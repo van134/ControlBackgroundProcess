@@ -25,7 +25,7 @@ import java.io.File;
 import java.util.HashMap;
 
 /**
- * Created by asus on 2017/5/27.
+ * Created by van on 2017/5/27.
  */
 public class ADBTestActivity extends BaseActivity{
     private EditText et;
