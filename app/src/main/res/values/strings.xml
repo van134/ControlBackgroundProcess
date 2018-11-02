@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">应用控制器</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="navigation_drawer_open">打开导航栏</string>
+    <string name="navigation_drawer_close">关闭导航栏</string>
+
+    <string name="action_settings">设置</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="accessibility_description">返回强退监听器</string>
+</resources>

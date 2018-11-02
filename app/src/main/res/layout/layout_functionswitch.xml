@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="全局功能开关,设置后重启生效，关闭的功能则不会再运行"
+        android:id="@+id/setting_all_title" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/alert_backgroundshape" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="服务、广播、唤醒锁、定时器"
+                android:id="@+id/setting_allsw_onesw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="最近任务列表移除时杀死进程"
+                android:id="@+id/switch2"
+                android:checked="false"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="强退设置、墓碑、待机模式"
+                android:id="@+id/setting_allsw_twosw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="IFW阻止服务、活动、广播"
+                android:id="@+id/setting_allsw_threesw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="最近任务卡片设置"
+                android:id="@+id/setting_allsw_foursw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="应用锁、启动控制、常驻内存"
+                android:id="@+id/setting_allsw_fivesw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="冻结、阻止卸载、卸载"
+                android:id="@+id/setting_allsw_sixsw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="强制打盹"
+                android:id="@+id/setting_allsw_sevensw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="界面控制"
+                android:id="@+id/setting_allsw_eightsw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="跳过广告"
+                android:id="@+id/setting_allsw_ninesw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="杂项"
+                android:id="@+id/setting_allsw_tensw"
+                android:checked="false" />
+        </FrameLayout>
+
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:weightSum="5"
+            android:orientation="vertical"
+            android:descendantFocusability="blocksDescendants"
+            android:layout_gravity="left|center_vertical">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+
+                android:id="@+id/item_chooseapp_img"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="15dp" />
+
+            <TextView
+                android:id="@+id/item_chooseapp_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="35dp"
+                android:layout_gravity="center_horizontal"
+                android:text="服装设计"
+                android:maxLength="25"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:maxLines="2"
+                android:maxWidth="100dp"
+                android:gravity="center"
+                android:textAlignment="center" />
+
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ice"
+            android:id="@+id/item_chooseice_img"
+            android:layout_gravity="right|top"
+            android:layout_marginTop="3dp"
+            android:layout_marginRight="3dp" />
+    </FrameLayout>
+
+</LinearLayout>

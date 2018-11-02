@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="新应用加入设置"
+        android:id="@+id/setting_newapp_title" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/alert_backgroundshape" >
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入返回强退"
+                android:id="@+id/setting_backautoadd_sw"
+                android:checked="false" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入返回键墓碑"
+                android:id="@+id/setting_newappbackmubei_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入后台墓碑"
+                android:id="@+id/setting_newapphomemubei_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入后台待机"
+                android:id="@+id/setting_newapphomeidle_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入熄屏时墓碑"
+                android:id="@+id/setting_newappoffmubei_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入熄屏强退"
+                android:id="@+id/setting_offautoadd_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入禁止自启"
+                android:id="@+id/setting_autostartadd_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入通知排除"
+                android:id="@+id/setting_newappnotifyadd_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入最近任务模糊"
+                android:id="@+id/setting_newapprecentbluradd_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入最近任务移除杀死"
+                android:id="@+id/setting_newappaddrecentmovestop_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="新应用自动加入状态导航栏染色\n(当染色开关打开时才会生效)"
+                android:id="@+id/setting_newappaddcolorbar_sw"
+                android:checked="false" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,120 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.click369.controlbp.activity.ControlFragment">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="7"
+            android:layout_marginTop="5dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="重置统计数据"
+                android:id="@+id/wakelock_reset_tv"
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="清除自定义规则"
+                android:id="@+id/wakelock_cleanrole_tv"
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="清除所有设置"
+                android:id="@+id/wakelock_cleanset_tv"
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="说明"
+                android:id="@+id/wakelock_showalert_tv"
+                android:layout_weight="1"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/alert_backgroundshape"
+            android:id="@+id/wakelock_alert_fl"
+            android:layout_marginTop="3dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.点击未控制可以设置唤醒锁间隔时长,输入0代表移除控制,关闭开关则所有设置失效。\n2.每个程序只能添加一个规则，规则的原理是阻止以设置的内容开头的唤醒锁，主要用来处理随机唤醒锁，没有随机唤醒锁的应用不要乱加规则。例如有很多WakerLock:xxx这样的唤醒锁，规则就可以设置为WakerLock，并设置间隔时间即可控制。\n3.该功能比较危险，小白用户不要看了之后随便禁用唤醒锁，使用过AMP的基友们可以试试，如果禁用后到导致无法开机请在REC中删除data/data/com.click369.controlbp/shared_prefs/mWakelockSettings.xml即可。"
+                android:id="@+id/wakelock_alert_tv"
+                android:layout_gravity="left|top"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+             >
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/alert_backgroundshape">
+
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="增强唤醒锁总开关"
+                    android:id="@+id/wakelock_sw"
+                    android:checked="false"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp" />
+            </FrameLayout>
+
+            <ExpandableListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:divider="@null"
+                android:id="@+id/wakelock_log_listview"
+                android:visibility="visible" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

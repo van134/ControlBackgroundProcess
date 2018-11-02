@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin" >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/changetext_name_et"
+            android:layout_below="@+id/disable_tv"
+            android:hint="输入应用名称"
+            android:background="@drawable/et_backgroundshape"
+            android:gravity="center"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/changetext_old_et"
+            android:layout_below="@+id/disable_tv"
+            android:hint="输入要替换的文字"
+            android:background="@drawable/et_backgroundshape"
+            android:gravity="center"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/changetext_new_et"
+            android:layout_below="@+id/disable_tv"
+            android:hint="输入新的文字"
+            android:background="@drawable/et_backgroundshape"
+            android:gravity="center"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="添加"
+                android:id="@+id/changetext_okbt"
+
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="清空所有设置"
+                android:id="@+id/changetext_clearbt"
+
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="说明：该功能仅为尝鲜功能，至于以后是否改进优化还不确定。要注意的是如果要替换微信中的聊天内容只能一个字一个字替换，比如‘你好吗’要替换，必须分开三个字进行三次替换，目前没办法也别问我为什么。替换或清除后强制杀死进程或重启生效"
+            android:id="@+id/changetext_alerttv" />
+
+    </LinearLayout>
+
+</RelativeLayout>

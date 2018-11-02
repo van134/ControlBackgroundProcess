@@ -1,0 +1,24 @@
+<resources>
+
+    <!--<style name="AppTheme.NoActionBar">-->
+        <!--<item name="windowActionBar">false</item>-->
+        <!--<item name="windowNoTitle">true</item>-->
+        <!--<item name="android:windowDrawsSystemBarBackgrounds">true</item>-->
+        <!--<item name="android:statusBarColor">@android:color/transparent</item>-->
+    <!--</style>-->
+
+    <!--<style name="AppTheme.NoActionBarDark">-->
+        <!--<item name="windowActionBar">false</item>-->
+        <!--<item name="windowNoTitle">true</item>-->
+        <!--<item name="android:windowBackground">@color/black</item>-->
+        <!--<item name="android:textColor">@color/gray</item>-->
+        <!--&lt;!&ndash;<item name="android:toolbarStyle">@style/ToolbarTheme</item>&ndash;&gt;-->
+    <!--</style>-->
+    <!--<style name="AppTheme.NoActionBarDarkAct">-->
+        <!--<item name="windowActionBar">true</item>-->
+        <!--<item name="windowNoTitle">false</item>-->
+        <!--<item name="android:windowBackground">@color/black</item>-->
+        <!--<item name="android:textColor">@color/gray</item>-->
+        <!--<item name="android:toolbarStyle">@style/ToolbarTheme</item>-->
+    <!--</style>-->
+</resources>

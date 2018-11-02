@@ -1,0 +1,395 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.click369.controlbp.activity.ControlFragment">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="14" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="白名单"
+                android:id="@+id/doze_whitelist_tv"
+                android:layout_weight="3"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="亮屏打盹"
+                android:id="@+id/doze_scon_tv"
+                android:layout_weight="4"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="熄屏打盹"
+                android:id="@+id/doze_scoff_tv"
+                android:layout_weight="4"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="提示"
+                android:id="@+id/doze_showalert_tv"
+                android:layout_weight="3"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/alert_backgroundshape"
+            android:id="@+id/doze_alert_fl"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="不需要染色的应用透明度设置为0即可，部分应用无法染色。"
+                android:id="@+id/doze_alert_tv"
+                android:layout_gravity="left|top"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/alert_backgroundshape" >
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left|center_vertical">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="12">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="状态："
+                            android:id="@+id/doze_state_tv"
+                            android:layout_gravity="left|center_vertical"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_weight="10" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="日志"
+                            android:id="@+id/doze_log_tv"
+                            android:layout_gravity="left|center_vertical"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="10dp"
+                            android:layout_weight="2"
+                            android:textAlignment="center" />
+                    </LinearLayout>
+
+                    <ListView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/doze_log_listview"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="打盹总开关"
+                    android:id="@+id/doze_allswitch_sw"
+                    android:checked="false"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/doze_scon_fl">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="10" >
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="8.5" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="亮屏每次打盹时长"
+                                android:id="@+id/doze_scon_time_tv"
+                                android:layout_marginLeft="8dp" />
+
+                            <SeekBar
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/doze_scon_sb"
+                                android:indeterminate="false"
+                                android:max="3600"
+                                android:progress="0"
+                                android:layout_marginTop="5dp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/doze_scon_pen"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/pen"
+                            android:layout_weight="1.5"
+                            android:scaleType="center" />
+                    </LinearLayout>
+                </FrameLayout>
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/doze_scoff_fl">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="10" >
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="8.5" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="熄屏每次打盹时长"
+                                android:id="@+id/doze_scoff_time_tv"
+                                android:layout_marginLeft="8dp" />
+
+                            <SeekBar
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/doze_scoff_sb"
+                                android:indeterminate="false"
+                                android:max="3600"
+                                android:progress="0"
+                                android:layout_marginTop="5dp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/doze_scoff_pen"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/pen"
+                            android:layout_weight="1.5"
+                            android:scaleType="center" />
+                    </LinearLayout>
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/frameLayout2" >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="10" >
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="8.5" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="熄屏打盹延迟"
+                                android:id="@+id/doze_scoff_delaytime_tv"
+                                android:layout_marginLeft="8dp" />
+
+                            <SeekBar
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/doze_scoffdelay_sb"
+                                android:indeterminate="false"
+                                android:max="3600"
+                                android:progress="0"
+                                android:layout_marginTop="5dp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/doze_scoffdelay_pen"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/pen"
+                            android:layout_weight="1.5"
+                            android:scaleType="center" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="亮屏打盹时更新时钟(类原生有效)"
+                    android:id="@+id/doze_updatetime_sw"
+                    android:checked="false"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="显示打盹通知"
+                    android:id="@+id/doze_notify_sw"
+                    android:checked="false"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="夜晚熄屏时每小时暂停一次打盹\n(22点后生效，早晨6点后亮屏恢复原时长)"
+                    android:id="@+id/doze_night_sw"
+                    android:checked="false"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/alert_backgroundshape" >
+
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

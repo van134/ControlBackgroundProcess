@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选择关联设置"
+        android:id="@+id/setting_link_title" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/alert_backgroundshape" >
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="强退选中时关联禁止自启"
+                android:id="@+id/setting_linkstopandautostart_sw"
+                android:checked="false" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="强退选中时关联移除杀死"
+                android:id="@+id/setting_linkstopandremovestop_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="最近任务卡片选中保留时关联常驻内存"
+                android:id="@+id/setting_linkrecentnotcleanandnotstop_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="最近任务卡片选中移除杀死时关联禁止自启"
+                android:id="@+id/setting_linkrecentremoveandautostart_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+
+
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.click369.controlbp.activity.IFWCompActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="16">
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:id="@+id/ifwcomp_et"
+                android:layout_below="@+id/disable_tv"
+                android:hint="搜索"
+                android:background="@drawable/et_backgroundshape"
+
+                android:gravity="center"
+                android:layout_weight="6"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="禁用全部"
+                android:id="@+id/ifwcomp_disableall"
+                android:layout_weight="3"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="启用全部"
+                android:id="@+id/ifwcomp_notdisableall"
+                android:layout_weight="3"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="全称"
+                android:id="@+id/ifwcomp_showallname"
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="提示"
+                android:id="@+id/ifwcomp_showalert"
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/alert_backgroundshape"
+            android:id="@+id/ifwcomp_alert_fl"
+            android:layout_marginTop="3dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="设置后部分组件重启手机生效，如果禁用后导致本应用异常可以选择启用全部并重启手机。"
+                android:id="@+id/ifwcomp_alert_tv"
+                android:layout_gravity="left|top"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/alert_backgroundshape"
+            android:layout_marginTop="3dp">
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/ifwcom_listview"
+                android:divider="@null"
+                android:layout_marginRight="4dp"
+                android:layout_marginLeft="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

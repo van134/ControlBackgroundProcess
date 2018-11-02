@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/alert_backgroundshape"
+        android:layout_marginTop="5dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Text"
+            android:id="@+id/wakelock_name"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="3"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginRight="35dp"
+            android:layout_marginLeft="30dp" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right|center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="+/- 规则"
+                android:id="@+id/wakelock_addrole_tv"
+                android:layout_gravity="right|center_vertical"
+                android:layout_weight="2"
+                android:layout_marginRight="15dp"
+                android:textAlignment="gravity"
+                android:gravity="center" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_one"
+            android:title="服务、广播、唤醒锁、定时器" />
+        <item
+            android:id="@+id/nav_two"
+            android:title="强退设置、墓碑、待机模式"/>
+        <item
+            android:id="@+id/nav_three"
+            android:title="IFW阻止服务、活动、广播" />
+        <item
+            android:id="@+id/nav_twelve"
+            android:title="最近任务卡片设置" />
+        <item
+            android:id="@+id/nav_nine"
+            android:title="应用锁、启动控制、常驻内存" />
+        <item
+            android:id="@+id/nav_four"
+            android:title="冻结、阻止卸载、卸载" />
+        <item
+            android:id="@+id/nav_five"
+            android:title="强制打盹" />
+        <item
+            android:id="@+id/nav_ten"
+            android:title="界面控制" />
+        <item
+            android:id="@+id/nav_eleven"
+            android:title="广告跳过" />
+        <item
+            android:id="@+id/nav_six"
+            android:title="杂项" />
+        <item
+            android:id="@+id/nav_seven"
+            android:title="设置" />
+        <item
+            android:id="@+id/nav_eight"
+            android:title="捐赠" />
+        <item
+            android:id="@+id/nav_thridteen"
+            android:title="常见问题及日志" />
+        <!--<item-->
+            <!--android:id="@+id/nav_nine"-->
+            <!--android:title="关于" />-->
+    </group>
+
+    <!--<item android:title="Communicate">-->
+        <!--<menu>-->
+            <!--<item-->
+                <!--android:id="@+id/nav_share"-->
+                <!--android:icon="@drawable/ic_menu_share"-->
+                <!--android:title="Share" />-->
+            <!--<item-->
+                <!--android:id="@+id/nav_send"-->
+                <!--android:icon="@drawable/ic_menu_send"-->
+                <!--android:title="Send" />-->
+        <!--</menu>-->
+    <!--</item>-->
+
+</menu>

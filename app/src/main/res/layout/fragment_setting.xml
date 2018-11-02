@@ -1,0 +1,483 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.click369.controlbp.activity.SettingFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/scrollView" >
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="4dp" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="服务、强退、冷藏等相关设置"
+                android:id="@+id/setting_title1_tv" />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/alert_backgroundshape"
+                android:layout_marginBottom="15dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="记录应用开启及关闭日志\n(可在常见问题及日志中查看)"
+                        android:id="@+id/setting_backlog_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="打开控制器时默认显示侧栏"
+                        android:id="@+id/setting_showsidebar_sw"
+                        android:checked="true" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="被强退的应用从最近任务移除"
+                        android:id="@+id/setting_exitremoverecent_sw"
+                        android:checked="true" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Xposed模式监听应用\n(关闭为无障碍模式,如果XP模式可用建议使用XP模式)"
+                        android:id="@+id/setting_isnotneedaccess_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"
+                    android:visibility="visible" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="Xposed模式杀进程\n(关闭为root模式,如果XP模式可用建议使用XP模式)"
+                        android:id="@+id/setting_stopmode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"
+                    android:visibility="visible" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible">
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="墓碑时保留主进程终止其他进程(大多保留1-2个)\n(试验功能，打开后若有异常请反馈并关闭该功能)"
+                        android:id="@+id/setting_mubestopreceiver_sw"
+                        android:checked="false"
+                        android:visibility="visible" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"
+                    android:visibility="visible" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible">
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="冷藏室应用启动后从最近任务划掉重新冷藏\n(该选项需要最近任务和启动控制功能开启)"
+                        android:id="@+id/setting_ice_remove_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"
+                    android:visibility="visible" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="冷藏室应用启动后熄屏重新冷藏\n(延迟时长与熄屏强退延迟同步)"
+                        android:id="@+id/setting_ice_off_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="冷藏室应用启动后返回退出重新冷藏\n(延迟时长与返回强退延迟同步)"
+                        android:id="@+id/setting_ice_stop_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="定时强退的应用取消时必须用密码验证\n(密码与应用锁密码相同，选择密码验证指纹失效)"
+                        android:id="@+id/setting_settimestoppwdmode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="定时强退的应用取消时必须用指纹验证\n(选择指纹验证密码验证失效)"
+                        android:id="@+id/setting_settimestopzwmode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="点按震动"
+                        android:id="@+id/setting_zhendong_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp">
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="10">
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="8.5">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="返回键强退、墓碑和冻结延迟:0秒"
+                                android:id="@+id/setting_backdelay_tv"
+                                android:layout_marginLeft="8dp" />
+
+                            <SeekBar
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/setting_backdelay_sb"
+                                android:indeterminate="false"
+                                android:max="3600"
+                                android:progress="0"
+                                android:layout_marginTop="5dp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/setting_pen1_iv"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/pen"
+                            android:layout_weight="1.5"
+                            android:scaleType="center" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="10" >
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="8.5" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="后台时墓碑、待机延迟:0秒"
+                                android:id="@+id/setting_homedelay_tv"
+                                android:layout_marginLeft="8dp" />
+
+                            <SeekBar
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/setting_homedelay_sb"
+                                android:indeterminate="false"
+                                android:max="3600"
+                                android:progress="0"
+                                android:layout_marginTop="5dp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/setting_pen2_iv"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/pen"
+                            android:layout_weight="1.5"
+                            android:scaleType="center" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:weightSum="10" >
+
+                        <LinearLayout
+                            android:orientation="vertical"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="4dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="8.5" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="熄屏时强退、墓碑和冻结延迟:0秒"
+                                android:id="@+id/setting_offdelay_tv"
+                                android:layout_marginLeft="8dp" />
+
+                            <SeekBar
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/setting_offdelay_sb"
+                                android:indeterminate="false"
+                                android:max="3600"
+                                android:progress="0"
+                                android:layout_marginTop="5dp" />
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:id="@+id/setting_pen3_iv"
+                            android:layout_gravity="center_vertical"
+                            android:src="@mipmap/pen"
+                            android:layout_weight="1.5"
+                            android:scaleType="center" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+
+
+            </LinearLayout>
+
+            <include
+                layout="@layout/layout_lockapp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp" />
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/layout_newappswitch"
+                android:layout_marginBottom="15dp" />
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/layout_linkswitch"
+                android:layout_marginBottom="15dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="主题设置"
+                android:id="@+id/textView3" />
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/alert_backgroundshape"
+                android:layout_marginBottom="15dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="22:00-7:00自动切换为夜间模式"
+                        android:id="@+id/setting_auto_night_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="夜间模式"
+                        android:id="@+id/setting_nightmode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+            <include
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/layout_functionswitch"
+                android:layout_marginBottom="15dp" />
+
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

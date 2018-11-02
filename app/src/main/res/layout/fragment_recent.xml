@@ -1,0 +1,95 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.click369.controlbp.activity.ControlFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_topsearch" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/alert_backgroundshape" >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:weightSum="20"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp" >
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/textView5"
+                    android:layout_weight="8"
+                    android:textAlignment="gravity"
+                    android:gravity="left|center"
+                    android:text="长按全选" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="保留"
+                    android:id="@+id/recent_notclean_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="杀死"
+                    android:id="@+id/recent_forceclean_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="模糊"
+                    android:id="@+id/recent_blur_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="开机自启"
+                    android:id="@+id/textView2"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="隐藏"
+                    android:id="@+id/rrecent_notshow_tv"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:layout_gravity="center_vertical" />
+            </LinearLayout>
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/recent_listview"
+                android:divider="@null"
+                android:layout_marginRight="8dp"
+                android:layout_marginLeft="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

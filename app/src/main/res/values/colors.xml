@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<color name="colorPrimary">#1d9598</color>-->
+    <color name="colorPrimary">#1a9dac</color>
+    <color name="colorPrimaryDark">#1a9dac</color>
+    <color name="colorAccent">#1a9dac</color>
+    <color name="checked_color">#ffffff</color>
+    <color name="uncheck_color">#bddddd</color>
+    <color name="uncheck_colordark">#b4b4b4</color>
+    <color name="trans">#00000000</color>
+    <color name="transhalf">#88000000</color>
+    <color name="transhalf33">#33000000</color>
+    <color name="black">#000000</color>
+    <color name="white">#ffffffff</color>
+    <color name="red">#ffff0000</color>
+    <color name="lightblue">#ff40d0b7</color>
+    <color name="gray">#aaaaaa</color>
+    <color name="darkblack">#000000</color>
+    <!--<color name="darkblack">#333333</color>-->
+    <!--<color name="darkblacktrans">#bb333333</color>-->
+</resources>
