@@ -54,7 +54,7 @@
             android:alpha="0.71"
             android:layout_gravity="bottom"
             android:foregroundGravity="bottom"
-            android:scaleType="fitEnd" />
+            android:scaleType="fitXY" />
 
         <LinearLayout
             android:orientation="vertical"
