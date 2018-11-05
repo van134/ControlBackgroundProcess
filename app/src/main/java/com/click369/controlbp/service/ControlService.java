@@ -92,8 +92,12 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			if (isOneOpen||isTwoOpen){
 //				boolean isMubeiStopBroad = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPRECEIVER,false);
 //				XposedService.loadPackage(lpparam, controlPrefs,wakeLockPrefs,muBeiPrefs,isOneOpen,isTwoOpen,isMubeiStopBroad);
-				XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,muBeiPrefs,isOneOpen,isTwoOpen);
-				XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,muBeiPrefs,isOneOpen,isTwoOpen);
+				if(wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)){
+					XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,muBeiPrefs,isOneOpen,isTwoOpen);
+				}
+				if(alarmPrefs.getBoolean(Common.PREFS_SETTING_ALARM_LOOK,false)){
+					XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,muBeiPrefs,isOneOpen,isTwoOpen);
+				}
 //				XposedBroadCast.loadPackage(lpparam, controlPrefs, muBeiPrefs, isOneOpen, isTwoOpen, isMubeiStopBroad);
 			}
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true)){

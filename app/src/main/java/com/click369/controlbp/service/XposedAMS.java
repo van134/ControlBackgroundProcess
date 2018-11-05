@@ -1047,9 +1047,9 @@ public class XposedAMS {
                             if (sysCxt!=null) {
                                 Intent intent = new Intent("com.click369.control.removerecent");
                                 intent.putExtra("pkg",pkg);
-                                if(isKillFail){
-                                    intent.putExtra("killfail",isKillFail);
-                                }
+//                                if(isKillFail){
+//                                    intent.putExtra("killfail",isKillFail);
+//                                }
                                 sysCxt.sendBroadcast(intent);
                             }
                         }

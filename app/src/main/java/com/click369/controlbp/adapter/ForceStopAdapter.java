@@ -102,13 +102,19 @@ public class ForceStopAdapter extends BaseAdapter{
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
-			if(sortType == 0&&(ai.isBackForceStop||ai.isBackMuBei)){
+			if(sortType == 0&&(ai.isBackForceStop)){//||ai.isBackMuBei
 				this.bjdatas.add(ai);
 			}else if(sortType == 1&&(ai.isHomeMuBei)){//ai.isHomeForceStop||
 				this.bjdatas.add(ai);
-			}else if(sortType == 2&&(ai.isOffscForceStop||ai.isOffscMuBei)){
+			}else if(sortType == 2&&(ai.isOffscForceStop)){//||ai.isOffscMuBei
 				this.bjdatas.add(ai);
 			}else if(sortType == 3&&ai.isNotifyNotExit){
+				this.bjdatas.add(ai);
+			}else if(sortType == 4&&ai.isBackMuBei){
+				this.bjdatas.add(ai);
+			}else if(sortType == 5&&ai.isOffscMuBei){
+				this.bjdatas.add(ai);
+			}else if(sortType == 6&&ai.isHomeIdle){
 				this.bjdatas.add(ai);
 			}else{
 				if(ai.isRunning){

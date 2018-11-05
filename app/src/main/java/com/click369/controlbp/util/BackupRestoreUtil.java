@@ -63,18 +63,18 @@ public class BackupRestoreUtil {
             }else if(type == 2){
                 act.ifwFragment.backup();
             }else if(type == 3){
-                Map<String,Boolean> allForce = new HashMap<String,Boolean>();
+                Map<String,Object> allForce = new HashMap<String,Object>();
                 Map<String,?> temp1 =  act.pmPrefs.getAll();
                 for(String s:temp1.keySet()){
-                    allForce.put(s,Boolean.parseBoolean(temp1.get(s).toString()));
+                    allForce.put(s,temp1.get(s));
                 }
                 FileUtil.writeObj(allForce,FileUtil.FILEPATH+File.separator+"package");
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"package");
             }else if(type == 4){
-                Map<String,Boolean> allForce = new HashMap<String,Boolean>();
+                Map<String,Object> allForce = new HashMap<String,Object>();
                 Map<String,?> temp1 =  act.dozePrefs.getAll();
                 for(String s:temp1.keySet()){
-                    allForce.put(s,Boolean.parseBoolean(temp1.get(s).toString()));
+                    allForce.put(s,temp1.get(s));
                 }
                 FileUtil.writeObj(allForce,FileUtil.FILEPATH+File.separator+"doze");
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"doze");
@@ -101,10 +101,10 @@ public class BackupRestoreUtil {
                 FileUtil.writeObj(allForce,FileUtil.FILEPATH+File.separator+"autostartnet");
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"autostartnet");
             }else if(type == 9){
-                Map<String,Boolean> allForce = new HashMap<String,Boolean>();
+                Map<String,Object> allForce = new HashMap<String,Object>();
                 Map<String,?> temp1 =  act.uiBarPrefs.getAll();
                 for(String s:temp1.keySet()){
-                    allForce.put(s,Boolean.parseBoolean(temp1.get(s).toString()));
+                    allForce.put(s,temp1.get(s));
                 }
                 FileUtil.writeObj(allForce,FileUtil.FILEPATH+File.separator+"uicontrol");
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"uicontrol");
@@ -250,14 +250,18 @@ public class BackupRestoreUtil {
             if(file.exists()){
                 Object o = FileUtil.readObj(file.getAbsolutePath());
                 if(o!=null){
-                    Map<String,Boolean>  datas = (Map<String,Boolean>)o;
+                    Map<String,Object>  datas = (Map<String,Object>)o;
                     SharedPreferences.Editor ed = act.dozePrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
                     for(String p:datas.keySet()){
-                        if(datas.get(p)){
-                            ed.putBoolean(p,datas.get(p));
+                        if(datas.get(p) instanceof Boolean){
+                            ed.putBoolean(p,(Boolean)datas.get(p));
+                        }else if(datas.get(p) instanceof String){
+                            ed.putString(p,(String)datas.get(p));
+                        }else if(datas.get(p) instanceof Integer){
+                            ed.putInt(p,(Integer)datas.get(p));
                         }
                     }
                     ed.commit();
@@ -286,9 +290,11 @@ public class BackupRestoreUtil {
                     }
                     for(String p:datas.keySet()){
                         if(datas.get(p) instanceof Boolean){
-                            ed.putBoolean(p,(Boolean) datas.get(p));
+                            ed.putBoolean(p,(Boolean)datas.get(p));
+                        }else if(datas.get(p) instanceof String){
+                            ed.putString(p,(String)datas.get(p));
                         }else if(datas.get(p) instanceof Integer){
-                            ed.putInt(p,(Integer) datas.get(p));
+                            ed.putInt(p,(Integer)datas.get(p));
                         }
                     }
                     ed.commit();
@@ -304,14 +310,18 @@ public class BackupRestoreUtil {
             if(file.exists()){
                 Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"autostartnet");
                 if(o!=null){
-                    Map<String,Boolean>  datas = (Map<String,Boolean>)o;
+                    Map<String,Object>  datas = (Map<String,Object>)o;
                     SharedPreferences.Editor ed = act.autoStartNetPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
                     for(String p:datas.keySet()){
-                        if(datas.get(p)){
-                            ed.putBoolean(p,datas.get(p));
+                        if(datas.get(p) instanceof Boolean){
+                            ed.putBoolean(p,(Boolean)datas.get(p));
+                        }else if(datas.get(p) instanceof String){
+                            ed.putString(p,(String)datas.get(p));
+                        }else if(datas.get(p) instanceof Integer){
+                            ed.putInt(p,(Integer)datas.get(p));
                         }
                     }
                     ed.commit();

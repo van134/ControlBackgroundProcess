@@ -13,6 +13,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.click369.controlbp.common.Common;
 
@@ -148,7 +149,8 @@ public class XposedAlarm {
                             cxt.registerReceiver(new MyReciver(), intentFilter);
                         }
                     }catch (RuntimeException e){
-                        e.printStackTrace();
+//                        e.printStackTrace();
+                        Log.i("CONTROL","广播强制注销");
                     }
                 }
             };

@@ -113,14 +113,15 @@ public class AppStartService {
             else if(intent.getAction().equals("com.click369.control.removerecent")){
                 String pkg = intent.getStringExtra("pkg");
                 if(!pkg.equals("com.click369.control")){
-                    Log.e("CONTROL","从最近任务列表移除 "+pkg);
+
                     if(service.isAtuoRemoveIce&& service.iceButOpenInfos.size()>0&&service.iceButOpenInfos.contains(pkg)){
                         ShellUtilNoBackData.execCommand("pm disable "+pkg);
                         Log.e("CONTROL", "划掉 冻结"+pkg);
                         service.iceButOpenInfos.remove(pkg);
                     }
                 }
-                if (intent!=null&&intent.hasExtra("killfail")){
+                Log.e("CONTROL","从最近任务列表移除 "+pkg+"  "+intent.getStringExtra("killfail"));
+                if (intent!=null&&WatchDogService.notStops.contains(pkg)){
                     XposedStopApp.stopApk(pkg,service);
                 }
                 if (!isOffScLockApp&&service.autoStartPrefs.contains(pkg+"/lockok")){

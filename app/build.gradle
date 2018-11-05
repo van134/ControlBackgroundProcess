@@ -8,8 +8,8 @@ android {
         applicationId "com.click369.controlbp"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 133
-        versionName "2.4.6"
+        versionCode 134
+        versionName "2.4.7"
     }
     buildTypes {
         release {

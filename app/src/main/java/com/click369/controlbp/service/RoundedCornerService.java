@@ -29,6 +29,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
@@ -90,6 +91,7 @@ public class RoundedCornerService extends Service {
     int dhheight = 0,statusheight = 0;
     int offset = 0;
     int roundSize = 35;
+    long clickTime = 0;
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private void createFloatView(int type)//0竖 1横
     {
@@ -176,6 +178,7 @@ public class RoundedCornerService extends Service {
             imeFloatLayout.setVisibility(View.GONE);
             actInfoLL = (LinearLayout) infoFloatLayout.findViewById(R.id.float_show_act_info_ll);
             actInfoTV = (TextView) infoFloatLayout.findViewById(R.id.float_show_act_info_tv);
+            actInfoTV.setText("长按关闭,点击复制,双击清空");
             ImageView ltImg = (ImageView)mFloatLayoutTop.findViewById(R.id.round_lt_img);
             ltImg.setLayoutParams(new FrameLayout.LayoutParams(roundSize,roundSize,Gravity.LEFT));
             ImageView rtImg = (ImageView)mFloatLayoutTop.findViewById(R.id.round_rt_img);
@@ -187,22 +190,31 @@ public class RoundedCornerService extends Service {
             //添加mFloatLayout
             mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
             mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
-            mWindowManager.addView(infoFloatLayout,wmParamsInfo);
+            if(WatchDogService.isShowActInfo){
+                mWindowManager.addView(infoFloatLayout,wmParamsInfo);
+            }
             infoFloatLayout.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
+                    mWindowManager.removeView(infoFloatLayout);
                     actInfoTV.setText("");
                     actInfoSB.delete(0,actInfoSB.length());
-                    infoFloatLayout.setVisibility(View.GONE);
+                    WatchDogService.isShowActInfo = false;
                     return true;
                 }
             });
             infoFloatLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
-                    // 将文本内容放到系统剪贴板里。
-                    cm.setText(actInfoSB.toString());
+                    actInfoTV.removeCallbacks(r);
+                    if(System.currentTimeMillis()-clickTime<300){
+                        actInfoTV.setText("");
+                        actInfoSB.delete(0,actInfoSB.length());
+                        infoFloatLayout.setVisibility(View.GONE);
+                    }else{
+                        actInfoTV.postDelayed(r,400);
+                    }
+                    clickTime = System.currentTimeMillis();
                 }
             });
 //            infoFloatLayout.setOnTouchListener(new View.OnTouchListener() {
@@ -221,6 +233,16 @@ public class RoundedCornerService extends Service {
             this.stopSelf();
         }
     }
+
+    Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+            // 将文本内容放到系统剪贴板里。
+            cm.setText(actInfoSB.toString());
+            Toast.makeText(RoundedCornerService.this,"已复制到粘贴板",Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -340,8 +362,10 @@ public class RoundedCornerService extends Service {
                 boolean isShowInfo = intent.getBooleanExtra("isShow",false);
                 if(isShowInfo){
 //                    actInfoLL.setVisibility(View.VISIBLE);
+                    mWindowManager.addView(infoFloatLayout,wmParamsInfo);
                 }else{
-                    infoFloatLayout.setVisibility(View.GONE);
+//                    infoFloatLayout.setVisibility(View.GONE);
+                    mWindowManager.removeView(infoFloatLayout);
                     actInfoTV.setText("");
                     actInfoSB.delete(0,actInfoSB.length());
                 }

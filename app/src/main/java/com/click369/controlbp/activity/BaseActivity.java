@@ -41,7 +41,7 @@ import java.util.ArrayList;
 
 
 public class BaseActivity extends AppCompatActivity {
-    public static boolean isPressBack = false;
+    public static boolean isPressBack = true;
     private Toast t;
     public Handler h = new Handler();
     public static Point p = new Point();

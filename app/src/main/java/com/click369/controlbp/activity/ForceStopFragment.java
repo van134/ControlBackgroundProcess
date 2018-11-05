@@ -427,6 +427,19 @@ public class ForceStopFragment extends Fragment {
             tvs.add(offScTv);
             tvs.add(notifyTv);
             int index = tvs.indexOf(v);
+            if(index == 0&&adapter.sortType==index){
+                index = 4;
+            }else if(index == 0&&adapter.sortType==4){
+                index = -1;
+            }else if(index == 2&&adapter.sortType==index){
+                index = 5;
+            }else if(index == 2&&adapter.sortType==5){
+                index = -1;
+            }else if(index == 1&&adapter.sortType==index){
+                index = 6;
+            }else if(index == 1&&adapter.sortType==6){
+                index = -1;
+            }
             adapter.setSortType(adapter.sortType==index?-1:index);
             for(TextView t:tvs){
                 t.setTextColor(curColor);

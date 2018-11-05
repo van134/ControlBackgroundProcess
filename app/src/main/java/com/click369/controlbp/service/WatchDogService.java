@@ -736,6 +736,9 @@ public class WatchDogService extends Service {
                 if(isOffClean&&delayCleanTime>3){
                     cleanAlarm("com.click369.control.offcleancache");
                 }
+                if(offScreenStops.size()>0){
+                    cleanAlarm("com.click369.control.offsccloseapp");
+                }
             }else if ("com.click369.control.offsccloseapp".equals(action)) {
                 closeAppOffSc();
             }else if (Intent.ACTION_POWER_CONNECTED.equals(action)) {
