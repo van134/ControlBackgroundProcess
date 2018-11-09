@@ -114,6 +114,8 @@ public class WatchDogService extends Service {
 
     public static String openPkgName = "";//当前打开的 比较准确
     public static String nowPkgName = "";//当前打开的 不一定准确
+    private HashSet<String> oneTimeOpenPkgs = new HashSet<String>();//从桌面开始到回到桌面整个过程打开的应用
+    private HashMap<String,String> openLinkPkgs = new HashMap<String,String>();//链式启动
 
     public static int delayOffTime = 0;
     public static int delayBackTime = 0;
@@ -657,6 +659,9 @@ public class WatchDogService extends Service {
                     homeKeyPressApp.add(openPkgName);
                     backKillApp.remove(openPkgName);
                     backMuBeiApp.remove(openPkgName);
+                    backKillApp.removeAll(oneTimeOpenPkgs);
+                    backMuBeiApp.removeAll(oneTimeOpenPkgs);
+                    oneTimeOpenPkgs.clear();
 //                    openPkgName = "com.android.systemui";
 //                    nowPkgName = "com.android.systemui";
                 }
@@ -1069,6 +1074,9 @@ public class WatchDogService extends Service {
                 homeKeyPressApp.add(openPkgName);
                 backKillApp.remove(openPkgName);
                 backMuBeiApp.remove(openPkgName);
+                backKillApp.removeAll(oneTimeOpenPkgs);
+                backMuBeiApp.removeAll(oneTimeOpenPkgs);
+                oneTimeOpenPkgs.clear();
             }else{//按返回
                 if(isSaveBackLog){
                     StringBuilder sbb = new StringBuilder();
@@ -1083,6 +1091,10 @@ public class WatchDogService extends Service {
                     }
                     FileUtil.writeLog(backLog.toString());
                 }
+                oneTimeOpenPkgs.remove(openPkgName);
+                backKillApp.removeAll(oneTimeOpenPkgs);
+                backMuBeiApp.removeAll(oneTimeOpenPkgs);
+                oneTimeOpenPkgs.clear();
                 homeKeyPressApp.remove(openPkgName);
                 backKillApp.removeAll(homeKeyPressApp);
                 backMuBeiApp.removeAll(homeKeyPressApp);
@@ -1206,6 +1218,22 @@ public class WatchDogService extends Service {
 //            }
             isInHome = false;
             if (!openPkgName.equals(apk)){
+                //如果包含当前打开的APK则证明本次是从上一个APK返回回来的
+
+                oneTimeOpenPkgs.add(apk);
+                if(!"".equals(openPkgName)&&!"com.android.systemui".equals(apk)&&
+                        !"com.android.systemui".equals(openPkgName)){
+                    Log.i("CONTROL","openLinkPkgs.get(apk)    "+openLinkPkgs.get(apk));
+                    if(openLinkPkgs.containsKey(apk)&&openLinkPkgs.get(apk).equals(openPkgName)){
+                        oneTimeOpenPkgs.remove(openPkgName);
+                        openLinkPkgs.remove(apk);
+                        homeKeyPressApp.remove(openPkgName);
+                        Log.i("CONTROL","oneLinkPkgs remove  "+openPkgName+"  "+apk);
+                    }else{
+                        Log.i("CONTROL","oneLinkPkgs put  "+openPkgName+"  "+apk);
+                        openLinkPkgs.put(openPkgName,apk);
+                    }
+                }
                 if(isSaveBackLog) {
                     backLog.append(FileUtil.getLog("打开" + PackageUtil.getAppNameByPkg(WatchDogService.this,apk)));
                 }
@@ -1311,17 +1339,19 @@ public class WatchDogService extends Service {
 //                    }catch (RuntimeException e){
 //                    }
 //                }
+            }else if(isRecentClick){
+
             }
 
             if (isRecentClick&&!"com.android.systemui".equals(apk)) {
                 handler1.removeCallbacks(resetRecent);
                 handler1.postDelayed(resetRecent,1500);
             }
-            if("com.android.systemui".equals(apk)){
-                homeKeyPressApp.add(openPkgName);
-                backKillApp.remove(openPkgName);
-                backMuBeiApp.remove(openPkgName);
-            }
+//            if("com.android.systemui".equals(apk)){
+//                homeKeyPressApp.add(openPkgName);
+//                backKillApp.remove(openPkgName);
+//                backMuBeiApp.remove(openPkgName);
+//            }
             openPkgName = apk;
             isHomeClick = false;
         }
