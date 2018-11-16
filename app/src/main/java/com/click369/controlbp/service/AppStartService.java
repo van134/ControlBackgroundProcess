@@ -121,7 +121,7 @@ public class AppStartService {
                     }
                 }
                 Log.e("CONTROL","从最近任务列表移除 "+pkg+"  "+intent.getStringExtra("killfail"));
-                if (intent!=null&&WatchDogService.notStops.contains(pkg)){
+                if (intent!=null&&WatchDogService.notStops.contains(pkg)&&WatchDogService.removeRecents.contains(pkg)){
                     XposedStopApp.stopApk(pkg,service);
                 }
                 if (!isOffScLockApp&&service.autoStartPrefs.contains(pkg+"/lockok")){

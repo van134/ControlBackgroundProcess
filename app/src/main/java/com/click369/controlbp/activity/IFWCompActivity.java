@@ -181,11 +181,14 @@ public class IFWCompActivity extends BaseActivity {
                 new Thread(){
                     @Override
                     public void run() {
-                        synchronized (IFWCompActivity.this) {
+                        synchronized (IFWFragment.ai) {
                             String dataName = null;
                             String pkgName = null;
                             String ext = null;
                             if (isFinishing()){
+                                return;
+                            }
+                            if (position>=adapter.getCount()){
                                 return;
                             }
                             if (type == 0) {

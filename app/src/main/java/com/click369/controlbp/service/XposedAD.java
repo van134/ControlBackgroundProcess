@@ -15,6 +15,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewParent;
@@ -136,41 +137,13 @@ public class XposedAD {
                         XposedHelpers.findAndHookConstructor(tvcls,Context.class, AttributeSet.class,int.class,int.class, new XC_MethodHook() {
                             @Override
                             protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                final TextView tv = (TextView)methodHookParam.thisObject;
-//                                XposedBridge.log("++++++++++++++TEXTVIEW11" + lpparam.packageName + " " + tv.getText());
-                                String tet = tv.getText().toString();
-                                if((tet.contains("跳过")||tet.toLowerCase().contains("skip"))&&tet.length()<8||tet.length()==0){
-                                    Runnable r = new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            String tet1 = tv.getText().toString();
-                                            if(!tet1.contains("跳过")&&!tet1.toLowerCase().contains("skip")){
-                                                return;
-                                            }
-                                            tv.performClick();
-                                            ViewParent vp = tv.getParent();
-                                            if(vp!=null){
-                                                View v = ((View)vp);
-                                                v.performClick();
-//                                                ViewParent vpp = v.getParent();
-//                                                XposedBridge.log("++++++++++++++TEXTVIEW22" + lpparam.packageName + " " +  v.getPivotX()+"  "+v.getWidth());
-//                                                if(vpp!=null){
-//                                                    View v1= ((View)vpp);
-//                                                    XposedBridge.log("++++++++++++++TEXTVIEW33" + lpparam.packageName + " " +  v.getPivotX()+"  "+v1.getWidth());
-//                                                    v1.performClick();
-////                                                        ((View)vpp).setVisibility(View.GONE);
-//                                                }
-//                                                    ((View)vp).setVisibility(View.GONE);
-
-                                            }
-                                        }
-                                    };
-                                    if (tet.length() == 0){
-                                        tv.postDelayed(r,100);
-                                    }else{
-                                        tv.postDelayed(r,500);
-                                    }
-                                }
+                                skipAd(methodHookParam,lpparam,0);
+                            }
+                        });
+                        XposedHelpers.findAndHookMethod(tvcls, "setText", CharSequence.class, TextView.BufferType.class, boolean.class, int.class, new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                                skipAd(methodHookParam,lpparam,1);
                             }
                         });
                     }
@@ -244,6 +217,44 @@ public class XposedAD {
 
         }catch (RuntimeException e){
             e.printStackTrace();
+        }
+    }
+
+    private static void skipAd(XC_MethodHook.MethodHookParam methodHookParam,XC_LoadPackage.LoadPackageParam lpparam,int type){
+        final TextView tv = (TextView)methodHookParam.thisObject;
+//                                XposedBridge.log("++++++++++++++TEXTVIEW11" + lpparam.packageName + " " + tv.getText());
+        String tet = tv.getText().toString();
+        if(tv.getAlpha()!=0.99f&&(tet.contains("跳过")||tet.toLowerCase().contains("skip"))&&(tet.contains("1")||tet.contains("2")||tet.contains("3")||tet.contains("4")||tet.contains("5")||tet.contains("6"))&&tet.length()<8){
+//            XposedBridge.log("CONTROL skip ad  type3  "+lpparam.packageName+" mode " + type+" tv.isDirty() "+tv.isDirty());
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    String tet1 = tv.getText().toString();
+                    if(!tet1.contains("跳过")&&!tet1.toLowerCase().contains("skip")){
+                        return;
+                    }
+                    if(android.os.Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+                        tv.performContextClick();
+                    }
+                    tv.performClick();
+                    tv.setAlpha(0.99f);
+                    ViewParent vp = tv.getParent();
+                    if(vp!=null){
+                        View v = ((View)vp);
+                        v.performClick();
+                        ViewParent vp1 = v.getParent();
+                        if(vp1!=null){
+                            View v1 = ((View)vp1);
+                            v1.performClick();
+                        }
+                    }
+                }
+            };
+//            if (tet.length() == 0){
+//                tv.postDelayed(r,100);
+//            }else{
+                tv.postDelayed(r,100);
+//            }
         }
     }
 }

@@ -64,6 +64,7 @@ public class AddAppReceiver extends BroadcastReceiver {
                 if (ContainsKeyWord.isContainsPkg(addPkg)){
                     return;
                 }
+
                 settings.edit().putBoolean(Common.PREFS_NAME_APPCHANGE,true).commit();
                 settings.edit().putBoolean(Common.PREFS_NAME_IFWCHANGE,true).commit();
                 if(settings.getBoolean(Common.PREFS_SETTING_BACKAPPAUTOADD,false)){

@@ -206,7 +206,9 @@ public class OpenCloseUtil {
         // 通过getPackageManager()的queryIntentActivities方法遍历
         List<ResolveInfo> resolveinfoList = act.getPackageManager()
                 .queryIntentActivities(resolveIntent, 0);
-
+        if (resolveinfoList == null||resolveinfoList.size()==0) {
+            return;
+        }
         ResolveInfo resolveinfo = resolveinfoList.iterator().next();
         if (resolveinfo != null) {
             // packagename = 参数packname

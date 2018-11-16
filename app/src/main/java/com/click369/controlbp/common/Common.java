@@ -41,6 +41,7 @@ public class Common {
     public static String PREFS_SETTING_NEWAPPADDCOLORBAR ="newappaddcolorbar";
     public static String PREFS_SETTING_ISNOTNEEDACCESS ="isnotneedaccess";
     public static String PREFS_SETTING_ZHENDONG ="zhengdong";
+    public static String PREFS_SETTING_NEWAPPAUTOOPENCONTROL ="newappautoopencontrol";
 
     public static String PREFS_SETTING_WAKELOCK_LOOK ="wakelocklook";
     public static String PREFS_SETTING_ALARM_LOOK ="alarmlook";

@@ -151,7 +151,7 @@ public class MainActivity extends BaseActivity
         if(isNightMode){
             setTheme(R.style.AppTheme_NoActionBarDark);
         }
-        setContentView(R.layout.activity_main);
+          setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         mainRL =(RelativeLayout) findViewById(R.id.main_fragment_rl);
         mainRL.setBackgroundColor(isNightMode?Color.BLACK:Color.WHITE);

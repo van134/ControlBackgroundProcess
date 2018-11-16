@@ -26,7 +26,9 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.click369.controlbp.activity.AppConfigActivity;
 import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.activity.RunningActivity;
 import com.click369.controlbp.activity.ShowDialogActivity;
 import com.click369.controlbp.activity.UIControlFragment;
@@ -108,12 +110,14 @@ public class WatchDogService extends Service {
     public HashSet<String> forceStopAppList = new HashSet<String>();
 
     public HashSet<String> removeAppList = new HashSet<String>();
+    public static ArrayList<String> newInstallAppList = new ArrayList<String>();
     //要移除的最近任务卡片 有可能是打开了最近任务所以暂时没有移除
     public static HashSet<String> removeRecents = new HashSet<String>();
     public static HashSet<String> iceButOpenInfos = new HashSet<String>();
 
     public static String openPkgName = "";//当前打开的 比较准确
     public static String nowPkgName = "";//当前打开的 不一定准确
+//    public static String lastPkgName = "";//上一个打开的
     private HashSet<String> oneTimeOpenPkgs = new HashSet<String>();//从桌面开始到回到桌面整个过程打开的应用
     private HashMap<String,String> openLinkPkgs = new HashMap<String,String>();//链式启动
 
@@ -200,6 +204,8 @@ public class WatchDogService extends Service {
         ifliter.addAction("com.click369.control.canceltimestopapp");
         ifliter.addAction("com.click369.control.removeapp");
         ifliter.addAction("com.click369.control.addapp");
+        ifliter.addAction("com.click369.control.appconfigclose");
+        ifliter.addAction("com.click369.control.openmain");
         ifliter.addAction(Intent.ACTION_SCREEN_OFF);
         ifliter.addAction(Intent.ACTION_SCREEN_ON);
         ifliter.addAction(Intent.ACTION_POWER_DISCONNECTED);
@@ -775,6 +781,10 @@ public class WatchDogService extends Service {
                 }
             }else if ("com.click369.control.test".equals(action)) {
                 openApp(intent);
+            }else if ("com.click369.control.openmain".equals(action)) {
+                Intent intent1 = new Intent(WatchDogService.this,MainActivity.class);
+                intent1.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                startActivity(intent1);
             }else if("com.click369.control.exit".equals(action)){
                 backStopMubeiApp();
                 if (delayBackMuBeiApp.size()==0&&delayBackKillApp.size()==0) {
@@ -823,12 +833,29 @@ public class WatchDogService extends Service {
             } else if("com.click369.control.loadapplist".equals(action)){
                 handler.removeCallbacks(loadApp);
                 handler.postDelayed(loadApp,500);
-            } else if("com.click369.control.removeapp".equals(action)){
+            } else if("com.click369.control.removeapp".equals(action)){//删除应用
                 removeAppList.add(intent.getStringExtra("pkg"));
                 handler.removeCallbacks(removeapp);
                 handler.postDelayed(removeapp,1000);
-            } else if("com.click369.control.addapp".equals(action)){
-                removeAppList.remove(intent.getStringExtra("pkg"));
+            } else if("com.click369.control.addapp".equals(action)){//新安装应用
+                String pkg = intent.getStringExtra("pkg");
+                //是否自动打开控制面板
+                if (!removeAppList.contains(pkg)&&settings.getBoolean(Common.PREFS_SETTING_NEWAPPAUTOOPENCONTROL,false)){
+                    newInstallAppList.add(pkg);
+                    Intent intent1 = new Intent(WatchDogService.this, AppConfigActivity.class);
+                    intent1.putExtra("pkg",pkg);
+                    intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    intent1.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent1);
+                }
+                removeAppList.remove(pkg);
+            }else if("com.click369.control.appconfigclose".equals(action)){
+                if (settings.getBoolean(Common.PREFS_SETTING_NEWAPPAUTOOPENCONTROL,false)&&newInstallAppList.size()>0){
+                    Intent intent1 = new Intent(WatchDogService.this, AppConfigActivity.class);
+                    intent1.putExtra("pkg",newInstallAppList.get(0));
+                    intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent1);
+                }
             } else if("com.click369.control.heart".equals(action)){
                 Intent intent1 = new Intent("com.click369.control.ams.heart");
                 sendBroadcast(intent1);
@@ -1078,6 +1105,15 @@ public class WatchDogService extends Service {
                 backMuBeiApp.removeAll(oneTimeOpenPkgs);
                 oneTimeOpenPkgs.clear();
             }else{//按返回
+
+                oneTimeOpenPkgs.remove(openPkgName);
+                backKillApp.removeAll(oneTimeOpenPkgs);
+                backMuBeiApp.removeAll(oneTimeOpenPkgs);
+                oneTimeOpenPkgs.clear();
+                homeKeyPressApp.remove(openPkgName);
+                backKillApp.removeAll(homeKeyPressApp);
+                backMuBeiApp.removeAll(homeKeyPressApp);
+                homeKeyPressApp.clear();
                 if(isSaveBackLog){
                     StringBuilder sbb = new StringBuilder();
                     if (!openPkgName.equals("")) {
@@ -1091,14 +1127,6 @@ public class WatchDogService extends Service {
                     }
                     FileUtil.writeLog(backLog.toString());
                 }
-                oneTimeOpenPkgs.remove(openPkgName);
-                backKillApp.removeAll(oneTimeOpenPkgs);
-                backMuBeiApp.removeAll(oneTimeOpenPkgs);
-                oneTimeOpenPkgs.clear();
-                homeKeyPressApp.remove(openPkgName);
-                backKillApp.removeAll(homeKeyPressApp);
-                backMuBeiApp.removeAll(homeKeyPressApp);
-                homeKeyPressApp.clear();
                 if (backKillApp.size()>0||backMuBeiApp.size()>0){
                     for(String delPkg:backKillApp){
                         delayBackKillApp.put(delPkg,System.currentTimeMillis());
@@ -1174,6 +1202,7 @@ public class WatchDogService extends Service {
     public void openApp(Intent intent){
         String apk = intent.getStringExtra("pkg");
         String cls = intent.getStringExtra("class");
+
         if(isShowActInfo){
             Intent intent1 = new Intent("com.click369.control.float.actinfo");
             intent1.putExtra("data",cls);
@@ -1188,22 +1217,15 @@ public class WatchDogService extends Service {
             return;
         }else if(apk.equals(nowPkgName)){//包名未变//com.eg.android.AlipayGphone  com.alipay.mobile.scan.as.main.MainCaptureActivity
             if(ContainsKeyWord.fullCpuCoreApp.containsKey(apk)&&ContainsKeyWord.fullCpuCoreApp.get(apk).contains(cls)){
-//            }
-//            if(isCameraMode&&
-//                    (
-//                            ("com.tencent.mm".equals(apk)&&
-//                            "com.tencent.mm.plugin.scanner.ui.BaseScanUI".equals(cls))||
-//                            ("com.eg.android.AlipayGphone".equals(apk)&&
-//                            "com.alipay.mobile.scan.as.main.MainCaptureActivity".equals(cls))
-//                    )
-//                    ){//拍照模式 开启大核心
                 startCameraChangeMode();
             }else if(isCameraModeOpen&&isCameraMode){//拍照模式 开启大核心
                 exitCameraChangeMode();
             }
             return;
         }
-        Log.i("CONTROL","---openApp："+ apk  +"  nowPkgName "+nowPkgName+"  "+isHomeClick);
+        String from = intent.getStringExtra("from");
+        Log.i("CONTROL","---openApp："+ apk  +"  nowPkgName "+nowPkgName+"  "+isHomeClick+"  from "+from);//+
+//        lastPkgName = nowPkgName;//保存上一个应用包名
         if (homePkg.equals(apk)){//返回了桌面
 //            lastInHome = System.currentTimeMillis();
             isInHome = false;
@@ -1219,7 +1241,6 @@ public class WatchDogService extends Service {
             isInHome = false;
             if (!openPkgName.equals(apk)){
                 //如果包含当前打开的APK则证明本次是从上一个APK返回回来的
-
                 oneTimeOpenPkgs.add(apk);
                 if(!"".equals(openPkgName)&&!"com.android.systemui".equals(apk)&&
                         !"com.android.systemui".equals(openPkgName)){
@@ -1255,9 +1276,39 @@ public class WatchDogService extends Service {
                 removeRecents.remove(apk);
                 delayBackKillApp.remove(apk);
                 delayBackMuBeiApp.remove(apk);
-                if (backForceStops.contains(apk)){
+                if (backForceStops.contains(apk)){//&&!nowPkgName.equals(openLinkPkgs.get(apk))
                     backKillApp.add(apk);
+                    //from从哪个应用打开 apk
+//                    openLinkPkgs.put(nowPkgName,apk);
                 }
+//                //如果上一次从这个应用打开 则这个应用再次打开时把上一次从这个应用打开的应用加入返回强退
+//                if(openLinkPkgs.containsKey(apk)&&openLinkPkgs.get(apk).equals(nowPkgName)){
+//                    backKillApp.add(openLinkPkgs.get(apk));
+//                    oneTimeOpenPkgs.remove(openLinkPkgs.get(apk));
+//                    openLinkPkgs.remove(apk);
+//
+//                }
+//                if(openLinkPkgs.containsValue(nowPkgName)){
+//                    Set<String> keys = openLinkPkgs.keySet();
+//                    boolean isContains = false;
+//                    String mk = "";
+//                    for(String key:keys){
+//                        if (openLinkPkgs.get(key).equals(nowPkgName)){
+//                            mk = key;
+//                            if(key.equals(apk)){
+//                                isContains = true;
+//                                break;
+//                            }
+//                        }
+//                    }
+//                    if (isContains){
+//                        backKillApp.add(nowPkgName);
+//                        oneTimeOpenPkgs.remove(nowPkgName);
+//                        openLinkPkgs.remove(apk);
+//                    }else{
+//                        openLinkPkgs.remove(mk);
+//                    }
+//                }
                 if (isAtuoStopIce&&iceButOpenInfos.contains(apk)){
                     backKillApp.add(apk);
                 }

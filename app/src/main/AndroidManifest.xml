@@ -15,6 +15,7 @@
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <!-- 移除快捷方式 -->
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
     <application
         android:allowBackup="true"
         android:name=".activity.MyApp"
@@ -94,6 +95,18 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.AppConfigActivity"
+            android:screenOrientation="portrait"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnTaskLaunch="false"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:theme="@style/AppTheme.translucent" >
+            <intent-filter>
+                <category android:name="controlbp" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".activity.CPUSetActivity"
             android:exported="true"
             android:screenOrientation="portrait"
@@ -165,6 +178,15 @@
             android:name=".service.MyTileService"
             android:icon="@drawable/icon_doze"
             android:label="打盹开关"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".service.AppConfigFromStatusService"
+            android:icon="@drawable/icon_config"
+            android:label="应用控制"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />

@@ -18,7 +18,7 @@ import com.click369.controlbp.common.Common;
 public class NewAppSwitchView {
     private SharedPreferences settings;
     public TextView titleTv;
-    public Switch backmubeSw,homemubeSw,homeIdleSw,offmubeSw,backSw,offSw,autoStartSw,newAppAddRemoveRecentExit,notifySw,blurSw,colorBarSw;
+    public Switch newAppAutoOpenControlSw,backmubeSw,homemubeSw,homeIdleSw,offmubeSw,backSw,offSw,autoStartSw,newAppAddRemoveRecentExit,notifySw,blurSw,colorBarSw;
     private View v;
     private Context cxt;
     private int curColor = Color.BLACK;
@@ -31,6 +31,7 @@ public class NewAppSwitchView {
 //        View v = act.getLayoutInflater().inflate(R.layout.layout_topsearch,null);
         titleTv = (TextView) v.findViewById(R.id.setting_newapp_title);
         curColor = titleTv.getCurrentTextColor();
+        newAppAutoOpenControlSw = (Switch) v.findViewById(R.id.setting_newappautoopencontrol_sw);
         backmubeSw = (Switch) v.findViewById(R.id.setting_newappbackmubei_sw);
         homemubeSw = (Switch) v.findViewById(R.id.setting_newapphomemubei_sw);
         homeIdleSw = (Switch) v.findViewById(R.id.setting_newapphomeidle_sw);
@@ -42,6 +43,7 @@ public class NewAppSwitchView {
         notifySw = (Switch) v.findViewById(R.id.setting_newappnotifyadd_sw);
         blurSw = (Switch) v.findViewById(R.id.setting_newapprecentbluradd_sw);
         colorBarSw = (Switch) v.findViewById(R.id.setting_newappaddcolorbar_sw);
+        newAppAutoOpenControlSw.setTextColor(curColor);
         backmubeSw.setTextColor(curColor);
         homemubeSw.setTextColor(curColor);
         homeIdleSw.setTextColor(curColor);
@@ -64,6 +66,7 @@ public class NewAppSwitchView {
         blurSw.setTag(8);
         colorBarSw.setTag(9);
         homeIdleSw.setTag(10);
+        newAppAutoOpenControlSw.setTag(11);
         if(settings.getBoolean(Common.PREFS_SETTING_NEWAPPHOMEMUBEI,false)){
             settings.edit().remove(Common.PREFS_SETTING_NEWAPPBACKMUBEI).commit();
             settings.edit().remove(Common.PREFS_SETTING_NEWAPPOFFMUBEI).commit();
@@ -83,6 +86,7 @@ public class NewAppSwitchView {
         notifySw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPADDNOTIFY,false));
         blurSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPADDBLUR,false));
         colorBarSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPADDCOLORBAR,false));
+        newAppAutoOpenControlSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPAUTOOPENCONTROL,false));
         if(backSw.isChecked()){
             backmubeSw.setChecked(false);
             settings.edit().remove(Common.PREFS_SETTING_NEWAPPBACKMUBEI).commit();
@@ -92,6 +96,7 @@ public class NewAppSwitchView {
             settings.edit().remove(Common.PREFS_SETTING_NEWAPPOFFMUBEI).commit();
         }
         SwitchClick sc = new SwitchClick();
+        newAppAutoOpenControlSw.setOnCheckedChangeListener(sc);
         backSw.setOnCheckedChangeListener(sc);
         homeIdleSw.setOnCheckedChangeListener(sc);
         offSw.setOnCheckedChangeListener(sc);
@@ -112,7 +117,8 @@ public class NewAppSwitchView {
             String names[] = {Common.PREFS_SETTING_BACKAPPAUTOADD,Common.PREFS_SETTING_OFFAPPAUTOADD,
                     Common.PREFS_SETTING_AUTOSTARTAPPAUTOADD,Common.PREFS_SETTING_NEWAPPADDREMOVERECENTEXIT,
                     Common.PREFS_SETTING_NEWAPPBACKMUBEI,Common.PREFS_SETTING_NEWAPPHOMEMUBEI,Common.PREFS_SETTING_NEWAPPOFFMUBEI,
-            Common.PREFS_SETTING_NEWAPPADDNOTIFY,Common.PREFS_SETTING_NEWAPPADDBLUR,Common.PREFS_SETTING_NEWAPPADDCOLORBAR,Common.PREFS_SETTING_NEWAPPHOMEIDLE};
+            Common.PREFS_SETTING_NEWAPPADDNOTIFY,Common.PREFS_SETTING_NEWAPPADDBLUR,Common.PREFS_SETTING_NEWAPPADDCOLORBAR,
+                    Common.PREFS_SETTING_NEWAPPHOMEIDLE,Common.PREFS_SETTING_NEWAPPAUTOOPENCONTROL};
             settings.edit().putBoolean(names[tag],isChecked).commit();
             if(tag == 0){
                 if(isChecked){

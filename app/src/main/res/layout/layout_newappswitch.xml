@@ -26,6 +26,23 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                android:text="新应用安装后自动打开控制面板"
+                android:id="@+id/setting_newappautoopencontrol_sw"
+                android:checked="false" />
+        </FrameLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
                 android:text="新应用自动加入返回强退"
                 android:id="@+id/setting_backautoadd_sw"
                 android:checked="false" />
