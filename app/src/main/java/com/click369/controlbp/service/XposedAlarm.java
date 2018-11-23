@@ -34,7 +34,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedAlarm {
-    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences controlPrefs,final XSharedPreferences alarmPrefs,final XSharedPreferences muBeiPrefs,final boolean isOneOpen,final boolean isTwoOpen) {//,final boolean isMubeStopBroad
+    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences controlPrefs,final XSharedPreferences alarmPrefs,final XSharedPreferences muBeiPrefs,final boolean isOneOpen,final boolean isTwoOpen,final boolean isMubeiStopOther) {//,final boolean isMubeStopBroad
         if (lpparam.packageName.equals("com.click369.controlbp")) {
             return;
         }
@@ -192,11 +192,11 @@ public class XposedAlarm {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 try {
-//                    muBeiPrefs.reload();
+                    muBeiPrefs.reload();
                     controlPrefs.reload();
-                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen)) {
-//                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen) ||
-//                            (muBeiPrefs.getInt(lpparam.packageName, -1) == 0 && isTwoOpen && isMubeStopBroad)) {
+//                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen)) {
+                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen) ||
+                            (isTwoOpen && isMubeiStopOther&& muBeiPrefs.getInt(lpparam.packageName, -1) == 0 )) {
                         param.setResult(null);
                         return;
                     }

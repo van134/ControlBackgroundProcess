@@ -32,6 +32,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.InputEvent;
@@ -130,6 +131,7 @@ public class XposedRencent {
                 final Class tvtCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
                 final Class recentActCls = XposedHelpers.findClass("com.android.systemui.recents.RecentsActivity", lpparam.classLoader);
                 if (tvtCls != null) {
+//                    final int roundNumber = barPrefs.getInt(Common.PREFS_SETTING_UI_RECENTBARROUNDNUM, 10);
                     Class clss[] = XposedUtil.getParmsByName(tvtCls, "setThumbnail");
                     XC_MethodHook hook = new XC_MethodHook() {
                         @Override
@@ -150,6 +152,7 @@ public class XposedRencent {
                                             if (thumbnailData instanceof Bitmap) {
                                                 methodHookParam.args[0] = fastblur((Bitmap) thumbnailData, 8);
                                             } else {
+
                                                 Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
                                                 Field scaleField = thumbnailData.getClass().getDeclaredField("scale");
                                                 thumbnailField.setAccessible(true);
@@ -165,11 +168,62 @@ public class XposedRencent {
                                             methodHookParam.args[0] = newData;
                                         }
                                     }
+
+//                                    Field mTaskBarField = tvtCls.getDeclaredField("mTaskBar");
+//                                    mTaskBarField.setAccessible(true);
+//                                    View mTaskBar = (View) mTaskBarField.get(methodHookParam.thisObject);
+//                                    Object thumbnailData = methodHookParam.args[0];
+//                                    Bitmap bitmap = null;
+//                                    if (thumbnailData instanceof Bitmap) {
+//                                        bitmap = (Bitmap) thumbnailData;
+//                                    } else {
+//                                        Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
+//                                        Field scaleField = thumbnailData.getClass().getDeclaredField("scale");
+//                                        thumbnailField.setAccessible(true);
+//                                        scaleField.setAccessible(true);
+//                                        Object bmObj = thumbnailField.get(thumbnailData);
+//                                        bitmap = (Bitmap) bmObj;
+//                                    }
+//                                    int pixel = bitmap.getPixel(1, bitmap.getHeight()/2);
+//                                    mTaskBar.setBackgroundColor(pixel);
+//                                    XposedBridge.log("【颜色值】  bitmap "+bitmap+ Integer.toHexString(pixel).toUpperCase());
                                 }
                             } catch (RuntimeException e) {
                                 e.printStackTrace();
                             }
                         }
+
+//                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+//                        @Override
+//                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                            if (param.args[0] != null) {
+////                                View v = (View) param.thisObject;
+////                                Map thbcolors = (HashMap) XposedHelpers.getAdditionalStaticField(recentActCls, "thbcolors");
+////                                if (thbcolors == null) {
+////                                    thbcolors = new HashMap<String, Integer>();
+////                                    XposedHelpers.setAdditionalStaticField(recentActCls, "thbcolors", thbcolors);
+////                                }
+//                                Field mTaskBarField = tvtCls.getDeclaredField("mTaskBar");
+//                                mTaskBarField.setAccessible(true);
+//                                View mTaskBar = (View) mTaskBarField.get(param.thisObject);
+//                                Object thumbnailData = param.args[0];
+//                                Bitmap bitmap = null;
+//                                if (thumbnailData instanceof Bitmap) {
+//                                    bitmap = (Bitmap) thumbnailData;
+//                                } else {
+//                                    Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
+//                                    Field scaleField = thumbnailData.getClass().getDeclaredField("scale");
+//                                    thumbnailField.setAccessible(true);
+//                                    scaleField.setAccessible(true);
+//                                    Object bmObj = thumbnailField.get(thumbnailData);
+//                                    bitmap = (Bitmap) bmObj;
+//                                }
+//                               int pixel = bitmap.getPixel(1, bitmap.getHeight()/2);
+//                                mTaskBar.setBackgroundColor(pixel);
+//                                XposedBridge.log("【颜色值】  bitmap "+bitmap+ Integer.toHexString(pixel).toUpperCase());
+//
+//                            }
+//                        }
                     };
                     if (clss != null) {
                         if (clss.length == 1) {
@@ -195,8 +249,12 @@ public class XposedRencent {
                             @Override
                             protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                 Map thbs = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbs");
+                                Map thbcolors = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbcolors");
                                 if (thbs!=null){
                                     thbs.clear();
+                                }
+                                if (thbcolors!=null){
+                                    thbcolors.clear();
                                 }
                             }
                         };
@@ -323,6 +381,8 @@ public class XposedRencent {
                                     Field field = recentHeaderCls.getDeclaredField(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? "mTitleView" : "mActivityDescription");
                                     field.setAccessible(true);
                                     final TextView tv = (TextView) field.get(methodHookParam.thisObject);
+//                                    ((View)(tv.getParent())).setBackgroundColor(Color.TRANSPARENT);
+//                                            LinearLayout
                                     tv.setOnClickListener(new View.OnClickListener() {
                                         @Override
                                         public void onClick(View view) {
@@ -506,11 +566,18 @@ public class XposedRencent {
                             @Override
                             protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                             try {
+//                                ((View)methodHookParam.thisObject).setBackgroundColor(Color.TRANSPARENT);
+                                Field mThumbnailViewfield = recentViewCls.getDeclaredField("mThumbnailView");
+                                mThumbnailViewfield.setAccessible(true);
+                                final View mThumbnailView = (View) mThumbnailViewfield.get(methodHookParam.thisObject);
+                                mThumbnailView.setAlpha(alphaNumber);
+
                                 Field field = recentViewCls.getDeclaredField("mHeaderView");
                                 field.setAccessible(true);
                                 final View v = (View) field.get(methodHookParam.thisObject);
                                 if (isHideBar) {
-                                    v.setVisibility(View.INVISIBLE);
+//                                    v.setVisibility(View.INVISIBLE);
+                                    v.setBackgroundColor(Color.TRANSPARENT);
                                 } else {
                                     if (isColorBar) {
                                         final String colors[] = {"#c84848", "#c75241", "#c58c47", "#c7ba45", "#86c442", "#5fc745", "#47c278", "#43c29c", "#46c6c2", "#419ec7", "#435cc0", "#6b46c1", "#8546c4", "#b745c0", "#c54367"};
@@ -527,10 +594,9 @@ public class XposedRencent {
                                         }
                                     }
                                 }
-                                Field mThumbnailViewfield = recentViewCls.getDeclaredField("mThumbnailView");
-                                mThumbnailViewfield.setAccessible(true);
-                                final View mThumbnailView = (View) mThumbnailViewfield.get(methodHookParam.thisObject);
-                                mThumbnailView.setAlpha(alphaNumber);
+
+
+
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     try {
                                         Field field1 = recentHeaderCls.getDeclaredField("mCornerRadius");
@@ -603,15 +669,8 @@ public class XposedRencent {
                                 protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                     try{
                                         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                                            methodHookParam.args[0] = null;
+//                                            methodHookParam.args[0] = null;
                                         }
-//                                        else{
-//                                            View taskBar = (View)methodHookParam.args[0];
-//                                            int top = (int) Math.max(0, taskBar.getTranslationY() +
-//                                                    taskBar.getMeasuredHeight() - 1);
-//                                            mClipRect.set(0, top, getMeasuredWidth(), getMeasuredHeight());
-//                                            setClipBounds(mClipRect);
-//                                        }
                                     } catch (RuntimeException e) {
                                         e.printStackTrace();
                                     }
@@ -1016,4 +1075,21 @@ public class XposedRencent {
         // 得到新的圖片
         return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix,false);
     }
+
+    public static Bitmap getBitmapFromView(View v) {
+        Bitmap b = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.RGB_565);
+        Canvas c = new Canvas(b);
+        v.layout(v.getLeft(), v.getTop(), v.getRight(), v.getBottom());
+        // Draw background
+        Drawable bgDrawable = v.getBackground();
+        if (bgDrawable != null) {
+            bgDrawable.draw(c);
+        } else {
+            c.drawColor(Color.WHITE);
+        }
+        // Draw view to canvas
+        v.draw(c);
+        return b;
+    }
+
 }

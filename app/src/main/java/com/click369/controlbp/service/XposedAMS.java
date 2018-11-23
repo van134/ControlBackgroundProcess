@@ -689,7 +689,7 @@ public class XposedAMS {
         isOneOpen = settingPrefs.getBoolean(Common.ALLSWITCH_ONE,true);
         isTwoOpen = settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true);
         isStopScanMedia = settingPrefs.getBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,false);
-//        final boolean isMubeiStopBroad = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPRECEIVER,false);
+        final boolean isMubeiStopOther = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false);
         if(amsMethods.containsKey("startService")&&(isOneOpen||isTwoOpen)){
             final Class clss[] = amsMethods.get("startService").getParameterTypes();
             XC_MethodHook hook = new XC_MethodHook() {
@@ -762,15 +762,15 @@ public class XposedAMS {
                 try{
                     //阻止往出发广播
                     String callingPackage = ((String)methodHookParam.args[1])+"";
-//                        if(isMubeiStopBroad&&isTwoOpen) {
-//                            muBeiPrefs.reload();
-//                        }
-//                        if(isOneOpen) {
-//                            controlPrefs.reload();
-//                        }
-                    if((isOneOpen&&controlHMs.containsKey(callingPackage+"/broad"))){
-//                            if((isTwoOpen&&muBeiPrefs.getInt(callingPackage + "/service", -1)==0&&isMubeiStopBroad)||
-//                                    (isOneOpen&&controlPrefs.getBoolean(callingPackage+"/broad",false))){
+                        if(isMubeiStopOther&&isTwoOpen) {
+                            muBeiPrefs.reload();
+                        }
+                        if(isOneOpen) {
+                            controlPrefs.reload();
+                        }
+//                    if((isOneOpen&&controlHMs.containsKey(callingPackage+"/broad"))){
+                            if((isOneOpen&&controlHMs.containsKey(callingPackage+"/broad"))||(isMubeiStopOther&&isTwoOpen&&muBeiHSs.contains(callingPackage))
+                                    ){
                             boolean isSend = false;
                             if(methodHookParam.args[2]!=null){
                                 Intent intent = (Intent)methodHookParam.args[2];

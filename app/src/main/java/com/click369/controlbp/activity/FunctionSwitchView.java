@@ -18,7 +18,7 @@ import com.click369.controlbp.common.Common;
 public class FunctionSwitchView {
     private SharedPreferences settingPrefs;
     public TextView titleTv;
-    public Switch oneSW,twoSW,threeSW,fourSW,fiveSW,sixSW,sevenSW,eightSW,nineSW,tenSw;
+    public Switch oneSW,twoSW,threeSW,fourSW,fiveSW,sixSW,sevenSW,eightSW,nineSW,tenSw,elevenSw;
     private View v;
     private Context cxt;
     private int curColor = Color.BLACK;
@@ -41,6 +41,7 @@ public class FunctionSwitchView {
         eightSW = (Switch) v.findViewById(R.id.setting_allsw_eightsw);
         nineSW = (Switch) v.findViewById(R.id.setting_allsw_ninesw);
         tenSw = (Switch) v.findViewById(R.id.setting_allsw_tensw);
+        elevenSw = (Switch) v.findViewById(R.id.setting_allsw_elevensw);
         oneSW.setTextColor(curColor);
         twoSW.setTextColor(curColor);
         threeSW.setTextColor(curColor);
@@ -51,6 +52,7 @@ public class FunctionSwitchView {
         eightSW.setTextColor(curColor);
         nineSW.setTextColor(curColor);
         tenSw.setTextColor(curColor);
+        elevenSw.setTextColor(curColor);
         oneSW.setTag(0);
         twoSW.setTag(1);
         threeSW.setTag(2);
@@ -61,6 +63,7 @@ public class FunctionSwitchView {
         eightSW.setTag(7);
         nineSW.setTag(8);
         tenSw.setTag(9);
+        elevenSw.setTag(10);
         oneSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_ONE,true));
         twoSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true));
         threeSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_THREE,true));
@@ -71,6 +74,7 @@ public class FunctionSwitchView {
         eightSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_EIGHT,true));
         nineSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_NINE,true));
         tenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_TEN,true));
+        elevenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_ELEVEN,true));
         SwitchClick sc = new SwitchClick();
         oneSW.setOnCheckedChangeListener(sc);
         twoSW.setOnCheckedChangeListener(sc);
@@ -82,6 +86,7 @@ public class FunctionSwitchView {
         eightSW.setOnCheckedChangeListener(sc);
         nineSW.setOnCheckedChangeListener(sc);
         tenSw.setOnCheckedChangeListener(sc);
+        elevenSw.setOnCheckedChangeListener(sc);
     }
 
     class SwitchClick implements CompoundButton.OnCheckedChangeListener{
@@ -91,7 +96,7 @@ public class FunctionSwitchView {
             String names[] = {Common.ALLSWITCH_ONE,Common.ALLSWITCH_TWO,Common.ALLSWITCH_THREE,
                     Common.ALLSWITCH_FOUR,Common.ALLSWITCH_FIVE,Common.ALLSWITCH_SIX,
                     Common.ALLSWITCH_SEVEN,Common.ALLSWITCH_EIGHT,Common.ALLSWITCH_NINE,
-                    Common.ALLSWITCH_TEN};
+                    Common.ALLSWITCH_TEN,Common.ALLSWITCH_ELEVEN};
             if(settingPrefs.getBoolean(names[tag],true)!=isChecked){
                 Toast.makeText(cxt,"重启生效",Toast.LENGTH_LONG).show();
             }

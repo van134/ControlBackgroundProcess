@@ -76,6 +76,7 @@ public class ContainsKeyWord {
         notListenerApp.add("com.google.android.webview");
         notListenerApp.add("com.google.android.gms");
         notListenerApp.add("com.miui.contentcatcher");
+        notListenerApp.add("com.miui.catcherpatch");
         notListenerApp.add("com.android.keyguard");
         notListenerApp.add("com.yaerin.xposed.hide");
         notListenerApp.add("android");
@@ -90,6 +91,7 @@ public class ContainsKeyWord {
 
         notLockAppPage.add("com.click369.controlbp.activity.UnLockActivity");
         notLockAppPage.add("com.click369.controlbp.activity.RunningActivity");
+        notLockAppPage.add("com.click369.controlbp.activity.AppConfigActivity");
         notLockAppPage.add("com.alipay.android.phone.wallet.buscode.BusCodeActivity");
         notLockAppPage.add("com.alipay.mobile.quinox.LauncherActivity");
         notLockAppPage.add("com.android.webview");

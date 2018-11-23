@@ -30,6 +30,9 @@
             android:id="@+id/nav_eleven"
             android:title="广告跳过" />
         <item
+            android:id="@+id/nav_fourteen"
+            android:title="CPU控制" />
+        <item
             android:id="@+id/nav_six"
             android:title="杂项" />
         <item

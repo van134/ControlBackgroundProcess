@@ -1,13 +1,16 @@
 package com.click369.controlbp.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -44,6 +47,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.R;
 import com.click369.controlbp.adapter.NavInfoAdapter;
 import com.click369.controlbp.bean.AppInfo;
@@ -91,6 +95,7 @@ public class MainActivity extends BaseActivity
     public UIControlFragment uiControlFragment;
     public RecentFragment recentFragment;
     public AdFragment adFragment;
+    public CPUSetFragment cpuFragment;
     public QuestionFragment questionFragment;
     public Fragment chooseFragment;
     public SharedPreferences modPrefs,wakeLockPrefs,alarmPrefs,forceStopPrefs,muBeiPrefs,settings,ifwCountPrefs,uiBarPrefs,autoStartNetPrefs,recentPrefs,dozePrefs,adPrefs,pmPrefs;
@@ -151,7 +156,7 @@ public class MainActivity extends BaseActivity
         if(isNightMode){
             setTheme(R.style.AppTheme_NoActionBarDark);
         }
-          setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         mainRL =(RelativeLayout) findViewById(R.id.main_fragment_rl);
         mainRL.setBackgroundColor(isNightMode?Color.BLACK:Color.WHITE);
@@ -242,7 +247,9 @@ public class MainActivity extends BaseActivity
         if (!isModuleActive()){
             menuTv.setAlpha(0.5f);
             menuTv.setEnabled(false);
+            showNotActive();
         }
+
         runing = PackageUtil.getRunngingApp(this);
         initView();
         new Thread(){
@@ -290,12 +297,13 @@ public class MainActivity extends BaseActivity
         dozeFragment = new DozeFragment();
         uiControlFragment = new UIControlFragment();
         adFragment = new AdFragment();
+        cpuFragment = new CPUSetFragment();
         otherFragment = new OtherFragment();
         settingFragment = new SettingFragment();
         juanZengFragment = new JuanZengFragment();
         questionFragment = new QuestionFragment();
         Fragment fragments[] = {controlFragment,forceStopFragment,ifwFragment,recentFragment, appStartFragment,
-                iceRoomFragment,dozeFragment,uiControlFragment,adFragment,otherFragment,settingFragment,juanZengFragment,questionFragment};
+                iceRoomFragment,dozeFragment,uiControlFragment,adFragment,cpuFragment,otherFragment,settingFragment,juanZengFragment,questionFragment};
         int index = initMenuView();
         chooseFragment = fragments[index];
         navigationView.getMenu().getItem(index).setChecked(true);
@@ -337,6 +345,7 @@ public class MainActivity extends BaseActivity
         boolean eight = settings.getBoolean(Common.ALLSWITCH_EIGHT,true);
         boolean nine = settings.getBoolean(Common.ALLSWITCH_NINE,true);
         boolean ten = settings.getBoolean(Common.ALLSWITCH_TEN,true);
+        boolean eleven = settings.getBoolean(Common.ALLSWITCH_ELEVEN,true);
         navigationView.getMenu().getItem(0).setVisible(one);
         navigationView.getMenu().getItem(1).setVisible(two);
         navigationView.getMenu().getItem(2).setVisible(three);
@@ -347,6 +356,7 @@ public class MainActivity extends BaseActivity
         navigationView.getMenu().getItem(7).setVisible(eight);
         navigationView.getMenu().getItem(8).setVisible(nine);
         navigationView.getMenu().getItem(9).setVisible(ten);
+        navigationView.getMenu().getItem(10).setVisible(eleven);
         for(int i = 0;i<navigationView.getMenu().size();i++){
             if(navigationView.getMenu().getItem(i).isVisible()){
                 return i;
@@ -433,7 +443,10 @@ public class MainActivity extends BaseActivity
     public static boolean isModuleActive() {
         return false;
     }
-
+    public static int getActivatedModuleVersion(){
+        return  -1;
+    }
+    @SuppressLint("RestrictedApi")
     private void showOrHidden(Fragment fragOne){
         //Fragment的显示隐藏
         FragmentManager fm =MainActivity.this.getSupportFragmentManager();
@@ -545,6 +558,7 @@ public class MainActivity extends BaseActivity
         if (settings.getBoolean("nowmode",false)!=isNightMode){
             restartSelf();
         }
+//        showT("版本号："+getActivatedModuleVersion());
         super.onStart();
     }
 
@@ -722,6 +736,10 @@ public class MainActivity extends BaseActivity
             page = 12;
             menuTv.setVisibility(View.INVISIBLE);
             showOrHidden(questionFragment);
+        }else if (id == R.id.nav_fourteen) {
+            page = 13;
+            menuTv.setVisibility(View.INVISIBLE);
+            showOrHidden(cpuFragment);
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -1102,5 +1120,35 @@ public class MainActivity extends BaseActivity
         XposedStopApp.stopApk(ai.packageName,this);
         restartMethod();
     }
+    private void showNotActive() {
+        new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setMessage("模块未激活（更新后需要重新勾选一次模块），请先激活模块并重启手机")
+                .setPositiveButton("激活", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        openXposed();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
 
+    private void openXposed() {
+        if (PackageUtil.isAppInstalled(this, "de.robv.android.xposed.installer")) {
+            Intent intent = new Intent("de.robv.android.xposed.installer.OPEN_SECTION");
+            if (getPackageManager().queryIntentActivities(intent, 0).isEmpty()) {
+                intent = getPackageManager().getLaunchIntentForPackage("de.robv.android.xposed.installer");
+            }
+            if (intent != null) {
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra("section", "modules")
+                        .putExtra("fragment", 1)
+                        .putExtra("module", BuildConfig.APPLICATION_ID);
+                startActivity(intent);
+            }
+        } else {
+           showT("xposed installer未安装");
+        }
+    }
 }

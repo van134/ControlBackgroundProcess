@@ -207,6 +207,24 @@
             android:layout_width="match_parent"
             android:layout_height="2px"
             android:background="@drawable/line" />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp"
+            android:visibility="visible" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="CPU设置"
+                android:id="@+id/setting_allsw_elevensw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line" />
 
         <FrameLayout
             android:layout_width="match_parent"

@@ -224,7 +224,7 @@ public class XposedAD {
         final TextView tv = (TextView)methodHookParam.thisObject;
 //                                XposedBridge.log("++++++++++++++TEXTVIEW11" + lpparam.packageName + " " + tv.getText());
         String tet = tv.getText().toString();
-        if(tv.getAlpha()!=0.99f&&(tet.contains("跳过")||tet.toLowerCase().contains("skip"))&&(tet.contains("1")||tet.contains("2")||tet.contains("3")||tet.contains("4")||tet.contains("5")||tet.contains("6"))&&tet.length()<8){
+        if(tv.getAlpha()!=0.99f&&(tet.contains("跳过")||tet.toLowerCase().contains("skip"))&&tet.length()<5){
 //            XposedBridge.log("CONTROL skip ad  type3  "+lpparam.packageName+" mode " + type+" tv.isDirty() "+tv.isDirty());
             Runnable r = new Runnable() {
                 @Override

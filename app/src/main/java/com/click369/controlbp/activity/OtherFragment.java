@@ -66,7 +66,7 @@ import de.robv.android.xposed.XposedHelpers;
 
 
 public class OtherFragment extends Fragment {
-    private TextView jxCleanTv,cleanSysTv,cleanProcessTv,kjRunTv,kjIceTv,kjCleanTv,kjRestartTv,adbTv,wifiTv,killSelfTv,changeTextTv,cleanTv,changeBgTv,bgBlurTv,bgBrightTv,kjCPUTv;
+    private TextView jxCleanTv,cleanSysTv,cleanProcessTv,kjRunTv,kjIceTv,kjCleanTv,kjjxCleanTv,kjRestartTv,adbTv,wifiTv,killSelfTv,changeTextTv,cleanTv,changeBgTv,bgBlurTv,bgBrightTv,kjCPUTv;
     private Switch selSw,homeErrorSw,cleanSw,stopScanMeidaSw;//toastSw;
     private SeekBar cleanSb,bgBlurSb,bgBrightSb;
     private ActivityManager activityManager;
@@ -110,6 +110,7 @@ public class OtherFragment extends Fragment {
         kjRunTv = (TextView) v.findViewById(R.id.other_kj_run_tv);
         kjIceTv = (TextView) v.findViewById(R.id.other_kj_ice_tv);
         kjCleanTv = (TextView) v.findViewById(R.id.other_kj_clean_tv);
+        kjjxCleanTv = (TextView) v.findViewById(R.id.other_kj_jxclean_tv);
         kjRestartTv = (TextView) v.findViewById(R.id.other_kj_restart_tv);
         wifiTv = (TextView) v.findViewById(R.id.other_wifipwd_tv);
         killSelfTv = (TextView) v.findViewById(R.id.other_killself_tv);
@@ -135,6 +136,7 @@ public class OtherFragment extends Fragment {
         kjRunTv.setOnClickListener(itemClick);
         kjIceTv.setOnClickListener(itemClick);
         kjCleanTv.setOnClickListener(itemClick);
+        kjjxCleanTv.setOnClickListener(itemClick);
         kjRestartTv.setOnClickListener(itemClick);
         adbTv.setOnClickListener(itemClick);
         wifiTv.setOnClickListener(itemClick);
@@ -275,6 +277,9 @@ public class OtherFragment extends Fragment {
             }else if(v.equals(kjCleanTv)){
                 ShortCutUtil.addShortcut("缓存清理",getActivity().getApplicationContext(),EmptyActivity.class,R.drawable.icon_clean);
                 Toast.makeText(getActivity(),"缓存清理 快捷方式创建成功",Toast.LENGTH_LONG).show();
+            }else if(v.equals(kjjxCleanTv)){
+                ShortCutUtil.addShortcut("极限清理",getActivity().getApplicationContext(),LimitForceCleanActivity.class,R.drawable.icon_clean);
+                Toast.makeText(getActivity(),"极限清理 快捷方式创建成功",Toast.LENGTH_LONG).show();
             }else if(v.equals(kjCPUTv)){
                 ShortCutUtil.addShortcut("CPU设置",getActivity().getApplicationContext(),CPUSetActivity.class,R.drawable.icon_cpu);
                 Toast.makeText(getActivity(),"CPU设置 快捷方式创建成功",Toast.LENGTH_LONG).show();

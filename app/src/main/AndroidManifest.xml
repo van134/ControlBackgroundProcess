@@ -75,6 +75,20 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.LimitForceCleanActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnTaskLaunch="false"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/liveactivity">
+            <intent-filter>
+                <category android:name="controlbp" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.click369.controlbp.forcecleanactivity" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".activity.ShowDialogActivity"
             android:excludeFromRecents="true"
             android:exported="true"

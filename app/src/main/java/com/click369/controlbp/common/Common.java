@@ -50,14 +50,18 @@ public class Common {
     public static String PREFS_SETCPU_LOCKUNLOCK ="setcpulockunlock";
     public static String PREFS_SETCPU_AUTOSTART ="setcpuautostart";
     public static String PREFS_SETCPU_CAMERAMODE ="setcpucameramode";
-    public static String PREFS_SETCPU_CPU0 ="setcpu0";
-    public static String PREFS_SETCPU_CPU1 ="setcpu1";
-    public static String PREFS_SETCPU_CPU2 ="setcpu2";
-    public static String PREFS_SETCPU_CPU3 ="setcpu3";
-    public static String PREFS_SETCPU_CPU4 ="setcpu4";
-    public static String PREFS_SETCPU_CPU5 ="setcpu5";
-    public static String PREFS_SETCPU_CPU6 ="setcpu6";
-    public static String PREFS_SETCPU_CPU7 ="setcpu7";
+    public static String PREFS_SETCPU_OFFSCREENOPEN ="setcpuoffscreenopen";
+    public static String PREFS_SETCPU_OFFSCREENCORECOUNT ="setcpuoffscreencorecount";
+    public static String PREFS_SETCPU_DEFAULTCORECOUNT ="defaultcorecount";
+    public static String PREFS_SETCPU_OFFSCREENDELAY ="offscreendelay";
+//    public static String PREFS_SETCPU_CPU0 ="setcpu0";
+//    public static String PREFS_SETCPU_CPU1 ="setcpu1";
+//    public static String PREFS_SETCPU_CPU2 ="setcpu2";
+//    public static String PREFS_SETCPU_CPU3 ="setcpu3";
+//    public static String PREFS_SETCPU_CPU4 ="setcpu4";
+//    public static String PREFS_SETCPU_CPU5 ="setcpu5";
+//    public static String PREFS_SETCPU_CPU6 ="setcpu6";
+//    public static String PREFS_SETCPU_CPU7 ="setcpu7";
 
     public static String PREFS_SETTING_THEME_MODE ="isNight";
     public static String PREFS_SETTING_THEME_AUTOCHANGEMODE ="isautochangetheme";
@@ -152,4 +156,5 @@ public class Common {
     public static String ALLSWITCH_EIGHT = "allswitch_eight";
     public static String ALLSWITCH_NINE = "allswitch_nine";
     public static String ALLSWITCH_TEN = "allswitch_ten";
+    public static String ALLSWITCH_ELEVEN = "allswitch_eleven";
 }

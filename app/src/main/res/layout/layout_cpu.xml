@@ -35,12 +35,30 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="下面设置开机自启"
-                        android:id="@+id/cpu_autostart_sw"
+                        android:text="CPU设置总开关"
+                        android:id="@+id/cpu_lockunlock_sw"
                         android:checked="false" />
                 </FrameLayout>
-            </LinearLayout>
 
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="4dp" >
+
+                <Switch
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="CPU设置开机自启"
+                    android:id="@+id/cpu_autostart_sw"
+                    android:checked="false" />
+            </FrameLayout>
+            </LinearLayout>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -54,6 +72,7 @@
                 android:layout_marginTop="4dp"
                 android:background="@drawable/alert_backgroundshape" >
 
+
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -62,8 +81,8 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="阻止系统各种原因锁核(低电量或高温时)"
-                        android:id="@+id/cpu_lockunlock_sw"
+                        android:text="熄屏时只开CPU0和CPU1(默认熄屏30分钟后)"
+                        android:id="@+id/cpu_offsc_sw"
                         android:checked="false" />
                 </FrameLayout>
 

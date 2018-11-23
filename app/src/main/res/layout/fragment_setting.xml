@@ -126,7 +126,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="墓碑时保留主进程终止其他进程(大多保留1-2个)\n(试验功能，打开后若有异常请反馈并关闭该功能)"
+                        android:text="墓碑时保留主进程阻止唤醒锁定时器(大多保留1-2个)\n(试验功能，打开后若有异常请反馈并关闭该功能)"
                         android:id="@+id/setting_mubestopreceiver_sw"
                         android:checked="false"
                         android:visibility="visible" />

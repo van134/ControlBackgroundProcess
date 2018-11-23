@@ -8,8 +8,8 @@ android {
         applicationId "com.click369.controlbp"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 136
-        versionName "2.4.9"
+        versionCode 137
+        versionName "2.5.0"
     }
     buildTypes {
         release {
@@ -20,14 +20,18 @@ android {
         }
     }
 }
-
+repositories {
+    //通常新项目的 build.gradle 中不包含有repositories块，直接在空白处增加1-3行即可
+    jcenter(); }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    provided files('src/main/java/libs/XposedBridgeApi-87.jar')
+//    provided files('src/main/java/libs/XposedBridgeApi-87.jar')
     compile 'net.qiujuer.genius:blur:2.0.0-beta4'
     compile 'com.android.support:appcompat-v7:23+'
     compile 'com.android.support:design:23+'
     compile 'com.android.support:support-v4:23+'
     compile 'com.github.didikee:AndroidDonate:0.1.0'
+    provided 'de.robv.android.xposed:api:82'
+    provided 'de.robv.android.xposed:api:82:sources'
 }

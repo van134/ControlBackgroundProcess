@@ -494,6 +494,25 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
+                        android:text="创建极限清理快捷方式"
+                        android:id="@+id/other_kj_jxclean_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="left|center_vertical"
+                         />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginLeft="4dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
                         android:text="创建重启选项快捷方式"
                         android:id="@+id/other_kj_restart_tv"
                         android:textAlignment="gravity"
