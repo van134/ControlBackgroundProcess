@@ -224,7 +224,7 @@ public class XposedAD {
         final TextView tv = (TextView)methodHookParam.thisObject;
 //                                XposedBridge.log("++++++++++++++TEXTVIEW11" + lpparam.packageName + " " + tv.getText());
         String tet = tv.getText().toString();
-        if(tv.getAlpha()!=0.99f&&(tet.contains("跳过")||tet.toLowerCase().contains("skip"))&&tet.length()<5){
+        if(!"ad".equals(tv.getTag())&&(tet.contains("跳过")||tet.toLowerCase().contains("skip"))&&tet.length()<8){
 //            XposedBridge.log("CONTROL skip ad  type3  "+lpparam.packageName+" mode " + type+" tv.isDirty() "+tv.isDirty());
             Runnable r = new Runnable() {
                 @Override
@@ -233,20 +233,18 @@ public class XposedAD {
                     if(!tet1.contains("跳过")&&!tet1.toLowerCase().contains("skip")){
                         return;
                     }
-                    if(android.os.Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-                        tv.performContextClick();
-                    }
                     tv.performClick();
-                    tv.setAlpha(0.99f);
+                    tv.setAlpha(0.5f);
+                    tv.setTag("ad");
                     ViewParent vp = tv.getParent();
                     if(vp!=null){
                         View v = ((View)vp);
                         v.performClick();
-                        ViewParent vp1 = v.getParent();
-                        if(vp1!=null){
-                            View v1 = ((View)vp1);
-                            v1.performClick();
-                        }
+//                        ViewParent vp1 = v.getParent();
+//                        if(vp1!=null){
+//                            View v1 = ((View)vp1);
+//                            v1.performClick();
+//                        }
                     }
                 }
             };

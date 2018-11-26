@@ -55,6 +55,13 @@ public class EmptyActivity extends AppCompatActivity {
             this.finish();
         }else if(this.getIntent().hasExtra("data")&&this.getIntent().getStringExtra("data").contains("锁屏")){
             this.finish();
+        }else if(this.getIntent().hasExtra("data")&&this.getIntent().getStringExtra("data").contains("异常")){
+            AlertUtil.showAlertMsgBack(this, "应用控制器出现异常(请截屏发给开发者)", this.getIntent().getStringExtra("content"), new AlertUtil.InputCallBack() {
+                @Override
+                public void backData(String txt, int tag) {
+                   finish();
+                }
+            });
         }else if(this.getIntent().hasExtra("data")&&this.getIntent().getStringExtra("data").contains("清理")){
             clearMomery();
         }else if(this.getIntent().hasExtra("data")&&this.getIntent().getStringExtra("data").contains("重启")){

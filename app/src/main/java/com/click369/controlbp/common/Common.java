@@ -52,8 +52,11 @@ public class Common {
     public static String PREFS_SETCPU_CAMERAMODE ="setcpucameramode";
     public static String PREFS_SETCPU_OFFSCREENOPEN ="setcpuoffscreenopen";
     public static String PREFS_SETCPU_OFFSCREENCORECOUNT ="setcpuoffscreencorecount";
+    public static String PREFS_SETCPU_BATTERYLOWCORECOUNT ="batterylowcorecount";
     public static String PREFS_SETCPU_DEFAULTCORECOUNT ="defaultcorecount";
     public static String PREFS_SETCPU_OFFSCREENDELAY ="offscreendelay";
+    public static String PREFS_SETCPU_BATTERYBELOWOPEN ="batterybelowopen";
+    public static String PREFS_SETCPU_BATTERYBELOWCOUNT ="batterybelowcount";
 //    public static String PREFS_SETCPU_CPU0 ="setcpu0";
 //    public static String PREFS_SETCPU_CPU1 ="setcpu1";
 //    public static String PREFS_SETCPU_CPU2 ="setcpu2";
@@ -88,6 +91,9 @@ public class Common {
     public static String PREFS_SETTING_HOMEDELAYTIME ="homedelaytime";
     public static String PREFS_SETTING_OFFDELAYTIME ="offdelaytime";
     public static String PREFS_SETTING_ISMUBEISTOPOTHERPROC ="isstopotherproc";
+
+    public static String PREFS_SETTING_LASTUISTARTTIME ="lastuistarttime";
+    public static String PREFS_SETTING_LASTSERVICESTARTTIME ="lastservicestarttime";
 
     public static String PREFS_SETTING_LINK_STOPANDAUTOSTART ="linkstopandautostart";
     public static String PREFS_SETTING_LINK_STOPANDREMOVERECENTSTOP ="linkstopandremoverecentstop";

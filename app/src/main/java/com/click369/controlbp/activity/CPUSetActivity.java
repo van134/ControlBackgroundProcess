@@ -45,5 +45,7 @@ public class CPUSetActivity extends BaseActivity {
 //        setContentView(R.layout.fragment_cpu);
 //        initView();
         setTitle("CPU设置");
+//        int arr[] = new int[1];
+//        int a = arr[3];
     }
 }

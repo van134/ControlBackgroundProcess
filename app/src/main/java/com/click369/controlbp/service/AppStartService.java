@@ -120,8 +120,9 @@ public class AppStartService {
                         service.iceButOpenInfos.remove(pkg);
                     }
                 }
-                Log.e("CONTROL","从最近任务列表移除 "+pkg+"  "+intent.getStringExtra("killfail"));
-                if (intent!=null&&WatchDogService.removeRecents.contains(pkg)){
+                Log.e("CONTROL","从最近任务列表移除 "+pkg+"  killfail? "+intent.getStringExtra("killfail"));
+                if (intent!=null&&WatchDogService.removeFromRecentAppList.contains(pkg)){
+                    Log.e("CONTROL","从最近任务列表移除 "+pkg+"  并准备杀死");
                     XposedStopApp.stopApk(pkg,service);
                 }
                 if (!isOffScLockApp&&service.autoStartPrefs.contains(pkg+"/lockok")){

@@ -50,7 +50,14 @@ public class BaseActivity extends AppCompatActivity {
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        if (!MainActivity.isUIRun){
+            SharedPreferences settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+            long lastTime = settings.getLong(Common.PREFS_SETTING_LASTUISTARTTIME,0);
+            if (System.currentTimeMillis()-lastTime<500){
+                showT("检测到应用控制器频繁的开启，可能由于出错导致异常");
+            }
+            settings.edit().putLong(Common.PREFS_SETTING_LASTUISTARTTIME,System.currentTimeMillis()).commit();
+        }
         WindowManager mWindowManager = (WindowManager) getApplication().getSystemService(getApplication().WINDOW_SERVICE);
         mWindowManager.getDefaultDisplay().getRealSize(p);
         t = Toast.makeText(this,"",Toast.LENGTH_SHORT);

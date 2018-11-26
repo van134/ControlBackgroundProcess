@@ -75,6 +75,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.DebugActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnTaskLaunch="false"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/liveactivity">
+        </activity>
+        <activity
             android:name=".activity.LimitForceCleanActivity"
             android:excludeFromRecents="true"
             android:exported="true"
@@ -181,6 +190,10 @@
             <intent-filter>
                 <action android:name="com.click369.service"/>
             </intent-filter>
+        </service>
+        <service
+            android:name=".service.DebugService"
+            android:exported="true">
         </service>
         <service
             android:name=".service.ColorNavBarService"

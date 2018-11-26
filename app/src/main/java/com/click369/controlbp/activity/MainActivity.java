@@ -80,6 +80,7 @@ import java.util.HashSet;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    public static boolean isUIRun = false;
     public static HashMap<String,WhiteApp> whiteApps = new HashMap<String,WhiteApp>();
     public RelativeLayout mainRL;
     private AppCompatTextView menuTv;
@@ -129,6 +130,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        isUIRun = true;
         ifwCountPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPIFWCOUNT);// getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
         modPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_SETTINGNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         wakeLockPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_WAKELOCKNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
@@ -355,8 +357,8 @@ public class MainActivity extends BaseActivity
         navigationView.getMenu().getItem(6).setVisible(seven);
         navigationView.getMenu().getItem(7).setVisible(eight);
         navigationView.getMenu().getItem(8).setVisible(nine);
-        navigationView.getMenu().getItem(9).setVisible(ten);
-        navigationView.getMenu().getItem(10).setVisible(eleven);
+        navigationView.getMenu().getItem(9).setVisible(eleven);
+        navigationView.getMenu().getItem(10).setVisible(ten);
         for(int i = 0;i<navigationView.getMenu().size();i++){
             if(navigationView.getMenu().getItem(i).isVisible()){
                 return i;
@@ -471,14 +473,15 @@ public class MainActivity extends BaseActivity
     private boolean isLoadAppFromSys = false;
     ProgressDialog pd;
     private void loadApp(boolean isReload){
-        try {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,true);
+                    try {
+                        pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,true);
+                    }catch (Exception e){e.printStackTrace();}
                 }
             });
-        }catch (Exception e){e.printStackTrace();}
+
         synchronized (allAppInfos) {
             allAppInfos.clear();
             ArrayList<AppInfo> apps = AppInfo.readArrays(getApplicationContext());
@@ -1011,6 +1014,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        isUIRun = false;
         h.removeCallbacks(st);
         runing = "";
         if (settings.getBoolean(Common.ALLSWITCH_THREE,true)) {

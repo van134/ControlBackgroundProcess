@@ -44,7 +44,7 @@ public class MyDozeService {
     private Set<String> offWhiteList = new HashSet<String>();
     private  WatchDogService service;
     private MyDozeReceiver mdr;
-    private BettryReceiver br;
+//    private BettryReceiver br;
     private PowerManager pm;
     private boolean isDozeOpen;
     public static boolean lastDozeOpenScreenIsOn = false;
@@ -63,7 +63,7 @@ public class MyDozeService {
     private boolean isSelfStop = false;
     public static boolean isRoot = false;
     private Handler handler;
-    private int battery = 0,openDozeBattery = 0;
+    private int openDozeBattery = 0;//battery = 0,
     public SharedPreferences dozePrefs;
     @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
     public MyDozeService(WatchDogService service){
@@ -76,11 +76,11 @@ public class MyDozeService {
         ifliter.addAction(STATE_CLOSE);
         ifliter.addAction(STATE_CHECKON);
         mdr = new MyDozeReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        br = new BettryReceiver();
+//        IntentFilter intentFilter = new IntentFilter();
+//        intentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+//        br = new BettryReceiver();
         service.registerReceiver(mdr, ifliter);
-        service.registerReceiver(br, intentFilter);
+//        service.registerReceiver(br, intentFilter);
         handler = new Handler();
         pm = (PowerManager) (service.getApplicationContext().getSystemService(Context.POWER_SERVICE));
         ShellUtilDoze.execCommand("dumpsys deviceidle whitelist +com.click369.controlbp");
@@ -119,17 +119,17 @@ public class MyDozeService {
             }
         }
     }
-    class BettryReceiver extends BroadcastReceiver{
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if(Intent.ACTION_BATTERY_CHANGED.equals(action)){
-                int current = intent.getExtras().getInt("level");// 获得当前电量
-                int total = intent.getExtras().getInt("scale");// 获得总电量
-                battery = current * 100 / total;
-            }
-        }
-    }
+//    class BettryReceiver extends BroadcastReceiver{
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            String action = intent.getAction();
+//            if(Intent.ACTION_BATTERY_CHANGED.equals(action)){
+//                int current = intent.getExtras().getInt("level");// 获得当前电量
+//                int total = intent.getExtras().getInt("scale");// 获得总电量
+//                battery = current * 100 / total;
+//            }
+//        }
+//    }
     class  MyDozeReceiver extends BroadcastReceiver {
         @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
         @Override
@@ -234,7 +234,7 @@ public class MyDozeService {
                 Log.i("CONTROL","DOZE状态改变"+isDozeOpen);
                 if(isDozeOpen){
                     cancaleCheckAlarm();
-                    openDozeBattery = battery;
+                    openDozeBattery = service.batteryPer;
                     lastDozeOpenScreenIsOn = pm.isInteractive();
                     lastDozeOpenTime = System.currentTimeMillis();
                     dozePrefs.edit().putLong(Common.PREFS_SETTING_DOZE_LASTOPENTIME,lastDozeOpenTime).commit();
@@ -254,9 +254,9 @@ public class MyDozeService {
                         sb.append(" 打盹时长");
                         sb.append(TimeUtil.changeMils2StringZero(lastDozeCloseTime-lastDozeOpenTime,"HH:mm:ss"));
                         sb.append(" 耗电");
-                        sb.append((openDozeBattery-battery)>0?(openDozeBattery-battery):0).append("%");
+                        sb.append((openDozeBattery-service.batteryPer)>0?(openDozeBattery-service.batteryPer):0).append("%");
                         sb.append(" 剩余");
-                        sb.append(battery).append("%");
+                        sb.append(service.batteryPer).append("%");
                         logs.add(0,sb.toString());
 //                        Log.i("CONTROL","battery  "+battery);
                     }
@@ -430,6 +430,6 @@ public class MyDozeService {
         }
         Notify.cancelNotify(service);
         service.unregisterReceiver(mdr);
-        service.unregisterReceiver(br);
+//        service.unregisterReceiver(br);
     }
 }
