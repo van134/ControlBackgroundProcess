@@ -576,8 +576,8 @@ public class XposedRencent {
                                 field.setAccessible(true);
                                 final View v = (View) field.get(methodHookParam.thisObject);
                                 if (isHideBar) {
-//                                    v.setVisibility(View.INVISIBLE);
-                                    v.setBackgroundColor(Color.TRANSPARENT);
+                                    v.setVisibility(View.INVISIBLE);
+//                                    v.setBackgroundColor(Color.TRANSPARENT);
                                 } else {
                                     if (isColorBar) {
                                         final String colors[] = {"#c84848", "#c75241", "#c58c47", "#c7ba45", "#86c442", "#5fc745", "#47c278", "#43c29c", "#46c6c2", "#419ec7", "#435cc0", "#6b46c1", "#8546c4", "#b745c0", "#c54367"};

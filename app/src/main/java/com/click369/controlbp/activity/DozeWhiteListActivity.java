@@ -36,7 +36,7 @@ public class DozeWhiteListActivity extends BaseActivity {
         View v = getLayoutInflater().inflate(R.layout.activity_dozewhitelist,null);
         setContentView(v);
 
-        whiteListPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_DOZELIST);//this.getApplicationContext().getSharedPreferences(Common.PREFS_DOZEWHITELIST, Context.MODE_WORLD_READABLE);
+        whiteListPrefs = SharedPrefsUtil.getInstance(this).dozePrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_DOZELIST);//this.getApplicationContext().getSharedPreferences(Common.PREFS_DOZEWHITELIST, Context.MODE_WORLD_READABLE);
 //        et = (EditText)this.findViewById(R.id.main_edittext);
         list = (ListView)this.findViewById(R.id.doze_whitelist_listview);
         onTitle = (TextView)this.findViewById(R.id.doze_title_on_tv);

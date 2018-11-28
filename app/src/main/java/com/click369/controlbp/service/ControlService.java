@@ -37,7 +37,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPackage{//,IXposedHookInitPackageResources
 //	private static final String TAG = ControlService.class.getSimpleName();
 	private XSharedPreferences controlPrefs,wakeLockPrefs,alarmPrefs,settingPrefs,autoStartPrefs,barPrefs,recentPrefs,dozePrefs;
-	private XSharedPreferences pmPrefs,testPrefs,adPrefs,tvPrefs,muBeiPrefs;
+	private XSharedPreferences pmPrefs,testPrefs,adPrefs,tvPrefs,muBeiPrefs,dialogPrefs;
 	@Override
 	public void initZygote(IXposedHookZygoteInit.StartupParam paramStartupParam) throws Throwable {
 //		loadPrefs();
@@ -60,6 +60,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 		tvPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_TVLIST);
 		pmPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_PMLIST);
 		muBeiPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_MUBEILIST);
+		dialogPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_SKIPDIALOG);
 		controlPrefs.makeWorldReadable();
 		wakeLockPrefs.makeWorldReadable();
 		alarmPrefs.makeWorldReadable();
@@ -73,6 +74,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 		tvPrefs.makeWorldReadable();
 		pmPrefs.makeWorldReadable();
 		muBeiPrefs.makeWorldReadable();
+		dialogPrefs.makeWorldReadable();
 	}
 
 //	@Override
@@ -98,7 +100,6 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 
 			settingPrefs.reload();
 			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,muBeiPrefs,recentPrefs);
-
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_FIVE,true)){
 				XposedAppStart.loadPackage(lpparam, autoStartPrefs);
 			}
@@ -139,6 +140,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			}
 			if(settingPrefs.getBoolean(Common.ALLSWITCH_NINE,true)){
 				XposedAD.loadPackage(lpparam,adPrefs);
+				XposedDialog.loadPackage(lpparam,dialogPrefs);
 			}
 			if(tvPrefs!=null){
 				XposedTextView.loadPackage(lpparam,tvPrefs);

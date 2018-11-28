@@ -39,7 +39,7 @@ public class UIBarBlackListActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         View v = getLayoutInflater().inflate(R.layout.activity_uibarblacklist,null);
         setContentView(v);
-        barPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST);// this.getApplicationContext().getSharedPreferences(Common.PREFS_UIBARBLACKLIST, Context.MODE_WORLD_READABLE);
+        barPrefs = sharedPrefs.uiBarPrefs;SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST);// this.getApplicationContext().getSharedPreferences(Common.PREFS_UIBARBLACKLIST, Context.MODE_WORLD_READABLE);
 //        et = (EditText)this.findViewById(R.id.main_edittext);
         list = (ListView)this.findViewById(R.id.ui_blacklist_listview);
         topTitle = (TextView)this.findViewById(R.id.ui_title_topbar_tv);

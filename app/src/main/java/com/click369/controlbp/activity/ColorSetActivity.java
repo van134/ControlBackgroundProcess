@@ -39,7 +39,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_setcolor);
-        barPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST);//getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        barPrefs =  SharedPrefsUtil.getInstance(this).uiBarPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST);//getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         if(this.getIntent().hasExtra("apppkg")){
             apppkg = this.getIntent().getStringExtra("apppkg");
             this.setTitle("颜色设置");

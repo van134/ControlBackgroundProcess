@@ -11,6 +11,7 @@ import com.click369.controlbp.activity.MainActivity;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by asus on 2017/11/11.
@@ -32,21 +33,21 @@ public class BackupRestoreUtil {
             FileUtil.init();
             if(type == 0){
                 Map<String,Boolean> allChoose = new HashMap<String,Boolean>();
-                Map<String,?> temp =  act.modPrefs.getAll();
+                Map<String,?> temp =  act.sharedPrefs.modPrefs.getAll();
                 for(String s:temp.keySet()){
                     allChoose.put(s,Boolean.parseBoolean(temp.get(s).toString()));
                 }
                 FileUtil.writeObj(allChoose,FileUtil.FILEPATH+ File.separator+"choose");
 
                 Map allWakeLock = new HashMap();
-                Map temp1 =  act.wakeLockPrefs.getAll();
+                Map temp1 =  act.sharedPrefs.wakeLockPrefs.getAll();
                 for(Object s:temp1.keySet()){
                     allWakeLock.put(s,temp1.get(s));
                 }
                 FileUtil.writeObj(allWakeLock,FileUtil.FILEPATH+ File.separator+"wakelock");
 
                 Map allAlarm = new HashMap();
-                Map temp2 =  act.alarmPrefs.getAll();
+                Map temp2 =  act.sharedPrefs.alarmPrefs.getAll();
                 for(Object s:temp2.keySet()){
                     allAlarm.put(s,temp2.get(s));
                 }
@@ -54,7 +55,7 @@ public class BackupRestoreUtil {
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"choose");
             }else if(type == 1){
                 Map<String,Boolean> allForce = new HashMap<String,Boolean>();
-                Map<String,?> temp1 =  act.forceStopPrefs.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.forceStopPrefs.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,Boolean.parseBoolean(temp1.get(s).toString()));
                 }
@@ -64,7 +65,7 @@ public class BackupRestoreUtil {
                 act.ifwFragment.backup();
             }else if(type == 3){
                 Map<String,Object> allForce = new HashMap<String,Object>();
-                Map<String,?> temp1 =  act.pmPrefs.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.pmPrefs.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,temp1.get(s));
                 }
@@ -72,7 +73,7 @@ public class BackupRestoreUtil {
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"package");
             }else if(type == 4){
                 Map<String,Object> allForce = new HashMap<String,Object>();
-                Map<String,?> temp1 =  act.dozePrefs.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.dozePrefs.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,temp1.get(s));
                 }
@@ -86,7 +87,7 @@ public class BackupRestoreUtil {
                     saveData(i);
                 }
                 Map<String,Object> allForce = new HashMap<String,Object>();
-                Map<String,?> temp1 =  act.settings.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.settings.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,temp1.get(s));
                 }
@@ -94,7 +95,7 @@ public class BackupRestoreUtil {
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"setting");
             }else if(type == 8){
                 Map<String,Boolean> allForce = new HashMap<String,Boolean>();
-                Map<String,?> temp1 = act.autoStartNetPrefs.getAll();
+                Map<String,?> temp1 = act.sharedPrefs.autoStartNetPrefs.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,Boolean.parseBoolean(temp1.get(s).toString()));
                 }
@@ -102,7 +103,7 @@ public class BackupRestoreUtil {
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"autostartnet");
             }else if(type == 9){
                 Map<String,Object> allForce = new HashMap<String,Object>();
-                Map<String,?> temp1 =  act.uiBarPrefs.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.uiBarPrefs.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,temp1.get(s));
                 }
@@ -110,15 +111,21 @@ public class BackupRestoreUtil {
                 act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"uicontrol");
             }else if(type == 10){
                 Map<String,Object> allForce = new HashMap<String,Object>();
-                Map<String,?> temp1 =  act.adPrefs.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.adPrefs.getAll();
                 for(String s:temp1.keySet()){
                     allForce.put(s,temp1.get(s));
                 }
                 FileUtil.writeObj(allForce,FileUtil.FILEPATH+File.separator+"adjump");
-                act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"adjump");
+                Map<String,?> temp2 =  act.sharedPrefs.skipDialogPrefs.getAll();
+                allForce.clear();
+                for(String s:temp2.keySet()){
+                    allForce.put(s,temp2.get(s));
+                }
+                FileUtil.writeObj(allForce,FileUtil.FILEPATH+File.separator+"dialogjump");
+                act.showT("保存成功，保存在"+FileUtil.FILEPATH+File.separator+"dialogjump");
             }else if(type == 11){
                 Map<String,Boolean> allRecents = new HashMap<String,Boolean>();
-                Map<String,?> temp1 =  act.recentPrefs.getAll();
+                Map<String,?> temp1 =  act.sharedPrefs.recentPrefs.getAll();
                 for(String s:temp1.keySet()){
                     allRecents.put(s,Boolean.parseBoolean(temp1.get(s).toString()));
                 }
@@ -138,7 +145,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"choose");
                 if(o!=null){
                     Map<String,Boolean>  datas = (Map<String,Boolean>)o;
-                    SharedPreferences.Editor ed = act.modPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.modPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -155,7 +162,7 @@ public class BackupRestoreUtil {
                 Object o1 = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"wakelock");
                 if(o1!=null){
                     Map  datas = (Map)o1;
-                    SharedPreferences.Editor ed = act.wakeLockPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.wakeLockPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -176,7 +183,7 @@ public class BackupRestoreUtil {
                 Object o2 = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"alarm");
                 if(o2!=null){
                     Map  datas = (Map)o2;
-                    SharedPreferences.Editor ed = act.alarmPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.alarmPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -203,7 +210,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(file.getAbsolutePath());
                 if(o!=null){
                     Map<String,Boolean>  datas = (Map<String,Boolean>)o;
-                    SharedPreferences.Editor ed = act.forceStopPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.forceStopPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -228,7 +235,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(file.getAbsolutePath());
                 if(o!=null){
                     Map<String,Boolean>  datas = (Map<String,Boolean>)o;
-                    SharedPreferences.Editor ed = act.pmPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.pmPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -251,7 +258,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(file.getAbsolutePath());
                 if(o!=null){
                     Map<String,Object>  datas = (Map<String,Object>)o;
-                    SharedPreferences.Editor ed = act.dozePrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.dozePrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -284,7 +291,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(file.getAbsolutePath());
                 if(o!=null){
                     Map<String,Object>  datas = (Map<String,Object>)o;
-                    SharedPreferences.Editor ed = act.settings.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.settings.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -311,7 +318,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"autostartnet");
                 if(o!=null){
                     Map<String,Object>  datas = (Map<String,Object>)o;
-                    SharedPreferences.Editor ed = act.autoStartNetPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.autoStartNetPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -338,7 +345,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"uicontrol");
                 if(o!=null){
                     Map<String,Object>  datas = (Map<String,Object>)o;
-                    SharedPreferences.Editor ed = act.uiBarPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.uiBarPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -368,7 +375,7 @@ public class BackupRestoreUtil {
                 Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"adjump");
                 if(o!=null){
                     Map<String,Object>  datas = (Map<String,Object>)o;
-                    SharedPreferences.Editor ed = act.adPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.adPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }
@@ -387,13 +394,39 @@ public class BackupRestoreUtil {
             }else{
                 act.showT("备份文件不存在");
             }
+            file = new File(FileUtil.FILEPATH+ File.separator+"dialogjump");
+            if(file.exists()){
+                Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"dialogjump");
+                if(o!=null){
+                    Map<String,Object>  datas = (Map<String,Object>)o;
+                    SharedPreferences.Editor ed = act.sharedPrefs.skipDialogPrefs.edit();
+                    if (datas.size()>0){
+                        ed.clear().commit();
+                    }
+                    for(String p:datas.keySet()){
+                        if(datas.get(p) instanceof Integer){
+                            ed.putInt(p,(Integer) datas.get(p));
+                        }else if(datas.get(p) instanceof String){
+                            ed.putString(p,(String) datas.get(p));
+                        }else if(datas.get(p) instanceof Set){
+                            ed.putStringSet(p,(Set<String>) datas.get(p));
+                        }
+                    }
+                    ed.commit();
+                    act.showT("还原成功");
+                }else{
+                    act.showT("备份文件损坏");
+                }
+            }else{
+                act.showT("备份文件不存在");
+            }
         }else if(type == 11){
             File file = new File(FileUtil.FILEPATH+ File.separator+"recents");
             if(file.exists()){
                 Object o = FileUtil.readObj(FileUtil.FILEPATH+ File.separator+"recents");
                 if(o!=null){
                     Map<String,Boolean>  datas = (Map<String,Boolean>)o;
-                    SharedPreferences.Editor ed = act.recentPrefs.edit();
+                    SharedPreferences.Editor ed = act.sharedPrefs.recentPrefs.edit();
                     if (datas.size()>0){
                         ed.clear().commit();
                     }

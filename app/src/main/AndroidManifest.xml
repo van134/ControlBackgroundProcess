@@ -150,6 +150,7 @@
         <activity android:name=".activity.WakeLockActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.AlarmActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ChangeTextActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.SkipDialogActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.UnLockActivity"
             android:exported="true"
             android:excludeFromRecents="true"

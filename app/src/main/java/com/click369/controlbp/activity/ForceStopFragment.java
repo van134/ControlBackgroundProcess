@@ -67,9 +67,9 @@ public class ForceStopFragment extends Fragment {
     }
 
     private void initView(View v){
-        appStartPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-        muBeiPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_MUBEILIST);
-        forcePrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_FORCESTOPNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
+        appStartPrefs =SharedPrefsUtil.getInstance(getActivity()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
+        muBeiPrefs = SharedPrefsUtil.getInstance(getActivity()).muBeiPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_MUBEILIST);
+        forcePrefs = SharedPrefsUtil.getInstance(getActivity()).forceStopPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_FORCESTOPNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
 //        controlPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_SETTINGNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
         listView = (ListView)v.findViewById(R.id.main_listview);
         backTv = (TextView) v.findViewById(R.id.main_back_tv);

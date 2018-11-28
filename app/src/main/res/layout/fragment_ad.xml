@@ -15,7 +15,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             layout="@layout/layout_topsearch" />
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:text="跳过指定对话框"
+            android:id="@+id/main_skipdialog_tv"
+            android:background="@drawable/et_backgroundshape"
+            android:gravity="center"
+            android:textAlignment="gravity"
+            android:layout_gravity="center_vertical" />
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"

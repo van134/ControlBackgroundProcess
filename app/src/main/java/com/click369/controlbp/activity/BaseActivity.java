@@ -46,10 +46,12 @@ public class BaseActivity extends AppCompatActivity {
     public Handler h = new Handler();
     public static Point p = new Point();
     public static boolean isZhenDong = true;
+    public SharedPrefsUtil sharedPrefs;
 //    @TargetApi(Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        sharedPrefs = SharedPrefsUtil.getInstance(this);
         if (!MainActivity.isUIRun){
             SharedPreferences settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
             long lastTime = settings.getLong(Common.PREFS_SETTING_LASTUISTARTTIME,0);
@@ -175,7 +177,7 @@ public class BaseActivity extends AppCompatActivity {
                                @Override
                                public void backData(String txt, int tag) {
                                if (tag == 1) {
-                                   ((MainActivity) cxt).clearAppSettings(ai);
+                                   ((BaseActivity)cxt).sharedPrefs.clearAppSettings(ai);
                                }
                                }
                            });

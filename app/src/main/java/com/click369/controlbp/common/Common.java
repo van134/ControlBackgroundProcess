@@ -4,6 +4,8 @@ package com.click369.controlbp.common;
  * Created by asus on 2017/10/15.
  */
 public class Common {
+    public static String BUILDCODE = "BUILDCODE";
+
     public static String PREFS_SETTINGNAME = "mControlSettings";
     public static String PREFS_WAKELOCKNAME = "mWakelockSettings";
     public static String PREFS_ALARMNAME = "mAlarmSettings";
@@ -15,6 +17,7 @@ public class Common {
     public static String PREFS_APPIFWCOUNT = "ifwCount";
     public static String PREFS_SETTIMESTOP = "settimestop";
     public static String PREFS_SETCPU = "setcpu";
+    public static String PREFS_SKIPDIALOG = "skipdialog";
     public static String PACKAGENAME ="com.click369.controlbp";
     public static String SHOWDIALOGCLS ="com.click369.controlbp.activity.ShowDialogActivity";
     public static String ISCOLORBAROPEN ="navcolorbaropen";
@@ -147,6 +150,9 @@ public class Common {
     public static String PREFS_SETTING_UI_ISSHOWACTINFO ="isshowactinfo";
 
     public static String PREFS_SETTING_APPPWD ="apppwd";
+
+
+    public static String PREFS_SKIPDIALOG_KEYWORDS ="keywords";
 //    public static String PREFS_SETTING_UI_ALWAYS_CHANGE ="alwayschange";
 
 //    public static String EX_PREVENTSERVICE = "preventService";

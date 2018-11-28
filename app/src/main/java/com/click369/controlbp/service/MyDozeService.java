@@ -68,7 +68,7 @@ public class MyDozeService {
     @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
     public MyDozeService(WatchDogService service){
         this.service = service;
-        dozePrefs =  SharedPrefsUtil.getPreferences(service,Common.PREFS_DOZELIST);//service.getSharedPreferences(Common.PREFS_DOZEWHITELIST,Context.MODE_WORLD_READABLE);
+        dozePrefs = SharedPrefsUtil.getInstance(service).dozePrefs;// SharedPrefsUtil.getPreferences(service,Common.PREFS_DOZELIST);//service.getSharedPreferences(Common.PREFS_DOZEWHITELIST,Context.MODE_WORLD_READABLE);
         IntentFilter ifliter = new IntentFilter();
         ifliter.addAction("android.os.action.DEVICE_IDLE_MODE_CHANGED");
         ifliter.addAction(STATE_OFF);

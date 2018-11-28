@@ -66,7 +66,7 @@ public class ControlFragment extends Fragment {
     @SuppressLint("WorldReadableFiles")
     private void initView(View v){
 //        settingPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-        modPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_SETTINGNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
+        modPrefs =  SharedPrefsUtil.getInstance(getContext()).modPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_SETTINGNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         modPrefs.edit().remove(Common.PACKAGENAME+"/broad").commit();
 //        isBroadStop = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPRECEIVER,false);
 //        modPrefs.edit().putBoolean(Common.PACKAGENAME+"/broad",true).commit();

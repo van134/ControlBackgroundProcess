@@ -11,9 +11,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.util.AlertUtil;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -217,6 +219,7 @@ public class XposedStartListener {
                                     }else if (methodHookParam.args[0] instanceof KeyEvent){
                                         event = (KeyEvent)methodHookParam.args[0];
                                     }
+//                                    AlertDialog
                                     if (event!=null) {
                                         int keyCode = event.getKeyCode();
                                         if (keyCode == KeyEvent.KEYCODE_HOME&&event.getAction() == KeyEvent.ACTION_UP&&!event.isLongPress()) {

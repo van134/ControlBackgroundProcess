@@ -1,6 +1,7 @@
 package com.click369.controlbp.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -59,15 +60,23 @@ public class AdFragment extends Fragment {
     }
 
     private void initView(View v){
-        adPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_ADLIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
+        adPrefs = SharedPrefsUtil.getInstance(getContext()).adPrefs;//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         listView = (ListView)v.findViewById(R.id.main_listview);
         oneTv = (TextView) v.findViewById(R.id.main_service_tv);
         twoTv = (TextView)v.findViewById(R.id.main_wakelock_tv);
         threeTv = (TextView)v.findViewById(R.id.main_alarm_tv);
+        TextView main_skipdialog_tv = (TextView)v.findViewById(R.id.main_skipdialog_tv);
+        main_skipdialog_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(),SkipDialogActivity.class);
+                startActivity(intent);
+            }
+        });
         curColor = oneTv.getCurrentTextColor();
         adapter = new AdAdapter(this.getActivity(),adPrefs);
         listView.setAdapter(adapter);
-        BaseActivity.addListClickListener(listView,adapter,getActivity());
+        BaseActivity.addListClickListener(listView,adapter, getActivity());
         topView = new TopSearchView(this.getActivity(),v);
         topView.initView();
         String msg = "";

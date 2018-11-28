@@ -91,7 +91,7 @@ public class JuanZengFragment extends Fragment {
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.N){
             arFL.setVisibility(View.GONE);
         }
-        settingPrefs = SharedPrefsUtil.getPreferences(this.getActivity(), Common.PREFS_APPSETTINGS);//getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS,Context.MODE_WORLD_READABLE);
+        settingPrefs = SharedPrefsUtil.getInstance(getActivity()).settings;//SharedPrefsUtil.getPreferences(this.getActivity(), Common.PREFS_APPSETTINGS);//getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS,Context.MODE_WORLD_READABLE);
         arSw.setChecked(settingPrefs.getBoolean("archange",false));
         arQuaTv.setEnabled(arSw.isChecked());
         arQuaTv.setAlpha(arSw.isChecked()?1.0f:0.6f);

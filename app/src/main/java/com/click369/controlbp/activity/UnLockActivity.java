@@ -74,8 +74,8 @@ public class UnLockActivity extends Activity {
         pkg = this.getIntent().getStringExtra("pkg");
         cls = this.getIntent().getStringExtra("class");
         mIntent = this.getIntent().getParcelableExtra("intent");
-        autoStartPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_AUTOSTARTNAME);
-         settingPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
+        autoStartPrefs = SharedPrefsUtil.getInstance(this).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_AUTOSTARTNAME);
+         settingPrefs = SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
         Log.i("CONTROL","准备解锁：pkg"+pkg+"  intent "+mIntent);
         if(pkg==null||pkg.length()==0){
             this.finish();

@@ -87,7 +87,7 @@ public class OtherFragment extends Fragment {
                              Bundle savedInstanceState) {
         mainActivity = (MainActivity)getActivity();
         View v = inflater.inflate(R.layout.fragment_other, container, false);
-        settings = SharedPrefsUtil.getPreferences(getActivity(),Common.PREFS_APPSETTINGS);
+        settings = SharedPrefsUtil.getInstance(getActivity()).settings;//SharedPrefsUtil.getPreferences(getActivity(),Common.PREFS_APPSETTINGS);
         selSw = (Switch) v.findViewById(R.id.other_sel_sw);
         stopScanMeidaSw = (Switch) v.findViewById(R.id.other_scanmedia_sw);
         homeErrorSw = (Switch) v.findViewById(R.id.other_homeerr_sw);

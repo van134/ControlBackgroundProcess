@@ -5,8 +5,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -121,9 +123,22 @@ public class IceRoomView{
                             }else if(tag == 2){
                                 try {
                                     Drawable d = cxt.getPackageManager().getPackageInfo(ai.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.loadIcon(cxt.getPackageManager());
-                                    BitmapDrawable bd = (BitmapDrawable) d ;
-                                    ShortCutUtil.addShortcutDrawable(ai.getPackageName(),ai.appName,cxt,EmptyActivity.class, bd.getBitmap());
-                                    Toast.makeText(cxt,"快捷方式创建成功",Toast.LENGTH_LONG).show();
+
+                                    BitmapDrawable bd = null ;
+                                    if(d instanceof BitmapDrawable){
+                                        bd = (BitmapDrawable) d ;
+                                    }else if(d instanceof AdaptiveIconDrawable){
+                                        AdaptiveIconDrawable ad = (AdaptiveIconDrawable) d ;
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            bd = (BitmapDrawable) (ad.getForeground());
+                                        }
+                                    }
+                                    if (bd==null){
+                                        Toast.makeText(cxt,"快捷方式创建失败",Toast.LENGTH_LONG).show();
+                                    }else{
+                                        ShortCutUtil.addShortcutDrawable(ai.getPackageName(),ai.appName,cxt,EmptyActivity.class, bd.getBitmap());
+                                        Toast.makeText(cxt,"快捷方式创建成功",Toast.LENGTH_LONG).show();
+                                    }
                                 } catch (PackageManager.NameNotFoundException e) {
                                     e.printStackTrace();
                                 }

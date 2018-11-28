@@ -42,7 +42,7 @@ public class ChangeTextActivity extends BaseActivity{
             newEt.setHintTextColor(Color.GRAY);
         }
         this.setTitle("替换文字");
-        tvPrefs = SharedPrefsUtil.getPreferences(getApplicationContext(), Common.IPREFS_TVLIST);
+        tvPrefs =  SharedPrefsUtil.getInstance(this).tvPrefs;//SharedPrefsUtil.getPreferences(getApplicationContext(), Common.IPREFS_TVLIST);
         okTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -45,7 +45,7 @@ public class WakeLockActivity extends BaseActivity {
     }
 
     private void initView() {
-        wakeLockPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_WAKELOCKNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        wakeLockPrefs = sharedPrefs.wakeLockPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_WAKELOCKNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         listView = (ExpandableListView) findViewById(R.id.wakelock_log_listview);
         wakelockSw = (Switch) findViewById(R.id.wakelock_sw);
         alertFl = (FrameLayout) findViewById(R.id.wakelock_alert_fl);

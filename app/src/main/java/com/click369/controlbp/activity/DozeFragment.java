@@ -83,7 +83,7 @@ public class DozeFragment extends Fragment {
     @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
     private void initView(View v){
         pm = (PowerManager) (this.getActivity().getApplicationContext().getSystemService(Context.POWER_SERVICE));
-        dozePrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_DOZELIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        dozePrefs = SharedPrefsUtil.getInstance(getContext()).dozePrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_DOZELIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         listView = (ListView) v.findViewById(R.id.doze_log_listview);
         updateTimeSw = (Switch) v.findViewById(R.id.doze_updatetime_sw);
         notifySw = (Switch) v.findViewById(R.id.doze_notify_sw);

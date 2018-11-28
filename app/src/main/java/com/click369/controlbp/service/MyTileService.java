@@ -36,8 +36,8 @@ public class MyTileService extends TileService{
     @Override
     public void onClick() {
         super.onClick();
-        SharedPreferences sp =  SharedPrefsUtil.getPreferences(this, Common.PREFS_DOZELIST);
-        SharedPreferences setting =  SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
+        SharedPreferences sp =  SharedPrefsUtil.getInstance(this).dozePrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_DOZELIST);
+        SharedPreferences setting =  SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
         if(!setting.getBoolean(Common.ALLSWITCH_SEVEN,true)){
             return;
         }

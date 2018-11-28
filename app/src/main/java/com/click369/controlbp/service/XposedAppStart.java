@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
+
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.common.ContainsKeyWord;
 
@@ -75,6 +77,7 @@ public class XposedAppStart {
 //                                            !("com.eg.android.AlipayGphone".equals(lpparam.packageName)&&("com.alipay.mobile.nebulacore.ui.H5Activity".equals(cls)||"com.alipay.mobile.quinox.LauncherActivity".equals(cls)))) {
                                     if(!ContainsKeyWord.isContainsNotLockApk(cls)&&
                                             !ContainsKeyWord.isContainsNotLockApk(lpparam.packageName)){
+
                                         final Context cxt = ((Context) methodHookParam.thisObject);
                                         final Intent broad = new Intent("com.click369.control.lockapp");
                                         broad.putExtra("pkg", pkg);

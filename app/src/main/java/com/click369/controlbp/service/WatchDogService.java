@@ -25,6 +25,7 @@ import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -40,6 +41,7 @@ import com.click369.controlbp.activity.RunningActivity;
 import com.click369.controlbp.activity.ShowDialogActivity;
 import com.click369.controlbp.activity.UIControlFragment;
 import com.click369.controlbp.activity.UnLockActivity;
+import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.common.ContainsKeyWord;
 import com.click369.controlbp.receiver.AddAppReceiver;
@@ -222,7 +224,7 @@ public class WatchDogService extends Service {
 //        Intent intent = new Intent(this, DebugService.class);
 //        startService(intent);
 //        listener = new PrefsListener();
-        settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        settings = SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
 //        if (!WatchDogService.isKillRun){
 //            long lastTime = settings.getLong(Common.PREFS_SETTING_LASTSERVICESTARTTIME,0);
 //            settings.edit().putLong(Common.PREFS_SETTING_LASTSERVICESTARTTIME,System.currentTimeMillis()).commit();
@@ -235,13 +237,13 @@ public class WatchDogService extends Service {
 
         watchDogstartTime = System.currentTimeMillis();
         Log.e("DOZE", "WatchDogService启动后台进程监听服务");
-        forceStopPrefs = SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_FORCESTOPNAME);
+        forceStopPrefs = SharedPrefsUtil.getInstance(this).forceStopPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_FORCESTOPNAME);
 
-        autoStartPrefs = SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_AUTOSTARTNAME);
-        muBeiPrefs = SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_MUBEILIST);
-        muControlPrefs = SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_SETTINGNAME);
-        recentPrefs = SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_RECENTLIST);
-        cpuPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_SETCPU);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        autoStartPrefs = SharedPrefsUtil.getInstance(this).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_AUTOSTARTNAME);
+        muBeiPrefs = SharedPrefsUtil.getInstance(this).muBeiPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_MUBEILIST);
+        muControlPrefs = SharedPrefsUtil.getInstance(this).modPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_SETTINGNAME);
+        recentPrefs = SharedPrefsUtil.getInstance(this).recentPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_RECENTLIST);
+        cpuPrefs = SharedPrefsUtil.getInstance(this).cpuPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_SETCPU);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         muBeiPrefs.edit().clear().commit();
 //        muControlPrefs.registerOnSharedPreferenceChangeListener(listener);
 //        forceStopPrefs.registerOnSharedPreferenceChangeListener(listener);
@@ -488,7 +490,7 @@ public class WatchDogService extends Service {
         autoStartPrefs.edit().putString("nowhomeapk",WatchDogService.getDefaultHome(this)).commit();
 
         if(!RoundedCornerService.isRoundRun){
-            UIControlFragment.startRound(SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST),this);
+            UIControlFragment.startRound(SharedPrefsUtil.getInstance(this).uiBarPrefs,this);
         }
 
         if (!NotificationService.isNotifyRunning&&!isNotNeedAccessibilityService&&settings.getBoolean(Common.ALLSWITCH_TWO,true)){
@@ -1122,45 +1124,47 @@ public class WatchDogService extends Service {
         public void run() {
             if (removeAppList.size()>0){
                 AddAppReceiver.removePkg = "";
-                SharedPreferences modPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_SETTINGNAME);
-                SharedPreferences autoStartNetPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_AUTOSTARTNAME);
-                SharedPreferences dozePrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_DOZELIST);
-                SharedPreferences uiBarPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_UIBARLIST);
-                SharedPreferences pmPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.IPREFS_PMLIST);
-                SharedPreferences ifwCountPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_APPIFWCOUNT);
-                SharedPreferences adPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.IPREFS_ADLIST);
+
+//                SharedPreferences modPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_SETTINGNAME);
+//                SharedPreferences autoStartNetPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_AUTOSTARTNAME);
+//                SharedPreferences dozePrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_DOZELIST);
+//                SharedPreferences uiBarPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_UIBARLIST);
+//                SharedPreferences pmPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.IPREFS_PMLIST);
+//                SharedPreferences ifwCountPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.PREFS_APPIFWCOUNT);
+//                SharedPreferences adPrefs = SharedPrefsUtil.getPreferences(WatchDogService.this,Common.IPREFS_ADLIST);
                 for(String pkg:removeAppList){
-                    modPrefs.edit().remove(pkg + "/service")
-                            .remove(pkg + "/broad")
-                            .remove(pkg + "/wakelock")
-                            .remove(pkg + "/alarm").commit();
-                    forceStopPrefs.edit().remove(pkg + "/backstop")
-                            .remove(pkg + "/backmubei")
-                            .remove(pkg + "/offstop")
-                            .remove(pkg + "/offmubei")
-                            .remove(pkg + "/homemubei")
-                            .remove(pkg + "/idle")
-                            .remove(pkg + "/notifynotexit").commit();
-                     muBeiPrefs.edit().remove(pkg).commit();
-                    autoStartNetPrefs.edit()
-                            .remove(pkg + "/autostart")
-                            .remove(pkg + "/stopapp")
-                            .remove(pkg + "/lockapp")
-                            .remove(pkg + "/notstop").commit();
-                    dozePrefs.edit()
-                            .remove(pkg + "/offsc")
-                            .remove(pkg + "/onsc")
-                            .remove(pkg + "/openstop").commit();
-                    recentPrefs.edit().remove(pkg + "/notclean")
-                            .remove(pkg + "/forceclean")
-                            .remove(pkg + "/blur")
-                            .remove(pkg + "/notshow").commit();
-                    uiBarPrefs.edit().remove(pkg + "/locklist").remove(pkg + "/colorlist").commit();
-                    pmPrefs.edit().remove(pkg + "/notunstall").commit();
-                    ifwCountPrefs.edit().remove(pkg + "/ifwservice")
-                            .remove(pkg + "/ifwreceiver")
-                            .remove(pkg + "/ifwactivity").commit();
-                    adPrefs.edit().remove(pkg + "/ad").commit();
+                    SharedPrefsUtil.getInstance(WatchDogService.this).clearAppSettings(new AppInfo(pkg,pkg));
+//                    modPrefs.edit().remove(pkg + "/service")
+//                            .remove(pkg + "/broad")
+//                            .remove(pkg + "/wakelock")
+//                            .remove(pkg + "/alarm").commit();
+//                    forceStopPrefs.edit().remove(pkg + "/backstop")
+//                            .remove(pkg + "/backmubei")
+//                            .remove(pkg + "/offstop")
+//                            .remove(pkg + "/offmubei")
+//                            .remove(pkg + "/homemubei")
+//                            .remove(pkg + "/idle")
+//                            .remove(pkg + "/notifynotexit").commit();
+//                     muBeiPrefs.edit().remove(pkg).commit();
+//                    autoStartNetPrefs.edit()
+//                            .remove(pkg + "/autostart")
+//                            .remove(pkg + "/stopapp")
+//                            .remove(pkg + "/lockapp")
+//                            .remove(pkg + "/notstop").commit();
+//                    dozePrefs.edit()
+//                            .remove(pkg + "/offsc")
+//                            .remove(pkg + "/onsc")
+//                            .remove(pkg + "/openstop").commit();
+//                    recentPrefs.edit().remove(pkg + "/notclean")
+//                            .remove(pkg + "/forceclean")
+//                            .remove(pkg + "/blur")
+//                            .remove(pkg + "/notshow").commit();
+//                    uiBarPrefs.edit().remove(pkg + "/locklist").remove(pkg + "/colorlist").commit();
+//                    pmPrefs.edit().remove(pkg + "/notunstall").commit();
+//                    ifwCountPrefs.edit().remove(pkg + "/ifwservice")
+//                            .remove(pkg + "/ifwreceiver")
+//                            .remove(pkg + "/ifwactivity").commit();
+//                    adPrefs.edit().remove(pkg + "/ad").commit();
                 }
             }
         }
@@ -1192,7 +1196,12 @@ public class WatchDogService extends Service {
             return;
         }
         Log.i("CONTROL","拍照模式退出  开始锁定核心");
-        resetCpuLock();
+        if(cpuBatteryLowIsAlreadyLock){
+            lockCpu(batteryLowCpuChooses);
+        }else{
+            resetCpuLock();
+        }
+
     }
 
     private void resetCpuLock(){

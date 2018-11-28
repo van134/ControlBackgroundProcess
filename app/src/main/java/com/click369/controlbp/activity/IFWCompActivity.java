@@ -71,7 +71,7 @@ public class IFWCompActivity extends BaseActivity {
 //        if(isSelOpen){
 //            SELinuxUtil.closeSEL();
 //        }
-        ifwCountPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPIFWCOUNT);// getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
+        ifwCountPrefs = sharedPrefs.ifwCountPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPIFWCOUNT);// getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
         Intent intent= this.getIntent();
         appName = intent.getStringExtra("name");
         pkg = intent.getStringExtra("pkg");

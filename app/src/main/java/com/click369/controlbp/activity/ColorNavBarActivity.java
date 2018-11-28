@@ -55,7 +55,7 @@ public class ColorNavBarActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         View v = getLayoutInflater().inflate(R.layout.activity_colorbar,null);
         setContentView(v);
-        settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);//this.getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        settings =  SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);//this.getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
 
 //        et = (EditText)this.findViewById(R.id.main_edittext);
         list = (ListView)this.findViewById(R.id.main_listview);

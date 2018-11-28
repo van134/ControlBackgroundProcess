@@ -172,6 +172,7 @@ public class AlertUtil {
 
             }
         });
+        builder.setCancelable(false);
         builder.create().show();
     }
     public static void showAlertMsgBack(final Context cxt,final String title,final String msg,final InputCallBack ic){
@@ -420,6 +421,62 @@ public class AlertUtil {
                     String input = et.getText().toString();
                     if (input.length()<4) {
                         Toast.makeText(cxt.getApplicationContext(), "至少输入4个字符" + input, Toast.LENGTH_LONG).show();
+                    }else {
+                        ic.backData(input,0);
+                        ad.dismiss();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        et.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                et.setFocusableInTouchMode(true);
+                et.requestFocus();
+                InputMethodManager inputManager = (InputMethodManager)et.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.showSoftInput(et, 0);
+
+            }
+        },200);
+    }
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static void inputTextAlert(final Activity cxt,final int minlength, final InputCallBack ic){
+        final EditText et = new EditText(cxt);
+        et.setHint("至少"+minlength+"个字符");
+        et.setText("");
+        et.setInputType(InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE);
+        et.setBackgroundColor(Color.argb(20,0,0,0));
+        et.setPadding(0,30,0,30);
+        et.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        final AlertDialog ad = new AlertDialog.Builder(cxt).setTitle("请输入内容")
+                .setView(et)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String input = et.getText().toString();
+                        if (input.length()<minlength) {
+                            Toast.makeText(cxt.getApplicationContext(), "至少输入"+minlength+"个字符" + input, Toast.LENGTH_LONG).show();
+                        }else {
+                            ic.backData(input,0);
+                        }
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+        et.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    // 先隐藏键盘
+                    ((InputMethodManager) et.getContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    String input = et.getText().toString();
+                    if (input.length()<minlength) {
+                        Toast.makeText(cxt.getApplicationContext(), "至少输入"+minlength+"个字符" + input, Toast.LENGTH_LONG).show();
                     }else {
                         ic.backData(input,0);
                         ad.dismiss();

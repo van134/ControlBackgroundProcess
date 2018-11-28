@@ -591,7 +591,7 @@ public class XposedAMS {
 //                        }
 //                      ComponentName hostingName = (ComponentName)methodHookParam.args[5];
                         if(!"android".equals(processName)&&!"android".equals(info.packageName)){
-//                            autoStartPrefs.reload();
+                            autoStartPrefs.reload();
                             String hostingType = (String)methodHookParam.args[4];
 
                             boolean isAutoHM = appStartPrefHMs.containsKey(info.packageName+"/autostart");

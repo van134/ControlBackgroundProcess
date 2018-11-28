@@ -49,7 +49,7 @@ public class SettingFragment extends Fragment {
     }
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        settings = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//  getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        settings = SharedPrefsUtil.getInstance(getActivity()).settings;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//  getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         View v = inflater.inflate(R.layout.fragment_setting, container, false);
         funcitonSWView = new FunctionSwitchView(settings,v,getActivity());
         funcitonSWView.initView();

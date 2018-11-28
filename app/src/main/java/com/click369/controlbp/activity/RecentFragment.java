@@ -55,8 +55,8 @@ public class RecentFragment extends Fragment {
     }
 
     private void initView(View v){
-        recentPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_RECENTLIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-        appStartPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
+        recentPrefs = SharedPrefsUtil.getInstance(getActivity()).recentPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_RECENTLIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
+        appStartPrefs = SharedPrefsUtil.getInstance(getActivity()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
         listView = (ListView)v.findViewById(R.id.recent_listview);
         notCleanTv = (TextView) v.findViewById(R.id.recent_notclean_tv);
         forceCleanTv = (TextView)v.findViewById(R.id.recent_forceclean_tv);

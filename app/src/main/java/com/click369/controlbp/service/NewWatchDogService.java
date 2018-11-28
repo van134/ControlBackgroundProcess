@@ -119,7 +119,7 @@ public class NewWatchDogService extends AccessibilityService {
         isOpenNewDogService = true;
         run_state = 0;
 
-        SharedPreferences settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);
+        SharedPreferences settings = SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);
         WatchDogService.isNotNeedAccessibilityService = settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true);
         if (!WatchDogService.isKillRun) {
             Intent intent = new Intent(NewWatchDogService.this, WatchDogService.class);

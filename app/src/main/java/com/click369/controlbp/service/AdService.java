@@ -31,7 +31,7 @@ public class AdService {
                 String pkg = intent.getStringExtra("pkg");
                 String two = intent.getStringExtra("two");
                 String three = intent.getStringExtra("three");
-                SharedPreferences adPrefs = SharedPrefsUtil.getPreferences(service, Common.IPREFS_ADLIST);
+                SharedPreferences adPrefs = SharedPrefsUtil.getInstance(context).adPrefs;//SharedPrefsUtil.getPreferences(service, Common.IPREFS_ADLIST);
                 Log.i("CONTROL","AD TWO"+two+"  THREE "+three);
                 if(two.length()>0){
                     adPrefs.edit().putString(pkg+"/two",two).commit();

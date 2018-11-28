@@ -43,7 +43,7 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class SetPWDActivity extends Activity {
+public class SetPWDActivity extends BaseActivity {
     private Handler h = new Handler();
     private TextView msgTv,pwdTv;
     private LinearLayout numberLL;
@@ -57,7 +57,7 @@ public class SetPWDActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-         settingPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
+         settingPrefs =sharedPrefs.settings;// SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
             requestWindowFeature(Window.FEATURE_NO_TITLE);
             setContentView(R.layout.activity_unlock);
             initView();

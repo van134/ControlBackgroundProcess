@@ -68,7 +68,7 @@ public class IceUnstallFragment extends Fragment {
 
     @SuppressLint("WorldReadableFiles")
     private void initView(View v){
-        modPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_PMLIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
+        modPrefs =SharedPrefsUtil.getInstance(getActivity()).pmPrefs;// SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_PMLIST);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
         listView = (ListView)v.findViewById(R.id.main_listview);
         iceAppTv = (TextView) v.findViewById(R.id.main_service_tv);
         notUnstallAppTv = (TextView)v.findViewById(R.id.main_wakelock_tv);

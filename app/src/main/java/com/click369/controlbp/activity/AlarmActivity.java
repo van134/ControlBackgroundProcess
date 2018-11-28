@@ -50,7 +50,7 @@ public class AlarmActivity extends BaseActivity {
     }
 
     private void initView() {
-        alarmPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_ALARMNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        alarmPrefs =  SharedPrefsUtil.getInstance(this).alarmPrefs;//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         listView = (ExpandableListView) findViewById(R.id.alarm_log_listview);
         alarmSw = (Switch) findViewById(R.id.alarm_sw);
         alertFl = (FrameLayout) findViewById(R.id.wakelock_alert_fl);

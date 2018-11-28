@@ -26,6 +26,7 @@ import com.click369.controlbp.R;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.FileUtil;
+import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.io.File;
 import java.util.HashMap;
@@ -120,7 +121,7 @@ public class ColorNavBarService extends Service {
         LayoutInflater inflater = LayoutInflater.from(getApplication());
         //获取浮动窗口视图所在布局
         mFloatLayout = (FrameLayout) inflater.inflate(R.layout.float_layout, null);
-        SharedPreferences settings = this.getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        SharedPreferences settings = SharedPrefsUtil.getInstance(this).settings;//this.getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
 
         if(!settings.getBoolean(Common.ISCOLORBAROPEN,false)){
             isShow = false;

@@ -135,7 +135,7 @@ public class UIControlFragment extends Fragment {
         alwaysColorSw.setTag(10);
 //        actInfoSw.setTag(11);
 //        activityManager = (ActivityManager)getActivity().getSystemService(Context.ACTIVITY_SERVICE);
-        barPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_UIBARLIST);//getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS,Context.MODE_WORLD_READABLE);
+        barPrefs = SharedPrefsUtil.getInstance(getActivity()).uiBarPrefs;//;SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_UIBARLIST);//getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS,Context.MODE_WORLD_READABLE);
         recentBarColorSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_RECENTBARCOLOR,false));
         recentBarHideSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_RECENTBARHIDE,false));
         recentMemSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_RECENTMEMSHOW,false));
@@ -211,6 +211,13 @@ public class UIControlFragment extends Fragment {
         });
         return v;
     }
+
+    @Override
+    public void onResume() {
+        actInfoSw.setChecked(WatchDogService.isShowActInfo);
+        super.onResume();
+    }
+
     class SwCheckListener implements CompoundButton.OnCheckedChangeListener{
         @TargetApi(Build.VERSION_CODES.M)
         @Override

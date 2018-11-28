@@ -46,6 +46,7 @@ public class RoundedCornerService extends Service {
     boolean isShow = true,isShowKeyBar;
     //定义浮动窗口布局
     FrameLayout mFloatLayoutTop,mFloatLayoutBottom,imeFloatLayout,infoFloatLayout;
+    boolean infoFloatIsShow = false;
     LinearLayout actInfoLL;
     TextView actInfoTV;
     WindowManager.LayoutParams wmParamsBottom,wmParamsTop,wmParamsInfo;
@@ -63,7 +64,7 @@ public class RoundedCornerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        barPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_UIBARLIST);
+        barPrefs = SharedPrefsUtil.getInstance(this).uiBarPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_UIBARLIST);
         isShowKeyBar = barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR,false);
         rec = new MyReciver();
         IntentFilter filter = new IntentFilter();
@@ -191,11 +192,13 @@ public class RoundedCornerService extends Service {
             mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
             mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
             if(WatchDogService.isShowActInfo){
+                infoFloatIsShow = true;
                 mWindowManager.addView(infoFloatLayout,wmParamsInfo);
             }
             infoFloatLayout.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
+                    infoFloatIsShow = false;
                     mWindowManager.removeView(infoFloatLayout);
                     actInfoTV.setText("");
                     actInfoSB.delete(0,actInfoSB.length());
@@ -248,6 +251,10 @@ public class RoundedCornerService extends Service {
     public void onDestroy() {
         mWindowManager.removeView(mFloatLayoutBottom);
         mWindowManager.removeView(mFloatLayoutTop);
+        if(infoFloatIsShow){
+            mWindowManager.removeView(infoFloatLayout);
+        }
+
         this.unregisterReceiver(rec);
         isRoundRun = false;
         super.onDestroy();
@@ -362,9 +369,17 @@ public class RoundedCornerService extends Service {
                 boolean isShowInfo = intent.getBooleanExtra("isShow",false);
                 if(isShowInfo){
 //                    actInfoLL.setVisibility(View.VISIBLE);
+                    if(infoFloatIsShow){
+                        return;
+                    }
+                    infoFloatIsShow = true;
                     mWindowManager.addView(infoFloatLayout,wmParamsInfo);
                 }else{
 //                    infoFloatLayout.setVisibility(View.GONE);
+                    if(!infoFloatIsShow){
+                        return;
+                    }
+                    infoFloatIsShow = false;
                     mWindowManager.removeView(infoFloatLayout);
                     actInfoTV.setText("");
                     actInfoSB.delete(0,actInfoSB.length());

@@ -81,8 +81,8 @@ public class IFWFragment extends Fragment {
 
     @SuppressLint("WorldReadableFiles")
     private void initView(View v){
-        ifwCountPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPIFWCOUNT);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
-        settings = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//tthis.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        ifwCountPrefs = SharedPrefsUtil.getInstance(getActivity()).ifwCountPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPIFWCOUNT);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
+        settings = SharedPrefsUtil.getInstance(getActivity()).settings;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//tthis.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         listView = (ListView)v.findViewById(R.id.main_listview);
         serviceTv = (TextView) v.findViewById(R.id.main_service_tv);
         broadTv = (TextView)v.findViewById(R.id.main_broad_tv);

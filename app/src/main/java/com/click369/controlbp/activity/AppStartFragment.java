@@ -61,7 +61,7 @@ public class AppStartFragment extends Fragment {
 
     @SuppressLint("WorldReadableFiles")
     private void initView(View v){
-        modPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
+        modPrefs =  SharedPrefsUtil.getInstance(getContext()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
 
         listView = (ListView)v.findViewById(R.id.main_listview);
         lockAppTv = (TextView) v.findViewById(R.id.main_service_tv);
@@ -71,7 +71,7 @@ public class AppStartFragment extends Fragment {
         curColor = autoStartTv.getCurrentTextColor();
         adapter = new AppStartAdapter(this.getActivity(),modPrefs);
         listView.setAdapter(adapter);
-        BaseActivity.addListClickListener(listView,adapter,getActivity());
+        BaseActivity.addListClickListener(listView,adapter, getActivity());
         topView = new TopSearchView(this.getActivity(),v);
         topView.initView();
         if(MainActivity.isModuleActive()){
