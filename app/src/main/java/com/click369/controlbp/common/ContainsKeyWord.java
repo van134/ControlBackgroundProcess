@@ -105,7 +105,7 @@ public class ContainsKeyWord {
         ArrayList<String> full2 = new ArrayList<String>();
         full2.add("com.alipay.mobile.scan.as.main.MainCaptureActivity");
         full2.add("com.alipay.mobile.chatapp.ui.video.VideoRecordActivity_");
-        fullCpuCoreApp.put("om.eg.android.AlipayGphone",full2);
+        fullCpuCoreApp.put("com.eg.android.AlipayGphone",full2);
         ArrayList<String> full3 = new ArrayList<String>();
         full3.add("com.ss.android.ugc.aweme.shortvideo.ui.VideoRecordNewActivity");
         fullCpuCoreApp.put("com.ss.android.ugc.aweme",full3);

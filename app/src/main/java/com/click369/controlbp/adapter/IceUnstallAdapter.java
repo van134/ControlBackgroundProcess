@@ -193,7 +193,7 @@ public class IceUnstallAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);

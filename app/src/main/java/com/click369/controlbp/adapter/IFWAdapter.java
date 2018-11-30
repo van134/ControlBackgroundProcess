@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.activity.ControlFragment;
 import com.click369.controlbp.activity.IFWCompActivity;
 import com.click369.controlbp.activity.IFWFragment;
@@ -175,7 +176,7 @@ public class IFWAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appNameTv.setText(data.appName+ BaseActivity.getProcTimeStr(data.packageName));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());

@@ -45,6 +45,8 @@ public class Common {
     public static String PREFS_SETTING_ISNOTNEEDACCESS ="isnotneedaccess";
     public static String PREFS_SETTING_ZHENDONG ="zhengdong";
     public static String PREFS_SETTING_NEWAPPAUTOOPENCONTROL ="newappautoopencontrol";
+    public static String PREFS_SETTING_ISNOTEXITAUDIOPLAY ="isnotexitaudioplay";
+    public static String PREFS_SETTING_ISCHECKTIMEOUTAPP ="ischecktimeoutapp";
 
     public static String PREFS_SETTING_WAKELOCK_LOOK ="wakelocklook";
     public static String PREFS_SETTING_ALARM_LOOK ="alarmlook";
@@ -153,6 +155,7 @@ public class Common {
 
 
     public static String PREFS_SKIPDIALOG_KEYWORDS ="keywords";
+    public static String PREFS_SKIPNOTIFY_KEYWORDS ="notifykeywords";
 //    public static String PREFS_SETTING_UI_ALWAYS_CHANGE ="alwayschange";
 
 //    public static String EX_PREVENTSERVICE = "preventService";

@@ -56,51 +56,53 @@ public class XposedEnd {
                 protected void afterHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
                     try {
                         final Application app = (Application) (methodHookParam.thisObject);
-                            Handler h = new Handler();
-                            h.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (app!=null){
-                                        try {
-                                            if(!settingPrefs.getBoolean(Common.PREFS_SETTING_OTHER_HOMEERROR,false)){
-                                            ComponentName component = new ComponentName(Common.PACKAGENAME, Common.PACKAGENAME+".service.WatchDogService");
-                                            // Create a new intent. Use the old one for extras and such reuse
-                                            Intent explicitIntent = new Intent("com.click369.service");
-                                            explicitIntent.setComponent(component);
-                                            app.getApplicationContext().startService(explicitIntent);
-    //                                            Intent intenta = new Intent("com.click369.service");
-    //                                            Intent intentb = createExplicitFromImplicitIntent(app,intenta);
-    //                                            if(intentb!=null){
-    //                                                Intent eintent = new Intent(intentb);
-    //                                                if(eintent!=null){
-    //                                                    app.startService(eintent);
-    //                                                }
-    //                                            }
-                                            }
-                                            else{
-                                                Intent intenta = new Intent("com.click369.controlbp.emptyactivity");
-                                                intenta.addCategory("controlbp");
-                                                intenta.putExtra("data","启动服务");
-                                                app.startActivity(intenta);
-                                            }
-                                        }catch (Exception e){
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                }
-                            },6000);
+//                            Handler h = new Handler();
+//                            h.postDelayed(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    if (app!=null){
+//                                        try {
+//                                            if(!settingPrefs.getBoolean(Common.PREFS_SETTING_OTHER_HOMEERROR,false)){
+//                                            ComponentName component = new ComponentName(Common.PACKAGENAME, Common.PACKAGENAME+".service.WatchDogService");
+//                                            // Create a new intent. Use the old one for extras and such reuse
+//                                            Intent explicitIntent = new Intent("com.click369.service");
+//                                            explicitIntent.setComponent(component);
+//                                            app.getApplicationContext().startService(explicitIntent);
+//    //                                            Intent intenta = new Intent("com.click369.service");
+//    //                                            Intent intentb = createExplicitFromImplicitIntent(app,intenta);
+//    //                                            if(intentb!=null){
+//    //                                                Intent eintent = new Intent(intentb);
+//    //                                                if(eintent!=null){
+//    //                                                    app.startService(eintent);
+//    //                                                }
+//    //                                            }
+//                                            }
+//                                            else{
+//                                                Intent intenta = new Intent("com.click369.controlbp.emptyactivity");
+//                                                intenta.addCategory("controlbp");
+//                                                intenta.putExtra("data","启动服务");
+//                                                app.startActivity(intenta);
+//                                            }
+//                                        }catch (Exception e){
+//                                            e.printStackTrace();
+//                                        }
+//                                    }
+//                                }
+//                            },6000);
 
                         if (app!=null){
-                            Intent intentb = new Intent("com.click369.control.ams.initreload");
-                            autoStartPrefs.reload();
-                            controlPrefs.reload();
-                            muBeiPrefs.reload();
-                            settingPrefs.reload();
-                            intentb.putExtra("autoStartPrefs", (Serializable) autoStartPrefs.getAll());
-                            intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
-                            intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());
-                            intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
+                            Intent intentb = new Intent("com.click369.control.startservice");
                             app.sendBroadcast(intentb);
+//                            Intent intentb = new Intent("com.click369.control.ams.initreload");
+//                            autoStartPrefs.reload();
+//                            controlPrefs.reload();
+//                            muBeiPrefs.reload();
+//                            settingPrefs.reload();
+//                            intentb.putExtra("autoStartPrefs", (Serializable) autoStartPrefs.getAll());
+//                            intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
+//                            intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());
+//                            intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
+//                            app.sendBroadcast(intentb);
                         }
                     }catch (Exception e){
                         XposedBridge.log("^^^^^^^^^^^^^HOOK homeapk 出错"+e+"^^^^^^^^^^^^^^^");
@@ -174,7 +176,8 @@ public class XposedEnd {
 //            }catch (RuntimeException e){
 //            }
 //        }
-        else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&"android".equals(lpparam.packageName)){
+        else
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&"android".equals(lpparam.packageName)){
             try {
                 final Class apperrorsCls = XposedHelpers.findClass("com.android.server.am.AppErrors", lpparam.classLoader);
                 Class clss[] = XposedUtil.getParmsByName(apperrorsCls,"appNotResponding");

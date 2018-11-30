@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.click369.controlbp.common.Common;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -32,6 +34,25 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedUtil {
+    //    static long lastReloadTime = 0;
+    public static void reloadInfos(Context c,
+                                   SharedPreferences autoStartPrefs,
+                                   SharedPreferences controlPrefs,
+                                   SharedPreferences muBeiPrefs,
+                                   SharedPreferences settingPrefs,
+                                   SharedPreferences skipDialogPrefs){
+//        if(System.currentTimeMillis()-lastReloadTime<200){
+//            return;
+//        }
+//        lastReloadTime = System.currentTimeMillis();
+        Intent intentb = new Intent("com.click369.control.ams.initreload");
+        intentb.putExtra("autoStartPrefs", (Serializable) autoStartPrefs.getAll());
+        intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
+        intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());
+        intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
+        intentb.putExtra("skipDialogPrefs", (Serializable) skipDialogPrefs.getAll());
+        c.sendBroadcast(intentb);
+    }
     public  static HashMap<String,Method> getAMSParmas(Class amsCls){
         HashMap<String,Method> hms = new HashMap<String,Method>();
         Method ms[] = amsCls.getDeclaredMethods();

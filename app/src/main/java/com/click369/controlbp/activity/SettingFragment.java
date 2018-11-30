@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import com.click369.controlbp.util.SharedPrefsUtil;
 public class SettingFragment extends Fragment {
     private Switch iceRemoveSw,iceOffSw,iceStopSw,autoNightSw,nightModeSw,isShowSideBarSw,
 //            isNotShowLockUISw,unlockNumberSw,
+            notExitAudioPlaySw,checkTimeOutSw,
             setTimeStopPwdModeSw,setTimeStopZWModeSw,
             stopAppModeSw,exitRemoveRecentSw,muBeiStopReceiverSw,
             notneedAccessSw,zhendongSw,backSw;//,offSw,autoStartSw,newAppAddRemoveRecentExit,,recentRemoveSw
@@ -65,8 +67,8 @@ public class SettingFragment extends Fragment {
         iceStopSw = (Switch) v.findViewById(R.id.setting_ice_stop_sw);
         setTimeStopZWModeSw = (Switch) v.findViewById(R.id.setting_settimestopzwmode_sw);
         setTimeStopPwdModeSw = (Switch) v.findViewById(R.id.setting_settimestoppwdmode_sw);
-//        unlockNumberSw = (Switch) v.findViewById(R.id.setting_showunlocknumber_sw);
-//        isNotShowLockUISw = (Switch) v.findViewById(R.id.setting_showui_sw);
+        notExitAudioPlaySw = (Switch) v.findViewById(R.id.setting_notexitaudio_sw);
+        checkTimeOutSw = (Switch) v.findViewById(R.id.setting_checktimeout_sw);
         iceRemoveSw = (Switch) v.findViewById(R.id.setting_ice_remove_sw);
         iceOffSw = (Switch) v.findViewById(R.id.setting_ice_off_sw);
         autoNightSw = (Switch) v.findViewById(R.id.setting_auto_night_sw);
@@ -87,11 +89,11 @@ public class SettingFragment extends Fragment {
         nightModeSw.setTextColor(curColor);
         iceStopSw.setTextColor(curColor);
         stopAppModeSw.setTextColor(curColor);
-//        isNotShowLockUISw.setTextColor(curColor);
+        notExitAudioPlaySw.setTextColor(curColor);
         muBeiStopReceiverSw.setTextColor(curColor);
         exitRemoveRecentSw.setTextColor(curColor);
         zhendongSw.setTextColor(curColor);
-//        newAppAddRemoveRecentExit.setTextColor(curColor);
+        checkTimeOutSw.setTextColor(curColor);
         notneedAccessSw.setTextColor(curColor);
         penImg1 = (ImageView) v.findViewById(R.id.setting_pen1_iv);
         penImg2 = (ImageView) v.findViewById(R.id.setting_pen2_iv);
@@ -111,7 +113,7 @@ public class SettingFragment extends Fragment {
         offSb = (SeekBar) v.findViewById(R.id.setting_offdelay_sb);
         isShowSideBarSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SHOWSIDEBAR,true));
         backSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_BACKLOGOPEN,false));
-//        unlockNumberSw.setChecked(settings.getBoolean(Common.PREFS_APPSTART_ISSHOWNUMBERLOCK,true));
+        notExitAudioPlaySw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,false));
         iceStopSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICESTOPICE,false));
         iceRemoveSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEBACKICE,true));
         iceOffSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEOFFICE,false));
@@ -122,7 +124,7 @@ public class SettingFragment extends Fragment {
         stopAppModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_STOPAPPBYXP,true));
         muBeiStopReceiverSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
         exitRemoveRecentSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_EXITREMOVERECENT,true));
-//        newAppAddRemoveRecentExit.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPADDREMOVERECENTEXIT,false));
+        checkTimeOutSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,false));
         notneedAccessSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true));
         zhendongSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true));
         backDelayTimeTv.setText("返回时强退、墓碑和冻结延迟:"+settings.getInt(Common.PREFS_SETTING_BACKDELAYTIME,0)+"秒");
@@ -141,10 +143,10 @@ public class SettingFragment extends Fragment {
         iceStopSw.setTag(7);
         stopAppModeSw.setTag(8);
         setTimeStopPwdModeSw.setTag(9);
-//        isNotShowLockUISw.setTag(10);
+        notExitAudioPlaySw.setTag(10);
         muBeiStopReceiverSw.setTag(11);
         exitRemoveRecentSw.setTag(12);
-//        newAppAddRemoveRecentExit.setTag(13);
+        checkTimeOutSw.setTag(13);
         notneedAccessSw.setTag(14);
         zhendongSw.setTag(15);
         SwitchClick sc = new SwitchClick();
@@ -158,8 +160,8 @@ public class SettingFragment extends Fragment {
         setTimeStopPwdModeSw.setOnCheckedChangeListener(sc);
         iceStopSw.setOnCheckedChangeListener(sc);
         stopAppModeSw.setOnCheckedChangeListener(sc);
-//        unlockNumberSw.setOnCheckedChangeListener(sc);
-//        isNotShowLockUISw.setOnCheckedChangeListener(sc);
+        notExitAudioPlaySw.setOnCheckedChangeListener(sc);
+        checkTimeOutSw.setOnCheckedChangeListener(sc);
         muBeiStopReceiverSw.setOnCheckedChangeListener(sc);
         exitRemoveRecentSw.setOnCheckedChangeListener(sc);
 //        newAppAddRemoveRecentExit.setOnCheckedChangeListener(sc);
@@ -183,8 +185,8 @@ public class SettingFragment extends Fragment {
             String names[] = {Common.PREFS_SETTING_BACKLOGOPEN,Common.PREFS_SETTING_SHOWSIDEBAR,Common.PREFS_SETTING_ICEBACKICE,
                     Common.PREFS_SETTING_ICEOFFICE,Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,Common.PREFS_SETTING_THEME_MODE,
                     Common.PREFS_SETTING_SETTIMESTOPMODE,Common.PREFS_SETTING_ICESTOPICE,Common.PREFS_SETTING_STOPAPPBYXP,
-                    Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_APPSTART_ISSHOWUI,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
-                    Common.PREFS_SETTING_EXITREMOVERECENT,Common.PREFS_SETTING_NEWAPPADDREMOVERECENTEXIT,Common.PREFS_SETTING_ISNOTNEEDACCESS,
+                    Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
+                    Common.PREFS_SETTING_EXITREMOVERECENT,Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,Common.PREFS_SETTING_ISNOTNEEDACCESS,
                     Common.PREFS_SETTING_ZHENDONG};
             if (tag == 0){
                 WatchDogService.isSaveBackLog = isChecked;
@@ -222,10 +224,15 @@ public class SettingFragment extends Fragment {
                     WatchDogService.isSetTimeStopByZW = false;
                     settings.edit().putBoolean(Common.PREFS_SETTING_SETTIMESTOPMODE,false).commit();
                 }
+            }else if(tag ==10){
+                WatchDogService.isNotExitAudioPlay = isChecked;
+//                Log.i("CONTROL","WatchDogService.isNotExitAudioPlay  "+WatchDogService.isNotExitAudioPlay);
             }else if(tag ==11){
                 AlertUtil.showAlertMsg(getActivity(),"改变模式后重启生效，请手动重启手机，部分系统处理广播会导致异常，如果出现异常请关闭并重启。");
             }else if(tag ==12){
                 WatchDogService.isExitRemoveRecent= isChecked;
+            }else if(tag ==13){
+                WatchDogService.isCheckTimeOutApp= isChecked;
             }else if(tag ==14){
                 settings.edit().putBoolean(names[tag],isChecked).commit();
                 WatchDogService.isNotNeedAccessibilityService= isChecked;

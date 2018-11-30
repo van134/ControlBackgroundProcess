@@ -56,11 +56,13 @@
  <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
+     android:visibility="gone"
                     android:background="@drawable/line" />
 
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:visibility="gone"
                     android:layout_marginLeft="4dp" >
 
                     <Switch

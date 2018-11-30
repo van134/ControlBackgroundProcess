@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.Vibrator;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -35,9 +36,11 @@ import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
+import com.click369.controlbp.util.TimeUtil;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class BaseActivity extends AppCompatActivity {
@@ -47,11 +50,12 @@ public class BaseActivity extends AppCompatActivity {
     public static Point p = new Point();
     public static boolean isZhenDong = true;
     public SharedPrefsUtil sharedPrefs;
-//    @TargetApi(Build.VERSION_CODES.M)
+    private static HashMap<String,Long> procTimeInfos = new HashMap<String,Long>();
+    //    @TargetApi(Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        sharedPrefs = SharedPrefsUtil.getInstance(this);
+        sharedPrefs = SharedPrefsUtil.getInstance(this.getApplicationContext());
         if (!MainActivity.isUIRun){
             SharedPreferences settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
             long lastTime = settings.getLong(Common.PREFS_SETTING_LASTUISTARTTIME,0);
@@ -82,6 +86,27 @@ public class BaseActivity extends AppCompatActivity {
             }
         }
         super.onCreate(savedInstanceState);
+    }
+
+    public static void setProcTimeInfos(HashMap<String,Long> procTimeInfos){
+        if(procTimeInfos!=null){
+            BaseActivity.procTimeInfos.clear();
+            BaseActivity.procTimeInfos.putAll(procTimeInfos);
+        }
+    }
+    public static long getProcTime(String packageName){
+        if(BaseActivity.procTimeInfos.containsKey(packageName)){
+            return  BaseActivity.procTimeInfos.get(packageName);
+        }
+        return -1;
+    }
+    public static String getProcTimeStr(String packageName){
+        long t = getProcTime(packageName);
+        if(t==-1){
+            return  "";
+        }
+        t = SystemClock.elapsedRealtime()- t;
+        return "\n后台:"+TimeUtil.changeMils2StringMin(t);
     }
 
     public void showT(String msg){

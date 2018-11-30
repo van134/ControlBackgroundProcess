@@ -15,15 +15,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             layout="@layout/layout_topsearch" />
-        <TextView
+
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="跳过指定对话框"
-            android:id="@+id/main_skipdialog_tv"
-            android:background="@drawable/et_backgroundshape"
-            android:gravity="center"
-            android:textAlignment="gravity"
-            android:layout_gravity="center_vertical" />
+            android:layout_height="wrap_content"
+            android:weightSum="2"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="1dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="跳过指定对话框"
+                android:layout_weight="1"
+                android:id="@+id/main_skipdialog_tv"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="屏蔽指定通知"
+                android:layout_weight="1"
+                android:id="@+id/main_skipnotify_tv"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+
+        </LinearLayout>
+
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"

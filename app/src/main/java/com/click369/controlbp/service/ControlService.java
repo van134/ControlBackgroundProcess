@@ -99,7 +99,8 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			}
 
 			settingPrefs.reload();
-			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,muBeiPrefs,recentPrefs);
+			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,muBeiPrefs,recentPrefs,dialogPrefs);
+			XposedMedia.loadPackage(lpparam);
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_FIVE,true)){
 				XposedAppStart.loadPackage(lpparam, autoStartPrefs);
 			}

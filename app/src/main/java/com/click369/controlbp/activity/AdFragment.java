@@ -66,10 +66,20 @@ public class AdFragment extends Fragment {
         twoTv = (TextView)v.findViewById(R.id.main_wakelock_tv);
         threeTv = (TextView)v.findViewById(R.id.main_alarm_tv);
         TextView main_skipdialog_tv = (TextView)v.findViewById(R.id.main_skipdialog_tv);
+        TextView main_skipnotify_tv = (TextView)v.findViewById(R.id.main_skipnotify_tv);
         main_skipdialog_tv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getActivity(),SkipDialogActivity.class);
+                intent.putExtra("type",0);
+                startActivity(intent);
+            }
+        });
+        main_skipnotify_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(),SkipDialogActivity.class);
+                intent.putExtra("type",1);
                 startActivity(intent);
             }
         });

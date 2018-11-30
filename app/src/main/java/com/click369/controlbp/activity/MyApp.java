@@ -16,7 +16,7 @@ public class MyApp extends Application {
         super.onCreate();
         MyCrashHandler crashHandler = MyCrashHandler.getInstance();
         crashHandler.init(this);
-        SharedPrefsUtil.getInstance(this);
+//        SharedPrefsUtil.getInstance(this);
     }
 }
 /*

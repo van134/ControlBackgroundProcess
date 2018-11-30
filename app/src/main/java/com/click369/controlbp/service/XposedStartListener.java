@@ -46,8 +46,8 @@ public class XposedStartListener {
                         final Context context = ((Context) methodHookParam.thisObject);
                         String cls = methodHookParam.thisObject.getClass().getName();
                             Intent broad = new Intent("com.click369.control.test");
-                            broad.putExtra("pkg", lpparam.packageName);
-                            broad.putExtra("from", lpparam.packageName);
+                            broad.putExtra("pkg", context.getApplicationInfo().packageName);
+                            broad.putExtra("from", context.getApplicationInfo().packageName);
                             broad.putExtra("class", cls);
                             broad.putExtra("action", "");
                             if(context!=null) {

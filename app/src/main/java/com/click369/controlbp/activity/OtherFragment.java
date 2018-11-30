@@ -449,6 +449,10 @@ public class OtherFragment extends Fragment {
                                 continue;
                             }
                             lists.add("am force-stop "+ai.getPackageName());
+                            WatchDogService.sendRemoveRecent(ai.getPackageName(),getActivity());
+                            if(WatchDogService.notStops!=null&&WatchDogService.notStops.contains(ai.getPackageName())){
+                                XposedStopApp.stopApk(ai.getPackageName(),getContext());
+                            }
                         }
                     }
                     Thread.sleep(1000);

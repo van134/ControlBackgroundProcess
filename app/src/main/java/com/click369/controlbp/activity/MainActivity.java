@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -77,6 +78,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -514,6 +516,12 @@ public class MainActivity extends BaseActivity
         restartMethod();
         h.removeCallbacks(reUpdateR);
         h.postDelayed(reUpdateR,3000);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
     }
 
     Runnable reUpdateR = new Runnable() {
@@ -1045,6 +1053,7 @@ public class MainActivity extends BaseActivity
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction("com.click369.control.updatelist");
             intentFilter.addAction("com.click369.control.recappidlestate");
+            intentFilter.addAction("com.click369.control.backprocinfo");
             MainActivity.this.registerReceiver(this,intentFilter);
         }
         @Override
@@ -1063,6 +1072,15 @@ public class MainActivity extends BaseActivity
                 }
                 pkgIdleStates.addAll(pkgs);
                 reloadAdapter();
+            }else if("com.click369.control.backprocinfo".equals(action)){
+                HashMap<String,Long> procTimeInfos = (HashMap<String,Long>)intent.getSerializableExtra("infos");
+                setProcTimeInfos(procTimeInfos);
+//                Set<String> keys = procTimeInfos.keySet();
+//                for(String key:keys){
+//                    long lastTime = procTimeInfos.get(key);
+//                    String msg = pkgproc[0] + " " + pkgproc[1] + " interactionEventTime " + TimeUtil.changeMils2String(interactionEventTime,"yyyy-MM-dd HH:mm:ss")+ " lastActivityTime " + TimeUtil.changeMils2String(lastActivityTime,"yyyy-MM-dd HH:mm:ss")+" hasShownUi "+hasShownUi+" hasOverlayUi "+hasOverlayUi;
+//                    Log.i("CONTROL", msg);
+//                }
             }
         }
     }

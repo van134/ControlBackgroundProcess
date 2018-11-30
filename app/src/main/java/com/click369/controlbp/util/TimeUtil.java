@@ -31,6 +31,23 @@ public class TimeUtil {
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         return sdf.format(new Date(mils));
     }
+
+    public static String changeMils2StringMin(long mils){
+        if(mils<1000){
+            return "1秒";
+        }else if(mils>1000&&mils<1000*60){
+            SimpleDateFormat sdf = new SimpleDateFormat("s秒");
+            return sdf.format(mils);
+        }else if(mils>1000*60&&mils<1000*60*60){
+            SimpleDateFormat sdf = new SimpleDateFormat("m分");
+            return sdf.format(mils);
+        }else{
+            SimpleDateFormat sdf = new SimpleDateFormat("m分");
+            long h = mils/(1000*60*60);
+            return h+"小时"+sdf.format(mils);
+        }
+    }
+
     public static String changeMils2StringZero(long mils,String format){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         sdf.setTimeZone(new SimpleTimeZone(0, "GMT"));

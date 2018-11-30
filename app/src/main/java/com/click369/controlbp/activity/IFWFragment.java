@@ -157,11 +157,12 @@ public class IFWFragment extends Fragment {
         new Thread() {
             @Override
             public void run() {
-                isStrart = true;
-                isOpen = SELinuxUtil.isSELOpen();
-                if(isOpen){
-                    SELinuxUtil.closeSEL();
-                }
+                try {
+                    isStrart = true;
+                    isOpen = SELinuxUtil.isSELOpen();
+                    if(isOpen){
+                        SELinuxUtil.closeSEL();
+                    }
 
                     h.post(new Runnable() {
                         @Override
@@ -187,111 +188,113 @@ public class IFWFragment extends Fragment {
                     }
                     SharedPreferences prefsCount = getActivity().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
                     ShellUtils.execCommand(lists,true,true);
-//                    Log.i("CONTROL","start get disable count2");
-                synchronized (MainActivity.allAppInfos) {
-                    try {
-                        for (AppInfo ai : MainActivity.allAppInfos) {
-                            if (ai.serviceCount > 0) {
-                                if (getActivity()==null||getActivity().isFinishing()){
-                                    return;
-                                }
-                                ServiceInfo sis[] = PackageUtil.getServicesByPkg(getActivity(), ai.getPackageName());
-                                String ifw = "";
-                                File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_SERVICE+".xml");
-                                if(file.exists()){
-//                                FileUtil.changeQX(777,file.getAbsolutePath());
-                                    byte datas[] = FileUtil.readFile(file.getAbsolutePath());
-                                    if(datas!=null&&datas.length>0){
-                                        ifw = new String(datas);
+                    synchronized (MainActivity.allAppInfos) {
+                        try {
+                            for (AppInfo ai : MainActivity.allAppInfos) {
+                                if (ai.serviceCount > 0) {
+                                    if (getActivity()==null||getActivity().isFinishing()){
+                                        return;
                                     }
-                                }
-                                ai.serviceDisableCount = 0;
-                                if (sis!=null) {
-                                    for (ServiceInfo si : sis) {
-                                        String dataName = si.name;//.replaceAll("\\$", "/\\$");
-                                        if (ifw.contains(dataName) || !PackageUtil.isEnable(si.packageName, dataName, pm)) {//||ifw.contains(dataName)!PackageUtil.isEnable(si.packageName, dataName, pm)||
-                                            ai.serviceDisableCount++;
+                                    ServiceInfo sis[] = PackageUtil.getServicesByPkg(getActivity(), ai.getPackageName());
+                                    String ifw = "";
+                                    File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_SERVICE+".xml");
+                                    if(file.exists()){
+    //                                FileUtil.changeQX(777,file.getAbsolutePath());
+                                        byte datas[] = FileUtil.readFile(file.getAbsolutePath());
+                                        if(datas!=null&&datas.length>0){
+                                            ifw = new String(datas);
                                         }
                                     }
-                                }
-                                prefsCount.edit().putInt(ai.getPackageName()+"/ifwservice",ai.serviceDisableCount).commit();
-                            }
-                            if (ai.broadCastCount > 0) {
-                                String ifw = "";
-                                File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_BROADCASE+".xml");
-                                if(file.exists()){
-//                                FileUtil.changeQX(777,file.getAbsolutePath());
-                                    byte datas[] = FileUtil.readFile(file.getAbsolutePath());
-                                    if(datas!=null&&datas.length>0){
-                                        ifw = new String(datas);
-                                    }
-                                }
-//                            String ifw = FileUtil.readIFWList(ai.getPackageName()+IFWCompActivity.EXT_BROADCASE);
-                                ActivityInfo ais[] = PackageUtil.getReceiverByPkg(getActivity(), ai.getPackageName());
-                                ai.broadCastDisableCount = 0;
-                                if (ais!=null) {
-                                    for (ActivityInfo si : ais) {
-                                        String dataName = si.name;//.replaceAll("\\$", "/\\$");
-                                        if (ifw.contains(dataName) || !PackageUtil.isEnable(si.packageName, dataName, pm)) {//||ifw.contains(dataName)!PackageUtil.isEnable(si.packageName, dataName, pm)||
-                                            ai.broadCastDisableCount++;
+                                    ai.serviceDisableCount = 0;
+                                    if (sis!=null) {
+                                        for (ServiceInfo si : sis) {
+                                            String dataName = si.name;//.replaceAll("\\$", "/\\$");
+                                            if (ifw.contains(dataName) || !PackageUtil.isEnable(si.packageName, dataName, pm)) {//||ifw.contains(dataName)!PackageUtil.isEnable(si.packageName, dataName, pm)||
+                                                ai.serviceDisableCount++;
+                                            }
                                         }
                                     }
+                                    prefsCount.edit().putInt(ai.getPackageName()+"/ifwservice",ai.serviceDisableCount).commit();
                                 }
-                                prefsCount.edit().putInt(ai.getPackageName()+"/ifwreceiver",ai.broadCastDisableCount).commit();
-                            }
-                            if (ai.activityCount > 0) {
-                                String ifw = "";
-                                File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_ACTIVITY+".xml");
-                                if(file.exists()){
-//                                FileUtil.changeQX(777,file.getAbsolutePath());
-                                    byte datas[] = FileUtil.readFile(file.getAbsolutePath());
-                                    if(datas!=null&&datas.length>0){
-                                        ifw = new String(datas);
-                                    }
-                                }
-//                            String ifw = FileUtil.readIFWList(ai.getPackageName()+IFWCompActivity.EXT_ACTIVITY);
-                                ActivityInfo ais[] = PackageUtil.getActivityByPkg(getActivity(), ai.getPackageName());
-                                ai.activityDisableCount = 0;
-                                if (ais!=null) {
-                                    for (ActivityInfo si : ais) {
-                                        String dataName = si.name;//.replaceAll("\\$", "/\\$");
-                                        if (ifw.contains(dataName) || !PackageUtil.isEnable(si.packageName, dataName, pm)) {//||ifw.contains(dataName)!PackageUtil.isEnable(si.packageName, dataName, pm)||
-                                            ai.activityDisableCount++;
+                                if (ai.broadCastCount > 0) {
+                                    String ifw = "";
+                                    File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_BROADCASE+".xml");
+                                    if(file.exists()){
+    //                                FileUtil.changeQX(777,file.getAbsolutePath());
+                                        byte datas[] = FileUtil.readFile(file.getAbsolutePath());
+                                        if(datas!=null&&datas.length>0){
+                                            ifw = new String(datas);
                                         }
                                     }
-                                }
-                                prefsCount.edit().putInt(ai.getPackageName()+"/ifwactivity",ai.activityDisableCount).commit();
-                            }
-                            count++;
-                            if(count%20==0){
-                                h.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        adapter.notifyDataSetChanged();
+    //                            String ifw = FileUtil.readIFWList(ai.getPackageName()+IFWCompActivity.EXT_BROADCASE);
+                                    ActivityInfo ais[] = PackageUtil.getReceiverByPkg(getActivity(), ai.getPackageName());
+                                    ai.broadCastDisableCount = 0;
+                                    if (ais!=null) {
+                                        for (ActivityInfo si : ais) {
+                                            String dataName = si.name;//.replaceAll("\\$", "/\\$");
+                                            if (ifw.contains(dataName) || !PackageUtil.isEnable(si.packageName, dataName, pm)) {//||ifw.contains(dataName)!PackageUtil.isEnable(si.packageName, dataName, pm)||
+                                                ai.broadCastDisableCount++;
+                                            }
+                                        }
                                     }
-                                });
+                                    prefsCount.edit().putInt(ai.getPackageName()+"/ifwreceiver",ai.broadCastDisableCount).commit();
+                                }
+                                if (ai.activityCount > 0) {
+                                    String ifw = "";
+                                    File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_ACTIVITY+".xml");
+                                    if(file.exists()){
+    //                                FileUtil.changeQX(777,file.getAbsolutePath());
+                                        byte datas[] = FileUtil.readFile(file.getAbsolutePath());
+                                        if(datas!=null&&datas.length>0){
+                                            ifw = new String(datas);
+                                        }
+                                    }
+    //                            String ifw = FileUtil.readIFWList(ai.getPackageName()+IFWCompActivity.EXT_ACTIVITY);
+                                    ActivityInfo ais[] = PackageUtil.getActivityByPkg(getActivity(), ai.getPackageName());
+                                    ai.activityDisableCount = 0;
+                                    if (ais!=null) {
+                                        for (ActivityInfo si : ais) {
+                                            String dataName = si.name;//.replaceAll("\\$", "/\\$");
+                                            if (ifw.contains(dataName) || !PackageUtil.isEnable(si.packageName, dataName, pm)) {//||ifw.contains(dataName)!PackageUtil.isEnable(si.packageName, dataName, pm)||
+                                                ai.activityDisableCount++;
+                                            }
+                                        }
+                                    }
+                                    prefsCount.edit().putInt(ai.getPackageName()+"/ifwactivity",ai.activityDisableCount).commit();
+                                }
+                                count++;
+                                if(count%20==0){
+                                    h.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            adapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }
                             }
+                            List<String> lists2 = new ArrayList<String>();
+                            for(File f:ifwFiles){
+                                lists2.add("chmod 644 "+f.getAbsolutePath());
+                            }
+                            lists2.add("chmod 700 /data/system/ifw");
+                            ShellUtils.execCommand(lists2,true,false);
+                            //                AppInfo.writeArrays(MainActivity.allAppInfos,getActivity());
+                            h.post(new Runnable() {
+                                @Override
+                                public void run() {
+    //                            adapter.notifyDataSetChanged();
+                                    fresh();
+    //                            adapter.fliterList(adapter.fliterName, MainActivity.allAppInfos);
+                                }
+                            });
+                            isStrart = false;
+                            settings.edit().putBoolean(Common.PREFS_NAME_IFWCHANGE,false);
+                        }catch (RuntimeException e){
+                            e.printStackTrace();
                         }
-                        List<String> lists2 = new ArrayList<String>();
-                        for(File f:ifwFiles){
-                            lists2.add("chmod 644 "+f.getAbsolutePath());
-                        }
-                        lists2.add("chmod 700 /data/system/ifw");
-                        ShellUtils.execCommand(lists2,true,false);
-                        //                AppInfo.writeArrays(MainActivity.allAppInfos,getActivity());
-                        h.post(new Runnable() {
-                            @Override
-                            public void run() {
-//                            adapter.notifyDataSetChanged();
-                                fresh();
-//                            adapter.fliterList(adapter.fliterName, MainActivity.allAppInfos);
-                            }
-                        });
-                        isStrart = false;
-                        settings.edit().putBoolean(Common.PREFS_NAME_IFWCHANGE,false);
-                    }catch (RuntimeException e){
-                        e.printStackTrace();
                     }
+                }catch (Exception e){
+
                 }
             }
         }.start();

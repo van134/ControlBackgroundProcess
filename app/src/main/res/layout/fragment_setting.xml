@@ -74,7 +74,38 @@
                         android:id="@+id/setting_exitremoverecent_sw"
                         android:checked="true" />
                 </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
 
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="正在播放音频的应用不执行‘强退/墓碑/待机’"
+                        android:id="@+id/setting_notexitaudio_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="加入返回强退的应用后台超时12小时后杀死"
+                        android:id="@+id/setting_checktimeout_sw"
+                        android:checked="false" />
+                </FrameLayout>
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"

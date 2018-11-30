@@ -71,6 +71,8 @@ public class UnLockActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         pkg = this.getIntent().getStringExtra("pkg");
         cls = this.getIntent().getStringExtra("class");
         mIntent = this.getIntent().getParcelableExtra("intent");
@@ -100,7 +102,7 @@ public class UnLockActivity extends Activity {
             },500);
         }else{
 
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
+
             setContentView(R.layout.activity_unlock);
             initView();
             mainRl = (RelativeLayout) findViewById(R.id.unlock_main_rl);
