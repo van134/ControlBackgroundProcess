@@ -146,7 +146,7 @@ public class UIBarBlackListAdapter extends BaseAdapter{
 		viewHolder.appNameTv.setText(data.appName);
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);
+		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.bottomBarIv.setTag(position);
 		viewHolder.topBarIv.setTag(position);

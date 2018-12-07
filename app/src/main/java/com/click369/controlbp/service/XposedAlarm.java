@@ -34,7 +34,13 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedAlarm {
-    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences controlPrefs,final XSharedPreferences alarmPrefs,final XSharedPreferences muBeiPrefs,final boolean isOneOpen,final boolean isTwoOpen,final boolean isMubeiStopOther) {//,final boolean isMubeStopBroad
+    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
+                                   final XSharedPreferences controlPrefs,
+                                   final XSharedPreferences alarmPrefs,
+//                                   final XSharedPreferences muBeiPrefs,
+                                   final boolean isOneOpen,
+                                   final boolean isTwoOpen,
+                                   final boolean isMubeiStopOther) {//,final boolean isMubeStopBroad
         if (lpparam.packageName.equals("com.click369.controlbp")) {
             return;
         }
@@ -154,17 +160,18 @@ public class XposedAlarm {
                     }
                 }
             };
-            if (clss.length == 2){
-                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],clss[1],hook);
-            }else if (clss.length == 3){
-                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],clss[1],clss[2],hook);
-            }else if (clss.length == 4){
-                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],clss[1],clss[2],clss[3],hook);
-            }else if (clss.length == 1){
-                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^^^^AlarmManager "+clss.length+" ^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookConstructorMethod(alarmManagerClass, clss,hook);
+//            if (clss.length == 2){
+//                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],clss[1],hook);
+//            }else if (clss.length == 3){
+//                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],clss[1],clss[2],hook);
+//            }else if (clss.length == 4){
+//                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],clss[1],clss[2],clss[3],hook);
+//            }else if (clss.length == 1){
+//                XposedHelpers.findAndHookConstructor(alarmManagerClass,clss[0],hook);
+//            }else{
+//                XposedBridge.log("^^^^^^^^^^^^^^^^^AlarmManager "+clss.length+" ^^^^^^^^^^^^^^^");
+//            }
         }
 
         Method ms[] = alarmManagerClass.getDeclaredMethods();
@@ -192,11 +199,11 @@ public class XposedAlarm {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                 try {
-                    muBeiPrefs.reload();
+//                    muBeiPrefs.reload();
                     controlPrefs.reload();
-//                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen)) {
-                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen) ||
-                            (isTwoOpen && isMubeiStopOther&& muBeiPrefs.getInt(lpparam.packageName, -1) == 0 )) {
+                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen)) {
+//                    if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen) ||
+//                            (isTwoOpen && isMubeiStopOther&& muBeiPrefs.getInt(lpparam.packageName, -1) == 0 )) {
                         param.setResult(null);
                         return;
                     }

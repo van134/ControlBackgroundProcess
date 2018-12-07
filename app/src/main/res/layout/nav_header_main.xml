@@ -25,7 +25,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="van134"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp" />
+        android:layout_marginTop="4dp" />
+    <TextView
+        android:id="@+id/head_threetitle_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="van134"
+        android:layout_marginTop="-1dp"
+        android:paddingBottom="4dp" />
 
 </LinearLayout>

@@ -25,6 +25,7 @@ import com.click369.controlbp.activity.ColorNavBarActivity;
 import com.click369.controlbp.activity.IceRoomView;
 import com.click369.controlbp.activity.UIControlFragment;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.SELinuxUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by asus on 2017/6/3.
@@ -112,10 +114,20 @@ public class NewWatchDogService extends AccessibilityService {
     protected void onServiceConnected() {
         Log.i("DOZE", "辅助服务开启");
 //        WatchDogService.launcherPkgs.clear();
-        WatchDogService.imePkgs.clear();
+//        WatchDogService.imePkgs.clear();
         WatchDogService.homePkg = WatchDogService.getDefaultHome(this);
-//        WatchDogService.launcherPkgs.addAll(WatchDogService.getLauncherPackageName(this));
-        WatchDogService.imePkgs.addAll(WatchDogService.getInputPackageName(this));
+        Set<String> launcherPkgs = WatchDogService.getLauncherPackageName(this);
+        ArrayList<String> imePkgs = WatchDogService.getInputPackageName(this);
+        for(String l:launcherPkgs){
+            if( AppLoaderUtil.allAppStateInfos.containsKey(l)){
+                AppLoaderUtil.allAppStateInfos.get(l).isHomePkg = true;
+            }
+        }
+        for(String i:imePkgs){
+            if(AppLoaderUtil.allAppStateInfos.containsKey(i)) {
+                AppLoaderUtil.allAppStateInfos.get(i).isImePkg = true;
+            }
+        }
         isOpenNewDogService = true;
         run_state = 0;
 

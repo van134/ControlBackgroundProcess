@@ -47,7 +47,7 @@ import com.click369.controlbp.util.TimeUtil;
  * Use the {@link ForceStopFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DozeFragment extends Fragment {
+public class DozeFragment extends BaseFragment {
 //    private TopSearchView topView;
     private MainActivity mainActivity;
     private Switch updateTimeSw,notifySw,allSwitchSw,nightSw;

@@ -144,15 +144,16 @@ public class XposedPackageManager {
                         }
                     };
                     if(clss1!=null){
-                        if(clss1.length == 4){
-                            XposedHelpers.findAndHookMethod(pmsCls, "deletePackage", clss1[0],clss1[1], clss1[2], clss1[3],hook1);
-                        }else if(clss1.length == 3){
-                            XposedHelpers.findAndHookMethod(pmsCls, "deletePackage", clss1[0],clss1[1], clss1[2],hook1);
-                        }else if(clss1.length == 5){
-                            XposedHelpers.findAndHookMethod(pmsCls, "deletePackage", clss1[0],clss1[1], clss1[2], clss1[3], clss1[4],hook1);
-                        }else{
-                            XposedBridge.log("^^^^^^^^^^^^^^PackageManagerService deletePackage else "+clss1.length+"未找到 ^^^^^^^^^^^^^^^^^");
-                        }
+                        XposedUtil.hookMethod(pmsCls,clss1,"deletePackage",hook);
+//                        if(clss1.length == 4){
+//                            XposedHelpers.findAndHookMethod(pmsCls, "deletePackage", clss1[0],clss1[1], clss1[2], clss1[3],hook1);
+//                        }else if(clss1.length == 3){
+//                            XposedHelpers.findAndHookMethod(pmsCls, "deletePackage", clss1[0],clss1[1], clss1[2],hook1);
+//                        }else if(clss1.length == 5){
+//                            XposedHelpers.findAndHookMethod(pmsCls, "deletePackage", clss1[0],clss1[1], clss1[2], clss1[3], clss1[4],hook1);
+//                        }else{
+//                            XposedBridge.log("^^^^^^^^^^^^^^PackageManagerService deletePackage else "+clss1.length+"未找到 ^^^^^^^^^^^^^^^^^");
+//                        }
                     }else{
                         //deletePackageVersioned(
                         final Class clss2[] = XposedUtil.getParmsByName(pmsCls,"deletePackageVersioned");
@@ -179,15 +180,16 @@ public class XposedPackageManager {
                             }
                         };
                         if(clss2!=null){
-                            if(clss2.length == 4){
-                                XposedHelpers.findAndHookMethod(pmsCls, "deletePackageVersioned", clss2[0],clss2[1], clss2[2], clss2[3],hook2);
-                            }else if(clss2.length == 3){
-                                XposedHelpers.findAndHookMethod(pmsCls, "deletePackageVersioned", clss2[0],clss2[1], clss2[2],hook2);
-                            }else if(clss2.length == 5){
-                                XposedHelpers.findAndHookMethod(pmsCls, "deletePackageVersioned", clss2[0],clss2[1], clss2[2], clss2[3], clss2[4],hook2);
-                            }else{
-                                XposedBridge.log("^^^^^^^^^^^^^^PackageManagerService deletePackageVersioned else "+clss.length+"未找到 ^^^^^^^^^^^^^^^^^");
-                            }
+                            XposedUtil.hookMethod(pmsCls,clss2,"deletePackageVersioned",hook);
+//                            if(clss2.length == 4){
+//                                XposedHelpers.findAndHookMethod(pmsCls, "deletePackageVersioned", clss2[0],clss2[1], clss2[2], clss2[3],hook2);
+//                            }else if(clss2.length == 3){
+//                                XposedHelpers.findAndHookMethod(pmsCls, "deletePackageVersioned", clss2[0],clss2[1], clss2[2],hook2);
+//                            }else if(clss2.length == 5){
+//                                XposedHelpers.findAndHookMethod(pmsCls, "deletePackageVersioned", clss2[0],clss2[1], clss2[2], clss2[3], clss2[4],hook2);
+//                            }else{
+//                                XposedBridge.log("^^^^^^^^^^^^^^PackageManagerService deletePackageVersioned else "+clss.length+"未找到 ^^^^^^^^^^^^^^^^^");
+//                            }
                         }else{
                             XposedBridge.log("^^^^^^^^^^^^^^PackageManagerService deletePackageVersioned clss null 未找到 ^^^^^^^^^^^^^^^^^");
                         }

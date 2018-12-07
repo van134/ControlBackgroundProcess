@@ -72,7 +72,7 @@ public class ColorNavBarActivity extends BaseActivity {
 //        }
         adapter = new ColorNavAppChooseAdapter(this);
         list.setAdapter(adapter);
-        adapter.fliterList("u",MainActivity.allAppInfos);
+        adapter.fliterList("u",appLoaderUtil.allAppInfos);
         topView = new TopSearchView(this,v);
         topView.initView();
         String msg = "不需要染色的应用透明度设置为0即可，部分应用无法染色。";
@@ -81,7 +81,7 @@ public class ColorNavBarActivity extends BaseActivity {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoaderUtil.allAppInfos);
             }
         });
         if(!settings.getBoolean(Common.ISCOLORBAROPEN,false)){

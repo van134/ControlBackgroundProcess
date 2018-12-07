@@ -24,9 +24,10 @@ import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
 
-public class SettingFragment extends Fragment {
+public class SettingFragment extends BaseFragment {
     private Switch iceRemoveSw,iceOffSw,iceStopSw,autoNightSw,nightModeSw,isShowSideBarSw,
 //            isNotShowLockUISw,unlockNumberSw,
+            updateTimeSw,
             notExitAudioPlaySw,checkTimeOutSw,
             setTimeStopPwdModeSw,setTimeStopZWModeSw,
             stopAppModeSw,exitRemoveRecentSw,muBeiStopReceiverSw,
@@ -73,6 +74,7 @@ public class SettingFragment extends Fragment {
         iceOffSw = (Switch) v.findViewById(R.id.setting_ice_off_sw);
         autoNightSw = (Switch) v.findViewById(R.id.setting_auto_night_sw);
         nightModeSw = (Switch) v.findViewById(R.id.setting_nightmode_sw);
+        updateTimeSw = (Switch) v.findViewById(R.id.setting_updatetime_sw);
 
         stopAppModeSw = (Switch) v.findViewById(R.id.setting_stopmode_sw);
         muBeiStopReceiverSw = (Switch) v.findViewById(R.id.setting_mubestopreceiver_sw);
@@ -95,6 +97,7 @@ public class SettingFragment extends Fragment {
         zhendongSw.setTextColor(curColor);
         checkTimeOutSw.setTextColor(curColor);
         notneedAccessSw.setTextColor(curColor);
+        updateTimeSw.setTextColor(curColor);
         penImg1 = (ImageView) v.findViewById(R.id.setting_pen1_iv);
         penImg2 = (ImageView) v.findViewById(R.id.setting_pen2_iv);
         penImg3 = (ImageView) v.findViewById(R.id.setting_pen3_iv);
@@ -127,6 +130,7 @@ public class SettingFragment extends Fragment {
         checkTimeOutSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,false));
         notneedAccessSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true));
         zhendongSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true));
+        updateTimeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISUPDATEAPPTIME,false));
         backDelayTimeTv.setText("返回时强退、墓碑和冻结延迟:"+settings.getInt(Common.PREFS_SETTING_BACKDELAYTIME,0)+"秒");
         homeDelayTimeTv.setText("后台时墓碑、待机延迟:"+settings.getInt(Common.PREFS_SETTING_HOMEDELAYTIME,0)+"秒");
         offDelayTimeTv.setText("熄屏时强退、墓碑和冻结延迟:"+settings.getInt(Common.PREFS_SETTING_OFFDELAYTIME,0)+"秒");
@@ -149,6 +153,7 @@ public class SettingFragment extends Fragment {
         checkTimeOutSw.setTag(13);
         notneedAccessSw.setTag(14);
         zhendongSw.setTag(15);
+        updateTimeSw.setTag(16);
         SwitchClick sc = new SwitchClick();
         backSw.setOnCheckedChangeListener(sc);
         isShowSideBarSw.setOnCheckedChangeListener(sc);
@@ -164,7 +169,7 @@ public class SettingFragment extends Fragment {
         checkTimeOutSw.setOnCheckedChangeListener(sc);
         muBeiStopReceiverSw.setOnCheckedChangeListener(sc);
         exitRemoveRecentSw.setOnCheckedChangeListener(sc);
-//        newAppAddRemoveRecentExit.setOnCheckedChangeListener(sc);
+        updateTimeSw.setOnCheckedChangeListener(sc);
         notneedAccessSw.setOnCheckedChangeListener(sc);
         zhendongSw.setOnCheckedChangeListener(sc);
         SeekBarListener sbl = new SeekBarListener();
@@ -187,7 +192,7 @@ public class SettingFragment extends Fragment {
                     Common.PREFS_SETTING_SETTIMESTOPMODE,Common.PREFS_SETTING_ICESTOPICE,Common.PREFS_SETTING_STOPAPPBYXP,
                     Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
                     Common.PREFS_SETTING_EXITREMOVERECENT,Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,Common.PREFS_SETTING_ISNOTNEEDACCESS,
-                    Common.PREFS_SETTING_ZHENDONG};
+                    Common.PREFS_SETTING_ZHENDONG,Common.PREFS_SETTING_ISUPDATEAPPTIME};
             if (tag == 0){
                 WatchDogService.isSaveBackLog = isChecked;
             }else if (tag == 2){
@@ -241,6 +246,8 @@ public class SettingFragment extends Fragment {
                 getActivity().startService(intent);
             }else if(tag ==15){
                 BaseActivity.isZhenDong = isChecked;
+            }else if(tag ==16){
+                BaseActivity.isUpdateAppTime = isChecked;
             }
             settings.edit().putBoolean(names[tag],isChecked).commit();
         }

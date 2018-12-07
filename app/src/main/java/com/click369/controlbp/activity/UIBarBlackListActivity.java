@@ -47,7 +47,7 @@ public class UIBarBlackListActivity extends BaseActivity {
         curColor = topTitle.getCurrentTextColor();
         adapter = new UIBarBlackListAdapter(this,barPrefs);
         list.setAdapter(adapter);
-        adapter.fliterList("u",MainActivity.allAppInfos);
+        adapter.fliterList("u",appLoaderUtil.allAppInfos);
         topView = new TopSearchView(this,v);
         topView.initView();
         String msg = "1.染色锁定是用来锁定该应用颜色，锁定后打开应用时如果该界面已经取过色就不再取色从而达到省电效果,几乎不耗电（如果颜色经常变色的应用不合适锁定）。\n2.开启染色设置需要染色的应用，如果某些软件需要染色则加入开启染色。";
@@ -60,7 +60,7 @@ public class UIBarBlackListActivity extends BaseActivity {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoaderUtil.allAppInfos);
             }
         });
         topTitle.setOnLongClickListener(new View.OnLongClickListener() {

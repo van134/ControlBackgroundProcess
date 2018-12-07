@@ -33,7 +33,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-public class QuestionFragment extends Fragment {
+public class QuestionFragment extends BaseFragment {
     private ListView list;
     private ScrollView scview;
     private TextView showAlertTv,showLogAlertTv,showAppLogAlertTv,alertTv;

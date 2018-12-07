@@ -27,7 +27,11 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedWakeLock {
-    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences controlPrefs,final XSharedPreferences wakeLockPrefs,final XSharedPreferences muBeiPrefs,final boolean isOneOpen,final boolean isTwoOpen,final boolean isMubeiStopOther){//,final boolean isMubeiStopOther
+    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
+                                   final XSharedPreferences controlPrefs,
+                                   final XSharedPreferences wakeLockPrefs,
+//                                   final XSharedPreferences muBeiPrefs,
+                                   final boolean isOneOpen,final boolean isTwoOpen,final boolean isMubeiStopOther){//,final boolean isMubeiStopOther
         final Class powerMangerClass = XposedHelpers.findClass("android.os.PowerManager", lpparam.classLoader);
         Constructor cs[] = powerMangerClass.getDeclaredConstructors();
         if (cs!=null&&cs.length>0){
@@ -106,17 +110,18 @@ public class XposedWakeLock {
                     }
                 }
             };
-            if (clss.length == 3){
-                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],clss[1],clss[2],hook);
-            }else if (clss.length == 4){
-                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],clss[1],clss[2],clss[3],hook);
-            }else if (clss.length == 2){
-                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],clss[1],hook);
-            }else if (clss.length == 1){
-                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^^^^PowerManager "+clss.length+" ^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookConstructorMethod(powerMangerClass,clss,hook);
+//            if (clss.length == 3){
+//                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],clss[1],clss[2],hook);
+//            }else if (clss.length == 4){
+//                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],clss[1],clss[2],clss[3],hook);
+//            }else if (clss.length == 2){
+//                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],clss[1],hook);
+//            }else if (clss.length == 1){
+//                XposedHelpers.findAndHookConstructor(powerMangerClass,clss[0],hook);
+//            }else{
+//                XposedBridge.log("^^^^^^^^^^^^^^^^^PowerManager "+clss.length+" ^^^^^^^^^^^^^^^");
+//            }
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^^^^PowerManager 未找到 ^^^^^^^^^^^^^^^");
         }
@@ -164,10 +169,10 @@ public class XposedWakeLock {
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
                         if (!isSysProcess) {
-                            muBeiPrefs.reload();
-//                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
-                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
-                                    (isTwoOpen && isMubeiStopOther&&muBeiPrefs.getInt(lpparam.packageName, -1) == 0)) {
+//                            muBeiPrefs.reload();
+                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
+//                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
+//                                    (isTwoOpen && isMubeiStopOther&&muBeiPrefs.getInt(lpparam.packageName, -1) == 0)) {
                                 boolean isScOff = true;
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
                                     Field this$0Field = param.thisObject.getClass().getDeclaredField("this$0");
@@ -241,10 +246,10 @@ public class XposedWakeLock {
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
                         if (!isSysProcess) {
-                            muBeiPrefs.reload();
-//                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
-                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
-                                    (isTwoOpen && isMubeiStopOther&&muBeiPrefs.getInt(lpparam.packageName , -1) == 0)) {
+//                            muBeiPrefs.reload();
+                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
+//                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
+//                                    (isTwoOpen && isMubeiStopOther&&muBeiPrefs.getInt(lpparam.packageName , -1) == 0)) {
                                 param.setResult(null);
                                 return;
                             }
@@ -309,10 +314,10 @@ public class XposedWakeLock {
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
                         if (!isSysProcess) {
-                            muBeiPrefs.reload();
-//                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
-                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
-                                    (muBeiPrefs.getInt(lpparam.packageName , -1) == 0 && isTwoOpen && isMubeiStopOther)) {
+//                            muBeiPrefs.reload();
+                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
+//                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
+//                                    (muBeiPrefs.getInt(lpparam.packageName , -1) == 0 && isTwoOpen && isMubeiStopOther)) {
                                 if (mCountField != null && mRefCountedField != null) {
                                     PowerManager.WakeLock pw = (PowerManager.WakeLock) param.thisObject;
                                     mCountField.setAccessible(true);

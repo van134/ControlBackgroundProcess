@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.util.Log;
 
+import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.common.ContainsKeyWord;
 import com.click369.controlbp.service.WatchDogService;
@@ -28,11 +29,12 @@ public class AddAppReceiver extends BroadcastReceiver {
         this.cxt = context;
         if (!WatchDogService.isKillRun) {
             appChange(action, intent, context);
-            h.removeCallbacks(r);
-            h.postDelayed(r,500);
+//            h.removeCallbacks(r);
+//            h.postDelayed(r,500);
 
             String addPkg =  intent.getDataString().substring(8);
-            if(WatchDogService.notStops.contains(addPkg)&&Intent.ACTION_PACKAGE_REPLACED.equals(action)){
+            AppInfo ai = AppLoaderUtil.allHMAppInfos.containsKey(addPkg)?AppLoaderUtil.allHMAppInfos.get(addPkg):new AppInfo();
+            if(ai.isNotStop&&Intent.ACTION_PACKAGE_REPLACED.equals(action)){
                 Intent intent1 = new Intent("com.click369.control.ams.changepersistent");
                 intent1.putExtra("persistent",false);
                 intent1.putExtra("pkg",addPkg);
@@ -41,16 +43,16 @@ public class AddAppReceiver extends BroadcastReceiver {
             Log.i("CONTROL","AddAppReceiver1  "+action);
         }
     }
-    Runnable r = new Runnable() {
-        @Override
-        public void run() {
-            if (cxt!=null) {
-                //通知后台服务刷新应用列表
-                Intent intent1 = new Intent("com.click369.control.loadapplist");
-                cxt.sendBroadcast(intent1);
-            }
-        }
-    };
+//    Runnable r = new Runnable() {
+//        @Override
+//        public void run() {
+//            if (cxt!=null) {
+//                //通知后台服务刷新应用列表
+//                Intent intent1 = new Intent("com.click369.control.loadapplist");
+//                cxt.sendBroadcast(intent1);
+//            }
+//        }
+//    };
     public static void appChange(String action,Intent intent,Context context){
         if(action.equals(Intent.ACTION_PACKAGE_ADDED)){
             String addPkg =  intent.getDataString().substring(8);

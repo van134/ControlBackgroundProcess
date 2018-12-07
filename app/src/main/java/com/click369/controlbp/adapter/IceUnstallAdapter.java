@@ -27,12 +27,14 @@ import com.click369.controlbp.activity.ControlFragment;
 import com.click369.controlbp.activity.EmptyActivity;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.PinyinCompare;
+import com.click369.controlbp.util.SharedPrefsUtil;
 import com.click369.controlbp.util.ShellUtilNoBackData;
 import com.click369.controlbp.util.ShortCutUtil;
 
@@ -196,7 +198,7 @@ public class IceUnstallAdapter extends BaseAdapter{
 		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);
+		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.iceAppIv.setTag(position);
 		viewHolder.notUnstallAppIv.setTag(position);
@@ -262,6 +264,7 @@ public class IceUnstallAdapter extends BaseAdapter{
 				ImageView buttonView = (ImageView)(view);
 				int g = (Integer)buttonView.getTag();
 				final AppInfo ai = bjdatas.get(g);
+
 				if (ai.isDisable){
 					String titles[] = {"运行该程序","创建快捷方式"};
 					AlertUtil.showListAlert(c,"请选择",titles,new AlertUtil.InputCallBack(){
@@ -345,14 +348,17 @@ public class IceUnstallAdapter extends BaseAdapter{
 	Handler h = new Handler();
 	public void runIceApp(final AppInfo ai){
 		if(ai.isDisable){
+			c.moveTaskToBack(true);
 			pd = ProgressDialog.show(c, null, "正在解冻并启动，请稍等...", true, false);
-			WatchDogService.iceButOpenInfos.add(ai.getPackageName());
+//			WatchDogService.iceButOpenInfos.add(ai.getPackageName());
+			AppStateInfo asi =AppLoaderUtil.allAppStateInfos.containsKey(ai.getPackageName())?AppLoaderUtil.allAppStateInfos.get(ai.getPackageName()):new AppStateInfo();
+			asi.isOpenFromIceRome = true;
 			Intent intent = new Intent("com.click369.control.pms.enablepkg");
 			intent.putExtra("pkg",ai.getPackageName());
 			c.sendBroadcast(intent);
 			ShellUtilNoBackData.execCommand("pm "+(ai.isDisable?"enable":"disable")+" "+ai.packageName);
 			this.ai = ai;
-			h.postDelayed(r,100);
+			h.postDelayed(r,200);
 			cout = 0;
 		}else{
 			OpenCloseUtil.doStartApplicationWithPackageName(ai.packageName,c);

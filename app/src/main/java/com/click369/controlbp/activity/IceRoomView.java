@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -20,8 +21,10 @@ import android.widget.Toast;
 import com.click369.controlbp.R;
 import com.click369.controlbp.adapter.IceRoomAdapter;
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.ShellUtilNoBackData;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.ShortCutUtil;
@@ -38,9 +41,9 @@ public class IceRoomView{
 //    private FrameLayout alertFl;
 //    private TextView alertTv,closeTv;
     private Handler h = new Handler();
-    private Activity act = null;
+    private BaseActivity act = null;
     private TopSearchView topView;
-    public View  onCreate(LayoutInflater inflater,final Activity cxt) {
+    public View  onCreate(LayoutInflater inflater,final BaseActivity cxt) {
         this.act = cxt;
         View v = inflater.inflate(R.layout.view_iceroom,null);
 //        et = (EditText)v.findViewById(R.id.main_edittext);
@@ -58,7 +61,7 @@ public class IceRoomView{
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,act.appLoaderUtil.allAppInfos);
             }
         });
 //        alertFl.setTag("iceroommsg");
@@ -170,14 +173,14 @@ public class IceRoomView{
     }
 
     public void refresh(Context cxt){
-        if(MainActivity.allAppInfos.size()==0){
+        if(act.appLoaderUtil.allAppInfos.size()==0){
             ArrayList<AppInfo> apps = AppInfo.readArrays(cxt);
-            MainActivity.allAppInfos.addAll(apps);
+            act.appLoaderUtil.allAppInfos.addAll(apps);
         }
         h.postDelayed(new Runnable() {
             @Override
             public void run() {
-                adapter.fliterList(adapter.fliterName,MainActivity.allAppInfos);
+                adapter.fliterList(adapter.fliterName,act.appLoaderUtil.allAppInfos);
             }
         },250);
     }
@@ -188,7 +191,10 @@ public class IceRoomView{
     public void runIceApp(final AppInfo ai){
         if(ai.isDisable){
             pd = ProgressDialog.show(act, null, "正在解冻并启动，请稍等...", true, false);
-            WatchDogService.iceButOpenInfos.add(ai.getPackageName());
+//            WatchDogService.iceButOpenInfos.add(ai.getPackageName());
+            AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(ai.getPackageName())?AppLoaderUtil.allAppStateInfos.get(ai.getPackageName()):new AppStateInfo();
+            asi.isOpenFromIceRome = true;
+            AppLoaderUtil.allAppStateInfos.put(ai.getPackageName(),asi);
             Intent intent = new Intent("com.click369.control.pms.enablepkg");
             intent.putExtra("pkg",ai.packageName);
             act.sendBroadcast(intent);

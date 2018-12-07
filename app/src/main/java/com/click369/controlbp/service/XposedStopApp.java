@@ -14,8 +14,11 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.common.ContainsKeyWord;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
@@ -55,12 +58,23 @@ public class XposedStopApp {
             if (WatchDogService.isSaveBackLog) {
                 FileUtil.writeLog(FileUtil.getLog("杀死 " + PackageUtil.getAppNameByPkg(cxt, pkg)));
             }
-            if(WatchDogService.notStops.contains(pkg)){
+            final AppInfo ai = AppLoaderUtil.allHMAppInfos.containsKey(pkg)?AppLoaderUtil.allHMAppInfos.get(pkg):new AppInfo();
+            ai.isRunning = false;
+            AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+            AppStateInfo newAsi = new AppStateInfo();
+            newAsi.isOpenFromIceRome = asi.isOpenFromIceRome;
+            AppLoaderUtil.allAppStateInfos.put(pkg,newAsi);
+            AppLoaderUtil.runLists.remove(pkg);
+            if(ai.isLockApp){
+                SharedPrefsUtil.getInstance(cxt).autoStartNetPrefs.edit().remove(pkg+"/lockok").commit();
+            }
+            if(ai.isNotStop){
                 Log.i("CONTROL","changepersistent  "+pkg);
                 Intent intent1 = new Intent("com.click369.control.ams.changepersistent");
                 intent1.putExtra("persistent",false);
                 intent1.putExtra("pkg",pkg);
                 cxt.sendBroadcast(intent1);
+                AppLoaderUtil.getInstance(cxt).notifyRuningStateChange();
                 return;
             }
             if (!isXPstop){
@@ -68,23 +82,13 @@ public class XposedStopApp {
                 Log.i("CONTROL","ROOT 杀死进程"+pkg);
             }else{
                 Log.i("CONTROL","AMS 杀死进程"+pkg);
-//                Intent intent = new Intent("com.click369.control.ams.forcestopapp");
-//                intent.putExtra("pkg",pkg);
-//                cxt.sendBroadcast(intent);
                 //部分系统无法使用
                 ActivityManager am =(ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
                 Method m = am.getClass().getDeclaredMethod("forceStopPackage",String.class);
                 m.setAccessible(true);
                 m.invoke(am,pkg);
             }
-            if(WatchDogService.stopAppName.contains(pkg)){
-                WatchDogService.stopAppName.remove(pkg);
-//                WatchDogService.cancelStopAppName.remove(pkg);
-                if (!WatchDogService.setTimeStopkeys.contains(pkg)){
-                    WatchDogService.setTimeStopApp.remove(pkg);
-                }
-            }
-
+            AppLoaderUtil.getInstance(cxt).notifyRuningStateChange();
         } catch (Exception e) {
             e.printStackTrace();
             Log.i("CONTROL","AMS 杀死进程出错 改为root方式");

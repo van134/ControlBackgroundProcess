@@ -41,7 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IFWFragment extends Fragment {
+public class IFWFragment extends BaseFragment {
     public IFWAdapter adapter;
     private ListView listView;
     private TextView serviceTv,broadTv,actTv;
@@ -98,7 +98,7 @@ public class IFWFragment extends Fragment {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoader.allAppInfos);
             }
         });
         TitleClickListener listener = new TitleClickListener();
@@ -167,7 +167,7 @@ public class IFWFragment extends Fragment {
                     h.post(new Runnable() {
                         @Override
                         public void run() {
-                            adapter.setData(MainActivity.allAppInfos);
+                            adapter.setData(appLoader.allAppInfos);
                         }
                     });
 //                    Log.i("CONTROL","start get disable count1");
@@ -188,9 +188,9 @@ public class IFWFragment extends Fragment {
                     }
                     SharedPreferences prefsCount = getActivity().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
                     ShellUtils.execCommand(lists,true,true);
-                    synchronized (MainActivity.allAppInfos) {
+                    synchronized (appLoader.allAppInfos) {
                         try {
-                            for (AppInfo ai : MainActivity.allAppInfos) {
+                            for (AppInfo ai : appLoader.allAppInfos) {
                                 if (ai.serviceCount > 0) {
                                     if (getActivity()==null||getActivity().isFinishing()){
                                         return;
@@ -313,8 +313,8 @@ public class IFWFragment extends Fragment {
     }
     ProgressDialog pd = null;
     public void startDis1(){
-        if(adapter.bjdatas.size()==MainActivity.allAppInfos.size()){
-            adapter.fliterList("u",MainActivity.allAppInfos);
+        if(adapter.bjdatas.size()==appLoader.allAppInfos.size()){
+            adapter.fliterList("u",appLoader.allAppInfos);
         }
         if(pd==null){
             pd= ProgressDialog.show(this.getActivity(),"正在阉割","准备阉割...",true,false);
@@ -323,7 +323,7 @@ public class IFWFragment extends Fragment {
         new Thread(){
             @Override
             public void run() {
-                synchronized (MainActivity.allAppInfos) {
+                synchronized (appLoader.allAppInfos) {
 //                    boolean isSEL = SELinuxUtil.isSELOpen();
 //                    if (isSEL) {
 //                        SELinuxUtil.closeSEL();
@@ -647,7 +647,7 @@ public class IFWFragment extends Fragment {
                     }
                     FileUtil.changeQX(700,"/data/system/ifw");
                     Toast.makeText(getActivity(),"清除完成",Toast.LENGTH_LONG).show();
-                    for(AppInfo ai:MainActivity.allAppInfos){
+                    for(AppInfo ai:appLoader.allAppInfos){
                         ai.activityDisableCount = 0;
                         ai.serviceDisableCount = 0;
                         ai.broadCastDisableCount = 0;

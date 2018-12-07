@@ -101,17 +101,21 @@ public class XposedRencent {
         return null;
     }
 
-    public static String getInfoByPkg(XSharedPreferences recentPrefs,XSharedPreferences appStartiPrefs,XSharedPreferences muBeiPrefs,String pkg){
-        muBeiPrefs.reload();
+    public static String getInfoByPkg(XSharedPreferences recentPrefs,
+                                      XSharedPreferences appStartiPrefs,
+//                                      XSharedPreferences muBeiPrefs,
+                                      String pkg){
+//        muBeiPrefs.reload();
         recentPrefs.reload();
         appStartiPrefs.reload();
         boolean isNotClean = recentPrefs.getBoolean(pkg + "/notclean", false);
         boolean isForceClean = recentPrefs.getBoolean(pkg+"/forceclean",false);
-        boolean isInMuBei = muBeiPrefs.getInt(pkg, -1) == 0;
+        boolean isBlur = recentPrefs.getBoolean(pkg+"/blur",false);
+//        boolean isInMuBei = muBeiPrefs.getInt(pkg, -1) == 0;
         boolean isNotStop = appStartiPrefs.getBoolean(pkg + "/notstop", false);
-        if (isNotClean ||isForceClean || isInMuBei || isNotStop) {
-            String msgs[] = {"墓碑", "保留", "常驻", "杀死"};
-            boolean chooses[] = {isInMuBei, isNotClean, isNotStop, isForceClean};
+        if (isNotClean ||isForceClean || isBlur || isNotStop) {
+            String msgs[] = {"模糊", "保留", "常驻", "杀死"};
+            boolean chooses[] = {isBlur, isNotClean, isNotStop, isForceClean};
             StringBuilder sb = new StringBuilder();
             sb.append("(");
             for (int i = 0; i < msgs.length; i++) {
@@ -125,7 +129,12 @@ public class XposedRencent {
         }
         return "";
     }
-    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences recentPrefs,final XSharedPreferences barPrefs,final XSharedPreferences muBeiPrefs,final XSharedPreferences appStartiPrefs,final boolean isRecentOpen,final boolean isUIChangeOpen){
+    public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
+                                   final XSharedPreferences recentPrefs,
+                                   final XSharedPreferences barPrefs,
+//                                   final XSharedPreferences muBeiPrefs,
+                                   final XSharedPreferences appStartiPrefs,
+                                   final boolean isRecentOpen,final boolean isUIChangeOpen){
         try {
             if(lpparam.packageName.equals("com.android.systemui")&&isRecentOpen&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){//&&Build.VERSION.SDK_INT < Build.VERSION_CODES.M
                 final Class tvtCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
@@ -226,20 +235,21 @@ public class XposedRencent {
 //                        }
                     };
                     if (clss != null) {
-                        if (clss.length == 1) {
-                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], hook);
-                        } else if (clss.length == 2) {
-                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], hook);
-                        } else if (clss.length == 4) {
-                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], clss[2], clss[3], hook);
-                        }  else if (clss.length == 3) {
-                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], clss[2], hook);
-                        } else {
-                            XposedBridge.log("^^^^^^^^^^^^^^setThumbnail else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-                            for (Class c : clss) {
-                                XposedBridge.log("^^^^^^^^^^^^^^setThumbnail canshu " + c.getName() + " ^^^^^^^^^^^^^^^^^");
-                            }
-                        }
+                        XposedUtil.hookMethod(tvtCls,clss,"setThumbnail",hook);
+//                        if (clss.length == 1) {
+//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], hook);
+//                        } else if (clss.length == 2) {
+//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], hook);
+//                        } else if (clss.length == 4) {
+//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], clss[2], clss[3], hook);
+//                        }  else if (clss.length == 3) {
+//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], clss[2], hook);
+//                        } else {
+//                            XposedBridge.log("^^^^^^^^^^^^^^setThumbnail else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
+//                            for (Class c : clss) {
+//                                XposedBridge.log("^^^^^^^^^^^^^^setThumbnail canshu " + c.getName() + " ^^^^^^^^^^^^^^^^^");
+//                            }
+//                        }
                     } else {
                         XposedBridge.log("^^^^^^^^^^^^^^setThumbnail 函数未找到 ^^^^^^^^^^^^^^^^^");
                     }
@@ -258,13 +268,14 @@ public class XposedRencent {
                                 }
                             }
                         };
-                        if (clss1.length == 0) {
-                            XposedHelpers.findAndHookMethod(recentActCls, "onStop", hook1);
-                        } else if (clss1.length == 2) {
-                            XposedHelpers.findAndHookMethod(recentActCls, "onStop", clss1[0], clss1[1], hook1);
-                        } else {
-                            XposedBridge.log("^^^^^^^^^^^^^^onStop else " + clss1.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-                        }
+                        XposedUtil.hookMethod(recentActCls,clss1,"onStop",hook1);
+//                        if (clss1.length == 0) {
+//                            XposedHelpers.findAndHookMethod(recentActCls, "onStop", hook1);
+//                        } else if (clss1.length == 2) {
+//                            XposedHelpers.findAndHookMethod(recentActCls, "onStop", clss1[0], clss1[1], hook1);
+//                        } else {
+//                            XposedBridge.log("^^^^^^^^^^^^^^onStop else " + clss1.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
+//                        }
                     } else {
                         XposedBridge.log("^^^^^^^^^^^^^^onStop 函数未找到 ^^^^^^^^^^^^^^^^^");
                     }
@@ -293,16 +304,18 @@ public class XposedRencent {
                             }
                         }
                     };
+
                     if (clss != null) {
-                        if (clss.length == 2) {
-                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], clss[1], hook);
-                        } else if (clss.length == 1) {
-                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], hook);
-                        } else if (clss.length == 3) {
-                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], clss[1], clss[2], hook);
-                        } else {
-                            XposedBridge.log("^^^^^^^^^^^^^^updateThumbnailLocked else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-                        }
+                        XposedUtil.hookMethod(arCls,clss,"updateThumbnailLocked",hook);
+//                        if (clss.length == 2) {
+//                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], clss[1], hook);
+//                        } else if (clss.length == 1) {
+//                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], hook);
+//                        } else if (clss.length == 3) {
+//                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], clss[1], clss[2], hook);
+//                        } else {
+//                            XposedBridge.log("^^^^^^^^^^^^^^updateThumbnailLocked else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
+//                        }
                     } else {
                         XposedBridge.log("^^^^^^^^^^^^^^updateThumbnailLocked 函数未找到 ^^^^^^^^^^^^^^^^^");
                     }
@@ -335,7 +348,7 @@ public class XposedRencent {
                                     protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                         try {
                                             String pkg = getPkgByTask(methodHookParam.thisObject);
-                                            String title = getInfoByPkg(recentPrefs,appStartiPrefs,muBeiPrefs,pkg);
+                                            String title = getInfoByPkg(recentPrefs,appStartiPrefs,pkg);
                                             if (title!=null&&title.length()>0) {
                                                 Field field = taskCls.getDeclaredField(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? "title" : "activityLabel");
                                                 field.setAccessible(true);
@@ -350,25 +363,27 @@ public class XposedRencent {
                                         }
                                     }
                                 };
-                                if (clss.length == 11) {
-                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], hook);
-                                } else if (clss.length == 20) {
-                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], clss[13], clss[14], clss[15], clss[16], clss[17], clss[18], clss[19], hook);
-                                }else if (clss.length == 21) {
-                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], clss[13], clss[14], clss[15], clss[16], clss[17], clss[18], clss[19],  clss[20], hook);
-                                }else if (clss.length == 13) {
-                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], hook);
-                                } else {
-                                    XposedBridge.log("^^^^^^^^^^^^^^Task else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-                                }
+                                XposedUtil.hookConstructorMethod(taskCls,clss,hook);
+//                                if (clss.length == 11) {
+//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], hook);
+//                                } else if (clss.length == 20) {
+//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], clss[13], clss[14], clss[15], clss[16], clss[17], clss[18], clss[19], hook);
+//                                }else if (clss.length == 21) {
+//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], clss[13], clss[14], clss[15], clss[16], clss[17], clss[18], clss[19],  clss[20], hook);
+//                                }else if (clss.length == 13) {
+//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], hook);
+//                                } else {
+//                                    XposedBridge.log("^^^^^^^^^^^^^^Task else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
+//                                }
                                 Class clss1[] = XposedUtil.getParmsByName(taskCls,"notifyTaskDataLoaded");
-                                if (clss1.length == 2) {
-                                    XposedHelpers.findAndHookMethod(taskCls, "notifyTaskDataLoaded", clss1[0],clss1[1], hook);
-                                }else if (clss1.length == 3) {
-                                    XposedHelpers.findAndHookMethod(taskCls, "notifyTaskDataLoaded", clss1[0],clss1[1],clss1[2], hook);
-                                } else {
-                                    XposedBridge.log("^^^^^^^^^^^^^^notifyTaskDataLoaded else " + clss1.length + " ^^^^^^^^^^^^^^^^^");
-                                }
+                                XposedUtil.hookMethod(taskCls,clss1,"notifyTaskDataLoaded",hook);
+//                                if (clss1.length == 2) {
+//                                    XposedHelpers.findAndHookMethod(taskCls, "notifyTaskDataLoaded", clss1[0],clss1[1], hook);
+//                                }else if (clss1.length == 3) {
+//                                    XposedHelpers.findAndHookMethod(taskCls, "notifyTaskDataLoaded", clss1[0],clss1[1],clss1[2], hook);
+//                                } else {
+//                                    XposedBridge.log("^^^^^^^^^^^^^^notifyTaskDataLoaded else " + clss1.length + " ^^^^^^^^^^^^^^^^^");
+//                                }
                             } else {
                                 XposedBridge.log("^^^^^^^^^^^^^^Task 构造函数未找到 ^^^^^^^^^^^^^^^^^");
                             }
@@ -392,7 +407,7 @@ public class XposedRencent {
                                                     Toast.makeText(tv.getContext(),"无法获取被点击的应用，证明系统代码改动较大没有适配",Toast.LENGTH_LONG).show();
                                                     return;
                                                 }
-                                                muBeiPrefs.reload();
+//                                                muBeiPrefs.reload();
                                                 recentPrefs.reload();
                                                 appStartiPrefs.reload();
                                                 final boolean isNotClean = recentPrefs.getBoolean(pkg + "/notclean", false);
@@ -423,7 +438,7 @@ public class XposedRencent {
                                                             @Override
                                                             public void run() {
                                                                 try {
-                                                                    String title = getInfoByPkg(recentPrefs,appStartiPrefs,muBeiPrefs,pkg);
+                                                                    String title = getInfoByPkg(recentPrefs,appStartiPrefs,pkg);
                                                                     String oldTitle = tv.getText().toString();
                                                                     if (oldTitle.indexOf("(")!=-1){
                                                                         oldTitle = oldTitle.substring(0,oldTitle.indexOf("("));
@@ -610,11 +625,12 @@ public class XposedRencent {
                             }
                             }
                         };
-                        if (clss.length == 0) {
-                            XposedHelpers.findAndHookMethod(recentViewCls, "onFinishInflate", hook);
-                        } else {
-                            XposedBridge.log("^^^^^^^^^^^^^^onFinishInflate else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-                        }
+                        XposedUtil.hookMethod(recentViewCls,clss,"onFinishInflate",hook);
+//                        if (clss.length == 0) {
+//                            XposedHelpers.findAndHookMethod(recentViewCls, "onFinishInflate", hook);
+//                        } else {
+//                            XposedBridge.log("^^^^^^^^^^^^^^onFinishInflate else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
+//                        }
                     } else {
                         XposedBridge.log("^^^^^^^^^^^^^^onFinishInflate  函数未找到 ^^^^^^^^^^^^^^^^^");
                     }
@@ -652,13 +668,14 @@ public class XposedRencent {
                                 }
                                 }
                             };
-                            if (clss.length == 4) {
-                                XposedHelpers.findAndHookConstructor(thumbViewCls, clss[0], clss[1], clss[2], clss[3], hook);
-                            } else if (clss.length == 5) {
-                                XposedHelpers.findAndHookConstructor(thumbViewCls, clss[0], clss[1], clss[2], clss[3], clss[4], hook);
-                            } else {
-                                XposedBridge.log("^^^^^^^^^^^^^^yhumbnail else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-                            }
+                            XposedUtil.hookConstructorMethod(thumbViewCls,clss,hook);
+//                            if (clss.length == 4) {
+//                                XposedHelpers.findAndHookConstructor(thumbViewCls, clss[0], clss[1], clss[2], clss[3], hook);
+//                            } else if (clss.length == 5) {
+//                                XposedHelpers.findAndHookConstructor(thumbViewCls, clss[0], clss[1], clss[2], clss[3], clss[4], hook);
+//                            } else {
+//                                XposedBridge.log("^^^^^^^^^^^^^^yhumbnail else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
+//                            }
                         } else {
                             XposedBridge.log("^^^^^^^^^^^^^^yhumbnail  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                         }
@@ -676,13 +693,14 @@ public class XposedRencent {
                                     }
                                 }
                             };
-                            if (clsss.length == 1) {
-                                XposedHelpers.findAndHookMethod(thumbViewCls, "updateClipToTaskBar", clsss[0], hook);
-                            } else if (clsss.length == 2) {
-                                XposedHelpers.findAndHookMethod(thumbViewCls, "updateClipToTaskBar", clsss[0], clsss[1], hook);
-                            } else {
-                                XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar else " + clsss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-                            }
+                            XposedUtil.hookMethod(thumbViewCls,clsss,"updateClipToTaskBar",hook);
+//                            if (clsss.length == 1) {
+//                                XposedHelpers.findAndHookMethod(thumbViewCls, "updateClipToTaskBar", clsss[0], hook);
+//                            } else if (clsss.length == 2) {
+//                                XposedHelpers.findAndHookMethod(thumbViewCls, "updateClipToTaskBar", clsss[0], clsss[1], hook);
+//                            } else {
+//                                XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar else " + clsss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
+//                            }
                         } else {
                             XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar  函数未找到 ^^^^^^^^^^^^^^^^^");
                         }
@@ -712,13 +730,14 @@ public class XposedRencent {
                                         }
                                     }
                                 };
-                                if (clss.length == 2) {
-                                    XposedHelpers.findAndHookConstructor(avbCls, clss[0], clss[1], hook);
-                                } else if (clss.length == 3) {
-                                    XposedHelpers.findAndHookConstructor(avbCls, clss[0], clss[1], clss[2], hook);
-                                } else {
-                                    XposedBridge.log("^^^^^^^^^^^^^^avbCls else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-                                }
+                                XposedUtil.hookConstructorMethod(avbCls,clss,hook);
+//                                if (clss.length == 2) {
+//                                    XposedHelpers.findAndHookConstructor(avbCls, clss[0], clss[1], hook);
+//                                } else if (clss.length == 3) {
+//                                    XposedHelpers.findAndHookConstructor(avbCls, clss[0], clss[1], clss[2], hook);
+//                                } else {
+//                                    XposedBridge.log("^^^^^^^^^^^^^^avbCls else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
+//                                }
                             } else {
                                 XposedBridge.log("^^^^^^^^^^^^^^avbCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                             }

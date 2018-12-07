@@ -26,21 +26,26 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.R;
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.bean.NavInfo;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
+import com.click369.controlbp.util.ShellUtilNoBackData;
 import com.click369.controlbp.util.TimeUtil;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 
 public class BaseActivity extends AppCompatActivity {
@@ -49,12 +54,15 @@ public class BaseActivity extends AppCompatActivity {
     public Handler h = new Handler();
     public static Point p = new Point();
     public static boolean isZhenDong = true;
+    public static boolean isUpdateAppTime = false;
     public SharedPrefsUtil sharedPrefs;
+    public AppLoaderUtil appLoaderUtil;
     private static HashMap<String,Long> procTimeInfos = new HashMap<String,Long>();
     //    @TargetApi(Build.VERSION_CODES.M)
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        appLoaderUtil = AppLoaderUtil.getInstance(this.getApplicationContext());
         sharedPrefs = SharedPrefsUtil.getInstance(this.getApplicationContext());
         if (!MainActivity.isUIRun){
             SharedPreferences settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
@@ -102,10 +110,10 @@ public class BaseActivity extends AppCompatActivity {
     }
     public static String getProcTimeStr(String packageName){
         long t = getProcTime(packageName);
-        if(t==-1){
+        if(t==-1||packageName.equals(BuildConfig.APPLICATION_ID)){
             return  "";
         }
-        t = SystemClock.elapsedRealtime()- t;
+        t =SystemClock.uptimeMillis()- t;
         return "\n后台:"+TimeUtil.changeMils2StringMin(t);
     }
 
@@ -162,38 +170,48 @@ public class BaseActivity extends AppCompatActivity {
                 return false;
             }
         });
+
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 final AppInfo ai = (AppInfo)(adapter.getItem(i));
+                final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(ai.packageName)?AppLoaderUtil.allAppStateInfos.get(ai.packageName):new AppStateInfo();
+
                 String titles[] = {"启动该应用","清空该应用的所有设置","打开后定时结束该程序"};
                 final boolean isRun = ai.isRunning;
-                if(isRun&&WatchDogService.setTimeStopApp.containsKey(ai.packageName)){
+                if(isRun&&(ai.isSetTimeStopApp)){
                     titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序","取消已设置的定时结束设置","杀死该进程"};
                     choose = 0;
-                }else if(isRun&&!WatchDogService.setTimeStopApp.containsKey(ai.packageName)){
+                }else if(isRun&&(!ai.isSetTimeStopApp)){
                     titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序","杀死该进程"};
                     choose = 1;
-                }else if(!isRun&&WatchDogService.setTimeStopApp.containsKey(ai.packageName)){
+                }else if(!isRun&&(ai.isSetTimeStopApp)){
                     titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序","取消已设置的定时结束设置"};
                     choose = 2;
-                }else if(!isRun&&!WatchDogService.setTimeStopApp.containsKey(ai.packageName)){
+                }else if(!isRun&&(!ai.isSetTimeStopApp)){
                     titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序"};
                     choose = 3;
                 }
-                final String t = WatchDogService.setTimeStopApp.containsKey(ai.packageName)? WatchDogService.setTimeStopApp.get(ai.packageName)+"":"";
+                final String t = ai.isSetTimeStopApp? ai.setTimeStopAppTime+"":"";
                 AlertUtil.showListAlert(cxt, "请选择对"+ai.appName+"的操作", titles, new AlertUtil.InputCallBack() {
                     @Override
                     public void backData(String txt, int tag) {
                         if (tag == 0){
                             if(ai.activityCount>0){
                                 cxt.moveTaskToBack(true);
+                                if(ai.isDisable){
+                                    asi.isOpenFromIceRome = true;
+                                    Intent intent = new Intent("com.click369.control.pms.enablepkg");
+                                    intent.putExtra("pkg",ai.getPackageName());
+                                    cxt.sendBroadcast(intent);
+                                    ShellUtilNoBackData.execCommand("pm "+(ai.isDisable?"enable":"disable")+" "+ai.packageName);
+                                }
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
                                         OpenCloseUtil.doStartApplicationWithPackageName(ai.packageName,cxt);
                                     }
-                                },500);
+                                },200);
                             }else{
                                 Toast.makeText(cxt,"该应用没有可视界面，无法启动",Toast.LENGTH_LONG).show();
                             }
@@ -202,7 +220,7 @@ public class BaseActivity extends AppCompatActivity {
                                @Override
                                public void backData(String txt, int tag) {
                                if (tag == 1) {
-                                   ((BaseActivity)cxt).sharedPrefs.clearAppSettings(ai);
+                                   ((BaseActivity)cxt).sharedPrefs.clearAppSettings(ai,false);
                                }
                                }
                            });
@@ -218,11 +236,18 @@ public class BaseActivity extends AppCompatActivity {
                                                public void backData(String txt, int tag) {
                                                    int time = Integer.parseInt(txt);
                                                    if (time>0){
-                                                       WatchDogService.setTimeStopApp.put(ai.packageName,time);
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().putInt(ai.packageName+"/one",time).commit();
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/long").commit();
+                                                       ai.isSetTimeStopOneTime = true;
+                                                       ai.setTimeStopAppTime = time;
+                                                       ai.isSetTimeStopApp = true;
                                                        Toast.makeText(cxt,"当该应用打开后将会在"+time+"分钟后强行关闭",Toast.LENGTH_LONG).show();
                                                    }else{
-                                                       WatchDogService.setTimeStopApp.remove(ai.packageName);
-                                                       WatchDogService.stopAppName.remove(ai.packageName);
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/one").commit();
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/long").commit();
+                                                       ai.isSetTimeStopOneTime = false;
+                                                       ai.setTimeStopAppTime = 0;
+                                                       ai.isSetTimeStopApp = false;
                                                        Toast.makeText(cxt,"没有设置有效的时间",Toast.LENGTH_SHORT).show();
                                                        adapter.notifyDataSetChanged();
                                                    }
@@ -233,17 +258,19 @@ public class BaseActivity extends AppCompatActivity {
                                                @Override
                                                public void backData(String txt, int tag) {
                                                    int time = Integer.parseInt(txt);
-                                                   SharedPreferences setTimeStop = SharedPrefsUtil.getPreferences(cxt, Common.PREFS_SETTIMESTOP);
                                                    if (time>0){
-                                                       setTimeStop.edit().putInt(ai.packageName,time).commit();
-                                                       WatchDogService.setTimeStopApp.put(ai.packageName,time);
-                                                       WatchDogService.setTimeStopkeys.add(ai.packageName);
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().putInt(ai.packageName+"/long",time).commit();
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/one").commit();
+                                                       ai.isSetTimeStopOneTime = false;
+                                                       ai.setTimeStopAppTime = time;
+                                                       ai.isSetTimeStopApp = true;
                                                        Toast.makeText(cxt,"当该应用每次打开后将会在"+time+"分钟后强行关闭",Toast.LENGTH_LONG).show();
                                                    }else{
-                                                       setTimeStop.edit().remove(ai.packageName).commit();
-                                                       WatchDogService.setTimeStopApp.remove(ai.packageName);
-                                                       WatchDogService.stopAppName.remove(ai.packageName);
-                                                       WatchDogService.setTimeStopkeys.remove(ai.packageName);
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/long").commit();
+                                                       SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/one").commit();
+                                                       ai.isSetTimeStopOneTime = false;
+                                                       ai.setTimeStopAppTime = 0;
+                                                       ai.isSetTimeStopApp = false;
                                                        Toast.makeText(cxt,"没有设置有效的时间",Toast.LENGTH_SHORT).show();
                                                        adapter.notifyDataSetChanged();
                                                    }
@@ -257,11 +284,11 @@ public class BaseActivity extends AppCompatActivity {
                                ai.isRunning = false;
                                adapter.notifyDataSetChanged();
                            }else if(tag==3&&(choose == 0||choose == 2)){
-                               WatchDogService.setTimeStopApp.remove(ai.packageName);
-                               WatchDogService.stopAppName.remove(ai.packageName);
-                               WatchDogService.setTimeStopkeys.remove(ai.packageName);
-                               SharedPreferences setTimeStop = SharedPrefsUtil.getPreferences(cxt, Common.PREFS_SETTIMESTOP);
-                               setTimeStop.edit().remove(ai.packageName).commit();
+                               ai.setTimeStopAppTime = 0;
+                               ai.isSetTimeStopApp = false;
+                               ai.isSetTimeStopOneTime= false;
+                               SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/long").commit();
+                               SharedPrefsUtil.getInstance(cxt).setTimeStopPrefs.edit().remove(ai.packageName+"/one").commit();
 
                                adapter.notifyDataSetChanged();
                            }
@@ -314,10 +341,19 @@ public class BaseActivity extends AppCompatActivity {
                 navInfos.add(new NavInfo(0,"锁定染色",null,ai.isBarLockList));
 
                 navInfos.add(new NavInfo(0,"跳过广告",null,ai.isADJump));
+                if(ai.instanllTime>0){
+                    navInfos.add(new NavInfo(1,"安装时间",TimeUtil.changeMils2String(ai.instanllTime,"yyyy-MM-dd HH:mm"),false));
+                    navInfos.add(new NavInfo(1,"更新时间",TimeUtil.changeMils2String(ai.updateTime,"yyyy-MM-dd HH:mm"),false));
+                }
+                if(ai.lastOpenTime>0){
+                    navInfos.add(new NavInfo(1,"上次打开",TimeUtil.changeMils2String(ai.lastOpenTime,"yyyy-MM-dd HH:mm"),false));
+                    navInfos.add(new NavInfo(1,"打开次数",ai.openCount+"",false));
+                }
                 MainActivity ma = (MainActivity)cxt;
                 ma.navInfoLL.setVisibility(View.VISIBLE);
+
                 ma.navInfoTitle.setText("对<"+ai.appName+">的控制详情");
-                ma.navInfoSamllTitle.setText(ai.packageName);
+                ma.navInfoSamllTitle.setText(ai.packageName+"\n版本:"+ai.versionName+" 版本号:"+ai.versionCode);
 //                ma.navInfoContent.setText(sb.toString());
                 ma.navAdapter.setData(navInfos);
                 if (!ma.drawer.isDrawerOpen(GravityCompat.START)) {

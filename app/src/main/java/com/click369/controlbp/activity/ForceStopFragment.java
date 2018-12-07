@@ -34,7 +34,7 @@ import java.util.ArrayList;
  * Use the {@link ForceStopFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ForceStopFragment extends Fragment {
+public class ForceStopFragment extends BaseFragment {
     private Handler h = new Handler();
     public ForceStopAdapter adapter;
     private ListView listView;
@@ -42,7 +42,7 @@ public class ForceStopFragment extends Fragment {
 //    private EditText editText;
 //    private FrameLayout alertFl;
     private TextView backTv,homeTv,offScTv,notifyTv;//alertTv,closeTv;
-    private SharedPreferences forcePrefs,muBeiPrefs,appStartPrefs;
+    private SharedPreferences forcePrefs,appStartPrefs;
     private MainActivity mainActivity;
     public static  boolean isClick = false;
     public static int curColor = Color.BLACK;
@@ -68,7 +68,7 @@ public class ForceStopFragment extends Fragment {
 
     private void initView(View v){
         appStartPrefs =SharedPrefsUtil.getInstance(getActivity()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-        muBeiPrefs = SharedPrefsUtil.getInstance(getActivity()).muBeiPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_MUBEILIST);
+//        muBeiPrefs = SharedPrefsUtil.getInstance(getActivity()).muBeiPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.IPREFS_MUBEILIST);
         forcePrefs = SharedPrefsUtil.getInstance(getActivity()).forceStopPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_FORCESTOPNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
 //        controlPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_SETTINGNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
         listView = (ListView)v.findViewById(R.id.main_listview);
@@ -87,7 +87,7 @@ public class ForceStopFragment extends Fragment {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoader.allAppInfos);
             }
         });
         final String titles [] =new String[]{"全选为强退模式","全选为墓碑模式","清除所有选择"};
@@ -104,12 +104,10 @@ public class ForceStopFragment extends Fragment {
                         if(tag==0){
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             SharedPreferences.Editor edStart = appStartPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 ed.putBoolean(ai.getPackageName()+"/backstop",true).commit();
                                 ed.remove(ai.getPackageName()+"/backmubei").commit();
-                                mbed.remove(ai.getPackageName()).commit();
                                 ai.isBackForceStop = true;
                                 ai.isBackMuBei = false;
 
@@ -124,13 +122,11 @@ public class ForceStopFragment extends Fragment {
                             }
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             SharedPreferences.Editor edStart = appStartPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 if(!ai.isHomeMuBei&&!ai.isServiceStop){
                                     ed.putBoolean(ai.getPackageName()+"/backmubei",true).commit();
                                     ed.remove(ai.getPackageName()+"/backstop").commit();
-                                    mbed.putInt(ai.getPackageName(),0).commit();
                                     ai.isBackMuBei = true;
                                     ai.isBackForceStop = false;
                                     if(!ai.isRecentForceClean){
@@ -143,11 +139,9 @@ public class ForceStopFragment extends Fragment {
                         }else if(tag==2){
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 ed.remove(ai.getPackageName()+"/backstop").commit();
                                 ed.remove(ai.getPackageName()+"/backmubei").commit();
-                                mbed.remove(ai.getPackageName()).commit();
                                 ai.isBackForceStop = false;
                                 ai.isBackMuBei = false;
                             }
@@ -176,10 +170,8 @@ public class ForceStopFragment extends Fragment {
                                 return;
                             }
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 ed.remove(ai.getPackageName()+"/homestop").putBoolean(ai.getPackageName()+"/idle",true).commit();
-                                mbed.remove(ai.getPackageName()+"/homemubei").remove(ai.getPackageName()).commit();
                                 ai.isHomeMuBei = false;
                                 ai.isHomeIdle = true;
                             }
@@ -191,12 +183,10 @@ public class ForceStopFragment extends Fragment {
                             }
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 if (!ai.isOffscMuBei&&!ai.isBackMuBei&&!ai.isServiceStop) {
                                     ed.remove(ai.getPackageName() + "/homestop").commit();
                                     ed.putBoolean(ai.getPackageName() + "/homemubei", true).commit();
-                                    mbed.putInt(ai.getPackageName(),0).commit();
                                     ai.isHomeMuBei = true;
 //                                ai.isHomeForceStop = false;
                                 }
@@ -205,10 +195,8 @@ public class ForceStopFragment extends Fragment {
                         }else if(tag==2){
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 ed.remove(ai.getPackageName()+"/idle").remove(ai.getPackageName()+"/homemubei").commit();
-                                mbed.remove(ai.getPackageName()).commit();
                                 ai.isHomeIdle = false;
                                 ai.isHomeMuBei = false;
                             }
@@ -233,11 +221,9 @@ public class ForceStopFragment extends Fragment {
                         if(tag==0){
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 ed.putBoolean(ai.getPackageName()+"/offstop",true).commit();
                                 ed.remove(ai.getPackageName()+"/offmubei").commit();
-                                mbed.remove(ai.getPackageName()).commit();
                                 ai.isOffscForceStop = true;
                                 ai.isOffscMuBei = false;
                             }
@@ -249,12 +235,10 @@ public class ForceStopFragment extends Fragment {
                             }
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 if(!ai.isHomeMuBei&&!ai.isServiceStop) {
                                     ed.putBoolean(ai.getPackageName() + "/offmubei", true).commit();
                                     ed.remove(ai.getPackageName() + "/offstop").commit();
-                                    mbed.putInt(ai.getPackageName() , 0).commit();
                                     ai.isOffscMuBei = true;
                                     ai.isOffscForceStop = false;
                                 }
@@ -263,11 +247,9 @@ public class ForceStopFragment extends Fragment {
                         }else if(tag==2){
                             isClick = true;
                             SharedPreferences.Editor ed = forcePrefs.edit();
-                            SharedPreferences.Editor mbed = muBeiPrefs.edit();
                             for(AppInfo ai:adapter.bjdatas){
                                 ed.remove(ai.getPackageName()+"/offstop").commit();
                                 ed.remove(ai.getPackageName()+"/offmubei").commit();
-                                mbed.remove(ai.getPackageName()).commit();
                                 ai.isOffscForceStop = false;
                                 ai.isOffscMuBei = false;
                             }

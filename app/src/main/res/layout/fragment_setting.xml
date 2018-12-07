@@ -17,7 +17,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="服务、强退、冷藏等相关设置"
+                android:text="全局相关、服务、强退、冷藏等相关设置"
                 android:id="@+id/setting_title1_tv" />
             <LinearLayout
                 android:orientation="vertical"
@@ -57,6 +57,23 @@
                         android:id="@+id/setting_showsidebar_sw"
                         android:checked="true" />
                 </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="应用列表实时更新后台时间(6秒一次)"
+                        android:id="@+id/setting_updatetime_sw"
+                        android:checked="true" />
+                </FrameLayout>
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -86,7 +103,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="正在播放音频的应用不执行‘强退/墓碑/待机’"
+                        android:text="正在播放音频的应用不执行‘强退/墓碑/待机/冻结’"
                         android:id="@+id/setting_notexitaudio_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -102,7 +119,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="加入返回强退的应用后台超时12小时后杀死"
+                        android:text="返回/熄屏强退的应用后台超时12小时后杀死"
                         android:id="@+id/setting_checktimeout_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -157,7 +174,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="墓碑时保留主进程阻止唤醒锁定时器(大多保留1-2个)\n(试验功能，打开后若有异常请反馈并关闭该功能)"
+                        android:text="墓碑时只保留主进程(大多保留1-2个)\n(试验功能，打开后若有异常请反馈并关闭该功能)"
                         android:id="@+id/setting_mubestopreceiver_sw"
                         android:checked="false"
                         android:visibility="visible" />

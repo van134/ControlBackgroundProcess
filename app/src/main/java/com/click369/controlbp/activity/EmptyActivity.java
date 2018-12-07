@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
@@ -96,7 +97,9 @@ public class EmptyActivity extends AppCompatActivity {
 //            if(!NewWatchDogService.isOpenNewDogService){
 //                OpenCloseUtil.closeOpenAccessibilitySettingsOn(this,true);
 //            }
-            WatchDogService.iceButOpenInfos.add(pkg);
+            AppStateInfo asi =AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+            asi.isOpenFromIceRome = true;
+            AppLoaderUtil.allAppStateInfos.put(pkg,asi);
             h.postDelayed(r,100);
             cout = 0;
         }

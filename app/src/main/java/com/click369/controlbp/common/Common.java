@@ -47,6 +47,7 @@ public class Common {
     public static String PREFS_SETTING_NEWAPPAUTOOPENCONTROL ="newappautoopencontrol";
     public static String PREFS_SETTING_ISNOTEXITAUDIOPLAY ="isnotexitaudioplay";
     public static String PREFS_SETTING_ISCHECKTIMEOUTAPP ="ischecktimeoutapp";
+    public static String PREFS_SETTING_ISUPDATEAPPTIME ="isupdateapptime";
 
     public static String PREFS_SETTING_WAKELOCK_LOOK ="wakelocklook";
     public static String PREFS_SETTING_ALARM_LOOK ="alarmlook";

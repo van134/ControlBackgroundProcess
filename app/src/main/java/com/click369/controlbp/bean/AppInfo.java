@@ -31,7 +31,8 @@ public class AppInfo implements Serializable {
     public boolean isUser;
     public boolean isDisable = false;
     public boolean isServiceStop;
-//    public boolean isServiceDeadStone;//墓碑
+    public boolean isSetTimeStopApp;//定时关闭
+    public boolean isSetTimeStopOneTime;//是否是一次性的定时关闭
     public boolean isWakelockStop;
     public boolean isBroadStop;
     public boolean isAlarmStop;
@@ -67,12 +68,20 @@ public class AppInfo implements Serializable {
     public int serviceCount;
     public int broadCastCount;
 
+    public int setTimeStopAppTime;
+
     public int activityDisableCount;
     public int serviceDisableCount;
     public int broadCastDisableCount;
+    public int openCount = 0;
+    public long lastOpenTime;
     public int uid;
     public long instanllTime;
+    public long updateTime;
+    public String versionName;
+    public long versionCode;
     public byte bits[];
+//    public AppStateInfo stateInfo;
     public AppInfo(){}
     public AppInfo(String appName){
         this.appName = appName;
@@ -88,6 +97,7 @@ public class AppInfo implements Serializable {
         bits = BytesBitmap.getBytes(bm);
         this.isUser = isUser;
         this.isDisable = isDisable;
+//        stateInfo = new AppStateInfo();
     }
 
 

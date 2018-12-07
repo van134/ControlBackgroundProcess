@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewParent;
@@ -38,7 +39,7 @@ public class XposedUtil {
     public static void reloadInfos(Context c,
                                    SharedPreferences autoStartPrefs,
                                    SharedPreferences controlPrefs,
-                                   SharedPreferences muBeiPrefs,
+//                                   SharedPreferences muBeiPrefs,
                                    SharedPreferences settingPrefs,
                                    SharedPreferences skipDialogPrefs){
 //        if(System.currentTimeMillis()-lastReloadTime<200){
@@ -48,7 +49,7 @@ public class XposedUtil {
         Intent intentb = new Intent("com.click369.control.ams.initreload");
         intentb.putExtra("autoStartPrefs", (Serializable) autoStartPrefs.getAll());
         intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
-        intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());
+//        intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());
         intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
         intentb.putExtra("skipDialogPrefs", (Serializable) skipDialogPrefs.getAll());
         c.sendBroadcast(intentb);
@@ -143,6 +144,25 @@ public class XposedUtil {
             }
         }
     }
+
+    public static void showParmsByNameLog(Class cls,String methodName){
+        if(cls!=null){
+            Method ms[] = cls.getDeclaredMethods();
+            Log.i("","^^^^^^^^^^^^^^" + cls.getName() + "的函数 "+methodName+"^^^^^^^^^^^^^^^^^");
+            for(Method m:ms){
+                StringBuilder sb = new StringBuilder();
+                for(Class c:m.getParameterTypes()){
+                    sb.append(c.getName()).append(",");
+                }
+                if (methodName!=null&&m.getName().equals(methodName)){
+                   Log.i("","^^^^^^^^^^^^^^" + m.getName() +" ("+sb.toString()+ ")^^^^^^^^^^^^^^^^^");
+                    continue;
+                }
+//                Log.i("","^^^^^^^^^^^^^^" + m.getName() +" ("+sb.toString()+ ")^^^^^^^^^^^^^^^^^");
+            }
+        }
+    }
+
     public static Method getMethodByName(Class cls,String methodName){
         if(cls!=null){
             Method ms[] = cls.getDeclaredMethods();
@@ -182,7 +202,7 @@ public class XposedUtil {
                     }
                 }
             }
-        }catch (Exception e){
+        }catch (Throwable e){
             e.printStackTrace();
             XposedBridge.log("^^^^^^^^^^^^^^changePersistent err1 "+ e + "^^^^^^^^^^^^^^^^^");
         }
@@ -238,7 +258,7 @@ public class XposedUtil {
                     }
                 }
             }
-        }catch (Exception e){
+        }catch (Throwable e){
             e.printStackTrace();
             XposedBridge.log("^^^^^^^^^^^^^^stopProcess err1 "+ e + "^^^^^^^^^^^^^^^^^");
         }
@@ -327,7 +347,7 @@ public class XposedUtil {
                     }
                 }
             }
-        }catch (Exception e){
+        }catch (Throwable e){
             e.printStackTrace();
             XposedBridge.log("^^^^^^^^^^^^^^stopServicesAndroidL err "+ e + "^^^^^^^^^^^^^^^^^");
         }
@@ -385,5 +405,178 @@ public class XposedUtil {
             e.printStackTrace();
             XposedBridge.log("^^^^^^^^^^^^^^stopProcess err1 "+ e + "^^^^^^^^^^^^^^^^^");
         }
+    }
+
+    public static void hookMethod(Class cls,Class clss[],String methodName,XC_MethodHook hook){
+        try {
+            int len = clss!=null?clss.length:0;
+            switch (len){
+
+
+                case 0:
+                    XposedHelpers.findAndHookMethod(cls, methodName,hook);
+                    break;
+                case 1:
+                    XposedHelpers.findAndHookMethod(cls, methodName, clss[0], hook);
+                    break;
+                case 2:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1], hook);
+                    break;
+                case 3:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], hook);
+                    break;
+                case 4:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3], hook);
+                    break;
+                case 5:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4], hook);
+                    break;
+                case 6:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],hook);
+                    break;
+                case 7:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],hook);
+                    break;
+                case 8:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],hook);
+                    break;
+                case 9:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],hook);
+                    break;
+                case 10:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],hook);
+                    break;
+                case 11:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],hook);
+                    break;
+                case 12:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],hook);
+                    break;
+                case 13:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],hook);
+                    break;
+                case 14:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],hook);
+                    break;
+                case 15:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],hook);
+                    break;
+                case 16:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],hook);
+                    break;
+                case 17:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],hook);
+                    break;
+                case 18:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],hook);
+                    break;
+                case 19:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],hook);
+                    break;
+                case 20:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],hook);
+                    break;
+                case 21:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],clss[20],hook);
+                    break;
+                case 22:
+                    XposedHelpers.findAndHookMethod(cls, methodName,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],clss[20],clss[21],hook);
+                    break;
+
+
+                default:
+                    XposedBridge.log("^^^^^^^^^^^^^^"+cls.getName()+"  "+methodName+"函数未找到  "+clss.length+"^^^^^^^^^^^^^^^^^");
+                    break;
+
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+            XposedBridge.log("^^^^^^^^^^^^^^"+cls.getName()+"  "+methodName+"函数未找到  "+e+"^^^^^^^^^^^^^^^^^");
+        }
+
+    }
+    public static void hookConstructorMethod(Class cls,Class clss[],XC_MethodHook hook){
+
+        try {
+            int len = clss!=null?clss.length:0;
+            switch (len){
+                case 0:
+                    XposedHelpers.findAndHookConstructor(cls,hook);
+                    break;
+                case 1:
+                    XposedHelpers.findAndHookConstructor(cls, clss[0], hook);
+                    break;
+                case 2:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1], hook);
+                    break;
+                case 3:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], hook);
+                    break;
+                case 4:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3], hook);
+                    break;
+                case 5:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4], hook);
+                    break;
+                case 6:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],hook);
+                    break;
+                case 7:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],hook);
+                    break;
+                case 8:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],hook);
+                    break;
+                case 9:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],hook);
+                    break;
+                case 10:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],hook);
+                    break;
+                case 11:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],hook);
+                    break;
+                case 12:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],hook);
+                    break;
+                case 13:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],hook);
+                    break;
+                case 14:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],hook);
+                    break;
+                case 15:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],hook);
+                    break;
+                case 16:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],hook);
+                    break;
+                case 17:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],hook);
+                    break;
+                case 18:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],hook);
+                    break;
+                case 19:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],hook);
+                    break;
+                case 20:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],hook);
+                    break;
+                case 21:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],clss[20],hook);
+                    break;
+                case 22:
+                    XposedHelpers.findAndHookConstructor(cls,clss[0], clss[1],clss[2], clss[3],clss[4],clss[5],clss[6],clss[7],clss[8],clss[9],clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],clss[20],clss[21],hook);
+                    break;
+                default:
+                    XposedBridge.log("^^^^^^^^^^^^^^构造函数未找到  "+cls.getName()+"  "+clss.length+"^^^^^^^^^^^^^^^^^");
+                    break;
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+            XposedBridge.log("^^^^^^^^^^^^^^构造函数未找到  "+cls.getName()+"  "+e+"^^^^^^^^^^^^^^^^^");
+        }
+
     }
 }

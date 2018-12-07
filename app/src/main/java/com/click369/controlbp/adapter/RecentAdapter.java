@@ -199,7 +199,7 @@ public class RecentAdapter extends BaseAdapter{
 		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);
+		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.notCleanIv.setTag(position);
 		viewHolder.forceCleanIv.setTag(position);

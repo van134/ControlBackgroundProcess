@@ -47,7 +47,7 @@ public class DozeWhiteListActivity extends BaseActivity {
         curColor = onTitle.getCurrentTextColor();
         adapter = new DozeWhiteListAdapter(this,whiteListPrefs);
         list.setAdapter(adapter);
-        adapter.fliterList("u",MainActivity.allAppInfos);
+        adapter.fliterList("u",appLoaderUtil.allAppInfos);
         topView = new TopSearchView(this,v);
         topView.initView();
         String msg = "打盹白名单，不建议设置过多APP到白名单(最好不要超过5个)，否则就失去了打盹的意义，甚至还会导致更加耗电。加入前台运行的程序当打开该程序时暂停打盹退出或后台时重新进入打盹";
@@ -55,7 +55,7 @@ public class DozeWhiteListActivity extends BaseActivity {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoaderUtil.allAppInfos);
             }
         });
         TitleClickListener tcl = new TitleClickListener();

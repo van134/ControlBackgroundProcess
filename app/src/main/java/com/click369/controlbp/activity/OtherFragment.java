@@ -65,7 +65,7 @@ import java.util.Map;
 import de.robv.android.xposed.XposedHelpers;
 
 
-public class OtherFragment extends Fragment {
+public class OtherFragment extends BaseFragment {
     private TextView jxCleanTv,cleanSysTv,cleanProcessTv,kjRunTv,kjIceTv,kjCleanTv,kjjxCleanTv,kjRestartTv,adbTv,wifiTv,killSelfTv,changeTextTv,cleanTv,changeBgTv,bgBlurTv,bgBrightTv,kjCPUTv;
     private Switch selSw,homeErrorSw,cleanSw,stopScanMeidaSw;//toastSw;
     private SeekBar cleanSb,bgBlurSb,bgBrightSb;
@@ -437,7 +437,7 @@ public class OtherFragment extends Fragment {
                     activityManager.getMemoryInfo(memoryInfo1);
                     String psRes = ShellUtilBackStop.execCommand("ps",true);
                     ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
-                    apps.addAll(MainActivity.allAppInfos);
+                    apps.addAll(appLoader.allAppInfos);
                     List<String> lists = new ArrayList<String>();
                     lists.add("sync");
                     lists.add("echo 3 > /proc/sys/vm/drop_caches");
@@ -450,7 +450,7 @@ public class OtherFragment extends Fragment {
                             }
                             lists.add("am force-stop "+ai.getPackageName());
                             WatchDogService.sendRemoveRecent(ai.getPackageName(),getActivity());
-                            if(WatchDogService.notStops!=null&&WatchDogService.notStops.contains(ai.getPackageName())){
+                            if(ai.isNotStop){
                                 XposedStopApp.stopApk(ai.getPackageName(),getContext());
                             }
                         }

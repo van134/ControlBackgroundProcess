@@ -9,6 +9,10 @@ import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
+import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.AppStateInfo;
+import com.click369.controlbp.util.AppLoaderUtil;
+
 /**
  * Created by asus on 2017/7/5.
  */
@@ -42,10 +46,13 @@ public class NotificationService extends NotificationListenerService {
     }
 
     public static void removedNotify(final Context cxt,final String pkg){
-        if(!WatchDogService.notifs.contains(pkg)){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
+        final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+        if(!asi.isHasNotify){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
             return;
         }
-        WatchDogService.notifs.remove(pkg);
+        asi.isHasNotify = false;
+//        WatchDogService.allAppStateInfos.put(pkg,asi);
+//        WatchDogService.notifs.remove(pkg);
         String mpkg = pkg.toLowerCase()+"";
         Log.i("CONTROL", "remove notify" + "-----" + pkg);
         if(mpkg.contains("android.deskclock")){
@@ -54,16 +61,16 @@ public class NotificationService extends NotificationListenerService {
             cxt.sendBroadcast(intent);
 
         }else{
-            if(WatchDogService.notifyNotColseList.contains(pkg)){
+            if(asi.isNotifyNotStop){
+//            if(WatchDogService.notifyNotColseList.contains(pkg)){
                 new Thread(){
                     @Override
                     public void run() {
                         try {
                             Thread.sleep(500);
-                            if(!WatchDogService.openPkgName.equals(pkg)&&
-                                    WatchDogService.notifyNotColseList.contains(pkg)){
+                            if(!WatchDogService.openPkgName.equals(pkg)){
                                 XposedStopApp.stopApk(pkg,cxt);
-                                WatchDogService.notifyNotColseList.remove(pkg);
+                                asi.isNotifyNotStop = false;
                             }
                         } catch (Exception e) {
                         }
@@ -81,10 +88,13 @@ public class NotificationService extends NotificationListenerService {
     }
 
     public static void addNotify(Context cxt,String pkg){
-        if(WatchDogService.notifs.contains(pkg)){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
+        final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+        if(asi.isHasNotify){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
             return;
         }
-        WatchDogService.notifs.add(pkg);
+//        WatchDogService.notifs.add(pkg);
+        asi.isHasNotify = true;
+//        WatchDogService.allAppStateInfos.put(pkg,asi);
         if(pkg.toLowerCase().contains("android.deskclock")){
             WatchDogService.isClockOpen = true;
         }else if(pkg.toLowerCase().contains("music")||pkg.equals("com.cyanogenmod.eleven")){

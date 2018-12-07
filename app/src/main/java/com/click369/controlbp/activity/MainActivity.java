@@ -41,6 +41,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -72,10 +73,13 @@ import com.click369.controlbp.util.ShellUtilBackStop;
 import com.click369.controlbp.util.ShellUtilDoze;
 import com.click369.controlbp.util.ShellUtils;
 import com.click369.controlbp.util.ShortCutUtil;
+import com.click369.controlbp.util.SoftKeyboardStateHelper;
 import com.click369.controlbp.util.TimeUtil;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -100,11 +104,10 @@ public class MainActivity extends BaseActivity
     public AdFragment adFragment;
     public CPUSetFragment cpuFragment;
     public QuestionFragment questionFragment;
-    public Fragment chooseFragment;
-//    public SharedPreferences modPrefs,wakeLockPrefs,alarmPrefs,forceStopPrefs,muBeiPrefs,settings,ifwCountPrefs,uiBarPrefs,autoStartNetPrefs,recentPrefs,dozePrefs,adPrefs,skipDialogPrefs,pmPrefs;
+    public BaseFragment chooseFragment;
     private NavigationView navigationView;
     private int page = 0;
-    public static String runing = "";
+//    public static String runing = "";
     public static String COLOR = "#00ccff";
     public static String COLOR_RUN = "#40d0b7";
     public static String COLOR_MUBEI = "#FF8C00";
@@ -127,28 +130,28 @@ public class MainActivity extends BaseActivity
     private long lastMuBeiUpdate = 0;
     public File bgFile,bgBlurFile;
     public GetPhoto getPhoto;
+    BaseFragment fragments[];
+    private AppLoaderUtil.LoadAppCallBack loadAppCallBack;
+    ProgressDialog pd;
+    TextView sysTimeTitle;
     public static HashSet<String> pkgIdleStates = new HashSet<String>();
+    boolean isClickSysTime = false;
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isUIRun = true;
-//        ifwCountPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPIFWCOUNT);// getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
-//        modPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_SETTINGNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-//        wakeLockPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_WAKELOCKNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-//        alarmPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_ALARMNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-//        forceStopPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_FORCESTOPNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
-//        muBeiPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_MUBEILIST);
-//        autoStartNetPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_AUTOSTARTNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-//        uiBarPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-//        settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        recentPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_RECENTLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        dozePrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_DOZELIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        adPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_ADLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        skipDialogPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_SKIPDIALOG);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        pmPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_PMLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-        muBeiPrefsFile = new File(getFilesDir() + "/../shared_prefs/" + Common.IPREFS_MUBEILIST + ".xml");
+
+        loadAppCallBack = new LoadAppCallBackImp();
+        appLoaderUtil.addAppChangeListener(loadAppCallBack);
+        if(!WatchDogService.isKillRun) {
+            Intent intent = new Intent(MainActivity.this, WatchDogService.class);
+            MainActivity.this.startService(intent);
+        }
+
         backupRestoreUtil = new BackupRestoreUtil(this);
+        muBeiPrefsFile = new File(getFilesDir() + "/../shared_prefs/" + Common.IPREFS_MUBEILIST + ".xml");
+
         isNightMode = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_MODE,false);
         boolean isAutoChange = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,false);
         if(!isNightMode&&isAutoChange){
@@ -169,19 +172,10 @@ public class MainActivity extends BaseActivity
         menuTv.setVisibility(View.VISIBLE);
         menuClick();
         setSupportActionBar(toolbar);
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
-//        DrawerAllScreen.setDrawerLeftEdgeSize(this,drawer,0.8f);
         toggle.syncState();
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navInfoLL = (LinearLayout)navigationView.findViewById(R.id.nav_info_ll);
@@ -189,7 +183,29 @@ public class MainActivity extends BaseActivity
         navInfoSamllTitle = (TextView)navigationView.findViewById(R.id.nav_info_smalltitle);
         navInfoListView = (ListView) navigationView.findViewById(R.id.nav_info_listview);
         TextView subTitle = (TextView)navigationView.getHeaderView(0).findViewById(R.id.head_subtitle_tv);
+        sysTimeTitle = (TextView)navigationView.getHeaderView(0).findViewById(R.id.head_threetitle_tv);//+"\n微信号:Van418"
         subTitle.setText("版本:"+PackageUtil.getAppVersionName(this)+"\n交流群:624055295");//+"\n朋友搞机公众号:MRYZSL"
+        isClickSysTime = sharedPrefs.settings.getBoolean("isclicksystime",false);
+        sysTimeTitle.setText("系统启动时长:"+TimeUtil.changeMils2StringMin(SystemClock.elapsedRealtime())+(isClickSysTime?"":"(点我)"));//+"\n朋友搞机公众号:MRYZSL"
+        sysTimeTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedPrefs.settings.edit().putBoolean("isclicksystime",true).commit();
+                isClickSysTime = true;
+                if(WatchDogService.batteryInfos.size()==0){
+                    AlertUtil.showAlertMsg(MainActivity.this,"还没有电量记录，待会再试哦");
+                }else{
+                    ArrayList<Integer> batteryInfo = new ArrayList<Integer>(WatchDogService.batteryInfos.keySet());
+                    String titls[] = new String[batteryInfo.size()];
+                    SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日HH:mm:ss 剩余:");
+                    for(int i = 0;i<batteryInfo.size();i++){
+                        Integer integer = batteryInfo.get(i);
+                        titls[i] = sdf.format(new Date(WatchDogService.batteryInfos.get(integer)))+integer+"%";
+                    }
+                    AlertUtil.showListAlert(MainActivity.this,"电池消耗时间点",titls,null);
+                }
+            }
+        });
         navAdapter = new NavInfoAdapter(this);
         navInfoListView.setAdapter(navAdapter);
         navInfoLL.setVisibility(View.GONE);
@@ -199,6 +215,7 @@ public class MainActivity extends BaseActivity
             }
             @Override
             public void onDrawerOpened(View drawerView) {
+                sysTimeTitle.setText("系统启动时长:"+TimeUtil.changeMils2StringMin(SystemClock.elapsedRealtime())+(isClickSysTime?"":"(点我)"));
             }
             @Override
             public void onDrawerClosed(View drawerView) {
@@ -223,6 +240,7 @@ public class MainActivity extends BaseActivity
             navigationView.setBackgroundColor(getResources().getColor(R.color.darkblack));
             navigationView.getHeaderView(0).setBackgroundColor(getResources().getColor(R.color.darkblack));
             navInfoLL.setBackgroundColor(getResources().getColor(R.color.darkblack));
+
 //            navigationView.getHeaderView(0).setBackgroundResource(R.drawable.saidbg);
             colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color) };
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -266,7 +284,7 @@ public class MainActivity extends BaseActivity
             }
         }
 
-        runing = PackageUtil.getRunngingApp(this);
+//        runing = PackageUtil.getRunngingApp(this);
         initView();
         new Thread(){
             @Override
@@ -291,19 +309,15 @@ public class MainActivity extends BaseActivity
                 mainRL.setBackground(d);
             }
         }
-//        Intent intent11 = new Intent("com.click369.control.ams.removemubei");
-//        Intent intent11 = new Intent("com.click369.control.ams.forcestopservice");
-//        intent11.putExtra("apk",Common.PACKAGENAME);
-//        intent11.putExtra("pkg",Common.PACKAGENAME);
-//        sendBroadcast(intent11);
-//        PackageUtil.getIntentFliterByName(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortCutUtil.initDynamicShortcuts(this);
         }
-
+        pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,false);
+        appLoaderUtil.loadLocalApp();
     }
 
     private void initView(){
+
         controlFragment = new ControlFragment();
         forceStopFragment = new ForceStopFragment();
         ifwFragment = new IFWFragment();
@@ -318,7 +332,7 @@ public class MainActivity extends BaseActivity
         settingFragment = new SettingFragment();
         juanZengFragment = new JuanZengFragment();
         questionFragment = new QuestionFragment();
-        Fragment fragments[] = {controlFragment,forceStopFragment,ifwFragment,recentFragment, appStartFragment,
+        fragments = new BaseFragment[]{controlFragment,forceStopFragment,ifwFragment,recentFragment, appStartFragment,
                 iceRoomFragment,dozeFragment,uiControlFragment,adFragment,cpuFragment,otherFragment,settingFragment,juanZengFragment,questionFragment};
         int index = initMenuView();
         chooseFragment = fragments[index];
@@ -329,6 +343,7 @@ public class MainActivity extends BaseActivity
             this.setTitle("打盹");
             navigationView.getMenu().getItem(4).setChecked(true);
             chooseFragment = dozeFragment;
+            page = 4;
         }
         showOrHidden(chooseFragment);
         if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
@@ -347,6 +362,8 @@ public class MainActivity extends BaseActivity
         isLinkStopAndRemoveStop = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_STOPANDREMOVERECENTSTOP,true);
         isLinkRecentAndNotStop = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_RECNETNOTCLEANANDNOTSTOP,false);
         isLinkRecentAndAuto = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_RECNETREMOVEANDAUTOSTART,true);
+        isUpdateAppTime = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ISUPDATEAPPTIME,false);
+        listenerSoftInput();
     }
 
 
@@ -383,17 +400,6 @@ public class MainActivity extends BaseActivity
 
 
     private void checkRoot(){
-        loadApp(false);
-        if(!WatchDogService.isKillRun) {
-            h.post(new Runnable() {
-                @Override
-                public void run() {
-                    Intent intent = new Intent(MainActivity.this, WatchDogService.class);
-                    MainActivity.this.startService(intent);
-                    sharedPrefs.settings.edit().putBoolean(Common.PREFS_NAME_APPCHANGE, true).commit();
-                }
-            });
-        }
         isRoot = ShellUtils.checkRootPermission();//runing==null||runing.length()==0?
         if(isRoot){
             try {
@@ -405,9 +411,6 @@ public class MainActivity extends BaseActivity
             startAccess();
             whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
         }else{
-//            if (isModuleActive()) {
-//                settings.edit().putBoolean(Common.PREFS_SETTING_STOPAPPBYXP, true).commit();
-//            }
             h.post(new Runnable() {
                 @Override
                 public void run() {
@@ -463,7 +466,7 @@ public class MainActivity extends BaseActivity
         return  -1;
     }
     @SuppressLint("RestrictedApi")
-    private void showOrHidden(Fragment fragOne){
+    private void showOrHidden(BaseFragment fragOne){
         //Fragment的显示隐藏
         FragmentManager fm =MainActivity.this.getSupportFragmentManager();
         FragmentTransaction trans = fm.beginTransaction();
@@ -479,34 +482,10 @@ public class MainActivity extends BaseActivity
         }
         chooseFragment = fragOne;
         trans.commit();
-    }
 
-
-
-    public static ArrayList<AppInfo> allAppInfos = new ArrayList<AppInfo>();
-    private boolean isLoadAppFromSys = false;
-    ProgressDialog pd;
-    private void loadApp(boolean isReload){
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,true);
-                    }catch (Exception e){e.printStackTrace();}
-                }
-            });
-
-        synchronized (allAppInfos) {
-            allAppInfos.clear();
-            ArrayList<AppInfo> apps = AppInfo.readArrays(getApplicationContext());
-            if (apps != null && apps.size() > 0&&!isReload) {
-                allAppInfos.addAll(apps);
-                isLoadAppFromSys = false;
-            } else {
-                isLoadAppFromSys = true;
-                allAppInfos.addAll(AppLoaderUtil.getAppInfos(MainActivity.this.getApplication(), 2));
-            }
-            loadAppSetting();
+        if(isUpdateAppTime){
+            h.removeCallbacks(updateTimeInfo);
+            h.postDelayed(updateTimeInfo,1000);
         }
     }
 
@@ -514,52 +493,83 @@ public class MainActivity extends BaseActivity
     protected void onRestart() {
         super.onRestart();
         restartMethod();
-        h.removeCallbacks(reUpdateR);
-        h.postDelayed(reUpdateR,3000);
+//        h.removeCallbacks(reUpdateR);
+//        h.postDelayed(reUpdateR,3000);
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
+        try {
+            h.removeCallbacks(updateTimeInfo);
+            h.postDelayed(updateTimeInfo,1);
+            HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
+            appLoaderUtil.reloadRunList();
+//            HashSet<String> runs = PackageUtil.getRunngingAppList(this);
+            for (String s : AppLoaderUtil.runLists) {
+                pkgs.put(s, false);
+            }
+            for(AppInfo ai:appLoaderUtil.allAppInfos){
+                ai.isRunning = AppLoaderUtil.runLists.contains(ai.getPackageName());
+            }
+            chooseFragment.fresh();
+            appLoaderUtil.addAppChangeListener(loadAppCallBack);
+            appLoaderUtil.loadAppSetting();
+            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
+            Intent intent = new Intent("com.click369.control.uss.getappidlestate");
+            intent.putExtra("pkgs", pkgs);
+            sendBroadcast(intent);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    Runnable reUpdateR = new Runnable() {
-        @Override
-        public void run() {
-            String mruning = PackageUtil.getRunngingApp(MainActivity.this);
-            if((mruning==null||mruning.length()==0)){
-                mruning = ShellUtilBackStop.execCommand("ps",true);
-                if (runing==null){
-                    runing = "";
-                }
-            }
-            long lastMuBei = 0;
-            if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
-                lastMuBei = muBeiPrefsFile.lastModified();
-            }
-            if(mruning!=null&&!mruning.equals(runing)||lastMuBei!=lastMuBeiUpdate){
-                loadAppSetting();
-            }
-        }
-    };
+//    Runnable reUpdateR = new Runnable() {
+//        @Override
+//        public void run() {
+//            String mruning = PackageUtil.getRunngingApp(MainActivity.this);
+//            if((mruning==null||mruning.length()==0)){
+//                mruning = ShellUtilBackStop.execCommand("ps",true);
+//                if (runing==null){
+//                    runing = "";
+//                }
+//            }
+//            long lastMuBei = 0;
+//            if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
+//                lastMuBei = muBeiPrefsFile.lastModified();
+//            }
+//            if(mruning!=null&&!mruning.equals(runing)||lastMuBei!=lastMuBeiUpdate){
+////                loadAppSetting();
+//                appLoaderUtil.loadAppSetting();
+//            }
+//        }
+//    };
     private void restartMethod(){
         if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
             lastMuBeiUpdate = muBeiPrefsFile.lastModified();
         }
         Log.i("CONTROL","WatchDogService.isKillRun  "+WatchDogService.isKillRun);
         if(!WatchDogService.isKillRun) {
+            showT("检测到后台服务未启动，准备启动后台服务");
             Intent intent = new Intent(MainActivity.this, WatchDogService.class);
             MainActivity.this.startService(intent);
         }
-        synchronized (allAppInfos) {
-            ArrayList<AppInfo> apps = AppInfo.readArrays(getApplicationContext());
-            if (apps != null && apps.size() > 0) {
-                allAppInfos.clear();
-                allAppInfos.addAll(apps);
-                loadAppSetting();
-            }
+//        synchronized (allAppInfos) {
+//            ArrayList<AppInfo> apps = AppInfo.readArrays(getApplicationContext());
+//            if (apps != null && apps.size() > 0) {
+//                allAppInfos.clear();
+//                allAppInfos.addAll(apps);
+//                loadAppSetting();
+        appLoaderUtil.checkAppChange();
+        if(!appLoaderUtil.isAppChange){
+            appLoaderUtil.loadAppSetting();
         }
+
+//            }
+//        }
     }
 
 //    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -613,19 +623,36 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    private void listenerSoftInput() {
+        SoftKeyboardStateHelper softKeyboardStateHelper = new SoftKeyboardStateHelper(this);
+        softKeyboardStateHelper.addSoftKeyboardStateListener(new SoftKeyboardStateHelper.SoftKeyboardStateListener() {
+            @Override
+            public void onSoftKeyboardOpened(int keyboardHeightInPx) {
+                h.removeCallbacks(updateTimeInfo);
+            }
+
+            @Override
+            public void onSoftKeyboardClosed() {
+                h.removeCallbacks(updateTimeInfo);
+                if(isUpdateAppTime) {
+                    h.postDelayed(updateTimeInfo, 1000);
+                }
+            }
+        });
+    }
     @Override
     protected void onStop() {
-//        if(pd!=null&&pd.isShowing()){
-//            pd.dismiss();
-//        }
+        appLoaderUtil.removeAppChangeListener(loadAppCallBack);
+        h.removeCallbacks(updateInfo);
+        h.removeCallbacks(updateTimeInfo);
         isShow = false;
         if(sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SEVEN,true)) {
             dozeFragment.destory();
         }
-        if(ControlFragment.isClick||ForceStopFragment.isClick||AppStartFragment.isClickItem){
-            Intent intent = new Intent(this, WatchDogService.class);
-            this.startService(intent);
-        }
+//        if(ControlFragment.isClick||ForceStopFragment.isClick||AppStartFragment.isClickItem){
+//            Intent intent = new Intent(this, WatchDogService.class);
+//            this.startService(intent);
+//        }
         //更新AMS中的数据
         if(ControlFragment.isClick){
             sendBroadAMSChangeControl(this);
@@ -639,7 +666,7 @@ public class MainActivity extends BaseActivity
             sendBroadAMSChangeAutoStart(this);
             AppStartFragment.isClickItem = false;
         }
-        h.removeCallbacks(reUpdateR);
+//        h.removeCallbacks(reUpdateR);
         super.onStop();
     }
 
@@ -799,11 +826,12 @@ public class MainActivity extends BaseActivity
                                         backupRestoreUtil.saveData(page);
                                     }else if(tag == 1){
                                         backupRestoreUtil.restoreData(page);
-                                        loadAppSetting();
+//                                        loadAppSetting();
+                                        appLoaderUtil.loadAppSetting();
                                         if(page == 0){
                                             controlFragment.fresh();
                                         }else if(page == 1){
-                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
+//                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
                                             forceStopFragment.fresh();
                                         }else if(page == 2){
                                             ifwFragment.loadDisableCount();
@@ -814,7 +842,8 @@ public class MainActivity extends BaseActivity
                                         }else if(page == 6){
                                             restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
                                         }else if(page == 8){
-                                            loadAppSetting();
+//                                            loadAppSetting();
+                                            appLoaderUtil.loadAppSetting();
                                         }else if(page == 9){
                                             restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
                                         }else if(page == 10){
@@ -830,9 +859,10 @@ public class MainActivity extends BaseActivity
                                                 @Override
                                                 public void backData(String txt, int tag) {
                                                     if(tag == 1){
-                                                        loadAppSetting();
+//                                                        loadAppSetting();
+                                                        appLoaderUtil.loadAppSetting();
                                                         if(page == 0){
-                                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
+//                                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
                                                             sharedPrefs.modPrefs.edit().clear().commit();
                                                             sharedPrefs.wakeLockPrefs.edit().clear().commit();
                                                             sharedPrefs.alarmPrefs.edit().clear().commit();
@@ -850,11 +880,12 @@ public class MainActivity extends BaseActivity
                                                             sharedPrefs.recentPrefs.edit().clear().commit();
                                                             sharedPrefs.dozePrefs.edit().clear().commit();
                                                             sharedPrefs.uiBarPrefs.edit().clear().commit();
-                                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
+//                                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
                                                             sharedPrefs.adPrefs.edit().clear().commit();
                                                             sharedPrefs.skipDialogPrefs.edit().clear().commit();
                                                             sharedPrefs.pmPrefs.edit().clear().commit();
                                                             sharedPrefs.settings.edit().clear().commit();
+                                                            sharedPrefs.setTimeStopPrefs.edit().clear().commit();
                                                             showT("清除成功,重启手机生效");
                                                             restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
                                                         }else if(page == 8){
@@ -873,8 +904,10 @@ public class MainActivity extends BaseActivity
                                                     }
                                                 }
                                             });
-                                            Intent intent = new Intent(MainActivity.this,WatchDogService.class);
-                                            startService(intent);
+                                            appLoaderUtil.setIsPrefsChange(true);
+                                            appLoaderUtil.loadAppSetting();
+//                                            Intent intent = new Intent(MainActivity.this,WatchDogService.class);
+//                                            startService(intent);
                                         }else if(page==2){
                                             ifwFragment.startDis();
                                         }
@@ -882,18 +915,11 @@ public class MainActivity extends BaseActivity
                                         if (page == 2){
                                             ifwFragment.startBackDis();
                                         }else{
-                                            new Thread(){
-                                                @Override
-                                                public void run() {
-                                                    loadApp(true);
-                                                }
-                                            }.start();
+                                            pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,true);
+                                            appLoaderUtil.setIsAppChange(true);
+                                            appLoaderUtil.loadApp();
                                         }
                                     }else if(tag == 4){
-//                                        if(page == 0){
-//                                            Intent intent =new Intent(MainActivity.this,WakeLockActivity.class);
-//                                            startActivity(intent);
-//                                        }else
                                         if (page == 2){
                                             ifwFragment.startClear();
                                         }else if (page == 10){
@@ -910,134 +936,11 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    private void loadAppSetting(){
-        final PackageManager pm = getPackageManager();
-        new Thread(){
-            @Override
-            public void run() {
-                runing = PackageUtil.getRunngingApp(MainActivity.this);
-                if((runing==null||runing.length()==0)){
-                    runing = ShellUtilBackStop.execCommand("ps",true);
-                    if (runing==null){
-                        runing = "";
-                    }
-                }else{
-                    try {
-                        HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
-                        String pkgs1[] = runing.split("\n");
-                        for (String s : pkgs1) {
-                            pkgs.put(s, false);
-                        }
-                        Intent intent = new Intent("com.click369.control.uss.getappidlestate");
-                        intent.putExtra("pkgs", pkgs);
-                        sendBroadcast(intent);
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                }
-                try {
-                    for (int i =0;i<allAppInfos.size();i++) {
-                        if (MainActivity.this.isFinishing()) {
-                            return;
-                        }
-                        AppInfo ai = allAppInfos.get(i);
-                        ai.isServiceStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/service", false);
-                        ai.isBroadStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/broad", false);
-                        ai.isWakelockStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/wakelock", false);
-                        ai.isAlarmStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/alarm", false);
-
-                        ai.isBackForceStop = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/backstop", false);
-                        ai.isBackMuBei = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/backmubei", false);
-                        ai.isOffscForceStop = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/offstop", false);
-                        ai.isOffscMuBei = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/offmubei", false);
-                        ai.isInMuBei = sharedPrefs.muBeiPrefs.getInt(ai.getPackageName(), -1)==0;
-                        ai.isHomeMuBei = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/homemubei", false);
-                        ai.isHomeIdle = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/idle", false);
-                        ai.isNotifyNotExit = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/notifynotexit", false);
-
-                        ai.isAutoStart = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/autostart", false);
-                        ai.isStopApp = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/stopapp", false);
-                        ai.isLockApp = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/lockapp", false);
-                        ai.isNotStop = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/notstop", false);
-
-                        ai.isDozeOffsc = sharedPrefs.dozePrefs.getBoolean(ai.getPackageName() + "/offsc", false);
-                        ai.isDozeOnsc = sharedPrefs.dozePrefs.getBoolean(ai.getPackageName() + "/onsc", false);
-                        ai.isDozeOpenStop = sharedPrefs.dozePrefs.getBoolean(ai.getPackageName() + "/openstop", false);
-
-                        ai.isRecentNotClean = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/notclean", false);
-                        ai.isRecentForceClean = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/forceclean", false);
-                        ai.isRecentBlur = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/blur", false);
-                        ai.isRecentNotShow = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/notshow", false);
-
-                        ai.isBarLockList = sharedPrefs.uiBarPrefs.getBoolean(ai.getPackageName() + "/locklist", false);
-                        ai.isBarColorList = sharedPrefs.uiBarPrefs.getBoolean(ai.getPackageName() + "/colorlist", false);
-
-                        ai.isNotUnstall = sharedPrefs.pmPrefs.getBoolean(ai.getPackageName() + "/notunstall", false);
-
-                        ai.serviceDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwservice", 0);
-                        ai.broadCastDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwreceiver", 0);
-                        ai.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwactivity", 0);
-                        ai.isADJump = sharedPrefs.adPrefs.getInt(ai.getPackageName() + "/ad", 0) != 0;
-                        if (runing != null && runing.length() > 0) {
-                            if (runing.contains(ai.getPackageName()+"\n")) {
-                                ai.isRunning = true;
-                            } else {
-                                ai.isRunning = false;
-                            }
-                        }
-                        if (!isLoadAppFromSys) {
-                            try {
-                                ai.isDisable = !pm.getPackageInfo(ai.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.enabled;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }catch (RuntimeException e){
-                    e.printStackTrace();
-                }
-                isLoadAppFromSys= false;
-                reloadAdapter();
-            }
-        }.start();
-    }
-
-    private void reloadAdapter(){
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (chooseFragment==null){
-                    return;
-                }
-                if(chooseFragment instanceof ControlFragment){
-                    controlFragment.fresh();
-                }else if(chooseFragment instanceof ForceStopFragment){
-                    forceStopFragment.fresh();
-                }else if(chooseFragment instanceof IFWFragment){
-                    ifwFragment.fresh();
-                }else if(chooseFragment instanceof RecentFragment){
-                    recentFragment.fresh();
-                }else if(chooseFragment instanceof AppStartFragment){
-                    appStartFragment.fresh();
-                }else if(chooseFragment instanceof IceUnstallFragment){
-                    iceRoomFragment.fresh();
-                }else if(chooseFragment instanceof AdFragment){
-                    adFragment.fresh();
-                }
-                if(pd!=null&&pd.isShowing()){
-                    pd.dismiss();
-                    pd = null;
-                }
-            }
-        });
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         isUIRun = false;
         h.removeCallbacks(st);
-        runing = "";
         if (sharedPrefs.settings.getBoolean(Common.ALLSWITCH_THREE,true)) {
             ifwFragment.destory();
         }
@@ -1051,7 +954,7 @@ public class MainActivity extends BaseActivity
     class MyUpdateListReceiver extends BroadcastReceiver{
         public MyUpdateListReceiver(){
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction("com.click369.control.updatelist");
+//            intentFilter.addAction("com.click369.control.updatelist");
             intentFilter.addAction("com.click369.control.recappidlestate");
             intentFilter.addAction("com.click369.control.backprocinfo");
             MainActivity.this.registerReceiver(this,intentFilter);
@@ -1059,28 +962,21 @@ public class MainActivity extends BaseActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if ("com.click369.control.updatelist".equals(action)) {
-                if (System.currentTimeMillis() - lastUpdateTime > 2000 && isShow) {
-                    restartMethod();
-                    lastUpdateTime = System.currentTimeMillis();
-                }
-            }else if("com.click369.control.recappidlestate".equals(action)){
+//            if ("com.click369.control.updatelist".equals(action)) {
+//                if (System.currentTimeMillis() - lastUpdateTime > 2000 && isShow) {
+//                    restartMethod();
+//                    lastUpdateTime = System.currentTimeMillis();
+//                }
+//            }else
+            if("com.click369.control.recappidlestate".equals(action)){
                 pkgIdleStates.clear();
                 HashSet<String> pkgs = ( HashSet<String>)intent.getSerializableExtra("pkgs");
-                if (pkgs.size() == 0&&WatchDogService.homeIdleApp.size()>0&&!WatchDogService.isCharging){
-                    pkgs.addAll(WatchDogService.homeIdleApp);
-                }
                 pkgIdleStates.addAll(pkgs);
-                reloadAdapter();
+                chooseFragment.fresh();
             }else if("com.click369.control.backprocinfo".equals(action)){
                 HashMap<String,Long> procTimeInfos = (HashMap<String,Long>)intent.getSerializableExtra("infos");
                 setProcTimeInfos(procTimeInfos);
-//                Set<String> keys = procTimeInfos.keySet();
-//                for(String key:keys){
-//                    long lastTime = procTimeInfos.get(key);
-//                    String msg = pkgproc[0] + " " + pkgproc[1] + " interactionEventTime " + TimeUtil.changeMils2String(interactionEventTime,"yyyy-MM-dd HH:mm:ss")+ " lastActivityTime " + TimeUtil.changeMils2String(lastActivityTime,"yyyy-MM-dd HH:mm:ss")+" hasShownUi "+hasShownUi+" hasOverlayUi "+hasOverlayUi;
-//                    Log.i("CONTROL", msg);
-//                }
+                chooseFragment.fresh();
             }
         }
     }
@@ -1137,4 +1033,68 @@ public class MainActivity extends BaseActivity
            showT("xposed installer未安装");
         }
     }
+
+    class LoadAppCallBackImp implements AppLoaderUtil.LoadAppCallBack{
+        @Override
+        public void onLoadLocalAppFinish() {
+            if(appLoaderUtil.allAppInfos.size()>0&&!appLoaderUtil.isAppChange){
+                appLoaderUtil.loadAppSetting();
+            }
+//            else if(appLoaderUtil.isAppChange||appLoaderUtil.allAppInfos.size()==0){
+//                appLoaderUtil.loadApp();
+//            }
+        }
+        @Override
+        public void onLoadAppFinish() {
+            chooseFragment.fresh();
+            //appLoaderUtil.loadAppSetting();
+            if(pd!=null&&pd.isShowing()){
+                pd.dismiss();
+            }
+            pd = null;
+        }
+
+        @Override
+        public void onRuningStateChange() {
+            chooseFragment.fresh();
+            h.removeCallbacks(updateInfo);
+            h.postDelayed(updateInfo,2000);
+            Log.i("CONTROL","运行状态发生变化 MainActivity 更新");
+        }
+
+        @Override
+        public void onLoadAppSettingFinish() {
+            chooseFragment.fresh();
+            if(pd!=null&&pd.isShowing()){
+                pd.dismiss();
+            }
+            pd = null;
+        }
+    }
+
+    Runnable updateInfo = new Runnable() {
+        @Override
+        public void run() {
+//            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
+            HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
+            appLoaderUtil.reloadRunList();
+            for (String s : AppLoaderUtil.runLists) {
+                pkgs.put(s, false);
+            }
+            Intent intent = new Intent("com.click369.control.uss.getappidlestate");
+            intent.putExtra("pkgs", pkgs);
+            sendBroadcast(intent);
+        }
+    };
+
+    Runnable updateTimeInfo = new Runnable() {
+        @Override
+        public void run() {
+//            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
+            chooseFragment.fresh();
+            if(isUpdateAppTime) {
+                h.postDelayed(updateTimeInfo, 6000);
+            }
+        }
+    };
 }

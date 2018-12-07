@@ -14,19 +14,21 @@ import java.io.File;
  * Created by asus on 2017/11/4.
  */
 public class SharedPrefsUtil {
+
+    public boolean isPrefsChange = true;
     public SharedPreferences
             modPrefs,
             wakeLockPrefs,
             alarmPrefs,
             forceStopPrefs,
-            muBeiPrefs,
+//            muBeiPrefs,
             settings,
             ifwCountPrefs,
             uiBarPrefs,
             autoStartNetPrefs,
             recentPrefs,
             dozePrefs,
-//            whiteListPrefs,
+            setTimeStopPrefs,
             adPrefs,
             skipDialogPrefs,
             pmPrefs,
@@ -49,19 +51,26 @@ public class SharedPrefsUtil {
         wakeLockPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_WAKELOCKNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         alarmPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_ALARMNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         forceStopPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_FORCESTOPNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
-        muBeiPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_MUBEILIST);
+//        muBeiPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_MUBEILIST);
         autoStartNetPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_AUTOSTARTNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
         uiBarPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_UIBARLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
         settings = SharedPrefsUtil.getPreferences(context,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         recentPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_RECENTLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         dozePrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_DOZELIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        whiteListPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_DOZELIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        setTimeStopPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_SETTIMESTOP);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         adPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_ADLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         skipDialogPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_SKIPDIALOG);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         pmPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_PMLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         tvPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_TVLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         cpuPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_SETCPU);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+//        Listener listener = new Listener();
+//        forceStopPrefs.registerOnSharedPreferenceChangeListener(listener);
+//        autoStartNetPrefs.registerOnSharedPreferenceChangeListener(listener);
+//        setTimeStopPrefs.registerOnSharedPreferenceChangeListener(listener);
     }
+
+
+
     public static SharedPreferences getPreferences(Context ctx, String prefName) {
         SharedPreferences prefs = ctx.getSharedPreferences(prefName, Context.MODE_WORLD_READABLE);
 //        final File prefsFile = new File(ctx.getFilesDir() + "/../shared_prefs/" + prefName + ".xml");
@@ -74,7 +83,7 @@ public class SharedPrefsUtil {
 //    public static void changeQx(SharedPreferences sp){
 //    }
 
-    public void clearAppSettings(AppInfo ai){
+    public void clearAppSettings(AppInfo ai,boolean isDel){
         SharedPreferences.Editor modEd = modPrefs.edit();
         modEd.remove(ai.getPackageName() + "/service");
         modEd.remove(ai.getPackageName() + "/broad");
@@ -87,7 +96,7 @@ public class SharedPrefsUtil {
         forceEd.remove(ai.getPackageName() + "/backmubei");
         forceEd.remove(ai.getPackageName() + "/offstop");
         forceEd.remove(ai.getPackageName() + "/offmubei");
-        muBeiPrefs.edit().remove(ai.getPackageName()).commit();
+//        muBeiPrefs.edit().remove(ai.getPackageName()).commit();
         forceEd.remove(ai.getPackageName() + "/homemubei");
         forceEd.remove(ai.getPackageName() + "/notifynotexit");
         forceEd.commit();
@@ -119,8 +128,11 @@ public class SharedPrefsUtil {
 
         pmPrefs.edit().remove(ai.getPackageName() + "/notunstall").commit();
         adPrefs.edit().remove(ai.getPackageName() + "/ad").commit();
-
-        ai.isRunning = false;
+        setTimeStopPrefs.edit().remove(ai.getPackageName() + "/one").commit();
+        setTimeStopPrefs.edit().remove(ai.getPackageName() + "/long").commit();
+        if(!isDel){
+            AppLoaderUtil.getInstance(context).loadAppSetting();
+        }
         XposedStopApp.stopApk(ai.packageName,context);
     }
 }

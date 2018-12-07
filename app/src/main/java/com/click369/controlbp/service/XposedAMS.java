@@ -45,8 +45,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedAMS {
-
-
     static boolean isOneOpen = true;
     static boolean isTwoOpen = true;
     static boolean isAppstart = true;
@@ -58,13 +56,13 @@ public class XposedAMS {
     final static HashSet<String> muBeiHSs = new HashSet<String>();
     final static HashSet<String> notifySkipKeyWords = new HashSet<String>();
     final static HashMap<String,Object> controlHMs = new HashMap<String,Object>();
-    final static HashMap<String,Boolean> mubeiStopOtherProc = new HashMap<String,Boolean>();
+//    final static HashMap<String,Boolean> mubeiStopOtherProc = new HashMap<String,Boolean>();
 
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
                                    final XSharedPreferences settingPrefs,
                                    final XSharedPreferences controlPrefs,
                                    final XSharedPreferences autoStartPrefs,
-                                   final XSharedPreferences muBeiPrefs,
+//                                   final XSharedPreferences muBeiPrefs,
                                    final XSharedPreferences recentPrefs,
                                    final XSharedPreferences skipDialogPrefs){
 
@@ -90,21 +88,19 @@ public class XposedAMS {
                                                 if("com.click369.control.getinitinfo".equals(action)){
                                                     autoStartPrefs.reload();
                                                     controlPrefs.reload();
-                                                    muBeiPrefs.reload();
+//                                                    muBeiPrefs.reload();
                                                     settingPrefs.reload();
                                                     skipDialogPrefs.reload();
-                                                    XposedUtil.reloadInfos(context,autoStartPrefs,controlPrefs,muBeiPrefs,settingPrefs,skipDialogPrefs);
-                                                }else if("com.click369.control.startservice".equals(action)){
+                                                    XposedUtil.reloadInfos(context,autoStartPrefs,controlPrefs,settingPrefs,skipDialogPrefs);
+                                                }else if("com.click369.control.startservice".equals(action)) {
                                                     try {
                                                         Intent explicitIntent = new Intent("com.click369.service");
-                                                        ComponentName component = new ComponentName(Common.PACKAGENAME, Common.PACKAGENAME+".service.WatchDogService");
+                                                        ComponentName component = new ComponentName(Common.PACKAGENAME, Common.PACKAGENAME + ".service.WatchDogService");
                                                         explicitIntent.setComponent(component);
                                                         app.getApplicationContext().startService(explicitIntent);
                                                         XposedBridge.log("应用控制器：启动WatchDogService成功");
-                                                    }catch (Exception e){
-                                                        XposedBridge.log("应用控制器：启动WatchDogService失败"+e);
-                                                    }catch (Error e1){
-                                                        XposedBridge.log("应用控制器：启动WatchDogService失败"+e1);
+                                                    } catch (Throwable e) {
+                                                        XposedBridge.log("应用控制器：启动WatchDogService失败" + e);
                                                     }
                                                 }
                                             }catch (Throwable e){
@@ -124,6 +120,8 @@ public class XposedAMS {
                 e.printStackTrace();
             }catch (NoSuchMethodError e){
                 e.printStackTrace();
+            }catch (Throwable e){
+                e.printStackTrace();
             }
         }
         if (!lpparam.packageName.equals("android")){
@@ -131,12 +129,12 @@ public class XposedAMS {
         }
         autoStartPrefs.reload();
         controlPrefs.reload();
-        muBeiPrefs.reload();
+//        muBeiPrefs.reload();
         appStartPrefHMs.putAll(autoStartPrefs.getAll());
         controlHMs.putAll(controlPrefs.getAll());
-        muBeiHSs.addAll(muBeiPrefs.getAll().keySet());
+//        muBeiHSs.addAll(muBeiPrefs.getAll().keySet());
         settingPrefs.reload();
-        mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
+//        mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
         final Class amsCls = XposedHelpers.findClass("com.android.server.am.ActivityManagerService", lpparam.classLoader);
 
         final Class actServiceCls = XposedHelpers.findClass("com.android.server.am.ActiveServices", lpparam.classLoader);
@@ -282,14 +280,15 @@ public class XposedAMS {
                                                             XposedUtil.stopServicesAndroidL(amsCls,processRecordCls,mServicesObject,ams,pkg);
                                                         }
 //                                                        XposedBridge.log("^^^^^^^^^^^^^^^^^墓碑 "+pkg+" ^^^^^^^^^^^^^^^");
-                                                        settingPrefs.reload();
-                                                        mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
-                                                        if(mubeiStopOtherProc.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)){
+//                                                        settingPrefs.reload();
+//                                                        mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
+//                                                        if(mubeiStopOtherProc.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)){
+                                                        if(isMubeiStopOther){
                                                             XposedUtil.stopProcess(amsCls,processRecordCls,ams,pkg,true);
                                                         }
                                                     }
                                                 }
-                                            } catch (Exception e) {
+                                            } catch (Throwable e) {
                                                 e.printStackTrace();
                                                 XposedBridge.log("^^^^^^^^^^^^^^^^^forcestopservice error "+e+" ^^^^^^^^^^^^^^^");
                                             }
@@ -304,8 +303,11 @@ public class XposedAMS {
                                                 HashSet<String> pkgs = (HashSet<String>)intent.getSerializableExtra("pkgs");
                                                 Field procListField = amsCls.getDeclaredField("mLruProcesses");
                                                 procListField.setAccessible(true);
-                                                ArrayList procs = (ArrayList)procListField.get(ams);
-                                                if(procs!=null&&procs.size()>0){
+                                                ArrayList procs = new ArrayList();
+                                                ArrayList procsTemp = (ArrayList)procListField.get(ams);
+                                                if(procsTemp!=null&&procsTemp.size()>0){
+                                                    procs.addAll(procsTemp);
+                                                    HashSet<String> stopPkgs = new HashSet<String>();
                                                     ArrayList newProcs = new ArrayList(procs);
                                                     for (Object proc:newProcs){
                                                         Field infoField = proc.getClass().getDeclaredField("info");
@@ -319,13 +321,14 @@ public class XposedAMS {
                                                             if(isCheckTimeout){
                                                                 long lastActivityTime = (Long)lastActivityTimeField.get(proc);
                                                                 //超时12小时没有打开过就杀死
-                                                                if(SystemClock.elapsedRealtime()-lastActivityTime>timeout){
+                                                                if(SystemClock.uptimeMillis()-lastActivityTime>timeout){
                                                                     Field persistentField = proc.getClass().getDeclaredField("persistent");
                                                                     persistentField.setAccessible(true);
                                                                     persistentField.set(proc,false);
                                                                     Message msg = new Message();
                                                                     msg.obj = info.packageName;
                                                                     h.sendMessage(msg);
+                                                                    stopPkgs.add(info.packageName);
                                                                 }
                                                             }else{
                                                                 ArrayList actList = (ArrayList)activitiesField.get(proc);
@@ -336,8 +339,14 @@ public class XposedAMS {
                                                                     Message msg = new Message();
                                                                     msg.obj = info.packageName;
                                                                     h.sendMessage(msg);
+                                                                    stopPkgs.add(info.packageName);
                                                                 }
                                                             }
+                                                        }
+                                                        if(stopPkgs.size()>0){
+                                                            Intent intent1 = new Intent("com.click369.control.amsstoppkg");
+                                                            intent1.putExtra("pkgs",stopPkgs);
+                                                            sysCxt.sendBroadcast(intent1);
                                                         }
                                                     }
                                                 }
@@ -349,8 +358,10 @@ public class XposedAMS {
                                                 final  HashMap<String,Long> procTimeInfos = new HashMap<String,Long>();
                                                 Field procListField = amsCls.getDeclaredField("mLruProcesses");
                                                 procListField.setAccessible(true);
-                                                ArrayList procs = (ArrayList)procListField.get(ams);
-                                                if(procs!=null&&procs.size()>0){
+                                                ArrayList procs = new ArrayList();
+                                                ArrayList procsTemp = (ArrayList)procListField.get(ams);
+                                                if(procsTemp!=null&&procsTemp.size()>0){
+                                                    procs.addAll(procsTemp);
                                                     for (Object proc:procs){
                                                         Field infoField = proc.getClass().getDeclaredField("info");
                                                         infoField.setAccessible(true);
@@ -412,8 +423,9 @@ public class XposedAMS {
                                             String apk = intent.getStringExtra("apk");
                                             muBeiHSs.remove(apk);
                                             settingPrefs.reload();
-                                            mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
-                                            if(mubeiStopOtherProc.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)) {
+//                                            mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
+//                                            if(mubeiStopOtherProc.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)) {
+                                            if(isMubeiStopOther) {
                                                 XposedUtil.stopProcess(amsCls, processRecordCls, ams, apk, false);
                                             }
                                         }else if("com.click369.control.ams.reloadcontrol".equals(action)){
@@ -423,19 +435,21 @@ public class XposedAMS {
                                                 controlHMs.putAll(controlPrefs.getAll());
                                                 XposedBridge.log("^^^^^^^^^^^^^^重载CONTROL " + controlHMs.size() + "^^^^^^^^^^^^^^^^^");
                                             }
-                                        }else if("com.click369.control.ams.reloadmubei".equals(action)){
-                                            if (muBeiPrefs.hasFileChanged()) {
-                                                muBeiPrefs.reload();
-                                                muBeiHSs.clear();
-                                                Set<String> keys = muBeiPrefs.getAll().keySet();
-                                                for (String k : keys) {
-                                                    if (muBeiPrefs.getInt(k, -1) == 0) {
-                                                        muBeiHSs.add(k);
-                                                    }
-                                                }
-                                                XposedBridge.log("^^^^^^^^^^^^^^重载墓碑 " + muBeiHSs.size() + "^^^^^^^^^^^^^^^^^");
-                                            }
-                                        }else if("com.click369.control.ams.reloadautostart".equals(action)){
+                                        }
+//                                        else if("com.click369.control.ams.reloadmubei".equals(action)){
+//                                            if (muBeiPrefs.hasFileChanged()) {
+//                                                muBeiPrefs.reload();
+//                                                muBeiHSs.clear();
+//                                                Set<String> keys = muBeiPrefs.getAll().keySet();
+//                                                for (String k : keys) {
+//                                                    if (muBeiPrefs.getInt(k, -1) == 0) {
+//                                                        muBeiHSs.add(k);
+//                                                    }
+//                                                }
+//                                                XposedBridge.log("^^^^^^^^^^^^^^重载墓碑 " + muBeiHSs.size() + "^^^^^^^^^^^^^^^^^");
+//                                            }
+//                                        }
+                                        else if("com.click369.control.ams.reloadautostart".equals(action)){
                                             if (autoStartPrefs.hasFileChanged()&&autoStartPrefs.getAll().size()>0) {
                                                 autoStartPrefs.reload();
                                                 appStartPrefHMs.clear();
@@ -445,18 +459,41 @@ public class XposedAMS {
                                         }else if("com.click369.control.ams.reloadskipnotify".equals(action)){
                                             notifySkipKeyWords.clear();
                                             Set<String> sets = (Set<String>)((Map)intent.getSerializableExtra("skipDialogPrefs")).get(Common.PREFS_SKIPNOTIFY_KEYWORDS);
-                                            notifySkipKeyWords.addAll(sets);
+                                            if(sets!=null){
+                                                notifySkipKeyWords.addAll(sets);
+                                            }
                                         }else if("com.click369.control.ams.initreload".equals(action)){
-                                            appStartPrefHMs.clear();
-                                            appStartPrefHMs.putAll((Map)intent.getSerializableExtra("autoStartPrefs"));
-                                            controlHMs.clear();
-                                            controlHMs.putAll((Map)intent.getSerializableExtra("controlPrefs"));
-                                            muBeiHSs.clear();
-                                            Map mbMap = (Map)intent.getSerializableExtra("muBeiPrefs");
-                                            muBeiHSs.addAll(mbMap.keySet());
-                                            notifySkipKeyWords.clear();
-                                            Set<String> sets = (Set<String>)((Map)intent.getSerializableExtra("skipDialogPrefs")).get(Common.PREFS_SKIPNOTIFY_KEYWORDS);
-                                            notifySkipKeyWords.addAll(sets);
+                                            Map autoMap = (Map)intent.getSerializableExtra("autoStartPrefs");
+                                            Map controlMap = (Map)(Map)intent.getSerializableExtra("controlPrefs");
+//                                            Map mbMap = (Map)intent.getSerializableExtra("muBeiPrefs");
+                                            Set<String> skipDiaSet = (Set<String>)((Map)intent.getSerializableExtra("skipDialogPrefs")).get(Common.PREFS_SKIPNOTIFY_KEYWORDS);
+                                            if(autoMap!=null) {
+                                                appStartPrefHMs.clear();
+                                                appStartPrefHMs.putAll(autoMap);
+//                                                XposedBridge.log("CONTROL--------------auto "+autoMap.size());
+                                            }
+                                            if(controlMap!=null) {
+                                                controlHMs.clear();
+                                                controlHMs.putAll(controlMap);
+//                                                XposedBridge.log("CONTROL--------------control "+controlMap.size());
+                                            }
+//                                            if(mbMap!=null){
+//                                                muBeiHSs.clear();
+//                                                Set<String> keys = mbMap.keySet();
+//                                                for (String k : keys) {
+//                                                    if (muBeiPrefs.getInt(k, -1) == 0) {
+//                                                        muBeiHSs.add(k);
+//                                                    }
+//                                                }
+////                                                muBeiHSs.addAll(mbMap.keySet());
+////                                                XposedBridge.log("CONTROL--------------muBei "+mbMap.size());
+//                                            }
+
+                                            if(skipDiaSet!=null){
+                                                notifySkipKeyWords.clear();
+                                                notifySkipKeyWords.addAll(skipDiaSet);
+//                                                XposedBridge.log("CONTROL--------------skip "+skipDiaSet.size());
+                                            }
                                             Map settingMap = (Map)intent.getSerializableExtra("settingPrefs");
                                             isOneOpen = settingMap.containsKey(Common.ALLSWITCH_ONE)?(boolean)settingMap.get(Common.ALLSWITCH_ONE):true;//settingPrefs.getBoolean(Common.ALLSWITCH_ONE,true);
                                             isTwoOpen = settingMap.containsKey(Common.ALLSWITCH_TWO)?(boolean)settingMap.get(Common.ALLSWITCH_TWO):true;//settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true);
@@ -466,9 +503,18 @@ public class XposedAMS {
                                             isStopScanMedia = settingMap.containsKey(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA)?(boolean)settingMap.get(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA):false;//settingPrefs.getBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,false);
                                             isMubeiStopOther = settingMap.containsKey(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)?(boolean)settingMap.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC):false;;
                                         }
-                                    }catch (Exception e){
+                                    }catch (Throwable e){
                                         e.printStackTrace();
+//                                        StackTraceElement[] stackTrace = e.getStackTrace();
+//                                        String err = "";
+//                                        if(stackTrace!=null&&stackTrace.length>0){
+//                                            err = "file:" + stackTrace[0].getFileName() + " class:"
+//                                                    + stackTrace[0].getClassName() + " method:"
+//                                                    + stackTrace[0].getMethodName() + " line:"
+//                                                    + stackTrace[0].getLineNumber() + "\n";
+//                                        }
                                         XposedBridge.log("^^^^^^^^^^^^^^AMS广播出错 " + e + "^^^^^^^^^^^^^^^^^");
+//                                        XposedBridge.log("^^^^^^^^^^^^^^AMS广播出错 " + e +err+ "^^^^^^^^^^^^^^^^^");
                                     }
                                     }
                                 };
@@ -483,7 +529,7 @@ public class XposedAMS {
                                 filter.addAction("com.click369.control.ams.removemubei");
                                 filter.addAction("com.click369.control.ams.changepersistent");
                                 filter.addAction("com.click369.control.ams.reloadcontrol");
-                                filter.addAction("com.click369.control.ams.reloadmubei");
+//                                filter.addAction("com.click369.control.ams.reloadmubei");
                                 filter.addAction("com.click369.control.ams.reloadautostart");
                                 filter.addAction("com.click369.control.ams.initreload");
                                 filter.addAction("com.click369.control.ams.reloadskipnotify");
@@ -503,13 +549,7 @@ public class XposedAMS {
                 }
             };
             Class clss[] = amsMethods.get("finishBooting").getParameterTypes();
-            if (clss.length==0){
-                XposedHelpers.findAndHookMethod(amsCls,"finishBooting",hook);
-            }else if (clss.length==1){
-                XposedHelpers.findAndHookMethod(amsCls,"finishBooting",clss[0],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^finishBooting else"+clss.length+" 函数未找到^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"finishBooting",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^finishBooting  函数未找到^^^^^^^^^^^^^^^^^");
         }
@@ -529,12 +569,7 @@ public class XposedAMS {
                 }
             };
             final Class clss[] = amsMethods.get("forceStopPackage").getParameterTypes();
-            if (clss.length == 4){XposedHelpers.findAndHookMethod(amsCls, "forceStopPackage",clss[0],clss[1],clss[2],clss[3],hook); }
-            else if (clss.length == 3){XposedHelpers.findAndHookMethod(amsCls, "forceStopPackage",clss[0],clss[1],clss[2],hook); }
-            else if (clss.length == 2){XposedHelpers.findAndHookMethod(amsCls, "forceStopPackage",clss[0],clss[1],hook); }
-            else if (clss.length == 1){XposedHelpers.findAndHookMethod(amsCls, "forceStopPackage",clss[0],hook); }else{
-                XposedBridge.log("^^^^^^^^^^^^^^forceStopPackage else"+clss.length+" 函数未找到^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"forceStopPackage",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^forceStopPackage  函数未找到^^^^^^^^^^^^^^^^^");
         }
@@ -554,12 +589,7 @@ public class XposedAMS {
                 }
             };
             final Class clss[] = amsMethods.get("checkCallingPermission").getParameterTypes();
-            if (clss.length == 4){XposedHelpers.findAndHookMethod(amsCls, "checkCallingPermission",clss[0],clss[1],clss[2],clss[3],hook); }
-            else if (clss.length == 3){XposedHelpers.findAndHookMethod(amsCls, "checkCallingPermission",clss[0],clss[1],clss[2],hook); }
-            else if (clss.length == 2){XposedHelpers.findAndHookMethod(amsCls, "checkCallingPermission",clss[0],clss[1],hook); }
-            else if (clss.length == 1){XposedHelpers.findAndHookMethod(amsCls, "checkCallingPermission",clss[0],hook); }else{
-                XposedBridge.log("^^^^^^^^^^^^^^checkCallingPermission else"+clss.length+" 函数未找到^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"checkCallingPermission",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^checkCallingPermission  函数未找到^^^^^^^^^^^^^^^^^");
         }
@@ -579,100 +609,11 @@ public class XposedAMS {
                 }
             };
             final Class clss[] = amsMethods.get("isGetTasksAllowed").getParameterTypes();
-            if (clss.length == 4){XposedHelpers.findAndHookMethod(amsCls, "isGetTasksAllowed",clss[0],clss[1],clss[2],clss[3],hook); }
-            else if (clss.length == 3){XposedHelpers.findAndHookMethod(amsCls, "isGetTasksAllowed",clss[0],clss[1],clss[2],hook); }
-            else if (clss.length == 2){XposedHelpers.findAndHookMethod(amsCls, "isGetTasksAllowed",clss[0],clss[1],hook); }
-            else if (clss.length == 1){XposedHelpers.findAndHookMethod(amsCls, "isGetTasksAllowed",clss[0],hook); }
+            XposedUtil.hookMethod(amsCls,clss,"isGetTasksAllowed",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^isGetTasksAllowed  函数未找到^^^^^^^^^^^^^^^^^");
         }
-
         isAppstart = settingPrefs.getBoolean(Common.ALLSWITCH_FIVE,true);
-//        //启动控制应用锁部分
-//        if(amsMethods.containsKey("startActivity")&&isAppstart){
-//            final Class clss[] = amsMethods.get("startActivity").getParameterTypes();
-//            int intentIndexTemp = -1,callPkgIndexTemp= -1;
-//            for(int i = 0;i<clss.length;i++){
-//                Class c = clss[i];
-//                if (intentIndexTemp==-1&&c.getName().equals(Intent.class.getName())){
-//                    intentIndexTemp = i;
-//                }
-//                if (callPkgIndexTemp==-1&&c.getName().equals(String.class.getName())){
-//                    callPkgIndexTemp = i;
-//                }
-//            }
-//            final int intentIndex = intentIndexTemp;
-//            final int callPkgIndex = callPkgIndexTemp;
-//            final String home = autoStartPrefs.getString("nowhomeapk","");
-//            XC_MethodHook xm = new XC_MethodHook() {
-//                @Override
-//                protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-//                    try {
-//                        if (intentIndex!=-1&&callPkgIndex!=-1){
-//                            final Object ams = methodHookParam.thisObject;
-//                            sysCxtField.setAccessible(true);
-//                            final Context cxt = (Context) sysCxtField.get(ams);
-//                            Intent intent = (Intent) methodHookParam.args[intentIndex];
-//                            String callingPkg = (String) methodHookParam.args[callPkgIndex]+"";
-//                            if (intent!=null&&!home.equals(callingPkg)) {
-//                                String pkg = intent.getComponent() == null ? null : intent.getComponent().getPackageName();
-//                                if(!callingPkg.equals(pkg)){
-//                                    XposedAppStart.sendBroad(intent,cxt,callingPkg,pkg);
-//                                    autoStartPrefs.reload();
-////                                    boolean isLockApp = appStartPrefHMs.containsKey(pkg+"/lockapp")?(Boolean)appStartPrefHMs.get(pkg+"/lockapp"):false;
-////                                    boolean isLockAppOk = appStartPrefHMs.containsKey(pkg+"/lockok")?(Boolean)appStartPrefHMs.get(pkg+"/lockok"):false;
-////                                    if(pkg!=null&isLockApp&&!isLockAppOk){
-//                                    if(pkg!=null&&autoStartPrefs.getBoolean(pkg+"/lockapp",false)&&!autoStartPrefs.getBoolean(pkg+"/lockok",false)){
-//                                        String cls = pkg==null?null:intent.getComponent().getClassName();
-//                                        if (!(Common.PACKAGENAME+".activity.UnLockActivity").equals(cls)&&
-//                                                !(Common.PACKAGENAME+".activity.RunningActivity").equals(cls)&&
-//                                                !"com.android.webview".equals(callingPkg)){
-//                                            Intent intent1 = new Intent(Intent.ACTION_MAIN);
-//                                            intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);// 注意
-//                                            intent1.addCategory(Intent.CATEGORY_HOME);
-//                                            cxt.startActivity(intent1);
-//                                            Intent broad1 = new Intent("com.click369.control.lockapp");
-//                                            broad1.putExtra("pkg", pkg);
-//                                            broad1.putExtra("class", cls);
-//                                            broad1.putExtra("intent", intent);
-//                                            cxt.startActivity(broad1);
-//                                            methodHookParam.setResult(102);
-//                                            return;
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }catch (RuntimeException e){
-//                        e.printStackTrace();
-//                    }
-//                }
-//            };
-//            if (clss.length ==12){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],xm );
-//            }else if (clss.length ==11){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],xm );
-//            }else if (clss.length ==10){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9],xm );
-//            }else if (clss.length ==9){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8],xm );
-//            }else if (clss.length ==8){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7],xm );
-//            }else if (clss.length ==7){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6],xm );
-//            }else if (clss.length ==6){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5],xm );
-//            }else if (clss.length ==3){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1], clss[2],xm );
-//            }else if (clss.length ==2){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0], clss[1],xm );
-//            }else if (clss.length ==1){
-//                XposedHelpers.findAndHookMethod(amsCls, "startActivity", clss[0],xm );
-//            }
-//        }else if(isAppstart){
-//            XposedBridge.log("^^^^^^^^^^^^^^startActivity  函数未找到^^^^^^^^^^^^^^^^^");
-//        }
-
         //自启控制中自启动
         if(amsMethods.containsKey("startProcessLocked")){
             final Class clss[] = amsMethods.get("startProcessLocked").getParameterTypes();
@@ -681,101 +622,59 @@ public class XposedAMS {
                 protected void beforeHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
                     try{
                         if(isAppstart){
-                        String processName = (String)methodHookParam.args[0];
-                        ApplicationInfo info = (ApplicationInfo)methodHookParam.args[1];
-                        if(!"android".equals(processName)&&!"android".equals(info.packageName)){
-                            autoStartPrefs.reload();
-                            String hostingType = (String)methodHookParam.args[4];
-
-                            boolean isAutoHM = appStartPrefHMs.containsKey(info.packageName+"/autostart");
-//                            XposedBridge.log("^^^^^^^^^^^^^^ startProcessLocked  "+hostingType+"  "+info.packageName+"  "+isAutoHM+"^^^^^^^^^^^^^^^^^");
-//                            if(isAutoHM){
-                            if(isAutoHM||autoStartPrefs.getBoolean(info.packageName+"/autostart",false)){
-                                boolean keepIfLarge = clss!=null&&clss.length>=14?((methodHookParam.args[9] instanceof Boolean)?(Boolean) methodHookParam.args[9]:true):true;
-                                Method getProcessRecordLocked = amsCls.getDeclaredMethod("getProcessRecordLocked",String.class,int.class,boolean.class);
-                                getProcessRecordLocked.setAccessible(true);
-//                                if(processName!=null){
-                                    Object processObj = getProcessRecordLocked.invoke(methodHookParam.thisObject,info.packageName,info.uid,keepIfLarge);
-                                    ComponentName cn = (ComponentName) methodHookParam.args[5];
-                                    if(appStartPrefHMs.containsKey(info.packageName+"/checkautostart")){
-//                                    if(autoStartPrefs.getBoolean(info.packageName+"/checkautostart",false)||appStartPrefHMs.containsKey(info.packageName+"/checkautostart")){
-                                        Object jumpAct = appStartPrefHMs.get(info.packageName+"/jumpactivity");
-                                        Object homeAct = appStartPrefHMs.get(info.packageName+"/homeactivity");
-//                                        String jumpAct = autoStartPrefs.getString(info.packageName+"/jumpactivity","");
-//                                        String homeAct = autoStartPrefs.getString(info.packageName+"/homeactivity","");
-//                                        if (jumpAct!=null){
-//                                            jumpAct = (String)(appStartPrefHMs.get(info.packageName+"/jumpactivity"));
-//                                        }else if (homeAct != null){
-//                                            homeAct = (String)(appStartPrefHMs.get(info.packageName+"/homeactivity"));
-//                                        }
-                                        if(processObj==null&&((jumpAct!=null&&jumpAct.equals(cn.getClassName()))||(homeAct!=null&&!homeAct.equals(cn.getClassName())))){
+                            String processName = (String)methodHookParam.args[0];
+                            ApplicationInfo info = (ApplicationInfo)methodHookParam.args[1];
+                            if(!"android".equals(processName)&&!"android".equals(info.packageName)){
+                                autoStartPrefs.reload();
+                                String hostingType = (String)methodHookParam.args[4];
+                                boolean isAutoHM = appStartPrefHMs.containsKey(info.packageName+"/autostart")?(Boolean)(appStartPrefHMs.get(info.packageName+"/autostart")):false;
+                                if(isAutoHM){//||autoStartPrefs.getBoolean(info.packageName+"/autostart",false)
+                                    boolean keepIfLarge = clss!=null&&clss.length>=14?((methodHookParam.args[9] instanceof Boolean)?(Boolean) methodHookParam.args[9]:true):true;
+                                    Method getProcessRecordLocked = amsCls.getDeclaredMethod("getProcessRecordLocked",String.class,int.class,boolean.class);
+                                    getProcessRecordLocked.setAccessible(true);
+                                        Object processObj = getProcessRecordLocked.invoke(methodHookParam.thisObject,info.packageName,info.uid,keepIfLarge);
+                                        ComponentName cn = (ComponentName) methodHookParam.args[5];
+                                        if(appStartPrefHMs.containsKey(info.packageName+"/checkautostart")){
+                                            Object jumpAct = appStartPrefHMs.get(info.packageName+"/jumpactivity");
+                                            Object homeAct = appStartPrefHMs.get(info.packageName+"/homeactivity");
+                                            if(processObj==null&&((jumpAct!=null&&jumpAct.equals(cn.getClassName()))||(homeAct!=null&&!homeAct.equals(cn.getClassName())))){
+                                                Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
+                                                m.invoke(methodHookParam.thisObject, info.packageName, 0);
+                                                methodHookParam.setResult(null);
+                                                return;
+                                            }
+                                        }
+                                        if(processObj==null&&!"activity".equals(hostingType)){
+                                            //8.0再选择杀死
+                                            if(Build.VERSION.SDK_INT>Build.VERSION_CODES.N ) {
+                                                Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
+                                                m.invoke(methodHookParam.thisObject, info.packageName, 0);
+                                            }
+                                            methodHookParam.setResult(null);
+                                            return;
+                                        }
+                                        //"com.igexin.sdk.GActivity""com.igexin.sdk.PushActivity"
+                                        if (processObj==null&&cn!=null&&"activity".equals(hostingType)&&(cn.getClassName().contains(".GActivity")||cn.getClassName().contains(".PushActivity")||cn.getClassName().contains(".PushGTActivity"))){
                                             Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
                                             m.invoke(methodHookParam.thisObject, info.packageName, 0);
                                             methodHookParam.setResult(null);
                                             return;
                                         }
-                                    }
-                                    if(processObj==null&&!"activity".equals(hostingType)){
-                                        //8.0再选择杀死
-                                        if(Build.VERSION.SDK_INT>Build.VERSION_CODES.N ) {
-                                            Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
-                                            m.invoke(methodHookParam.thisObject, info.packageName, 0);
-                                        }
-                                        methodHookParam.setResult(null);
-                                        return;
-                                    }
-                                    //"com.igexin.sdk.GActivity""com.igexin.sdk.PushActivity"
-                                    if (processObj==null&&cn!=null&&"activity".equals(hostingType)&&(cn.getClassName().contains(".GActivity")||cn.getClassName().contains(".PushActivity")||cn.getClassName().contains(".PushGTActivity"))){
-                                        Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
-                                        m.invoke(methodHookParam.thisObject, info.packageName, 0);
-                                        methodHookParam.setResult(null);
-                                        return;
-                                    }
-//                                }
-//                            }else if(isstopapp){
-                            }else if(appStartPrefHMs.containsKey(info.packageName+"/stopapp")){
-                                Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
-                                m.invoke(methodHookParam.thisObject, info.packageName, 0);
-                                methodHookParam.setResult(null);
-                                return;
+    //                                }
+                                }else if(appStartPrefHMs.containsKey(info.packageName+"/stopapp")&&appStartPrefHMs.get(info.packageName+"/stopapp")==(Boolean)true){
+                                    Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
+                                    m.invoke(methodHookParam.thisObject, info.packageName, 0);
+                                    methodHookParam.setResult(null);
+                                    return;
+                                }
                             }
-//                            if(mubeiStopOtherProc.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)&&muBeiHSs.contains(info.packageName)&&!"activity".equals(hostingType)){
-//                                XposedBridge.log("^^^^^^^^^^^^^^墓碑时启动 "+info.packageName+"  "+hostingType+" ^^^^^^^^^^^^^^^^^");
-//                                final String pkg = info.packageName;
-//                                new Handler().postDelayed(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        XposedBridge.log("^^^^^^^^^^^^^^墓碑时准备清理 "+pkg+" ^^^^^^^^^^^^^^^^^");
-//                                        stopProcess(amsCls,processRecordCls,methodHookParam.thisObject,pkg);
-//                                    }
-//                                },1000);
-//                                methodHookParam.setResult(null);
-//                                return;
-//                            }
                         }
-                        }
-                    } catch (RuntimeException e) {
+                    } catch (Throwable e) {
                         e.printStackTrace();
                     }
                 }
             };
-            if(clss.length == 14){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],clss[13],hook);
-            }else if(clss.length == 9){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8],hook);
-            }else if(clss.length == 6){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5],hook);
-            }else if(clss.length == 7){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6],hook);
-            }else if(clss.length == 8){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7],hook);
-            }else if(clss.length == 13){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],hook);
-            }else if(clss.length == 15){
-                XposedHelpers.findAndHookMethod(amsCls, "startProcessLocked", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],clss[13],clss[14],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^startProcessLocked else 函数未找到"+clss.length+" ^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"startProcessLocked",hook);
 
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^startProcessLocked  函数未找到^^^^^^^^^^^^^^^^^");
@@ -803,7 +702,6 @@ public class XposedAMS {
                                 }
                             }
                         }
-
                         if (SystemClock.elapsedRealtime() < 1000 * 60 * 2 && isStopScanMedia) {
                             if (intent != null && intent.getComponent() != null && intent.getComponent().getClassName().endsWith("MediaScannerService")) {
 //                            XposedBridge.log("CONTROL  "+intent.getComponent().getClassName());
@@ -815,7 +713,7 @@ public class XposedAMS {
                         }
 //                        XposedBridge.log("CONTROL  start isOneOpen " + isOneOpen + "  isTwoOpen " + isTwoOpen + "  isStopScanMedia " + isStopScanMedia + "  isMubeiStopOther " + isMubeiStopOther);
 //                    XposedBridge.log("CONTROL  start service "+callingPkg+"  "+intent+" "+muBeiHSs.contains(callingPkg)+"  "+controlHMs.containsKey(callingPkg+"/service"));
-                        if ((muBeiHSs.contains(callingPkg) && isTwoOpen) || (controlHMs.containsKey(callingPkg + "/service") && isOneOpen)) {
+                        if ((muBeiHSs.contains(callingPkg) && isTwoOpen) || (controlHMs.containsKey(callingPkg + "/service")&&controlHMs.get(callingPkg + "/service")==(Boolean)true && isOneOpen)) {
 //                            String apk = intent == null ? "" : intent.getComponent() == null ? "" : intent.getComponent().getPackageName();
                             if (intent != null && intent.getComponent() != null && controlHMs.containsKey(intent.getComponent().getClassName() + "/service")) {
                             } else {
@@ -830,29 +728,12 @@ public class XposedAMS {
                 }
                 }
             };
-            if(clss.length == 5){
-                XposedHelpers.findAndHookMethod(amsCls, "startService", clss[0], clss[1], clss[2], clss[3], clss[4],hook);
-            }else if(clss.length == 6){
-                XposedHelpers.findAndHookMethod(amsCls, "startService", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5],hook);
-            }else if(clss.length == 7){
-                XposedHelpers.findAndHookMethod(amsCls, "startService", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6],hook);
-            }else if(clss.length == 8){
-                XposedHelpers.findAndHookMethod(amsCls, "startService", clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7],hook);
-            }else if(clss.length == 4){
-                XposedHelpers.findAndHookMethod(amsCls, "startService", clss[0], clss[1], clss[2], clss[3],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^startService else 函数未找到"+clss.length+" ^^^^^^^^^^^^^^^^^");
-                for(Class c:clss){
-                    XposedBridge.log("^^^^^^^^^^^^^^METHOD startService "+c.getName()+ "^^^^^^^^^^^^^^^^^");
-                }
-            }
+            XposedUtil.hookMethod(amsCls,clss,"startService",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^startService  函数未找到^^^^^^^^^^^^^^^^^");
         }
 
         //阻止广播发送相关
-//        final boolean isOneOpen = settingPrefs.getBoolean(Common.ALLSWITCH_ONE,true);
-//        final boolean isTwoOpen = settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true);
         if(amsMethods.containsKey("broadcastIntentLocked")){
             XC_MethodHook hook = new XC_MethodHook() {
                 @Override
@@ -861,15 +742,15 @@ public class XposedAMS {
                     if(isOneOpen||isTwoOpen) {
                         //阻止往出发广播
                         String callingPackage = ((String) methodHookParam.args[1]) + "";
-                        if (isMubeiStopOther && isTwoOpen) {
-                            muBeiPrefs.reload();
-                        }
+//                        if (isMubeiStopOther && isTwoOpen) {
+//                            muBeiPrefs.reload();
+//                        }
                         if (isOneOpen) {
                             controlPrefs.reload();
                         }
 //                    if((isOneOpen&&controlHMs.containsKey(callingPackage+"/broad"))){
-                        if ((isOneOpen && controlHMs.containsKey(callingPackage + "/broad")) || (isMubeiStopOther && isTwoOpen && muBeiHSs.contains(callingPackage))
-                                ) {
+//                       (isMubeiStopOther && isTwoOpen && muBeiHSs.contains(callingPackage)
+                        if ((isOneOpen && controlHMs.containsKey(callingPackage + "/broad")&&controlHMs.get(callingPackage + "/broad")==(Boolean)true)) {
                             boolean isSend = false;
                             if (methodHookParam.args[2] != null) {
                                 Intent intent = (Intent) methodHookParam.args[2];
@@ -877,10 +758,8 @@ public class XposedAMS {
                             }
                             if (!isSend) {
                                 methodHookParam.setResult(-1);
-//                                    methodHookParam.setResult(-1);
                                 return;
                             }
-//                            }
                         }
                     }
                 } catch (RuntimeException e) {
@@ -888,20 +767,8 @@ public class XposedAMS {
                 }
                 }
             };
-            final Class sls[] = amsMethods.get("broadcastIntentLocked").getParameterTypes();
-            if(sls.length == 19){
-                XposedHelpers.findAndHookMethod(amsCls,"broadcastIntentLocked",sls[0],sls[1],sls[2],sls[3],sls[4],sls[5],sls[6],sls[7],sls[8],sls[9],sls[10],sls[11],sls[12],sls[13],sls[14],sls[15],sls[16],sls[17],sls[18], hook);
-            }else if(sls.length == 18){
-                XposedHelpers.findAndHookMethod(amsCls,"broadcastIntentLocked",sls[0],sls[1],sls[2],sls[3],sls[4],sls[5],sls[6],sls[7],sls[8],sls[9],sls[10],sls[11],sls[12],sls[13],sls[14],sls[15],sls[16],sls[17], hook);
-            }else if(sls.length == 17){
-                XposedHelpers.findAndHookMethod(amsCls,"broadcastIntentLocked",sls[0],sls[1],sls[2],sls[3],sls[4],sls[5],sls[6],sls[7],sls[8],sls[9],sls[10],sls[11],sls[12],sls[13],sls[14],sls[15],sls[16], hook);
-            }else if(sls.length == 16){
-                XposedHelpers.findAndHookMethod(amsCls,"broadcastIntentLocked",sls[0],sls[1],sls[2],sls[3],sls[4],sls[5],sls[6],sls[7],sls[8],sls[9],sls[10],sls[11],sls[12],sls[13],sls[14],sls[15], hook);
-            }else if(sls.length == 15){
-                XposedHelpers.findAndHookMethod(amsCls,"broadcastIntentLocked",sls[0],sls[1],sls[2],sls[3],sls[4],sls[5],sls[6],sls[7],sls[8],sls[9],sls[10],sls[11],sls[12],sls[13],sls[14], hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^broadcastIntentLocked else"+sls.length+"  函数未找到 ^^^^^^^^^^^^^^^^^");
-            }
+            final Class clss[] = amsMethods.get("broadcastIntentLocked").getParameterTypes();
+            XposedUtil.hookMethod(amsCls,clss,"broadcastIntentLocked",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^broadcastIntentLocked  函数未找到 ^^^^^^^^^^^^^^^^^");
         }
@@ -925,18 +792,8 @@ public class XposedAMS {
                 }
                 }
             };
-            final Class slsCbfs[] = amsMethods.get("checkBroadcastFromSystem").getParameterTypes();
-            if(slsCbfs.length == 6){
-                XposedHelpers.findAndHookMethod(amsCls,"checkBroadcastFromSystem",slsCbfs[0],slsCbfs[1],slsCbfs[2],slsCbfs[3],slsCbfs[4],slsCbfs[5], hookBroadPerm);
-            }else if(slsCbfs.length == 7){
-                XposedHelpers.findAndHookMethod(amsCls,"checkBroadcastFromSystem",slsCbfs[0],slsCbfs[1],slsCbfs[2],slsCbfs[3],slsCbfs[4],slsCbfs[5],slsCbfs[6], hookBroadPerm);
-            }else if(slsCbfs.length == 8){
-                XposedHelpers.findAndHookMethod(amsCls,"checkBroadcastFromSystem",slsCbfs[0],slsCbfs[1],slsCbfs[2],slsCbfs[3],slsCbfs[4],slsCbfs[5],slsCbfs[6],slsCbfs[7], hookBroadPerm);
-            }else if(slsCbfs.length == 5){
-                XposedHelpers.findAndHookMethod(amsCls,"checkBroadcastFromSystem",slsCbfs[0],slsCbfs[1],slsCbfs[2],slsCbfs[3],slsCbfs[4], hookBroadPerm);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^ checkBroadcastFromSystem else 未找到"+slsCbfs.length);
-            }
+            final Class clss[] = amsMethods.get("checkBroadcastFromSystem").getParameterTypes();
+            XposedUtil.hookMethod(amsCls,clss,"checkBroadcastFromSystem",hookBroadPerm);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^checkBroadcastFromSystem  函数未找到 ^^^^^^^^^^^^^^^^^");
         }
@@ -976,15 +833,7 @@ public class XposedAMS {
                 }
             };
             final Class clss[] = amsMethods.get("createRecentTaskInfoFromTaskRecord").getParameterTypes();
-            if(clss.length == 1){
-                XposedHelpers.findAndHookMethod(amsCls, "createRecentTaskInfoFromTaskRecord", clss[0],hook);
-            }else if(clss.length == 2){
-                XposedHelpers.findAndHookMethod(amsCls, "createRecentTaskInfoFromTaskRecord", clss[0],clss[1],hook);
-            }else if(clss.length == 3){
-                XposedHelpers.findAndHookMethod(amsCls, "createRecentTaskInfoFromTaskRecord", clss[0],clss[1],clss[2],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^createRecentTaskInfoFromTaskRecord else "+clss.length+"函数未找到 ^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"createRecentTaskInfoFromTaskRecord",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^createRecentTaskInfoFromTaskRecord  函数未找到 ^^^^^^^^^^^^^^^^^");
         }
@@ -1016,13 +865,7 @@ public class XposedAMS {
                     }
                     }
                 };
-                if (clss.length == 4){
-                    XposedHelpers.findAndHookConstructor(processRecordCls,clss[0],clss[1],clss[2],clss[3],hook);
-                }else if (clss.length == 3){
-                    XposedHelpers.findAndHookConstructor(processRecordCls,clss[0],clss[1],clss[2],hook);
-                }else if (clss.length == 2){
-                    XposedHelpers.findAndHookConstructor(processRecordCls,clss[0],clss[1],hook);
-                }
+                XposedUtil.hookConstructorMethod(processRecordCls,clss,hook);
             }else{
                 XposedBridge.log("^^^^^^^^^^^^^^ProcessRecord0  构造函数未找到 ^^^^^^^^^^^^^^^^^");
             }
@@ -1049,9 +892,7 @@ public class XposedAMS {
                 }
                 }
             };
-            if (clssself.length == 2){
-                XposedHelpers.findAndHookMethod(processRecordCls,"kill",clssself[0],clssself[1],hook);
-            }
+            XposedUtil.hookMethod(processRecordCls,clssself,"kill",hook);
         }
 
         //最近任务功能需要 自启控制也需要
@@ -1097,8 +938,10 @@ public class XposedAMS {
                             intentField.setAccessible(true);
                             Object intentObject = intentField.get(taskRecordObject);
                             String pkg = null;
+                            String cls = null;
                             if (intentObject != null) {
                                 pkg = ((Intent) intentObject).getComponent().getPackageName();
+                                cls = ((Intent) intentObject).getComponent().getClassName();
                                 if (recentPrefs.hasFileChanged()) {
                                     recentPrefs.reload();
                                 }
@@ -1110,53 +953,32 @@ public class XposedAMS {
                             } else if (recentPrefs.getBoolean(pkg + "/forceclean", false)) {
                                 final Object ams = methodHookParam.thisObject;
                                 try {
-                                    if ("com.tencent.mm".equals(pkg)) {
-                                        Field recField = methodHookParam.thisObject.getClass().getDeclaredField("mRecentTasks");
-                                        recField.setAccessible(true);
-                                        ArrayList lists = (ArrayList) (recField.get(methodHookParam.thisObject));
-                                        int count = 0;
-                                        if (lists.size() > 0) {
-                                            if (lists.get(0).getClass().getName().equals("com.android.server.am.TaskRecord")) {
-                                                for (Object o : lists) {
-                                                    Method getBaseMethod = taskRecordCls.getDeclaredMethod("getBaseIntent");
-                                                    if (getBaseMethod == null) {
-                                                        getBaseMethod = taskRecordCls.getMethod("getBaseIntent");
-                                                    }
-                                                    getBaseMethod.setAccessible(true);
-                                                    Intent intentm = (Intent) (getBaseMethod.invoke(o));
-                                                    if (intentm != null && pkg.equals(intentm.getComponent().getPackageName())) {
-                                                        count++;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (count <= 1) {
-                                            Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
-                                            m.setAccessible(true);
-                                            m.invoke(ams, pkg, 0);
-                                        }
-                                    } else {
+                                    //com.tencent.mm.plugin.appbrand.ui.AppBrandUI  com.tencent.mm.ui.LauncherUI
+                                    if("com.tencent.mm".equals(pkg)&&!"com.tencent.mm.ui.LauncherUI".equals(cls)){
+                                    }else {
                                         Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
                                         m.setAccessible(true);
                                         m.invoke(ams, pkg, 0);
+//                                        XposedBridge.log("CONTROL REMOVE CARD " + pkg + "  " + cls);
                                     }
                                 } catch (RuntimeException e) {
                                     isKillFail = true;
                                 }
-                            }
-                            final Object ams = methodHookParam.thisObject;
-                            if (sysCxtField != null) {
-                                sysCxtField.setAccessible(true);
-                                final Context sysCxt = (Context) sysCxtField.get(ams);//(Context)methodHookParam.args[0];
-                                if (sysCxt != null) {
-                                    Intent intent = new Intent("com.click369.control.removerecent");
-                                    intent.putExtra("pkg", pkg);
-//                                if(isKillFail){
-//                                    intent.putExtra("killfail",isKillFail);
-//                                }
-                                    sysCxt.sendBroadcast(intent);
+//                                final Object ams = methodHookParam.thisObject;
+                                if (sysCxtField != null) {
+                                    sysCxtField.setAccessible(true);
+                                    final Context sysCxt = (Context) sysCxtField.get(ams);//(Context)methodHookParam.args[0];
+                                    if (sysCxt != null) {
+                                        if("com.tencent.mm".equals(pkg)&&"com.tencent.mm.plugin.appbrand.ui.AppBrandUI".equals(cls)){
+                                        }else {
+                                            Intent intent = new Intent("com.click369.control.removerecent");
+                                            intent.putExtra("pkg", pkg);
+                                            sysCxt.sendBroadcast(intent);
+                                        }
+                                    }
                                 }
                             }
+
                         } else {
                             XposedBridge.log("^^^^^^^^^^^^^^taskRecordObject removeTask 对象获取失败  " + clss.length + "^^^^^^^^^^^^^^^^^");
                         }
@@ -1167,15 +989,7 @@ public class XposedAMS {
                 }
             };
             final Class clss[] = amsMethods.get("removeTask").getParameterTypes();
-            if(clss.length == 1){
-                XposedHelpers.findAndHookMethod(amsCls, "removeTask", clss[0],hook);
-            }else if(clss.length == 2){
-                XposedHelpers.findAndHookMethod(amsCls, "removeTask", clss[0],clss[1],hook);
-            }else if(clss.length == 3){
-                XposedHelpers.findAndHookMethod(amsCls, "removeTask", clss[0],clss[1],clss[2],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^removeTask else "+clss.length+"函数未找到 ^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"removeTask",hook);
         }else{
             XposedBridge.log("^^^^^^^^^^^^^^removeTask  函数未找到 ^^^^^^^^^^^^^^^^^");
         }
@@ -1228,11 +1042,12 @@ public class XposedAMS {
                                     broad1.putExtra("action", "");
                                     sysCxt.sendBroadcast(broad1);
                                     autoStartPrefs.reload();
-//                                    boolean isLockApp = appStartPrefHMs.containsKey(pkg+"/lockapp")?(Boolean)appStartPrefHMs.get(pkg+"/lockapp"):false;
+                                    boolean isLockApp = appStartPrefHMs.containsKey(pkg+"/lockapp")?(Boolean)appStartPrefHMs.get(pkg+"/lockapp"):false;
 //                                    boolean isLockAppOk = appStartPrefHMs.containsKey(pkg+"/lockok")?(Boolean)appStartPrefHMs.get(pkg+"/lockok"):false;
 
 //                                    if (pkg != null && isLockApp) {
-                                    if (pkg != null && autoStartPrefs.getBoolean(pkg + "/lockapp", false)) {
+                                    if (pkg != null && isLockApp) {
+//                                    if (pkg != null && autoStartPrefs.getBoolean(pkg + "/lockapp", false)) {
 //                                        if (!isLockAppOk) {
                                         if (!autoStartPrefs.getBoolean(pkg + "/lockok", false)) {
                                             Intent intent = new Intent(Intent.ACTION_MAIN);
@@ -1258,15 +1073,7 @@ public class XposedAMS {
                 }
                 }
             };
-            if(clss.length == 1){
-                XposedHelpers.findAndHookMethod(amsCls, "startActivityFromRecents", clss[0],hook);
-            }else if(clss.length == 2){
-                XposedHelpers.findAndHookMethod(amsCls, "startActivityFromRecents", clss[0],clss[1],hook);
-            }else if(clss.length == 3){
-                XposedHelpers.findAndHookMethod(amsCls, "startActivityFromRecents", clss[0],clss[1],clss[2],hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^startActivityFromRecents else "+clss.length+"函数未找到 ^^^^^^^^^^^^^^^^^");
-            }
+            XposedUtil.hookMethod(amsCls,clss,"startActivityFromRecents",hook);
         }else if(isAppstart){
             XposedBridge.log("^^^^^^^^^^^^^^startActivityFromRecents  函数未找到 ^^^^^^^^^^^^^^^^^");
         }
@@ -1301,7 +1108,7 @@ public class XposedAMS {
                                             nameFiled.setAccessible(true);
                                             String name = (String)nameFiled.get(o);
                                             if ((isTwoOpen&&muBeiHSs.contains(name))||
-                                                    (isOneOpen&&controlHMs.containsKey(name+"/broad"))){
+                                                    (isOneOpen&&controlHMs.containsKey(name+"/broad")&&controlHMs.get(name+"/broad")==(Boolean)true)){
 //                                                    if ((isOneOpen&&controlHMs.containsKey(name+"/broad"))){
                                                 removes.add(o);
                                             }
@@ -1309,7 +1116,7 @@ public class XposedAMS {
                                             ActivityInfo info = ((ResolveInfo)o).activityInfo;
                                             String name = info!=null?info.packageName:"";
                                             if ((isTwoOpen&&muBeiHSs.contains(name))||
-                                                    (isOneOpen&&controlHMs.containsKey(name+"/broad"))){
+                                                    (isOneOpen&&controlHMs.containsKey(name+"/broad")&&controlHMs.get(name+"/broad")==(Boolean)true)){
                                                 removes.add(o);
                                             }
                                         }
@@ -1326,18 +1133,7 @@ public class XposedAMS {
                     if (clss!=null){
                         //让7.0及以下生效  8.0强制杀死后不需要
                         if(Build.VERSION.SDK_INT<=Build.VERSION_CODES.N ){
-                            //有可能导致cpu频率过高。。目前移除
-                            if(clss.length == 19){
-                                XposedHelpers.findAndHookConstructor(brCls,clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],hook1);
-                            }else if (clss.length == 20){
-                                XposedHelpers.findAndHookConstructor(brCls,clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],hook1);
-                            }else if(clss.length == 21){
-                                XposedHelpers.findAndHookConstructor(brCls,clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],clss[18],clss[19],clss[20],hook1);
-                            }else if(clss.length == 18){
-                                XposedHelpers.findAndHookConstructor(brCls,clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10],clss[11],clss[12],clss[13],clss[14],clss[15],clss[16],clss[17],hook1);
-                            }else {
-                                XposedBridge.log("CONTROL BroadcastRecord "+clss.length+"未找到");
-                            }
+                            XposedUtil.hookConstructorMethod(brCls,clss,hook1);
                         }
                     }else{
                         XposedBridge.log("CONTROL BroadcastRecord 未找到0");
@@ -1386,15 +1182,12 @@ public class XposedAMS {
                                         }
                                         boolean idle = intent.getBooleanExtra("idle",true);
                                         if (idlemethod!=null) {
+                                            idlemethod.setAccessible(true);
                                             for(String pkg:idlePkgs){
-//                                                XposedBridge.log("CONTROL -----设置进入待机应用  "+pkg);
-                                                idlemethod.setAccessible(true);
                                                 idlemethod.invoke(methodHookParam.thisObject, pkg, idle, 0);
                                             }
                                         }else{
                                             XposedBridge.log("CONTROL -----未找到idle函数  ");
-//                                            XposedUtil.showParmsByName(ussCls,"setAppIdleAsync");
-//                                            XposedUtil.showParmsByName(ussCls,"setAppIdle");
                                         }
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -1402,13 +1195,10 @@ public class XposedAMS {
                                     }
                                 }else if ("com.click369.control.uss.getappidlestate".equals(intent.getAction())){
                                     try{
-    //                                    XposedBridge.log("CONTROL -----获取已进入待机应用");
-    //                                    final Method getidlemethod = ussCls.getDeclaredMethod("isAppIdleFilteredOrParoled",String.class,int.class,long.class,boolean.class);
                                         getidlemethod.setAccessible(true);
                                         HashMap<String,Boolean> pkgs = ( HashMap<String,Boolean>)intent.getSerializableExtra("pkgs");
                                         HashSet<String> newpkgs =new HashSet<String>();
                                         Set<String> keys = pkgs.keySet();
-//                                        XposedBridge.log("CONTROL -----获取已进入待机应用  idleFilterParms.length  "+idleFilterParms.length+"  pkgs.size  "+pkgs.size());
                                         if (idleFilterParms!=null&&idleFilterParms.length == 4){
                                             for(String key:keys){
                                                 Object isIdle = getidlemethod.invoke(methodHookParam.thisObject,key.trim(),0, SystemClock.elapsedRealtime(),true);
@@ -1435,7 +1225,7 @@ public class XposedAMS {
                                         intent1.putExtra("pkgs",newpkgs);
                                         context.sendBroadcast(intent1);
 //                                        XposedBridge.log("CONTROL -----已进入待机应用: "+newpkgs.size());
-                                    } catch (Exception e){
+                                    } catch (Throwable e){
                                         e.printStackTrace();
     //                                    XposedBridge.log("CONTROL -----获取已进入待机应用的个数出错  "+e.getMessage());
                                     }
@@ -1446,7 +1236,6 @@ public class XposedAMS {
                         filter.addAction("com.click369.control.uss.setappidle");
                         filter.addAction("com.click369.control.uss.getappidlestate");
                         context.registerReceiver(br, filter);
-    //                    XposedBridge.log("CONTROL -----待机广播注册");
                     }
                 });
             }
@@ -1469,10 +1258,6 @@ public class XposedAMS {
                             StatusBarNotification sbn = (StatusBarNotification)methodHookParam.args[0];
                             CharSequence title = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE);
                             CharSequence text = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT);
-//                            CharSequence subText = (CharSequence)sbn.getNotification().extras.get(Notification.EXTRA_SUB_TEXT);
-//                            CharSequence infoText = (CharSequence)sbn.getNotification().extras.get(Notification.EXTRA_INFO_TEXT);
-//                            XposedBridge.log("^^^^^^^^^^^^^^notifyPosted title "+title+" text "+text+"^^^^^^^^^^^^^^^^^");
-//                            XposedBridge.log("^^^^^^^^^^^^^^notifyPosted subText "+subText+" infoText "+infoText+"^^^^^^^^^^^^^^^^^");
                             if (title != null && title.toString().contains("应用控制器") && title.toString().contains("可能有害")) {
                                 methodHookParam.setResult(null);
                                 return;
@@ -1500,17 +1285,13 @@ public class XposedAMS {
                 }
             };
             if(clss!=null){
-                if(clss.length==2){
-                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPostedLocked", clss[0], clss[1],hook );
-                }else if(clss.length==1){
-                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPostedLocked", clss[0],hook );
-                }else if(clss.length==3){
-                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPostedLocked", clss[0], clss[1], clss[2],hook );
-                }
+                XposedUtil.hookMethod(notifyCls, clss, "notifyPostedLocked",hook);
             }
         } catch (RuntimeException e){
             e.printStackTrace();
         }catch (XposedHelpers.ClassNotFoundError e){
+            e.printStackTrace();
+        }catch (Throwable e){
             e.printStackTrace();
         }
 

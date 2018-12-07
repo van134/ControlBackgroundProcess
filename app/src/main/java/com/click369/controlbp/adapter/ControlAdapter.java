@@ -20,6 +20,7 @@ import com.click369.controlbp.bean.WhiteApp;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtilBackStop;
 
@@ -169,10 +170,12 @@ public class ControlAdapter extends BaseAdapter{
 		}
 		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
+//		viewHolder.appIcon.setImageBitmap();
+//		viewHolder.appIcon.setImageDrawable(PackageUtil.getBitmap(c,data.packageName));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
 
 //		viewHolder.iceIv.setVisibility(data.isDisable?View.VISIBLE:View.GONE);
-		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);
+		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.broadIv.setTag(position);
 		viewHolder.serviceIv.setTag(position);

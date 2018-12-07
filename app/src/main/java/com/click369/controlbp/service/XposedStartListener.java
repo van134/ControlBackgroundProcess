@@ -136,17 +136,18 @@ public class XposedStartListener {
                                 }
                             };
                             if(clss!=null){
-                                if(clss.length == 3){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2],hook );
-                                }else if(clss.length == 4){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2], clss[3],hook );
-                                }else if(clss.length == 2){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1],hook );
-                                }else if(clss.length == 5){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2], clss[3], clss[4],hook );
-                                }else{
-                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved clss else 未找到^^^^^^^^^^^^^^^^^");
-                                }
+                                XposedUtil.hookMethod(notifyCls,clss,"notifyRemoved",hook);
+//                                if(clss.length == 3){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2],hook );
+//                                }else if(clss.length == 4){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2], clss[3],hook );
+//                                }else if(clss.length == 2){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1],hook );
+//                                }else if(clss.length == 5){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2], clss[3], clss[4],hook );
+//                                }else{
+//                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved clss else 未找到^^^^^^^^^^^^^^^^^");
+//                                }
                             }else{
                                 XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved null 未找到^^^^^^^^^^^^^^^^^");
                             }
@@ -184,17 +185,18 @@ public class XposedStartListener {
                                 }
                             };
                             if(clss!=null){
-                                if(clss.length == 3){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2],hook );
-                                }else if(clss.length == 4){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2], clss[3],hook );
-                                }else if(clss.length == 2){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1],hook );
-                                }else if(clss.length == 5){
-                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2], clss[3], clss[4],hook );
-                                }else{
-                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted clss else 未找到^^^^^^^^^^^^^^^^^");
-                                }
+                                XposedUtil.hookMethod(notifyCls,clss,"notifyPosted",hook);
+//                                if(clss.length == 3){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2],hook );
+//                                }else if(clss.length == 4){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2], clss[3],hook );
+//                                }else if(clss.length == 2){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1],hook );
+//                                }else if(clss.length == 5){
+//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2], clss[3], clss[4],hook );
+//                                }else{
+//                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted clss else 未找到^^^^^^^^^^^^^^^^^");
+//                                }
                             }else{
                                 XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted null 未找到^^^^^^^^^^^^^^^^^");
                             }
@@ -238,13 +240,14 @@ public class XposedStartListener {
                                 }
                                 }
                             };
-                            if (clss.length == 3) {
-                                XposedHelpers.findAndHookMethod(windowManagerCls, "interceptKeyBeforeDispatching",clss[0],clss[1],clss[2], hook);
-                            }else if (clss.length == 4) {
-                                XposedHelpers.findAndHookMethod(windowManagerCls, "interceptKeyBeforeDispatching",clss[0],clss[1],clss[2],clss[3], hook);
-                            }else{
-                                XposedBridge.log("^^^^^^^^^^^^^^interceptKeyBeforeDispatching else "+clss.length+"^^^^^^^^^^^^^^^^^");
-                            }
+                            XposedUtil.hookMethod(windowManagerCls,clss,"interceptKeyBeforeDispatching",hook);
+//                            if (clss.length == 3) {
+//                                XposedHelpers.findAndHookMethod(windowManagerCls, "interceptKeyBeforeDispatching",clss[0],clss[1],clss[2], hook);
+//                            }else if (clss.length == 4) {
+//                                XposedHelpers.findAndHookMethod(windowManagerCls, "interceptKeyBeforeDispatching",clss[0],clss[1],clss[2],clss[3], hook);
+//                            }else{
+//                                XposedBridge.log("^^^^^^^^^^^^^^interceptKeyBeforeDispatching else "+clss.length+"^^^^^^^^^^^^^^^^^");
+//                            }
                         }else{
                             XposedBridge.log("^^^^^^^^^^^^^^interceptKeyBeforeDispatching null 未找到^^^^^^^^^^^^^^^^^");
                         }

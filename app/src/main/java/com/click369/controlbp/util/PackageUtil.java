@@ -7,10 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import com.click369.controlbp.common.Common;
@@ -191,6 +195,30 @@ public class PackageUtil {
         return sb.toString();
     }
 
+    public static HashSet<String> getRunngingAppList(Context cxt){
+        HashSet<String> runLists = new HashSet<String>();
+//        StringBuilder sb = new StringBuilder();
+        ActivityManager am = (ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> rps =  am.getRunningAppProcesses();
+        if (rps!=null){
+            for(ActivityManager.RunningAppProcessInfo ar:rps){
+                if(ar.pkgList!=null&&ar.pkgList.length>0){
+                    for(String s:ar.pkgList){
+//                        if(sb.indexOf(s)==-1){
+//                            sb.append(s).append("\n");
+                            runLists.add(s);
+//                        }
+                    }
+                }
+            }
+//        Log.i("CONTROL","running  "+sb.toString());
+        }
+        if(runLists.size()<3){
+            return new HashSet<String>();
+        }
+        return runLists;
+    }
+
     public static String getAppVersionName(Context context) {
         String versionName = "";
         try {
@@ -231,6 +259,20 @@ public class PackageUtil {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+    public static Drawable getBitmap(Context context,String pkg) {
+        PackageManager packageManager = null;
+        ApplicationInfo applicationInfo = null;
+        try {
+            packageManager = context.getApplicationContext().getPackageManager();
+            applicationInfo = packageManager.getApplicationInfo(pkg, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            applicationInfo = null;
+        }
+        Drawable d = packageManager.getApplicationIcon(applicationInfo); //xxx根据自己的情况获取drawable
+//        BitmapDrawable bd = (BitmapDrawable) d;
+//        Bitmap bm = bd.getBitmap();
+        return d;
     }
 
 }

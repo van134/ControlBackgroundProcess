@@ -65,6 +65,9 @@ public class ShellUtilNoBackData {
     public static void execCommand(String cmd){
         initProcess();
         try {
+            if(cmd!=null&&cmd.contains("pm")&(cmd.contains("disable")||cmd.contains("enable"))){
+                AppLoaderUtil.isIceAppChange = true;
+            }
             out.write((cmd+ "\n").getBytes());
 //            out.write(("exit\n").getBytes());
             out.flush();

@@ -48,7 +48,7 @@ public class ChangeTextActivity extends BaseActivity{
             public void onClick(View v) {
                 if (nameEt.getText().toString().trim().length()>0){
                     final String appName = nameEt.getText().toString().trim();
-                    for(AppInfo ai:MainActivity.allAppInfos){
+                    for(AppInfo ai:appLoaderUtil.allAppInfos){
                         if (ai.appName.equals(appName)){
                             pkg = ai.packageName;
                             break;

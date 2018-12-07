@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-public class JuanZengFragment extends Fragment {
+public class JuanZengFragment extends BaseFragment {
     private TextView zfbTv,wxTv,zklTv;
     private TextView arQuaTv;
     private LinearLayout arFL;

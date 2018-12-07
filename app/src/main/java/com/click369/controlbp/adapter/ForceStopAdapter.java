@@ -171,7 +171,7 @@ public class ForceStopAdapter extends BaseAdapter{
 
 //		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(data.isHomeIdle&&!data.isNotifyNotExit?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: WatchDogService.setTimeStopApp.containsKey(data.packageName)?R.mipmap.icon_clock:R.mipmap.empty);
+		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.offIv.setTag(position);
 		viewHolder.homeIv.setTag(position);
@@ -234,7 +234,6 @@ public class ForceStopAdapter extends BaseAdapter{
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
 						ai.isRecentForceClean = false;
 					}
-					SharedPrefsUtil.getInstance(c).muBeiPrefs.edit().remove(ai.getPackageName()).commit();
 					ed.remove(ai.getPackageName()+"/backmubei").commit();
 					ai.isBackMuBei = false;
 				}else{
@@ -248,7 +247,6 @@ public class ForceStopAdapter extends BaseAdapter{
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().putBoolean(ai.getPackageName() + "/forceclean", true).commit();
 						ai.isRecentForceClean = true;
 					}
-					SharedPrefsUtil.getInstance(c).muBeiPrefs.edit().remove(ai.getPackageName()).commit();
 					ed.remove(ai.getPackageName()+"/backmubei").commit();
 					ai.isBackMuBei = false;
 				}
@@ -268,7 +266,6 @@ public class ForceStopAdapter extends BaseAdapter{
 //				boolean isMubei = c.forceStopPrefs.getBoolean(ai.getPackageName()+"/homemubei",false);
 				if (ai.isHomeMuBei){
 					ed.remove(ai.getPackageName()+"/homestop").commit();
-					SharedPrefsUtil.getInstance(c).muBeiPrefs.edit().remove(ai.getPackageName()).commit();
 					ed.remove(ai.getPackageName()+"/homemubei").commit();
 					ai.isHomeMuBei = false;
 				}else if(ai.isHomeIdle){
@@ -353,13 +350,11 @@ public class ForceStopAdapter extends BaseAdapter{
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
 						ai.isRecentForceClean = false;
 					}
-					SharedPrefsUtil.getInstance(c).muBeiPrefs.edit().remove(ai.getPackageName()).commit();
 					ed.remove(ai.getPackageName()+"/offmubei").commit();
 					ai.isOffscMuBei = false;
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/offstop",true).commit();
 					ai.isOffscForceStop = true;
-					SharedPrefsUtil.getInstance(c).muBeiPrefs.edit().remove(ai.getPackageName()).commit();
 					ed.remove(ai.getPackageName()+"/offmubei").commit();
 					ai.isOffscMuBei = false;
 					if (MainActivity.isLinkStopAndAuto&&!ai.isAutoStart) {

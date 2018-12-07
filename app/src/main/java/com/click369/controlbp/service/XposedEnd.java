@@ -46,8 +46,10 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedEnd {
-    public  static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences settingPrefs,
-                                    final XSharedPreferences autoStartPrefs,final XSharedPreferences controlPrefs,final XSharedPreferences muBeiPrefs){
+    public  static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
+                                    final XSharedPreferences settingPrefs,
+                                    final XSharedPreferences autoStartPrefs,
+                                    final XSharedPreferences controlPrefs){
         //为了快速启动  hook到桌面应用 桌面刚加载就启动控制器
         if (settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName)){//lpparam.packageName.equals(settingPrefs.getString("homeapk",""))
             final Class appCls = XposedHelpers.findClass("android.app.Application",lpparam.classLoader);
@@ -56,7 +58,7 @@ public class XposedEnd {
                 protected void afterHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
                     try {
                         final Application app = (Application) (methodHookParam.thisObject);
-//                            Handler h = new Handler();
+                            Handler h = new Handler();
 //                            h.postDelayed(new Runnable() {
 //                                @Override
 //                                public void run() {
@@ -104,7 +106,7 @@ public class XposedEnd {
 //                            intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
 //                            app.sendBroadcast(intentb);
                         }
-                    }catch (Exception e){
+                    }catch (Throwable e){
                         XposedBridge.log("^^^^^^^^^^^^^HOOK homeapk 出错"+e+"^^^^^^^^^^^^^^^");
                         e.printStackTrace();
                     }

@@ -39,7 +39,7 @@ public class TimeUtil {
             SimpleDateFormat sdf = new SimpleDateFormat("s秒");
             return sdf.format(mils);
         }else if(mils>1000*60&&mils<1000*60*60){
-            SimpleDateFormat sdf = new SimpleDateFormat("m分");
+            SimpleDateFormat sdf = new SimpleDateFormat("m分s秒");
             return sdf.format(mils);
         }else{
             SimpleDateFormat sdf = new SimpleDateFormat("m分");

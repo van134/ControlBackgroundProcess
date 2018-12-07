@@ -7,6 +7,8 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.util.Log;
 
+import com.click369.controlbp.bean.AppStateInfo;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.ShellUtilNoBackData;
 
 import java.util.HashMap;
@@ -113,15 +115,19 @@ public class AppStartService {
             else if(intent.getAction().equals("com.click369.control.removerecent")){
                 String pkg = intent.getStringExtra("pkg");
                 if(!pkg.equals("com.click369.control")){
-
-                    if(service.isAtuoRemoveIce&& service.iceButOpenInfos.size()>0&&service.iceButOpenInfos.contains(pkg)){
+                    AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+//                    asi.isOpenFromIceRome = true;
+//                    WatchDogService.allAppStateInfos.put(ai.getPackageName(),asi);
+                    if(service.isAtuoRemoveIce&& asi.isOpenFromIceRome){
                         ShellUtilNoBackData.execCommand("pm disable "+pkg);
-                        Log.e("CONTROL", "划掉 冻结"+pkg);
-                        service.iceButOpenInfos.remove(pkg);
+                        Log.i("CONTROL", "划掉 冻结"+pkg);
+//                        service.iceButOpenInfos.remove(pkg);
+                        asi.isOpenFromIceRome = false;
                     }
                 }
                 Log.e("CONTROL","从最近任务列表移除 "+pkg+"  killfail? "+intent.getStringExtra("killfail"));
-                if (intent!=null&&WatchDogService.removeFromRecentAppList.contains(pkg)){
+                if (intent!=null&&AppLoaderUtil.allHMAppInfos.containsKey(pkg)&&AppLoaderUtil.allHMAppInfos.get(pkg).isRecentForceClean){
+//                if (intent!=null&&WatchDogService.removeFromRecentAppList.contains(pkg)){
                     Log.e("CONTROL","从最近任务列表移除 "+pkg+"  并准备杀死");
                     XposedStopApp.stopApk(pkg,service);
                 }

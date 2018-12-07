@@ -172,81 +172,83 @@ public class XposedAppStart {
             }
         }
 
-        if ("android".equals(lpparam.packageName)&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            try {
-                //com.android.server.content.SyncManager 处理*sync*
-                Class jobSerCls = XposedHelpers.findClass("com.android.server.job.JobSchedulerService", lpparam.classLoader);
-                if(jobSerCls!=null){
-                    Class clss[] = XposedUtil.getParmsByName(jobSerCls,"schedule");
-                    if (clss!=null){
-                        XC_MethodHook hook = new XC_MethodHook() {
-                            @Override
-                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                try {
-                                    JobInfo ji = (JobInfo) methodHookParam.args[0];
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP&&ji!=null&&ji.getService()!=null&&ji.getService().getPackageName()!=null){
-                                        autoStartPrefs.reload();
-                                        String pkg = ji.getService().getPackageName();
-                                        if(autoStartPrefs.getBoolean(pkg+"/autostart",false)||
-                                                autoStartPrefs.getBoolean(pkg+"/stopapp",false)){
-//                                    Method method = methodHookParam.thisObject.getClass().getDeclaredMethod("cancel",int.class);
-//                                    method.setAccessible(true);
-//                                    method.invoke(methodHookParam.thisObject,ji.getId());
-                                            methodHookParam.setResult(0);
-                                            return;
-                                        }
-                                    }
-                                }catch (RuntimeException e){
-                                    e.printStackTrace();
-                                }
-                            }
-                        };
-                        if (clss.length==1){
-                            XposedHelpers.findAndHookMethod(jobSerCls,"schedule",clss[0],hook);
-                        }else if (clss.length==2){
-                            XposedHelpers.findAndHookMethod(jobSerCls,"schedule",clss[0],clss[1],hook);
-                        }else{
-                            XposedBridge.log("^^^^^^^^^^^^^^schedule 未找到 " + clss.length + " ^^^^^^^^^^^^^^^^^");
-                        }
-                    }
-                    Class clss1[] = XposedUtil.getParmsByName(jobSerCls,"enqueue");
-                    if (clss1!=null){
-                        XC_MethodHook hook = new XC_MethodHook() {
-                            @Override
-                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                try{
-                                    JobInfo ji = (JobInfo) methodHookParam.args[0];
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP&&ji!=null&&ji.getService()!=null&&ji.getService().getPackageName()!=null){
-                                        autoStartPrefs.reload();
-                                        String pkg = ji.getService().getPackageName();
-                                        if(autoStartPrefs.getBoolean(pkg+"/autostart",false)||
-                                                autoStartPrefs.getBoolean(pkg+"/stopapp",false)){
-                                            //                                    Method method = methodHookParam.thisObject.getClass().getDeclaredMethod("cancel",int.class);
-                                            //                                    method.setAccessible(true);
-                                            //                                    method.invoke(methodHookParam.thisObject,ji.getId());
-                                            methodHookParam.setResult(0);
-                                            return;
-                                        }
-                                    }
-                                }catch (RuntimeException e){
-                                    e.printStackTrace();
-                                }
-                            }
-                        };
-                        if (clss.length==1){
-                            XposedHelpers.findAndHookMethod(jobSerCls,"enqueue",clss1[0],hook);
-                        }else if (clss.length==2){
-                            XposedHelpers.findAndHookMethod(jobSerCls,"enqueue",clss1[0],clss1[1],hook);
-                        }else if (clss.length==3){
-                            XposedHelpers.findAndHookMethod(jobSerCls,"enqueue",clss1[0],clss1[1],clss1[2],hook);
-                        }else{
-                            XposedBridge.log("^^^^^^^^^^^^^^enqueue 未找到 " + clss.length + " ^^^^^^^^^^^^^^^^^");
-                        }
-                    }
-                }
-            }catch (RuntimeException e){
-                XposedBridge.log("^^^^^^^^^^^^^^JobSchedulerService 未找到 " + e+ " ^^^^^^^^^^^^^^^^^");
-            }
-        }
+//        if ("android".equals(lpparam.packageName)&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            try {
+//                //com.android.server.content.SyncManager 处理*sync*
+//                Class jobSerCls = XposedHelpers.findClass("com.android.server.job.JobSchedulerService", lpparam.classLoader);
+//                if(jobSerCls!=null){
+//                    Class clss[] = XposedUtil.getParmsByName(jobSerCls,"schedule");
+//                    if (clss!=null){
+//                        XC_MethodHook hook = new XC_MethodHook() {
+//                            @Override
+//                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                                try {
+//                                    JobInfo ji = (JobInfo) methodHookParam.args[0];
+//                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP&&ji!=null&&ji.getService()!=null&&ji.getService().getPackageName()!=null){
+//                                        autoStartPrefs.reload();
+//                                        String pkg = ji.getService().getPackageName();
+//                                        if(autoStartPrefs.getBoolean(pkg+"/autostart",false)||
+//                                                autoStartPrefs.getBoolean(pkg+"/stopapp",false)){
+////                                    Method method = methodHookParam.thisObject.getClass().getDeclaredMethod("cancel",int.class);
+////                                    method.setAccessible(true);
+////                                    method.invoke(methodHookParam.thisObject,ji.getId());
+//                                            methodHookParam.setResult(0);
+//                                            return;
+//                                        }
+//                                    }
+//                                }catch (RuntimeException e){
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        };
+//                        XposedUtil.hookMethod(jobSerCls, clss, "schedule",hook);
+////                        if (clss.length==1){
+////                            XposedHelpers.findAndHookMethod(jobSerCls,"schedule",clss[0],hook);
+////                        }else if (clss.length==2){
+////                            XposedHelpers.findAndHookMethod(jobSerCls,"schedule",clss[0],clss[1],hook);
+////                        }else{
+////                            XposedBridge.log("^^^^^^^^^^^^^^schedule 未找到 " + clss.length + " ^^^^^^^^^^^^^^^^^");
+////                        }
+//                    }
+//                    Class clss1[] = XposedUtil.getParmsByName(jobSerCls,"enqueue");
+//                    if (clss1!=null){
+//                        XC_MethodHook hook = new XC_MethodHook() {
+//                            @Override
+//                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                                try{
+//                                    JobInfo ji = (JobInfo) methodHookParam.args[0];
+//                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP&&ji!=null&&ji.getService()!=null&&ji.getService().getPackageName()!=null){
+//                                        autoStartPrefs.reload();
+//                                        String pkg = ji.getService().getPackageName();
+//                                        if(autoStartPrefs.getBoolean(pkg+"/autostart",false)||
+//                                                autoStartPrefs.getBoolean(pkg+"/stopapp",false)){
+//                                            //                                    Method method = methodHookParam.thisObject.getClass().getDeclaredMethod("cancel",int.class);
+//                                            //                                    method.setAccessible(true);
+//                                            //                                    method.invoke(methodHookParam.thisObject,ji.getId());
+//                                            methodHookParam.setResult(0);
+//                                            return;
+//                                        }
+//                                    }
+//                                }catch (RuntimeException e){
+//                                    e.printStackTrace();
+//                                }
+//                            }
+//                        };
+//                        XposedUtil.hookMethod(jobSerCls, clss, "enqueue",hook);
+////                        if (clss.length==1){
+////                            XposedHelpers.findAndHookMethod(jobSerCls,"enqueue",clss1[0],hook);
+////                        }else if (clss.length==2){
+////                            XposedHelpers.findAndHookMethod(jobSerCls,"enqueue",clss1[0],clss1[1],hook);
+////                        }else if (clss.length==3){
+////                            XposedHelpers.findAndHookMethod(jobSerCls,"enqueue",clss1[0],clss1[1],clss1[2],hook);
+////                        }else{
+////                            XposedBridge.log("^^^^^^^^^^^^^^enqueue 未找到 " + clss.length + " ^^^^^^^^^^^^^^^^^");
+////                        }
+//                    }
+//                }
+//            }catch (RuntimeException e){
+//                XposedBridge.log("^^^^^^^^^^^^^^JobSchedulerService 未找到 " + e+ " ^^^^^^^^^^^^^^^^^");
+//            }
+//        }
     }
 }

@@ -37,7 +37,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPackage{//,IXposedHookInitPackageResources
 //	private static final String TAG = ControlService.class.getSimpleName();
 	private XSharedPreferences controlPrefs,wakeLockPrefs,alarmPrefs,settingPrefs,autoStartPrefs,barPrefs,recentPrefs,dozePrefs;
-	private XSharedPreferences pmPrefs,testPrefs,adPrefs,tvPrefs,muBeiPrefs,dialogPrefs;
+	private XSharedPreferences pmPrefs,testPrefs,adPrefs,tvPrefs,dialogPrefs;
 	@Override
 	public void initZygote(IXposedHookZygoteInit.StartupParam paramStartupParam) throws Throwable {
 //		loadPrefs();
@@ -59,7 +59,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 		adPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_ADLIST);
 		tvPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_TVLIST);
 		pmPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_PMLIST);
-		muBeiPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_MUBEILIST);
+//		muBeiPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_MUBEILIST);
 		dialogPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_SKIPDIALOG);
 		controlPrefs.makeWorldReadable();
 		wakeLockPrefs.makeWorldReadable();
@@ -73,7 +73,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 		adPrefs.makeWorldReadable();
 		tvPrefs.makeWorldReadable();
 		pmPrefs.makeWorldReadable();
-		muBeiPrefs.makeWorldReadable();
+//		muBeiPrefs.makeWorldReadable();
 		dialogPrefs.makeWorldReadable();
 	}
 
@@ -94,12 +94,12 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			if (lpparam.packageName.equals("com.click369.controlbp")) {
 				XposedHelpers.findAndHookMethod("com.click369.controlbp.activity.MainActivity", lpparam.classLoader,
 						"isModuleActive", XC_MethodReplacement.returnConstant(true));
-				XposedHelpers.findAndHookMethod("com.click369.controlbp.activity.MainActivity", lpparam.classLoader,
-						"getActivatedModuleVersion", XC_MethodReplacement.returnConstant(BuildConfig.VERSION_CODE));
+//				XposedHelpers.findAndHookMethod("com.click369.controlbp.activity.MainActivity", lpparam.classLoader,
+//						"getActivatedModuleVersion", XC_MethodReplacement.returnConstant(BuildConfig.VERSION_CODE));
 			}
 
 			settingPrefs.reload();
-			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,muBeiPrefs,recentPrefs,dialogPrefs);
+			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,recentPrefs,dialogPrefs);
 			XposedMedia.loadPackage(lpparam);
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_FIVE,true)){
 				XposedAppStart.loadPackage(lpparam, autoStartPrefs);
@@ -110,10 +110,10 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 				boolean isMubeiStopOther = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false);
 //				XposedService.loadPackage(lpparam, controlPrefs,wakeLockPrefs,muBeiPrefs,isOneOpen,isTwoOpen,isMubeiStopBroad);
 //				if(wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)){
-					XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,muBeiPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
+					XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
 //				}
 //				if(alarmPrefs.getBoolean(Common.PREFS_SETTING_ALARM_LOOK,false)){
-					XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,muBeiPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
+					XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
 //				}
 //				XposedBroadCast.loadPackage(lpparam, controlPrefs, muBeiPrefs, isOneOpen, isTwoOpen, isMubeiStopBroad);
 			}
@@ -122,7 +122,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			}
 			boolean isUIChangeOpen = settingPrefs.getBoolean(Common.ALLSWITCH_EIGHT,true);
 			boolean isRecentOpen = settingPrefs.getBoolean(Common.ALLSWITCH_FOUR,true);
-			XposedRencent.loadPackage(lpparam, recentPrefs,barPrefs,muBeiPrefs,autoStartPrefs,isRecentOpen,isUIChangeOpen);
+			XposedRencent.loadPackage(lpparam, recentPrefs,barPrefs,autoStartPrefs,isRecentOpen,isUIChangeOpen);
 
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_SIX,true)){
 				XposedPackageManager.loadPackage(lpparam, pmPrefs);
@@ -147,8 +147,8 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 				XposedTextView.loadPackage(lpparam,tvPrefs);
 			}
 
-			XposedEnd.loadPackage(lpparam,settingPrefs,autoStartPrefs,controlPrefs,muBeiPrefs);
-		}catch (RuntimeException e){
+			XposedEnd.loadPackage(lpparam,settingPrefs,autoStartPrefs,controlPrefs);
+		}catch (Throwable e){
 			XposedBridge.log("^^^^^^^^^^^^^重要！！！ MAIN  HOOK出错"+e+"^^^^^^^^^^^^^^^");
 		}
 	}

@@ -46,6 +46,7 @@ import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.GetPhoto;
 import com.click369.controlbp.util.MyFingerUtil;
@@ -258,20 +259,22 @@ public class ShowDialogActivity extends Activity {
         });
     }
 
-    private void confrim(){
-        Intent intent = new Intent("com.click369.control.canceltimestopapp");
-        intent.putExtra("pkg",pkg);
-        intent.putExtra("isdelay",false);
-        sendBroadcast(intent);
-        handler.removeCallbacks(showTime);
-        XposedStopApp.stopApk(pkg,ShowDialogActivity.this);
-        if (!WatchDogService.setTimeStopkeys.contains(pkg)) {
-            WatchDogService.setTimeStopApp.remove(pkg);
-        }
-        WatchDogService.stopAppName.remove(pkg);
-//        alertDialog.cancel();
-        finish();
-    }
+//    private void confrim(){
+//        Intent intent = new Intent("com.click369.control.canceltimestopapp");
+//        intent.putExtra("pkg",pkg);
+//        intent.putExtra("isdelay",false);
+//        sendBroadcast(intent);
+//        handler.removeCallbacks(showTime);
+//        XposedStopApp.stopApk(pkg,ShowDialogActivity.this);
+//        WatchDogService.allAppStateInfos.get(pkg).isSetTimeStopApp = false;
+//        WatchDogService.allAppStateInfos.get(pkg).setTimeStopTime = 0;
+////        if (!WatchDogService.setTimeStopkeys.contains(pkg)) {
+////            WatchDogService.setTimeStopApp.remove(pkg);
+////        }
+////        WatchDogService.stopAppName.remove(pkg);
+////        alertDialog.cancel();
+//        finish();
+//    }
 
     private void cancelClose(boolean isDelay){
         Intent intent = new Intent("com.click369.control.canceltimestopapp");
@@ -282,9 +285,13 @@ public class ShowDialogActivity extends Activity {
         if (isDelay){
             setAlarmWithCode("com.click369.control.settimestopapp",pkg,delayTime*60,pkg.hashCode());
         }else{
-            if (!WatchDogService.setTimeStopkeys.contains(pkg)) {
-                WatchDogService.setTimeStopApp.remove(pkg);
+            boolean isOne = SharedPrefsUtil.getInstance(this).setTimeStopPrefs.contains(pkg+"/one");
+            if(isOne){
+                SharedPrefsUtil.getInstance(this).setTimeStopPrefs.edit().remove(pkg+"/one").commit();
+                AppLoaderUtil.allHMAppInfos.get(pkg).isSetTimeStopApp = false;
+                AppLoaderUtil.allHMAppInfos.get(pkg).setTimeStopAppTime = 0;
             }
+            AppLoaderUtil.allHMAppInfos.get(pkg).isSetTimeStopOneTime = false;
         }
         finish();
     }

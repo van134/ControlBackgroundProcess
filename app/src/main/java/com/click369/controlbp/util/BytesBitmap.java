@@ -17,6 +17,9 @@ public class BytesBitmap {
     }
 
     public static  byte[] getBytes(Bitmap bitmap) {
+        if(bitmap==null){
+            return null;
+        }
         ByteArrayOutputStream baops = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, baops);
         return baops.toByteArray();

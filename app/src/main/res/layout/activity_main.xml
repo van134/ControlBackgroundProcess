@@ -46,6 +46,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="sdf"
+                android:gravity="center"
                 android:id="@+id/nav_info_smalltitle"
                 android:layout_gravity="center_horizontal"
                 android:textColor="@color/white" />

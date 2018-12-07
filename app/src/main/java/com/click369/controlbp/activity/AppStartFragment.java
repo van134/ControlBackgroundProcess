@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
  * Use the {@link ControlFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AppStartFragment extends Fragment {
+public class AppStartFragment extends BaseFragment {
     private Handler h = new Handler();
     public AppStartAdapter adapter;
     private ListView listView;
@@ -179,7 +180,7 @@ public class AppStartFragment extends Fragment {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoader.allAppInfos);
             }
         });
         TitleClickListener listener = new TitleClickListener();

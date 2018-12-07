@@ -38,6 +38,7 @@ import com.click369.controlbp.service.AppStartService;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.GetPhoto;
 import com.click369.controlbp.util.MyFingerUtil;
@@ -373,7 +374,8 @@ public class UnLockActivity extends Activity {
     @Override
     public void onBackPressed() {
 //        moveTaskToBack(false);
-        WatchDogService.backKillApp.remove(pkg);
+        AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyHome = true;
+        AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyBack = false;
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);// 注意
         intent.addCategory(Intent.CATEGORY_HOME);

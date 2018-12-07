@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class UIControlFragment extends Fragment {
+public class UIControlFragment extends BaseFragment {
     private TextView blackListTv,toastGrvityTv,toastBgColorTv,toastFontColorTv,keyColorTv,toastPositionTv,corTv,topCorTv,roundSizeTv,recentRoundSizeTv,recentAlphaTv;
     private SeekBar toastPositionSb,corOffsetSb,corTopOffsetSb,roundSizeSb,recentRoundSizeSb,recentAlphaSb;
     private Switch topBarSw,bottomBarSw,alwaysColorSw,bottomDengTopSw,toastSw,keyColorSw,roundSw,recentBarColorSw,recentBarHideSw,recentMemSw,recentInfoSw,actInfoSw;

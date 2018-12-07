@@ -29,7 +29,7 @@ import java.util.ArrayList;
  * Use the {@link ControlFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RecentFragment extends Fragment {
+public class RecentFragment extends BaseFragment {
     private Handler h = new Handler();
     public RecentAdapter adapter;
     private ListView listView;
@@ -228,7 +228,7 @@ public class RecentFragment extends Fragment {
         topView.setListener(new TopSearchView.CallBack() {
             @Override
             public void backAppType(String appName) {
-                adapter.fliterList(appName,MainActivity.allAppInfos);
+                adapter.fliterList(appName,appLoader.allAppInfos);
             }
         });
         TitleClickListener listener = new TitleClickListener();
