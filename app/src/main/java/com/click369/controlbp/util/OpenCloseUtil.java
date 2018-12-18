@@ -180,7 +180,7 @@ public class OpenCloseUtil {
             }
         } catch (RuntimeException e) {
             e.printStackTrace();
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "";
@@ -226,7 +226,7 @@ public class OpenCloseUtil {
             intent.setComponent(cn);
             try{
                 act.startActivity(intent);
-            }catch (RuntimeException e){
+            }catch (Exception e){
                 e.printStackTrace();
             }
         }

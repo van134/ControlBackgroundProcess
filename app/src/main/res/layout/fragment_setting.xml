@@ -70,6 +70,23 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
+                        android:text="任何界面长按屏幕右上方弹出控制面板\n(重启生效)"
+                        android:id="@+id/setting_openconfig_sw"
+                        android:checked="true" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
                         android:text="应用列表实时更新后台时间(6秒一次)"
                         android:id="@+id/setting_updatetime_sw"
                         android:checked="true" />
@@ -121,6 +138,22 @@
                         android:layout_height="50dp"
                         android:text="返回/熄屏强退的应用后台超时12小时后杀死"
                         android:id="@+id/setting_checktimeout_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="熄屏强退的应用时间未到再次亮屏时不取消定时杀死"
+                        android:id="@+id/setting_alwayskilloff_sw"
                         android:checked="false" />
                 </FrameLayout>
                 <FrameLayout

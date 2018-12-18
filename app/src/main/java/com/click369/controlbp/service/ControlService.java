@@ -146,8 +146,15 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			if(tvPrefs!=null){
 				XposedTextView.loadPackage(lpparam,tvPrefs);
 			}
+			boolean isLongClickOpenConfig = settingPrefs.getBoolean(Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,true);
+			if(isLongClickOpenConfig){
+				int w = settingPrefs.getInt(Common.PREFS_SETTING_SCREENWIDTH,0);
+				int h = settingPrefs.getInt(Common.PREFS_SETTING_SCREENHEIGHT,0);
+				XposedActivity.loadPackage(lpparam,isLongClickOpenConfig,w,h);
+			}
 
 			XposedEnd.loadPackage(lpparam,settingPrefs,autoStartPrefs,controlPrefs);
+
 		}catch (Throwable e){
 			XposedBridge.log("^^^^^^^^^^^^^重要！！！ MAIN  HOOK出错"+e+"^^^^^^^^^^^^^^^");
 		}

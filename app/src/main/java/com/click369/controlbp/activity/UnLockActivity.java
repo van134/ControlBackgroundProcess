@@ -296,11 +296,15 @@ public class UnLockActivity extends Activity {
 
     private void startact(){
         if(mIntent!=null){
-            if("com.android.settings".equals(mIntent.getPackage())){
-                Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                startActivity(intent);
-            }else{
-                UnLockActivity.this.startActivity(mIntent);
+            try {
+                if("com.android.settings".equals(mIntent.getPackage())){
+                    Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                    startActivity(intent);
+                }else{
+                    UnLockActivity.this.startActivity(mIntent);
+                }
+            }catch (Exception e){
+
             }
         }else{
             if("com.android.settings".equals(pkg)){

@@ -20,6 +20,7 @@ import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
@@ -137,11 +138,17 @@ public class WatchDogService extends Service {
     public static boolean  isOffScreenLockCpu = false;
     public static boolean  isBatteryLowLockCPU = false;
     public static boolean  isLockUnlockCPU = false;
-//    public static boolean  isBootStartLockCpu = false;
     public static boolean  isCameraModeOpen = false;//拍照模式开启后是否执行了
     public static boolean  isShowActInfo = false;
+    public static boolean  isAlwaysKillOff = false;
     public static int cpuNum = 8;
     public StringBuilder backLog = new StringBuilder();
+
+    long offScTime = 0;
+    long onScTime = 0;
+    public static long batteryOnScTime = 0;
+    public static long batteryOffScTime = 0;
+    boolean isScreenOff = false;
 
     MyDozeService myDozeService;
     AppStartService appStartService;
@@ -207,19 +214,17 @@ public class WatchDogService extends Service {
         }
         @Override
         public void onLoadAppSettingFinish() {
-//            for(AppInfo ai:appLoader.allAppInfos){
-////                allHMAppInfos.put(ai.packageName,ai);
-//                if(!AppLoaderUtil.allAppStateInfos.containsKey(ai.packageName)){
-//                    AppLoaderUtil.allAppStateInfos.put(ai.packageName,new AppStateInfo());
-//                }
-//            }
             initSomeData();
         }
     };
     @Override
     public void onCreate() {
+        PowerManager pm =  (PowerManager) (getApplicationContext().getSystemService(Context.POWER_SERVICE));
         instence = this;
         isKillRun = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            isScreenOff = !pm.isInteractive();
+        }
 //        if (isKillRun){
 //            return;
 //        }
@@ -271,6 +276,7 @@ public class WatchDogService extends Service {
         ifliter.addAction("com.click369.control.cpubatterychange");
         ifliter.addAction("com.click369.control.audiofocus");
         ifliter.addAction("com.click369.control.amsstoppkg");
+        ifliter.addAction("com.click369.controlbp.zhendong");
         ifliter.addAction(Intent.ACTION_SCREEN_OFF);
         ifliter.addAction(Intent.ACTION_SCREEN_ON);
         ifliter.addAction(Intent.ACTION_POWER_DISCONNECTED);
@@ -307,8 +313,23 @@ public class WatchDogService extends Service {
             defaultCpuChooses = CPUSetView.getCpuCoreInfo(cpuPrefs,Common.PREFS_SETCPU_DEFAULTCORECOUNT);
             batteryLowCpuChooses = CPUSetView.getCpuCoreInfo(cpuPrefs,Common.PREFS_SETCPU_BATTERYLOWCORECOUNT);
         }
+        BaseActivity.isZhenDong = settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true);
+        isAlwaysKillOff = settings.getBoolean(Common.PREFS_SETTING_ISALWAYSKILLOFF,false);
+
         startIdleState();
         initCpuAndSel(true);
+        File batteryFile = new File(getFilesDir(),"batteryinfo");
+        if(batteryFile.exists()){
+            try {
+                HashMap<Integer,Long> temps = (HashMap<Integer,Long>)FileUtil.readObj(batteryFile.getAbsolutePath());
+                batteryInfos.putAll(temps);
+            }catch (Throwable e){
+            }
+        }
+        offScTime = System.currentTimeMillis();
+        onScTime = System.currentTimeMillis();
+        batteryOffScTime = System.currentTimeMillis();
+        batteryOnScTime = System.currentTimeMillis();
         super.onCreate();
     }
 
@@ -647,8 +668,7 @@ public class WatchDogService extends Service {
     static final String SYSTEM_HOME_KEY = "homekey";
     static final String SYSTEM_RECENT_KEY = "recent";
     static final String SYSTEM_RECENTAPPS_KEY = "recentapps";
-    long offScTime = 0;
-    boolean isScreenOff = false;
+
     public  static long lastPressedHome = 0;
     public  static long lastCleanTime = 0;
     public  static long lastHomeClick = 0,lastRecentClick = 0;
@@ -680,8 +700,15 @@ public class WatchDogService extends Service {
                     }
                 }
             }else if (Intent.ACTION_SCREEN_OFF.equals(action)&&!isHookOff) {
-                isScreenOff = true;
+
+                batteryOffScTime = System.currentTimeMillis();
                 offScTime = System.currentTimeMillis();
+                if(!isScreenOff){
+                    Long nowOn = batteryInfos.containsKey(101)?batteryInfos.get(101):0L;
+                    nowOn+= System.currentTimeMillis()-batteryOnScTime;
+                    batteryInfos.put(101,nowOn);
+                }
+                isScreenOff = true;
                 Log.i("CONTROL","息屏 "+AppLoaderUtil.allHMAppInfos.size()+"  "+AppLoaderUtil.allAppStateInfos.size());
 
                 if (itemBACKHOMEOFFIsOpen) {
@@ -711,11 +738,14 @@ public class WatchDogService extends Service {
                         if (itemAUTOSTARTLOCKIsOpen&&ai.isLockApp) {
                             autoStartPrefs.edit().remove(key + "/lockok").commit();
                         }
-                        if(ai.isOffscForceStop){//如果息屏  则设定要杀死的状态
-                            asi.isReadyOffStop = true;
-                        }else if(ai.isOffscMuBei){//如果息屏  则设定要杀死的状态
-                            asi.isReadyOffMuBei = true;
+                        if(delayOffTime>120){
+                            if(ai.isOffscForceStop){//如果息屏  则设定要杀死的状态
+                                asi.isReadyOffStop = true;
+                            }else if(ai.isOffscMuBei){//如果息屏  则设定要杀死的状态
+                                asi.isReadyOffMuBei = true;
+                            }
                         }
+
                         if (!isHasOffStopOrMuBei) {
                             isHasOffStopOrMuBei = ai.isRunning && (ai.isOffscMuBei || ai.isOffscForceStop|| (asi.isOpenFromIceRome&&isAtuoOffScIce));
                         }
@@ -788,6 +818,13 @@ public class WatchDogService extends Service {
                     }
                 }
             }else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                batteryOnScTime = System.currentTimeMillis();
+                onScTime = System.currentTimeMillis();
+               if(isScreenOff){
+                   Long nowOff = batteryInfos.containsKey(102)?batteryInfos.get(102):0L;
+                   nowOff+= System.currentTimeMillis()-batteryOffScTime;
+                   batteryInfos.put(102,nowOff);
+               }
                 isScreenOff = false;
                 if(AppLoaderUtil.allHMAppInfos.size()==0){
                     appLoader.setIsAppChange(true);
@@ -807,7 +844,9 @@ public class WatchDogService extends Service {
                     if (isOffClean && delayCleanTime > 3) {
                         cleanAlarm("com.click369.control.offcleancache");
                     }
-//                    cleanAlarm("com.click369.control.offsccloseapp");
+                    if(!isAlwaysKillOff) {
+                        cleanAlarm("com.click369.control.offsccloseapp");
+                    }
 //                    cleanAlarm("com.click369.control.exit");
                 }
                 if(isLockUnlockCPU&&isOffScreenLockCpu){//关闭cpu
@@ -851,6 +890,12 @@ public class WatchDogService extends Service {
             }else if (Intent.ACTION_POWER_DISCONNECTED.equals(action)) {
                 isCharging = false;
                 batteryInfos.clear();
+                batteryOnScTime = System.currentTimeMillis();
+                batteryOffScTime = System.currentTimeMillis();
+                File batteryFile = new File(getFilesDir(),"batteryinfo");
+                if(batteryFile.exists()){
+                    batteryFile.delete();
+                }
                 lastBatteryPer = -1;
                 startIdleState();
             }else if (intent.getAction().equals("com.click369.control.notify")) {
@@ -1093,6 +1138,8 @@ public class WatchDogService extends Service {
                         asi.isSetTimeStopAlreadStart = false;
                     }
                 }
+            }else if("com.click369.controlbp.zhendong".equals(action)){
+                BaseActivity.zhenDong(WatchDogService.this);
             }
         }
     }
@@ -1554,7 +1601,31 @@ public class WatchDogService extends Service {
                     }
                 }
                 if(!isCharging&&lastBatteryPer!=batteryPer||lastBatteryPer==-1){
+                    if(batteryPer==100){
+                        batteryInfos.clear();
+                        batteryOnScTime = System.currentTimeMillis();
+                        batteryOffScTime = System.currentTimeMillis();
+                        File batteryFile = new File(getFilesDir(),"batteryinfo");
+                        if(batteryFile.exists()){
+                            batteryFile.delete();
+                        }
+                    }
                     batteryInfos.put(batteryPer,System.currentTimeMillis());
+                    if(!isScreenOff){
+                        Long nowOn = batteryInfos.containsKey(101)?batteryInfos.get(101):0L;
+                        nowOn+= System.currentTimeMillis()-batteryOnScTime;
+                        batteryInfos.put(101,nowOn);//亮屏
+                        batteryOnScTime = System.currentTimeMillis();
+                    }else{
+                        Long nowOff = batteryInfos.containsKey(102)?batteryInfos.get(102):0L;
+                        nowOff+= System.currentTimeMillis()-batteryOffScTime;
+                        batteryInfos.put(102,nowOff);
+                        batteryOffScTime = System.currentTimeMillis();
+                    }
+                    if(batteryPer%2==1){
+                        File batteryFile = new File(getFilesDir(),"batteryinfo");
+                        FileUtil.writeObj(batteryInfos,batteryFile.getAbsolutePath());
+                    }
                 }
                 lastBatteryPer = batteryPer;
             }

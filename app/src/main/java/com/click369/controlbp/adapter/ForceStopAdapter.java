@@ -236,6 +236,9 @@ public class ForceStopAdapter extends BaseAdapter{
 					}
 					ed.remove(ai.getPackageName()+"/backmubei").commit();
 					ai.isBackMuBei = false;
+					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
+						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+					}
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/backstop",true).commit();
 					ai.isBackForceStop = true;
@@ -249,6 +252,9 @@ public class ForceStopAdapter extends BaseAdapter{
 					}
 					ed.remove(ai.getPackageName()+"/backmubei").commit();
 					ai.isBackMuBei = false;
+					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
+						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+					}
 				}
 				buttonView.setImageResource(ai.isBackMuBei?R.mipmap.icon_dead:ai.isBackForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 				ForceStopFragment.isClick = true;
@@ -268,6 +274,9 @@ public class ForceStopAdapter extends BaseAdapter{
 					ed.remove(ai.getPackageName()+"/homestop").commit();
 					ed.remove(ai.getPackageName()+"/homemubei").commit();
 					ai.isHomeMuBei = false;
+					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
+						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+					}
 				}else if(ai.isHomeIdle){
 					ed.remove(ai.getPackageName()+"/idle").commit();
 					ai.isHomeIdle = false;
@@ -352,6 +361,9 @@ public class ForceStopAdapter extends BaseAdapter{
 					}
 					ed.remove(ai.getPackageName()+"/offmubei").commit();
 					ai.isOffscMuBei = false;
+					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
+						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+					}
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/offstop",true).commit();
 					ai.isOffscForceStop = true;

@@ -31,6 +31,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.AppCompatTextView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -79,6 +80,7 @@ import com.click369.controlbp.util.TimeUtil;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -192,15 +194,36 @@ public class MainActivity extends BaseActivity
             public void onClick(View v) {
                 sharedPrefs.settings.edit().putBoolean("isclicksystime",true).commit();
                 isClickSysTime = true;
+                Log.i("CONTROL","WatchDogService.batteryInfos  "+WatchDogService.batteryInfos.size());
                 if(WatchDogService.batteryInfos.size()==0){
                     AlertUtil.showAlertMsg(MainActivity.this,"还没有电量记录，待会再试哦");
                 }else{
                     ArrayList<Integer> batteryInfo = new ArrayList<Integer>(WatchDogService.batteryInfos.keySet());
-                    String titls[] = new String[batteryInfo.size()];
+                    batteryInfo.remove((Integer)101);
+                    batteryInfo.remove((Integer)102);
+                    Collections.reverse(batteryInfo);
+                    String titls[] = new String[batteryInfo.size()+(batteryInfo.size()>1?1:0)];
                     SimpleDateFormat sdf = new SimpleDateFormat("MM月dd日HH:mm:ss 剩余:");
-                    for(int i = 0;i<batteryInfo.size();i++){
-                        Integer integer = batteryInfo.get(i);
-                        titls[i] = sdf.format(new Date(WatchDogService.batteryInfos.get(integer)))+integer+"%";
+                    if(batteryInfo.size()>1){
+                        Integer now = batteryInfo.get(0);
+                        Integer first = batteryInfo.get(batteryInfo.size()-1);
+                        Log.i("CONTROL"," now  "+now+" first  "+first);
+                        long time = System.currentTimeMillis()-WatchDogService.batteryInfos.get(first);
+                        String title = (SystemClock.elapsedRealtime()-time>1000*60*5?"从拔下电源使用时长:":"从开机使用时长:")+TimeUtil.changeMils2StringMin(time)+",消耗电量:"+(first-now)+"%,";
+                        if(WatchDogService.batteryInfos.containsKey(101)&&WatchDogService.batteryInfos.containsKey(102)){
+                            title+="亮屏时长:"+TimeUtil.changeMils2StringMin(WatchDogService.batteryInfos.get(101)+(System.currentTimeMillis()-WatchDogService.batteryOnScTime))+",熄屏时长:"+TimeUtil.changeMils2StringMin(WatchDogService.batteryInfos.get(102));
+                        }
+                        Log.i("CONTROL"," title  "+title);
+                        titls[0] = title;
+                        for(int i = 1;i<batteryInfo.size()+1;i++){
+                            Integer integer = batteryInfo.get(i-1);
+                            titls[i] = sdf.format(new Date(WatchDogService.batteryInfos.get(integer)))+integer+"%";
+                        }
+                    }else{
+                        for(int i = 0;i<batteryInfo.size();i++){
+                            Integer integer = batteryInfo.get(i);
+                            titls[i] = sdf.format(new Date(WatchDogService.batteryInfos.get(integer)))+integer+"%";
+                        }
                     }
                     AlertUtil.showListAlert(MainActivity.this,"电池消耗时间点",titls,null);
                 }
@@ -364,6 +387,14 @@ public class MainActivity extends BaseActivity
         isLinkRecentAndAuto = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_RECNETREMOVEANDAUTOSTART,true);
         isUpdateAppTime = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ISUPDATEAPPTIME,false);
         listenerSoftInput();
+
+
+        DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        int height = dm.heightPixels;
+        int width = dm.widthPixels;
+        sharedPrefs.settings.edit().putInt(Common.PREFS_SETTING_SCREENWIDTH,width).commit();
+        sharedPrefs.settings.edit().putInt(Common.PREFS_SETTING_SCREENHEIGHT,height).commit();
     }
 
 
@@ -971,6 +1002,14 @@ public class MainActivity extends BaseActivity
             if("com.click369.control.recappidlestate".equals(action)){
                 pkgIdleStates.clear();
                 HashSet<String> pkgs = ( HashSet<String>)intent.getSerializableExtra("pkgs");
+                if(intent.hasExtra("mbpkgs")){
+                    HashSet<String> mbpkgs = ( HashSet<String>)intent.getSerializableExtra("mbpkgs");
+                    for(String p:mbpkgs){
+                        if( appLoaderUtil.allHMAppInfos.containsKey(p)){
+                            appLoaderUtil.allHMAppInfos.get(p).isInMuBei = true;
+                        }
+                    }
+                }
                 pkgIdleStates.addAll(pkgs);
                 chooseFragment.fresh();
             }else if("com.click369.control.backprocinfo".equals(action)){

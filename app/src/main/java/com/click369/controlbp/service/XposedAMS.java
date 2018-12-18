@@ -422,7 +422,7 @@ public class XposedAMS {
                                         }else if("com.click369.control.ams.removemubei".equals(action)){
                                             String apk = intent.getStringExtra("apk");
                                             muBeiHSs.remove(apk);
-                                            settingPrefs.reload();
+//                                            settingPrefs.reload();
 //                                            mubeiStopOtherProc.put(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
 //                                            if(mubeiStopOtherProc.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)) {
                                             if(isMubeiStopOther) {
@@ -1223,6 +1223,7 @@ public class XposedAMS {
                                         }
                                         Intent intent1 = new Intent("com.click369.control.recappidlestate");
                                         intent1.putExtra("pkgs",newpkgs);
+                                        intent1.putExtra("mbpkgs",muBeiHSs);
                                         context.sendBroadcast(intent1);
 //                                        XposedBridge.log("CONTROL -----已进入待机应用: "+newpkgs.size());
                                     } catch (Throwable e){

@@ -97,6 +97,10 @@ public class Common {
     public static String PREFS_SETTING_HOMEDELAYTIME ="homedelaytime";
     public static String PREFS_SETTING_OFFDELAYTIME ="offdelaytime";
     public static String PREFS_SETTING_ISMUBEISTOPOTHERPROC ="isstopotherproc";
+    public static String PREFS_SETTING_ISLONGCLICKOPENCONFIG ="islongclickopenconfig";
+    public static String PREFS_SETTING_ISALWAYSKILLOFF ="isalwayskilloff";
+    public static String PREFS_SETTING_SCREENWIDTH ="SCREENWIDTH";
+    public static String PREFS_SETTING_SCREENHEIGHT="SCREENHEIGHT";
 
     public static String PREFS_SETTING_LASTUISTARTTIME ="lastuistarttime";
     public static String PREFS_SETTING_LASTSERVICESTARTTIME ="lastservicestarttime";

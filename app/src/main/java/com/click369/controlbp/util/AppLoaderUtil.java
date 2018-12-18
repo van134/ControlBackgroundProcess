@@ -175,87 +175,9 @@ public class AppLoaderUtil {
                                 "com.android.systemui".equals(packageName)) {
                             continue;
                         }
-                        String appName = "";
-                        try {
-                            appName = packgeInfo.applicationInfo.loadLabel(pm).toString();
-                        } catch (Throwable e) {
-                            pm = context.getPackageManager();
-                            try {
-                                appName = packgeInfo.applicationInfo.loadLabel(pm).toString();
-                            } catch (Throwable e1) {
-                                e1.printStackTrace();
-                            }
-                        }
-                        AppInfo appInfo = null;
-                        try {
-                            Drawable d = packgeInfo.applicationInfo.loadIcon(pm);
-                            appInfo = new AppInfo(appName, packageName, zoomDrawable(d, 90, 90), (packgeInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0, !packgeInfo.applicationInfo.enabled);
-                            appInfo.instanllTime = packgeInfo.firstInstallTime;
-                            appInfo.updateTime = packgeInfo.lastUpdateTime;
-                            appInfo.versionCode = packgeInfo.versionCode;
-                            appInfo.versionName = packgeInfo.versionName;
-                            appInfo.uid = packgeInfo.applicationInfo.uid;
-                            appInfo.isServiceStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/service", false);
-                            appInfo.isBroadStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/broad", false);
-                            appInfo.isWakelockStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/wakelock", false);
-                            appInfo.isAlarmStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/alarm", false);
-
-                            appInfo.isBackForceStop = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/backstop", false);
-                            appInfo.isBackMuBei = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/backmubei", false);
-                            appInfo.isOffscForceStop = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/offstop", false);
-                            appInfo.isOffscMuBei = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/offmubei", false);
-//                            appInfo.isInMuBei = sharedPrefs.muBeiPrefs.getInt(appInfo.getPackageName(), -1) == 0;
-                            appInfo.isHomeMuBei = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/homemubei", false);
-                            appInfo.isHomeIdle = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/idle", false);
-                            appInfo.isNotifyNotExit = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/notifynotexit", false);
-
-                            appInfo.isAutoStart = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/autostart", false);
-                            appInfo.isStopApp = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/stopapp", false);
-                            appInfo.isLockApp = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/lockapp", false);
-                            appInfo.isNotStop = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/notstop", false);
-
-                            appInfo.isDozeOffsc = sharedPrefs.dozePrefs.getBoolean(appInfo.getPackageName() + "/offsc", false);
-                            appInfo.isDozeOnsc = sharedPrefs.dozePrefs.getBoolean(appInfo.getPackageName() + "/onsc", false);
-                            appInfo.isDozeOpenStop = sharedPrefs.dozePrefs.getBoolean(appInfo.getPackageName() + "/openstop", false);
-
-                            appInfo.isRecentNotClean = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/notclean", false);
-                            appInfo.isRecentForceClean = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/forceclean", false);
-                            appInfo.isRecentBlur = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/blur", false);
-                            appInfo.isRecentNotShow = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/notshow", false);
-
-                            appInfo.isBarLockList = sharedPrefs.uiBarPrefs.getBoolean(appInfo.getPackageName() + "/locklist", false);
-                            appInfo.isBarColorList = sharedPrefs.uiBarPrefs.getBoolean(appInfo.getPackageName() + "/colorlist", false);
-
-                            appInfo.isNotUnstall = sharedPrefs.pmPrefs.getBoolean(appInfo.getPackageName() + "/notunstall", false);
-
-                            appInfo.serviceDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwservice", 0);
-                            appInfo.broadCastDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwreceiver", 0);
-                            appInfo.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwactivity", 0);
-                            appInfo.isADJump = sharedPrefs.adPrefs.getInt(appInfo.getPackageName() + "/ad", 0) != 0;
-
-                            appInfo.isSetTimeStopApp = sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0) != 0||sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0) != 0;
-                            appInfo.isSetTimeStopOneTime = sharedPrefs.setTimeStopPrefs.contains(appInfo.getPackageName()+"/one");
-                            appInfo.setTimeStopAppTime = appInfo.isSetTimeStopOneTime?sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0):sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0);
-                            appInfo.isRunning = runLists.contains(appInfo.getPackageName());
-                            try {
-                                appInfo.isDisable = !pm.getPackageInfo(appInfo.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.enabled;
-                            } catch (Throwable e) {
-//                                e.printStackTrace();
-                            }
-
-                            PackageInfo piS = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_SERVICES | PackageManager.GET_DISABLED_COMPONENTS);
-                            PackageInfo piB = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_RECEIVERS | PackageManager.GET_DISABLED_COMPONENTS);
-                            PackageInfo piA = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_ACTIVITIES | PackageManager.GET_DISABLED_COMPONENTS);
-                            appInfo.activityCount = piA.activities != null ? piA.activities.length : 0;
-                            appInfo.serviceCount = piS.services != null ? piS.services.length : 0;
-                            appInfo.broadCastCount = piB.receivers != null ? piB.receivers.length : 0;
-
-                            if (appInfo.activityCount == 0 && appInfo.serviceCount == 0 && appInfo.broadCastCount == 0) {
-                                continue;
-                            }
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                            pm = context.getPackageManager();
+                        AppInfo appInfo = getOneAppInfo(packgeInfo,pm,context);
+                        if (appInfo.activityCount == 0 && appInfo.serviceCount == 0 && appInfo.broadCastCount == 0) {
+                            continue;
                         }
                         if (appInfo != null) {
                             tempallAppInfos.add(appInfo);
@@ -297,6 +219,85 @@ public class AppLoaderUtil {
         }.start();
     }
 
+    public AppInfo getOneAppInfo(PackageInfo packgeInfo,PackageManager pm,Context context){
+        AppInfo appInfo = null;
+        String appName = "";
+        try {
+            appName = packgeInfo.applicationInfo.loadLabel(pm).toString();
+        } catch (Throwable e) {
+            pm = context.getPackageManager();
+            try {
+                appName = packgeInfo.applicationInfo.loadLabel(pm).toString();
+            } catch (Throwable e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        try {
+            Drawable d = packgeInfo.applicationInfo.loadIcon(pm);
+            appInfo = new AppInfo(appName, packgeInfo.packageName, zoomDrawable(d, 90, 90), (packgeInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0, !packgeInfo.applicationInfo.enabled);
+            appInfo.instanllTime = packgeInfo.firstInstallTime;
+            appInfo.updateTime = packgeInfo.lastUpdateTime;
+            appInfo.versionCode = packgeInfo.versionCode;
+            appInfo.versionName = packgeInfo.versionName;
+            appInfo.uid = packgeInfo.applicationInfo.uid;
+            appInfo.isServiceStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/service", false);
+            appInfo.isBroadStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/broad", false);
+            appInfo.isWakelockStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/wakelock", false);
+            appInfo.isAlarmStop = sharedPrefs.modPrefs.getBoolean(appInfo.getPackageName() + "/alarm", false);
+
+            appInfo.isBackForceStop = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/backstop", false);
+            appInfo.isBackMuBei = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/backmubei", false);
+            appInfo.isOffscForceStop = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/offstop", false);
+            appInfo.isOffscMuBei = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/offmubei", false);
+//                            appInfo.isInMuBei = sharedPrefs.muBeiPrefs.getInt(appInfo.getPackageName(), -1) == 0;
+            appInfo.isHomeMuBei = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/homemubei", false);
+            appInfo.isHomeIdle = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/idle", false);
+            appInfo.isNotifyNotExit = sharedPrefs.forceStopPrefs.getBoolean(appInfo.getPackageName() + "/notifynotexit", false);
+
+            appInfo.isAutoStart = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/autostart", false);
+            appInfo.isStopApp = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/stopapp", false);
+            appInfo.isLockApp = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/lockapp", false);
+            appInfo.isNotStop = sharedPrefs.autoStartNetPrefs.getBoolean(appInfo.getPackageName() + "/notstop", false);
+
+            appInfo.isDozeOffsc = sharedPrefs.dozePrefs.getBoolean(appInfo.getPackageName() + "/offsc", false);
+            appInfo.isDozeOnsc = sharedPrefs.dozePrefs.getBoolean(appInfo.getPackageName() + "/onsc", false);
+            appInfo.isDozeOpenStop = sharedPrefs.dozePrefs.getBoolean(appInfo.getPackageName() + "/openstop", false);
+
+            appInfo.isRecentNotClean = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/notclean", false);
+            appInfo.isRecentForceClean = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/forceclean", false);
+            appInfo.isRecentBlur = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/blur", false);
+            appInfo.isRecentNotShow = sharedPrefs.recentPrefs.getBoolean(appInfo.getPackageName() + "/notshow", false);
+
+            appInfo.isBarLockList = sharedPrefs.uiBarPrefs.getBoolean(appInfo.getPackageName() + "/locklist", false);
+            appInfo.isBarColorList = sharedPrefs.uiBarPrefs.getBoolean(appInfo.getPackageName() + "/colorlist", false);
+
+            appInfo.isNotUnstall = sharedPrefs.pmPrefs.getBoolean(appInfo.getPackageName() + "/notunstall", false);
+
+            appInfo.serviceDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwservice", 0);
+            appInfo.broadCastDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwreceiver", 0);
+            appInfo.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwactivity", 0);
+            appInfo.isADJump = sharedPrefs.adPrefs.getInt(appInfo.getPackageName() + "/ad", 0) != 0;
+
+            appInfo.isSetTimeStopApp = sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0) != 0||sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0) != 0;
+            appInfo.isSetTimeStopOneTime = sharedPrefs.setTimeStopPrefs.contains(appInfo.getPackageName()+"/one");
+            appInfo.setTimeStopAppTime = appInfo.isSetTimeStopOneTime?sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0):sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0);
+            appInfo.isRunning = runLists.contains(appInfo.getPackageName());
+            try {
+                appInfo.isDisable = !pm.getPackageInfo(appInfo.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.enabled;
+            } catch (Throwable e) {
+            }
+            PackageInfo piS = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_SERVICES | PackageManager.GET_DISABLED_COMPONENTS);
+            PackageInfo piB = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_RECEIVERS | PackageManager.GET_DISABLED_COMPONENTS);
+            PackageInfo piA = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_ACTIVITIES | PackageManager.GET_DISABLED_COMPONENTS);
+            appInfo.activityCount = piA.activities != null ? piA.activities.length : 0;
+            appInfo.serviceCount = piS.services != null ? piS.services.length : 0;
+            appInfo.broadCastCount = piB.receivers != null ? piB.receivers.length : 0;
+
+        } catch (Throwable e) {
+        }
+        return appInfo;
+    }
     public void loadAppSetting(){
         final Handler handler = new Handler(Looper.getMainLooper());
         new Thread(){

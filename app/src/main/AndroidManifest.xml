@@ -127,6 +127,8 @@
             android:theme="@style/AppTheme.translucent" >
             <intent-filter>
                 <category android:name="controlbp" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.click369.controlbp.activity.AppConfigActivity" />
             </intent-filter>
         </activity>
         <activity
