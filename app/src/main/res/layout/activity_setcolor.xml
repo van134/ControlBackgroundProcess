@@ -24,7 +24,6 @@
                 android:layout_height="wrap_content"
                 android:text="透明度"
                 android:id="@+id/textView11"
-                android:textColor="#ffffff"
                 android:layout_margin="5dp" />
 
             <SeekBar
@@ -42,7 +41,6 @@
                 android:layout_height="wrap_content"
                 android:text="红"
                 android:id="@+id/textView12"
-                android:textColor="#ffffff"
                 android:layout_margin="5dp" />
 
             <SeekBar
@@ -60,7 +58,6 @@
                 android:layout_height="wrap_content"
                 android:text="绿"
                 android:id="@+id/textView13"
-                android:textColor="#ffffff"
                 android:layout_margin="5dp" />
 
             <SeekBar
@@ -78,7 +75,6 @@
                 android:layout_height="wrap_content"
                 android:text="蓝"
                 android:id="@+id/textView14"
-                android:textColor="#ffffff"
                 android:layout_margin="5dp" />
 
             <SeekBar

@@ -1,4 +1,4 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -13,32 +13,32 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.v4.app.Fragment;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.SimpleAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.ADBTestActivity;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.CPUSetActivity;
+import com.click369.controlbp.activity.ChangeTextActivity;
+import com.click369.controlbp.activity.EmptyActivity;
+import com.click369.controlbp.activity.IceRoomActivity;
+import com.click369.controlbp.activity.LimitForceCleanActivity;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.RunningActivity;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.common.TestDataInit;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
-import com.click369.controlbp.service.XposedToast;
 import com.click369.controlbp.util.AlertUtil;
-import com.click369.controlbp.util.FileUtil;
-import com.click369.controlbp.util.GetPhoto;
 import com.click369.controlbp.util.PermissionUtils;
 import com.click369.controlbp.util.SELinuxUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
@@ -53,16 +53,10 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import de.robv.android.xposed.XposedHelpers;
 
 
 public class OtherFragment extends BaseFragment {
@@ -208,6 +202,7 @@ public class OtherFragment extends BaseFragment {
     class SwCheckListener implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            BaseActivity.zhenDong(getContext());
             if (buttonView.equals(selSw)){
                 if (!isChecked){
                     SELinuxUtil.closeSEL();
@@ -239,6 +234,7 @@ public class OtherFragment extends BaseFragment {
     class ItemClick implements View.OnClickListener{
         @Override
         public void onClick(View v) {
+            BaseActivity.zhenDong(getContext());
             if(v.equals(adbTv)){
                Intent intent = new Intent(getActivity(),ADBTestActivity.class);
                 startActivity(intent);
@@ -546,6 +542,7 @@ public class OtherFragment extends BaseFragment {
         }
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            BaseActivity.zhenDong(getContext());
             int tag= (Integer) seekBar.getTag();
             int offset = seekBar.getProgress()%10;
             if(tag ==0){

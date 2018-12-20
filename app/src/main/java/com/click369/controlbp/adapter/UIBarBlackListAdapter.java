@@ -12,12 +12,10 @@ import android.widget.TextView;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
-import com.click369.controlbp.activity.ControlFragment;
+import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.activity.DozeWhiteListActivity;
 import com.click369.controlbp.activity.MainActivity;
-import com.click369.controlbp.activity.UIBarBlackListActivity;
 import com.click369.controlbp.bean.AppInfo;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.PinyinCompare;
 

@@ -1,11 +1,8 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -13,8 +10,6 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +19,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.IFWCompActivity;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.IFWAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
@@ -106,6 +105,7 @@ public class IFWFragment extends BaseFragment {
         broadTv.setOnClickListener(listener);
         actTv.setOnClickListener(listener);
         fresh();
+        loadY(listView,this.getClass(),adapter.sortType);
         loadDisableCount();
 //        setAlarmWithCode("com.click369.control.settimestopapp","mm",5,1);
 //        setAlarmWithCode("com.click369.control.settimestopapp","dd",20,2);
@@ -128,10 +128,8 @@ public class IFWFragment extends BaseFragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         if(!hidden){
-//            adapter.setData(MainActivity.allAppInfos);
-//            adapter.notifyDataSetChanged();
            fresh();
-//            loadDisableCount(editText.getText().toString().trim().length()==0?"u":editText.getText().toString().trim());
+            loadY(listView,this.getClass(),adapter.sortType);
         }
     }
 
@@ -197,7 +195,7 @@ public class IFWFragment extends BaseFragment {
                                     }
                                     ServiceInfo sis[] = PackageUtil.getServicesByPkg(getActivity(), ai.getPackageName());
                                     String ifw = "";
-                                    File file = new File("/data/system/ifw/"+ai.getPackageName()+IFWCompActivity.EXT_SERVICE+".xml");
+                                    File file = new File("/data/system/ifw/"+ai.getPackageName()+ IFWCompActivity.EXT_SERVICE+".xml");
                                     if(file.exists()){
     //                                FileUtil.changeQX(777,file.getAbsolutePath());
                                         byte datas[] = FileUtil.readFile(file.getAbsolutePath());
@@ -673,6 +671,7 @@ public class IFWFragment extends BaseFragment {
                 t.setTextColor(curColor);
             }
             tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            loadY(listView,IFWFragment.this.getClass(),adapter.sortType);
         }
     }
 }

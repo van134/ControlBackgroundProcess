@@ -13,12 +13,10 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
-import com.click369.controlbp.activity.ControlFragment;
-import com.click369.controlbp.activity.ForceStopFragment;
+import com.click369.controlbp.fragment.ControlFragment;
+import com.click369.controlbp.fragment.ForceStopFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
-import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.SharedPrefsUtil;
@@ -166,7 +164,7 @@ public class ForceStopAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
+		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 
 //		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(data.isHomeIdle&&!data.isNotifyNotExit?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
@@ -254,6 +252,7 @@ public class ForceStopAdapter extends BaseAdapter{
 					ai.isBackMuBei = false;
 					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
 						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+						ai.isInMuBei = false;
 					}
 				}
 				buttonView.setImageResource(ai.isBackMuBei?R.mipmap.icon_dead:ai.isBackForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
@@ -276,6 +275,7 @@ public class ForceStopAdapter extends BaseAdapter{
 					ai.isHomeMuBei = false;
 					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
 						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+						ai.isInMuBei = false;
 					}
 				}else if(ai.isHomeIdle){
 					ed.remove(ai.getPackageName()+"/idle").commit();
@@ -363,6 +363,7 @@ public class ForceStopAdapter extends BaseAdapter{
 					ai.isOffscMuBei = false;
 					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
 						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
+						ai.isInMuBei = false;
 					}
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/offstop",true).commit();

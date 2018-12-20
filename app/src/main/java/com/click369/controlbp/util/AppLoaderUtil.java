@@ -119,10 +119,14 @@ public class AppLoaderUtil {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                for (LoadAppCallBack lc : listeners) {
-                    if(lc!=null){
-                        lc.onLoadLocalAppFinish();
+                try{
+                    for (LoadAppCallBack lc : listeners) {
+                        if(lc!=null){
+                            lc.onLoadLocalAppFinish();
+                        }
                     }
+                }catch (Throwable e){
+                    e.printStackTrace();
                 }
             }
         });
@@ -305,10 +309,14 @@ public class AppLoaderUtil {
             public void run() {
                 if(isLoadAppSettingThreadRun||(!sharedPrefs.isPrefsChange&&!isIceAppChange)){
                     if(!sharedPrefs.isPrefsChange){
-                        for(LoadAppCallBack lac:listeners) {
-                            if(lac!=null) {
-                                lac.onLoadAppSettingFinish();
+                        try {
+                            for(LoadAppCallBack lac:listeners) {
+                                if(lac!=null) {
+                                    lac.onLoadAppSettingFinish();
+                                }
                             }
+                        }catch (Throwable e){
+                            e.printStackTrace();
                         }
                     }
                     return;

@@ -34,6 +34,7 @@ public class Common {
     public static String PREFS_SETTING_OFFSCLOCK ="offsclockapp";
     public static String PREFS_SETTING_SETTIMESTOPMODE ="settimestopmode";
     public static String PREFS_SETTING_SETTIMESTOPPWDMODE ="settimestoppwdmode";
+    public static String PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG ="settimestopnotshowdialog";
     public static String PREFS_SETTING_USEPWDLOCK ="usepwdlock";
     public static String PREFS_SETTING_STOPAPPBYXP ="stopappbyxp";
     public static String PREFS_SETTING_STRONGAUTOSTART ="strongautostart";
@@ -155,6 +156,18 @@ public class Common {
     public static String PREFS_SETTING_UI_ROUNDSIZE ="roundsize";
     public static String PREFS_SETTING_UI_BOTTOM_DENG_TOP ="bottomdengtopbar";
     public static String PREFS_SETTING_UI_ISSHOWACTINFO ="isshowactinfo";
+    public static String PREFS_SETTING_UI_LIGHTMSG ="lightmsg";
+    public static String PREFS_SETTING_UI_LIGHTCALL ="lightcall";
+    public static String PREFS_SETTING_UI_LIGHTMODE ="lightmode";
+    public static String PREFS_SETTING_UI_LIGHTSCON="lightscon";
+    public static String PREFS_SETTING_UI_LIGHTMUSIC="lightmusic";
+    public static String PREFS_SETTING_UI_LIGHTWIDTH="lightwidth";
+    public static String PREFS_SETTING_UI_LIGHTSIZE="lightsize";
+    public static String PREFS_SETTING_UI_LIGHTOFFSET="lightoffset";
+    public static String PREFS_SETTING_UI_LIGHTSPEED="lightspeed";
+    public static String PREFS_SETTING_UI_LIGHTWEIZHI="lightweizhi";
+    public static String PREFS_SETTING_UI_LIGHTCOLOR="lightcolor";
+    public static String PREFS_SETTING_UI_LIGHTXIAOGUO="lightxiaoguo";
 
     public static String PREFS_SETTING_APPPWD ="apppwd";
 

@@ -2,7 +2,6 @@ package com.click369.controlbp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -11,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,12 +17,11 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
-import com.click369.controlbp.activity.ControlFragment;
+import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.activity.IFWCompActivity;
-import com.click369.controlbp.activity.IFWFragment;
+import com.click369.controlbp.fragment.IFWFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtils;
 
@@ -176,7 +173,7 @@ public class IFWAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+ BaseActivity.getProcTimeStr(data.packageName));
+		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());

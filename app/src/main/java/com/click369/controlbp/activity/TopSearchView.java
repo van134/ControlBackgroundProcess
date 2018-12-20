@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.fragment.ControlFragment;
+import com.click369.controlbp.fragment.IFWFragment;
+import com.click369.controlbp.fragment.IceUnstallFragment;
 import com.click369.controlbp.util.AlertUtil;
 
 /**
@@ -67,7 +69,7 @@ public class TopSearchView {
             @Override
             public void onClick(View v) {
                 if(appType == 0){
-                    if (act instanceof MainActivity&&(((MainActivity) act).chooseFragment instanceof ControlFragment||((MainActivity) act).chooseFragment instanceof IFWFragment||((MainActivity) act).chooseFragment instanceof IceUnstallFragment)) {
+                    if (act instanceof MainActivity&&(((MainActivity) act).chooseFragment instanceof ControlFragment ||((MainActivity) act).chooseFragment instanceof IFWFragment ||((MainActivity) act).chooseFragment instanceof IceUnstallFragment)) {
                         AlertUtil.showConfirmAlertMsg(act, "处理系统应用时最好你十分确定处理了不会影响系统功能，否则请不要乱禁用，部分系统应用禁用后会导致无法开机及各种问题", new AlertUtil.InputCallBack() {
                             @Override
                             public void backData(String txt, int tag) {
@@ -148,7 +150,7 @@ public class TopSearchView {
         editText.setSelection(editText.getText().length());
     }
 
-    interface CallBack{
+    public interface CallBack{
         int APP_USER = 0;
         int APP_SYS = 1;
         int APP_ALL = 2;

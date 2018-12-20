@@ -19,14 +19,11 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
-import com.click369.controlbp.activity.ControlFragment;
+import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.activity.MainActivity;
-import com.click369.controlbp.activity.RecentFragment;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
-import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
 
@@ -196,7 +193,7 @@ public class RecentAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
+		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 		viewHolder.appIcon.setImageBitmap(data.getBitmap());
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);

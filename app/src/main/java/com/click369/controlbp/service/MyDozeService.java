@@ -14,7 +14,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 
-import com.click369.controlbp.activity.DozeFragment;
+import com.click369.controlbp.fragment.DozeFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.DozeUtil;

@@ -1,20 +1,17 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -23,14 +20,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.adapter.QuestionAdapter;
 import com.click369.controlbp.bean.Question;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.FileUtil;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class QuestionFragment extends BaseFragment {
@@ -79,6 +75,7 @@ public class QuestionFragment extends BaseFragment {
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
+                BaseActivity.zhenDong(getContext());
                 chooseIndex = chooseIndex==position?-1:position;
                 adapter.notifyDataSetChanged();
 //                if (chooseIndex!=-1){
@@ -89,6 +86,7 @@ public class QuestionFragment extends BaseFragment {
         showAlertTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                BaseActivity.zhenDong(getContext());
                 alertTv.setText(msg);
                 if (chooseType==0){
                     alertFl.setVisibility(View.VISIBLE);
@@ -98,6 +96,7 @@ public class QuestionFragment extends BaseFragment {
                 showAlertTv.setTextColor(alertFl.isShown()?Color.parseColor("#40d0b7"):curColor);
                 showLogAlertTv.setTextColor(curColor);
                 chooseType = 0;
+
             }
         });
         showLogAlertTv.setOnClickListener(new View.OnClickListener() {
@@ -127,6 +126,7 @@ public class QuestionFragment extends BaseFragment {
         showAppLogAlertTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                BaseActivity.zhenDong(getContext());
                 byte data[] = FileUtil.readFile(FileUtil.ROOTPATH+ File.separator+"backlog.txt");
                 logMSG = new String((data==null||data.length==0)?"暂无应用启动日志".getBytes():data);
                 if(logMSG.equals("暂无应用启动日志")||logMSG.length()<5){

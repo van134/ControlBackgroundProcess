@@ -3,6 +3,7 @@ package com.click369.controlbp.service;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
+import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -88,22 +89,7 @@ public class XposedStartListener {
                                 protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                 try {
                                     StatusBarNotification sbn = (StatusBarNotification) methodHookParam.args[1];
-//                                    Field mServiceField = notSerCls.getDeclaredField("mService");
-//                                    mServiceField.setAccessible(true);
-//                                    Field this$0Field = notifyCls.getDeclaredField("this$0");
-//                                    this$0Field.setAccessible(true);
-//                                    Object mServiceObj = mServiceField.get(this$0Field.get(methodHookParam.thisObject));
-//                                    Method getMethod = mServiceObj.getClass().getDeclaredMethod("getActiveNotifications",String.class);
-//                                    getMethod.setAccessible(true);
-//                                    StatusBarNotification[] sbns = (StatusBarNotification[])getMethod.invoke(mServiceObj,"android");
                                     boolean isRemove = false;
-//                                    if (sbns!=null){
-//                                        for (StatusBarNotification s:sbns){
-//                                            if (sbn.getPackageName().equals(s.getPackageName())){
-//                                                isRemove = false;
-//                                            }
-//                                        }
-//                                    }
                                     int id = sbn.getId();
                                     String pkg = sbn.getPackageName();
                                     String key = pkg+"/"+id;
@@ -137,17 +123,6 @@ public class XposedStartListener {
                             };
                             if(clss!=null){
                                 XposedUtil.hookMethod(notifyCls,clss,"notifyRemoved",hook);
-//                                if(clss.length == 3){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2],hook );
-//                                }else if(clss.length == 4){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2], clss[3],hook );
-//                                }else if(clss.length == 2){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1],hook );
-//                                }else if(clss.length == 5){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyRemoved", clss[0], clss[1], clss[2], clss[3], clss[4],hook );
-//                                }else{
-//                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved clss else 未找到^^^^^^^^^^^^^^^^^");
-//                                }
                             }else{
                                 XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved null 未找到^^^^^^^^^^^^^^^^^");
                             }
@@ -171,6 +146,7 @@ public class XposedStartListener {
                                         Intent broad = new Intent("com.click369.control.notify");
                                         broad.putExtra("type","add");
                                         broad.putExtra("pkg", pkg);
+                                        broad.putExtra("isnoclear", sbn.getNotification().flags>=Notification.FLAG_NO_CLEAR);
                                         Field cxtField = managerCls.getDeclaredField("mContext");
                                         cxtField.setAccessible(true);
                                         Object cxtObject = cxtField.get(methodHookParam.thisObject);

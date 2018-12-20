@@ -1,46 +1,36 @@
 package com.click369.controlbp.service;
 
 import android.app.AlarmManager;
-import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
-import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
-import android.preference.Preference;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.activity.AppConfigActivity;
 import com.click369.controlbp.activity.BaseActivity;
-import com.click369.controlbp.activity.CPUSetActivity;
 import com.click369.controlbp.activity.CPUSetView;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.activity.RunningActivity;
 import com.click369.controlbp.activity.ShowDialogActivity;
-import com.click369.controlbp.activity.UIControlFragment;
+import com.click369.controlbp.fragment.UIControlFragment;
 import com.click369.controlbp.activity.UnLockActivity;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.AppStateInfo;
@@ -58,20 +48,12 @@ import com.click369.controlbp.util.ShellUtilNoBackData;
 
 
 import java.io.File;
-import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-
-import de.robv.android.xposed.XposedBridge;
 
 /**
  * Created by asus on 2017/6/3.
@@ -79,14 +61,14 @@ import de.robv.android.xposed.XposedBridge;
 public class WatchDogService extends Service {
     public static final LinkedHashMap<Integer,Long> batteryInfos = new LinkedHashMap<Integer,Long>();
 //    public static final HashMap<String,AppStateInfo> allAppStateInfos = new HashMap<String,AppStateInfo>();
-
+    public static  HashSet<String> notLightPkgs =new HashSet<String>();
     public static boolean itemBACKHOMEOFFIsOpen = true;
     public static boolean itemAUTOSTARTLOCKIsOpen = true;
     public int batteryPer = 0;
     private HomeKeyReceiver hkr;
     private updateAppReceiver apr;
     private Handler handler = new Handler();
-    private Handler handler1 = new Handler();
+//    private Handler handler1 = new Handler();
 
 
     public static boolean isClockOpen = false;
@@ -141,7 +123,23 @@ public class WatchDogService extends Service {
     public static boolean  isCameraModeOpen = false;//拍照模式开启后是否执行了
     public static boolean  isShowActInfo = false;
     public static boolean  isAlwaysKillOff = false;
+    public static boolean  isSetTimeStopNotShowDialog = false;
+
+
+    public static boolean  isRoundCorOpen = false;
+    public static boolean  isLightMsg = false;
+    public static boolean  isLightCall = false;
+    public static boolean  isLightRandomMode = false;
+    public static boolean  isLightScOn = false;
+    public static boolean  isLightMusic = false;
+    public static int  lightSize = 8;
+    public static int  lightWidth = 100;
+    public static int  lightSpeed = 1;
+    public static int  lightOffset = 0;
+    public static int  lightShowMode = 0;//0左右  1上下  2上下左右
+    public static int  lightXiaoGuo = 0;//
     public static int cpuNum = 8;
+    public static String lightColor = "#01d8ff";
     public StringBuilder backLog = new StringBuilder();
 
     long offScTime = 0;
@@ -157,21 +155,30 @@ public class WatchDogService extends Service {
     SharedPreferences forceStopPrefs;
     SharedPreferences autoStartPrefs;
     SharedPreferences recentPrefs;
-//    SharedPreferences muBeiPrefs;
+    SharedPreferences barPrefs;
     SharedPreferences muControlPrefs;
     SharedPreferences cpuPrefs;
     SharedPreferences skipDialogPrefs;
     SharedPreferences setTimeStopPrefs;
     public static String homePkg = "";
     public static  long watchDogstartTime = 0;
-
+    private AudioManager audioManager;
     private AppLoaderUtil appLoader;
+    public static boolean isNeedAMSReadLoad = false;
     SharedPreferences.OnSharedPreferenceChangeListener prefsListener =  new SharedPreferences.OnSharedPreferenceChangeListener(){
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             if(!key.endsWith("lockapp")){
                 SharedPrefsUtil.getInstance(WatchDogService.this).isPrefsChange = true;
+
                 Log.i("CONTROL","shareprefs  变化了");
+            }
+            if(key.endsWith("broad")||
+                    key.endsWith("service")||
+                    key.endsWith("lockapp")||
+                    key.endsWith("notstop")||
+                    key.endsWith("autostart")){
+                isNeedAMSReadLoad = true;
             }
         }
     };
@@ -225,10 +232,7 @@ public class WatchDogService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
             isScreenOff = !pm.isInteractive();
         }
-//        if (isKillRun){
-//            return;
-//        }
-//        allHMAppInfos.clear();
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         AppLoaderUtil.allAppStateInfos.clear();
         settings = SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         setTimeStopPrefs = SharedPrefsUtil.getInstance(this).setTimeStopPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
@@ -236,7 +240,7 @@ public class WatchDogService extends Service {
         Log.i("CONTROL", "WatchDogService启动后台进程监听服务");
         forceStopPrefs = SharedPrefsUtil.getInstance(this).forceStopPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_FORCESTOPNAME);
         autoStartPrefs = SharedPrefsUtil.getInstance(this).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_AUTOSTARTNAME);
-//        muBeiPrefs = SharedPrefsUtil.getInstance(this).muBeiPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_MUBEILIST);
+        barPrefs = SharedPrefsUtil.getInstance(this).uiBarPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_MUBEILIST);
         muControlPrefs = SharedPrefsUtil.getInstance(this).modPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.PREFS_SETTINGNAME);
         recentPrefs = SharedPrefsUtil.getInstance(this).recentPrefs;//SharedPrefsUtil.getPreferences(getApplication(),Common.IPREFS_RECENTLIST);
         cpuPrefs = SharedPrefsUtil.getInstance(this).cpuPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_SETCPU);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
@@ -247,6 +251,7 @@ public class WatchDogService extends Service {
         appLoader.addAppChangeListener(appLoadListener);
         appLoader.loadLocalApp();
 
+        muControlPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
         forceStopPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
         autoStartPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
         setTimeStopPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
@@ -313,8 +318,25 @@ public class WatchDogService extends Service {
             defaultCpuChooses = CPUSetView.getCpuCoreInfo(cpuPrefs,Common.PREFS_SETCPU_DEFAULTCORECOUNT);
             batteryLowCpuChooses = CPUSetView.getCpuCoreInfo(cpuPrefs,Common.PREFS_SETCPU_BATTERYLOWCORECOUNT);
         }
+
+        if(settings.getBoolean(Common.ALLSWITCH_EIGHT,true)){
+            WatchDogService.isRoundCorOpen = barPrefs.getBoolean(Common.PREFS_SETTING_UI_ROUNDOPEN,false);
+            WatchDogService.isLightMsg = barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTMSG,false);
+            WatchDogService.isLightCall = barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTCALL,false);
+            WatchDogService.isLightRandomMode = barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTMODE,false);
+            WatchDogService.isLightScOn = barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTSCON,false);
+            WatchDogService.isLightMusic = barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTMUSIC,false);
+            WatchDogService.lightSize = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTSIZE,8);
+            WatchDogService.lightWidth = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTWIDTH,100);
+            WatchDogService.lightOffset = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTOFFSET,0);
+            WatchDogService.lightSpeed = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTSPEED,1);
+            WatchDogService.lightShowMode = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTWEIZHI,0);
+            WatchDogService.lightColor = barPrefs.getString(Common.PREFS_SETTING_UI_LIGHTCOLOR,"#01d8ff");
+            WatchDogService.lightXiaoGuo = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTXIAOGUO,0);
+        }
         BaseActivity.isZhenDong = settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true);
         isAlwaysKillOff = settings.getBoolean(Common.PREFS_SETTING_ISALWAYSKILLOFF,false);
+        isSetTimeStopNotShowDialog = settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,false);
 
         startIdleState();
         initCpuAndSel(true);
@@ -439,32 +461,6 @@ public class WatchDogService extends Service {
         if (settings.getBoolean(Common.ALLSWITCH_SEVEN,true)){
             myDozeService.loadWhilteList();
         }
-        if (itemBACKHOMEOFFIsOpen) {
-//            Set<String> keys = forceStopPrefs.getAll().keySet();
-//            SharedPreferences.Editor mubeiEditor = muBeiPrefs.edit();
-//            int defaultValue = 0;
-//            for (String key : keys) {
-//                if (key.endsWith("/backmubei") && forceStopPrefs.getBoolean(key, false)) {
-//                    String pkg = key.replace("/backmubei", "");
-//                    if (!muBeiPrefs.contains(pkg)) {
-//                        mubeiEditor.putInt(pkg, defaultValue).commit();
-//                    }
-//                }
-//                else if (key.endsWith("/offmubei") && forceStopPrefs.getBoolean(key, false)) {
-//                    String pkg = key.replace("/offmubei", "");
-//                    if (!muBeiPrefs.contains(pkg)) {
-//                        mubeiEditor.putInt(pkg , defaultValue).commit();
-//                    }
-//                }
-//                else if (key.endsWith("/homemubei") && forceStopPrefs.getBoolean(key, false)) {
-//                    String pkg = key.replace("/homemubei", "");
-////                    homeKeyMuBeis.add(pkg);
-//                    if (!muBeiPrefs.contains(pkg)) {
-//                        mubeiEditor.putInt(pkg, defaultValue).commit();
-//                    }
-//                }
-//            }
-        }
 
         settings.edit().remove("homeapk").commit();
         autoStartPrefs.edit().remove("homeapk").commit();
@@ -472,7 +468,7 @@ public class WatchDogService extends Service {
         autoStartPrefs.edit().putString("nowhomeapk",WatchDogService.getDefaultHome(this)).commit();
 
         if(!RoundedCornerService.isRoundRun){
-            UIControlFragment.startRound(SharedPrefsUtil.getInstance(this).uiBarPrefs,this);
+            UIControlFragment.startRound(this);
         }
 
         if (!NotificationService.isNotifyRunning&&!isNotNeedAccessibilityService&&settings.getBoolean(Common.ALLSWITCH_TWO,true)){
@@ -507,9 +503,13 @@ public class WatchDogService extends Service {
         }
         return super.onStartCommand(intent, Service.START_FLAG_RETRY, startId);
     }
+
     private void initSomeData(){
         Set<String>  launcherPkgs = getLauncherPackageName(this);
         ArrayList<String> imePkgs = getInputPackageName(this);
+        notLightPkgs.addAll(imePkgs);
+        notLightPkgs.add("android");
+        notLightPkgs.add("com.android.dialer");
         for(String l:launcherPkgs){
             if(AppLoaderUtil.allAppStateInfos.containsKey(l)){
                 AppLoaderUtil.allAppStateInfos.get(l).isHomePkg = true;
@@ -682,13 +682,13 @@ public class WatchDogService extends Service {
                 if (SYSTEM_HOME_KEY.equals(reason)||reason==null) {
                     lastHomeClick = System.currentTimeMillis();
                     Log.i("CONTROL","按下HOME "+openPkgName +" isRecentClick "+isRecentClick);
-                    if(!isRecentClick){
+//                    if(!isRecentClick){
                         isHomeClick = true;
                         lastPressedHome = System.currentTimeMillis();
-                    }else if(isRecentClick&&Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)){
-                        isHomeClick = false;
-                        isRecentClick = false;
-                    }
+//                    }else if(isRecentClick&&Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)){
+//                        isHomeClick = false;
+//                        isRecentClick = false;
+//                    }
                 }else if(SYSTEM_RECENT_KEY.equals(reason)||SYSTEM_RECENTAPPS_KEY.equals(reason)){
                     lastRecentClick = System.currentTimeMillis();
                     isRecentClick = true;
@@ -708,9 +708,12 @@ public class WatchDogService extends Service {
                     nowOn+= System.currentTimeMillis()-batteryOnScTime;
                     batteryInfos.put(101,nowOn);
                 }
+
                 isScreenOff = true;
                 Log.i("CONTROL","息屏 "+AppLoaderUtil.allHMAppInfos.size()+"  "+AppLoaderUtil.allAppStateInfos.size());
-
+                if(LightView.isStart){
+                    ScreenLightServiceUtil.sendHideLight(WatchDogService.this);
+                }
                 if (itemBACKHOMEOFFIsOpen) {
                     handler.removeCallbacks(exit);
                     boolean isHasOffStopOrMuBei = false;
@@ -825,6 +828,14 @@ public class WatchDogService extends Service {
                    nowOff+= System.currentTimeMillis()-batteryOffScTime;
                    batteryInfos.put(102,nowOff);
                }
+               if(isLightMusic&&audioManager.isMusicActive()){
+                   ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MUSIC,WatchDogService.this);
+               }if(NotificationService.notifyLights.size()>0){
+                   NotificationService.notifyLights.clear();
+                   ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MSG,WatchDogService.this);
+               }else if(isLightScOn){
+                   ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_SCON,WatchDogService.this);
+               }
                 isScreenOff = false;
                 if(AppLoaderUtil.allHMAppInfos.size()==0){
                     appLoader.setIsAppChange(true);
@@ -902,9 +913,12 @@ public class WatchDogService extends Service {
                 if (!NotificationService.isNotifyRunning) {
                     final String pkg = intent.getStringExtra("pkg").trim();
                     String type = intent.getStringExtra("type");
+                    boolean isnoclear = intent.getBooleanExtra("isnoclear",false);
+                    Log.i("CONTROL","notify  "+type+"  "+pkg);
                     if ("add".equals(type)) {
-                        NotificationService.addNotify(WatchDogService.this, pkg);
+                        NotificationService.addNotify(WatchDogService.this, pkg,isnoclear);
                     } else {
+
                         NotificationService.removedNotify(WatchDogService.this, pkg);
                         handler.postDelayed(new Runnable() {
                             @Override
@@ -968,9 +982,11 @@ public class WatchDogService extends Service {
                         if (autoStartPrefs.contains(name)){
                             autoStartPrefs.edit().remove(name).commit();
                             intent1.putExtra("persistent",false);
+                            AppLoaderUtil.allHMAppInfos.get(name.replace("/notstop", "")).isNotStop = false;
                         }else{
                             autoStartPrefs.edit().putBoolean(name,true).commit();
                             intent1.putExtra("persistent",true);
+                            AppLoaderUtil.allHMAppInfos.get(name.replace("/notstop", "")).isNotStop = true;
                         }
                         intent1.putExtra("pkg",pkg);
                         WatchDogService.this.sendBroadcast(intent1);
@@ -1043,24 +1059,16 @@ public class WatchDogService extends Service {
                     if(ai==null){
                         return;
                     }
-//                    try {
-//                        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-//                        Method m = am.getClass().getDeclaredMethod("isMusicActiveRemotely");
-//                        m.setAccessible(true);
-////                        Class<?> c  = Class.forName("android.media.AudioSystem");
-////                        XposedUtil.showParmsByNameLog(c,"isStreamActiveRemotely");
-////                        Method get = c.getMethod("isStreamActiveRemotely", int.class);
-////                        int r = (Integer) get.invoke(3);
-//                        Log.i("CONTROL","audiofocus "+m.invoke(am));
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-
                     AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
                     if(pkgs.contains(pkg)&&state!=2){
                         asi.isHasAudioFocus = true;
-                        Log.i("CONTROL",pkg+ " 获取音频焦点");
+                        if(isLightMusic&&ai.getAppName()!=null&&ai.getAppName().contains("音乐")){
+                            ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MUSIC,WatchDogService.this);
+                        }
                     }else{
+                        if(isLightMusic&&ai.getAppName()!=null&&ai.getAppName().contains("音乐")){
+                            ScreenLightServiceUtil.sendHideLight(WatchDogService.this);
+                        }
                         if(!asi.isHasAudioFocus){
                             return;
                         }
@@ -1109,7 +1117,7 @@ public class WatchDogService extends Service {
                 if(ai.setTimeStopAppTime>0&&asi.isSetTimeStopAlreadStart&&ai.isSetTimeStopApp){
                     try {
                         if (appLoader.runLists.contains(pkg)) {
-                            if (isScreenOff){
+                            if (isScreenOff||isSetTimeStopNotShowDialog){
                                 XposedStopApp.stopApk(pkg,WatchDogService.this);
                                 if(ai.isSetTimeStopOneTime){
                                     ai.isSetTimeStopOneTime = false;
@@ -1416,7 +1424,7 @@ public class WatchDogService extends Service {
                 }//Launch timeout has expired, giving up wake lock
                 if (ai.isOffscMuBei||
                         ai.isBackMuBei||
-                        ai.isHomeMuBei){
+                        ai.isHomeMuBei||asi.isInMuBei||ai.isInMuBei){
                     BaseActivity.sendBroadAMSRemovePkg(WatchDogService.this,apk);
 //                    muBeiPrefs.edit().putInt(apk,1).commit();
                     asi.isInIdle = false;
@@ -1429,22 +1437,20 @@ public class WatchDogService extends Service {
                 if(isCameraMode&&(apk.toLowerCase().contains("camera")||apk.toLowerCase().contains("lineageos.snap"))){//拍照模式 开启大核心
                     startCameraChangeMode();
                 }
-            }else if(isRecentClick){
-
             }
-            if (isRecentClick&&!"com.android.systemui".equals(apk)) {
-                handler1.removeCallbacks(resetRecent);
-                handler1.postDelayed(resetRecent,1500);
+            if("com.android.systemui".equals(openPkgName)){
+                handler.postDelayed(resetHome,500);
             }
             openPkgName = apk;
             isHomeClick = false;
+            isRecentClick = false;
         }
         nowPkgName = apk;
     }
-    Runnable resetRecent= new Runnable() {
+    Runnable resetHome= new Runnable() {
         @Override
         public void run() {
-            isRecentClick = false;
+            isHomeClick = false;
         }
     };
 
@@ -1514,7 +1520,9 @@ public class WatchDogService extends Service {
             Intent intent = new Intent("com.click369.control.ams.forcestopservice");
             intent.putExtra("pkg", muBeiApk);
             sendBroadcast(intent);
-
+//            if("com.tencent.mm".equals(muBeiApk)){
+//                return;
+//            }
             Intent intent1 = new Intent("com.click369.control.uss.setappidle");
             intent1.putExtra("pkg", muBeiApk);
             intent1.putExtra("idle", true);

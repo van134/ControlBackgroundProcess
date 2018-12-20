@@ -1,25 +1,24 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.AppStartAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
@@ -190,6 +189,7 @@ public class AppStartFragment extends BaseFragment {
         notStopTv.setOnClickListener(listener);
 //        loadApp();
         fresh();
+        loadY(listView,this.getClass(),adapter.sortType);
     }
 
     public void fresh(){
@@ -197,8 +197,6 @@ public class AppStartFragment extends BaseFragment {
             @Override
             public void run() {
                 topView.showText();
-//                adapter.fliterName = TopSearchView.searchText;
-//                adapter.fliterList(adapter.fliterName,MainActivity.allAppInfos);
             }
         },250);
     }
@@ -218,6 +216,7 @@ public class AppStartFragment extends BaseFragment {
                 t.setTextColor(curColor);
             }
             tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            loadY(listView,AppStartFragment.this.getClass(),adapter.sortType);
         }
     }
 
@@ -231,6 +230,7 @@ public class AppStartFragment extends BaseFragment {
     public void onHiddenChanged(boolean hidden) {
         if (!hidden){
             fresh();
+            loadY(listView,this.getClass(),adapter.sortType);
         }
         super.onHiddenChanged(hidden);
     }

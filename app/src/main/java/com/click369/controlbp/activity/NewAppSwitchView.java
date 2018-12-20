@@ -113,6 +113,7 @@ public class NewAppSwitchView {
     class SwitchClick implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            BaseActivity.zhenDong(cxt);
             int tag= (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_SETTING_BACKAPPAUTOADD,Common.PREFS_SETTING_OFFAPPAUTOADD,
                     Common.PREFS_SETTING_AUTOSTARTAPPAUTOADD,Common.PREFS_SETTING_NEWAPPADDREMOVERECENTEXIT,

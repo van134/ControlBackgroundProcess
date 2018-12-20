@@ -51,7 +51,7 @@ public class RunningActivity extends BaseActivity {
                     }
                 }
             };
-            h.postDelayed(r,500);
+            h.postDelayed(r,1000);
             h.postDelayed(new Runnable() {
                 @Override
                 public void run() {

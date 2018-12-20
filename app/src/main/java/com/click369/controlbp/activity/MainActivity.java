@@ -3,9 +3,7 @@ package com.click369.controlbp.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -13,8 +11,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -25,8 +21,6 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -42,7 +36,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -57,10 +50,25 @@ import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.WhiteApp;
 import com.click369.controlbp.common.TestDataInit;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.fragment.AdFragment;
+import com.click369.controlbp.fragment.AppStartFragment;
+import com.click369.controlbp.fragment.BaseFragment;
+import com.click369.controlbp.fragment.CPUSetFragment;
+import com.click369.controlbp.fragment.ControlFragment;
+import com.click369.controlbp.fragment.DozeFragment;
+import com.click369.controlbp.fragment.ForceStopFragment;
+import com.click369.controlbp.fragment.IFWFragment;
+import com.click369.controlbp.fragment.IceUnstallFragment;
+import com.click369.controlbp.fragment.JuanZengFragment;
+import com.click369.controlbp.fragment.OtherFragment;
+import com.click369.controlbp.fragment.QuestionFragment;
+import com.click369.controlbp.fragment.RecentFragment;
+import com.click369.controlbp.fragment.SettingFragment;
+import com.click369.controlbp.fragment.UIControlFragment;
 import com.click369.controlbp.receiver.BootStartReceiver;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
-import com.click369.controlbp.service.XposedStopApp;
+import com.click369.controlbp.service.XposedUtil;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.BackupRestoreUtil;
@@ -68,9 +76,6 @@ import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.GetPhoto;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PermissionUtils;
-import com.click369.controlbp.util.SELinuxUtil;
-import com.click369.controlbp.util.SharedPrefsUtil;
-import com.click369.controlbp.util.ShellUtilBackStop;
 import com.click369.controlbp.util.ShellUtilDoze;
 import com.click369.controlbp.util.ShellUtils;
 import com.click369.controlbp.util.ShortCutUtil;
@@ -84,7 +89,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -361,7 +365,7 @@ public class MainActivity extends BaseActivity
         chooseFragment = fragments[index];
         navigationView.getMenu().getItem(index).setChecked(true);
         this.setTitle(navigationView.getMenu().getItem(index).getTitle());
-        uiControlFragment.startRound(sharedPrefs.uiBarPrefs,this);
+        uiControlFragment.startRound(this);
         if(this.getIntent().hasExtra("from")&&this.getIntent().getStringExtra("from").equals("doze")){
             this.setTitle("打盹");
             navigationView.getMenu().getItem(4).setChecked(true);
@@ -685,19 +689,11 @@ public class MainActivity extends BaseActivity
 //            this.startService(intent);
 //        }
         //更新AMS中的数据
-        if(ControlFragment.isClick){
-            sendBroadAMSChangeControl(this);
-            ControlFragment.isClick = false;
+        if(WatchDogService.isNeedAMSReadLoad){
+            XposedUtil.reloadInfos(this,sharedPrefs.autoStartNetPrefs,sharedPrefs.modPrefs,sharedPrefs.settings,sharedPrefs.skipDialogPrefs);
+            WatchDogService.isNeedAMSReadLoad= false;
+            Log.i("CONTROL","更新AMS中的数据....");
         }
-        if(ForceStopFragment.isClick){
-            sendBroadAMSChangeMuBei(this);
-            ForceStopFragment.isClick = false;
-        }
-        if (AppStartFragment.isClickItem) {
-            sendBroadAMSChangeAutoStart(this);
-            AppStartFragment.isClickItem = false;
-        }
-//        h.removeCallbacks(reUpdateR);
         super.onStop();
     }
 
@@ -1132,7 +1128,7 @@ public class MainActivity extends BaseActivity
 //            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
             chooseFragment.fresh();
             if(isUpdateAppTime) {
-                h.postDelayed(updateTimeInfo, 6000);
+                h.postDelayed(updateTimeInfo, 10000);
             }
         }
     };

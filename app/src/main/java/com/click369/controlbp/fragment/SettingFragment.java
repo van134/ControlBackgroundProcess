@@ -1,11 +1,9 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +14,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.FunctionSwitchView;
+import com.click369.controlbp.activity.LinkAppSwitchView;
+import com.click369.controlbp.activity.LockAppSwitchView;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.NewAppSwitchView;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.AppStartService;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
@@ -29,7 +32,7 @@ public class SettingFragment extends BaseFragment {
             isOpenConfigSw,isAlwaysKillOffSw,
             updateTimeSw,
             notExitAudioPlaySw,checkTimeOutSw,
-            setTimeStopPwdModeSw,setTimeStopZWModeSw,
+            setTimeStopPwdModeSw,setTimeStopZWModeSw,setTimeStopNotShowDialogSw,
             stopAppModeSw,exitRemoveRecentSw,muBeiStopReceiverSw,
             notneedAccessSw,zhendongSw,backSw;//,offSw,autoStartSw,newAppAddRemoveRecentExit,,recentRemoveSw
     private TextView backDelayTimeTv,homeDelayTimeTv,offDelayTimeTv;
@@ -68,6 +71,7 @@ public class SettingFragment extends BaseFragment {
         iceStopSw = (Switch) v.findViewById(R.id.setting_ice_stop_sw);
         setTimeStopZWModeSw = (Switch) v.findViewById(R.id.setting_settimestopzwmode_sw);
         setTimeStopPwdModeSw = (Switch) v.findViewById(R.id.setting_settimestoppwdmode_sw);
+        setTimeStopNotShowDialogSw = (Switch) v.findViewById(R.id.setting_settimestopnotshowdialog_sw);
         notExitAudioPlaySw = (Switch) v.findViewById(R.id.setting_notexitaudio_sw);
         checkTimeOutSw = (Switch) v.findViewById(R.id.setting_checktimeout_sw);
         iceRemoveSw = (Switch) v.findViewById(R.id.setting_ice_remove_sw);
@@ -85,6 +89,7 @@ public class SettingFragment extends BaseFragment {
         zhendongSw = (Switch) v.findViewById(R.id.setting_zhendong_sw);
         setTimeStopZWModeSw.setTextColor(curColor);
         setTimeStopPwdModeSw.setTextColor(curColor);
+        setTimeStopNotShowDialogSw.setTextColor(curColor);
         backSw.setTextColor(curColor);
         isShowSideBarSw.setTextColor(curColor);
         iceRemoveSw.setTextColor(curColor);
@@ -128,6 +133,9 @@ public class SettingFragment extends BaseFragment {
         nightModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_THEME_MODE,false));
         setTimeStopZWModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPMODE,false));
         setTimeStopPwdModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPPWDMODE,false));
+        setTimeStopNotShowDialogSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,false));
+        setTimeStopZWModeSw.setEnabled(setTimeStopNotShowDialogSw.isChecked());
+        setTimeStopPwdModeSw.setEnabled(setTimeStopNotShowDialogSw.isChecked());
         stopAppModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_STOPAPPBYXP,true));
         muBeiStopReceiverSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
         exitRemoveRecentSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_EXITREMOVERECENT,true));
@@ -162,6 +170,7 @@ public class SettingFragment extends BaseFragment {
         updateTimeSw.setTag(16);
         isOpenConfigSw.setTag(17);
         isAlwaysKillOffSw.setTag(18);
+        setTimeStopNotShowDialogSw.setTag(19);
         SwitchClick sc = new SwitchClick();
         backSw.setOnCheckedChangeListener(sc);
         isShowSideBarSw.setOnCheckedChangeListener(sc);
@@ -171,6 +180,7 @@ public class SettingFragment extends BaseFragment {
         nightModeSw.setOnCheckedChangeListener(sc);
         setTimeStopZWModeSw.setOnCheckedChangeListener(sc);
         setTimeStopPwdModeSw.setOnCheckedChangeListener(sc);
+        setTimeStopNotShowDialogSw.setOnCheckedChangeListener(sc);
         iceStopSw.setOnCheckedChangeListener(sc);
         stopAppModeSw.setOnCheckedChangeListener(sc);
         notExitAudioPlaySw.setOnCheckedChangeListener(sc);
@@ -196,13 +206,15 @@ public class SettingFragment extends BaseFragment {
     class SwitchClick implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            BaseActivity.zhenDong(getContext());
             int tag= (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_SETTING_BACKLOGOPEN,Common.PREFS_SETTING_SHOWSIDEBAR,Common.PREFS_SETTING_ICEBACKICE,
                     Common.PREFS_SETTING_ICEOFFICE,Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,Common.PREFS_SETTING_THEME_MODE,
                     Common.PREFS_SETTING_SETTIMESTOPMODE,Common.PREFS_SETTING_ICESTOPICE,Common.PREFS_SETTING_STOPAPPBYXP,
                     Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
                     Common.PREFS_SETTING_EXITREMOVERECENT,Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,Common.PREFS_SETTING_ISNOTNEEDACCESS,
-                    Common.PREFS_SETTING_ZHENDONG,Common.PREFS_SETTING_ISUPDATEAPPTIME,Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,Common.PREFS_SETTING_ISALWAYSKILLOFF};
+                    Common.PREFS_SETTING_ZHENDONG,Common.PREFS_SETTING_ISUPDATEAPPTIME,Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,
+                    Common.PREFS_SETTING_ISALWAYSKILLOFF,Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG};
             if (tag == 0){
                 WatchDogService.isSaveBackLog = isChecked;
             }else if (tag == 2){
@@ -260,6 +272,10 @@ public class SettingFragment extends BaseFragment {
                 BaseActivity.isUpdateAppTime = isChecked;
             }else if(tag ==18){
                 WatchDogService.isAlwaysKillOff = isChecked;
+            }else if(tag ==19){
+                WatchDogService.isSetTimeStopNotShowDialog = isChecked;
+                setTimeStopZWModeSw.setEnabled(isChecked);
+                setTimeStopPwdModeSw.setEnabled(isChecked);
             }
             settings.edit().putBoolean(names[tag],isChecked).commit();
         }
@@ -278,6 +294,7 @@ public class SettingFragment extends BaseFragment {
         }
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
+            BaseActivity.zhenDong(getContext());
             int tag= (Integer) seekBar.getTag();
 //            if(seekBar.getProgress()>20){
             int offset = seekBar.getProgress()%10;
@@ -297,6 +314,7 @@ public class SettingFragment extends BaseFragment {
     class PenClickListener implements View.OnClickListener{
         @Override
         public void onClick(View view) {
+            BaseActivity.zhenDong(getContext());
             final int tag= (Integer) view.getTag();
             AlertUtil.inputAlert(getActivity(), tag, new AlertUtil.InputCallBack() {
                 @Override

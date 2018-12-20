@@ -18,10 +18,13 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -169,6 +172,9 @@ public class BaseActivity extends AppCompatActivity {
 
     public static float x = 0;
     public  static  int choose = 0;
+//    public static int scrolly = 0;
+    public static int mfirstVisibleItem = 0;
+    public static String scrollyTag = "";
     public static void addListClickListener(final ListView listView, final BaseAdapter adapter, final Activity cxt){
         listView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -177,7 +183,40 @@ public class BaseActivity extends AppCompatActivity {
                 return false;
             }
         });
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            private SparseArray recordSp = new SparseArray(0);
+            private int mCurrentfirstVisibleItem = 0;
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if(!scrollyTag.equals(view.getTag())){
+                    return;
+                }
+                mfirstVisibleItem = firstVisibleItem;
+            }
+            private int getScrollY() {
+                int height = 0;
+                for (int i = 0; i < mCurrentfirstVisibleItem; i++) {
+                    ItemRecod itemRecod = (ItemRecod) recordSp.get(i);
+                    if(itemRecod==null){
+                        break;
+                    }
+                    height += itemRecod.height;
+                }
+                ItemRecod itemRecod = (ItemRecod) recordSp.get(mCurrentfirstVisibleItem);
+                if (null == itemRecod) {
+                    itemRecod = new ItemRecod();
+                }
+                return height - itemRecod.top;
+            }
 
+            class ItemRecod {
+                int height = 0;
+                int top = 0;
+            }
+        });
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -381,20 +420,20 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
-    public static void sendBroadAMSChangeControl(Context cxt){
-        Intent intent = new Intent("com.click369.control.ams.reloadcontrol");
-        cxt.sendBroadcast(intent);
-    }
-
-    public static void sendBroadAMSChangeMuBei(Context cxt){
-        Intent intent = new Intent("com.click369.control.ams.reloadmubei");
-        cxt.sendBroadcast(intent);
-    }
-
-    public static void sendBroadAMSChangeAutoStart(Context cxt){
-        Intent intent = new Intent("com.click369.control.ams.reloadautostart");
-        cxt.sendBroadcast(intent);
-    }
+//    public static void sendBroadAMSChangeControl(Context cxt){
+//        Intent intent = new Intent("com.click369.control.ams.reloadcontrol");
+//        cxt.sendBroadcast(intent);
+//    }
+//
+//    public static void sendBroadAMSChangeMuBei(Context cxt){
+//        Intent intent = new Intent("com.click369.control.ams.reloadmubei");
+//        cxt.sendBroadcast(intent);
+//    }
+//
+//    public static void sendBroadAMSChangeAutoStart(Context cxt){
+//        Intent intent = new Intent("com.click369.control.ams.reloadautostart");
+//        cxt.sendBroadcast(intent);
+//    }
 
     public static void sendBroadAMSRemovePkg(Context cxt,String pkg){
         Intent intent = new Intent("com.click369.control.ams.removemubei");

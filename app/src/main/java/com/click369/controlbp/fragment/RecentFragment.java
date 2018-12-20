@@ -1,10 +1,9 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.RecentAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
@@ -237,6 +239,7 @@ public class RecentFragment extends BaseFragment {
         blurImgTv.setOnClickListener(listener);
         notShowTv.setOnClickListener(listener);
         fresh();
+        loadY(listView,this.getClass(),adapter.sortType);
     }
     @Override
     public void onHiddenChanged(boolean hidden) {
@@ -244,6 +247,7 @@ public class RecentFragment extends BaseFragment {
         if (!hidden){
 //            adapter.notifyDataSetChanged();
             fresh();
+            loadY(listView,this.getClass(),adapter.sortType);
         }
     }
     public void fresh(){
@@ -272,6 +276,7 @@ public class RecentFragment extends BaseFragment {
                 t.setTextColor(curColor);
             }
             tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            loadY(listView,RecentFragment.this.getClass(),adapter.sortType);
         }
     }
 }

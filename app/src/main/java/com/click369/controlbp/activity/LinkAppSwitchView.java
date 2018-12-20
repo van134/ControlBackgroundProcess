@@ -57,6 +57,7 @@ public class LinkAppSwitchView {
     class SwitchClick implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            BaseActivity.zhenDong(cxt);
             int tag= (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_SETTING_LINK_STOPANDAUTOSTART,
                     Common.PREFS_SETTING_LINK_STOPANDREMOVERECENTSTOP,

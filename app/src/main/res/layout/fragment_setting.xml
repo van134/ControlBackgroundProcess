@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.click369.controlbp.activity.SettingFragment">
+    tools:context="com.click369.controlbp.fragment.SettingFragment">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -70,7 +70,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="任何界面长按屏幕右上方弹出控制面板\n(重启生效)"
+                        android:text="任何界面长按屏幕顶部中间弹出控制面板\n(重启生效)"
                         android:id="@+id/setting_openconfig_sw"
                         android:checked="true" />
                 </FrameLayout>
@@ -87,7 +87,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="应用列表实时更新后台时间(6秒一次)"
+                        android:text="应用列表实时更新后台时间(10秒一次)"
                         android:id="@+id/setting_updatetime_sw"
                         android:checked="true" />
                 </FrameLayout>
@@ -152,7 +152,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="熄屏强退的应用时间未到再次亮屏时不取消定时杀死"
+                        android:text="熄屏时的动作时间未到再次亮屏时不取消执行"
                         android:id="@+id/setting_alwayskilloff_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -304,8 +304,26 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="定时强退的应用取消时必须用指纹验证\n(选择指纹验证密码验证失效)"
+                        android:text="定时强退的应用取消时必须用指纹验证\n(选择后指纹验证密码验证失效)"
                         android:id="@+id/setting_settimestopzwmode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="定时强退的应用强退前不显示提示框"
+                        android:id="@+id/setting_settimestopnotshowdialog_sw"
                         android:checked="false" />
                 </FrameLayout>
                 <FrameLayout

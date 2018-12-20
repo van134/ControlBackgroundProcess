@@ -1,14 +1,12 @@
 package com.click369.controlbp.activity;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,19 +24,13 @@ import android.widget.TextView;
 import com.click369.controlbp.R;
 import com.click369.controlbp.adapter.IFWCompActBroadAdapter;
 import com.click369.controlbp.adapter.IFWCompServiceAdapter;
-import com.click369.controlbp.bean.AppInfo;
-import com.click369.controlbp.common.Common;
+import com.click369.controlbp.fragment.IFWFragment;
 import com.click369.controlbp.service.XposedStopApp;
-import com.click369.controlbp.service.XposedUtil;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.FileUtil;
-import com.click369.controlbp.util.SharedPrefsUtil;
-import com.click369.controlbp.util.ShellUtilNoBackData;
 import com.click369.controlbp.util.PackageUtil;
-import com.click369.controlbp.util.SELinuxUtil;
 import com.click369.controlbp.util.ShellUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 

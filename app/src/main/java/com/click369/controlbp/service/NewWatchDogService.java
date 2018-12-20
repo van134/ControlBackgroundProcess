@@ -2,37 +2,25 @@ package com.click369.controlbp.service;
 
 import android.accessibilityservice.AccessibilityService;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Handler;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.inputmethod.InputMethodInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 //import com.click369.dozex.IceRoomActivity;
 //import com.click369.dozex.util.DozeAbout;
 //import com.click369.dozex.util.SavePerfrence;
 
-import com.click369.controlbp.activity.ColorNavBarActivity;
-import com.click369.controlbp.activity.IceRoomView;
-import com.click369.controlbp.activity.UIControlFragment;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
-import com.click369.controlbp.util.SELinuxUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -79,6 +67,9 @@ public class NewWatchDogService extends AccessibilityService {
                 intent.putExtra("action", "");
                 sendBroadcast(intent);
             }else {
+                if(accessibilityEvent.getClassName()==null||accessibilityEvent.getClassName().toString().startsWith("android.widget")){
+                    return;
+                }
                 String cls = accessibilityEvent.getClassName().toString();
                 if (Common.SHOWDIALOGCLS.equals(cls)){
                     return;

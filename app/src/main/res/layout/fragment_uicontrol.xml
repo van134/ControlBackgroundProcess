@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.click369.controlbp.activity.UIControlFragment">
+    tools:context="com.click369.controlbp.fragment.UIControlFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -91,9 +91,9 @@
                         android:checked="false" />
                 </FrameLayout>
                 <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="2px"
-                android:background="@drawable/line" />
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -168,7 +168,267 @@
                 </FrameLayout>
 
             </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/alert_backgroundshape"
+                android:visibility="visible" >
 
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="通知栏有消息时显示边沿呼吸效果"
+                        android:id="@+id/ui_light_msg_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="有电话呼入时显示边沿呼吸效果"
+                        android:id="@+id/ui_light_call_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="播放音乐时显示边沿呼吸效果"
+                        android:id="@+id/ui_light_music_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="点亮屏幕时显示边沿呼吸效果"
+                        android:id="@+id/ui_light_scon_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="随机显示边沿呼吸颜色"
+                        android:id="@+id/ui_light_mode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/ui_light_color_fl"
+                    >
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@drawable/line" />
+                    <TextView
+                        android:layout_marginLeft="4dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="自定义边沿呼吸颜色"
+                        android:id="@+id/ui_light_color_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="center_vertical" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="边沿呼吸速度（点击切换）:中"
+                        android:id="@+id/ui_light_speed_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="center_vertical" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="边沿呼吸位置（点击切换）:两侧"
+                        android:id="@+id/ui_light_weizhi_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="center_vertical" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="边沿呼吸效果（点击切换）:弧度"
+                        android:id="@+id/ui_light_xiaoguo_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="center_vertical" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="4dp"
+                        android:layout_gravity="center" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="边沿呼吸粗细:8%"
+                            android:id="@+id/ui_light_size_tv"
+                            android:layout_marginLeft="8dp" />
+
+                        <SeekBar
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/ui_light_size_sb"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:progress="8" />
+                    </LinearLayout>
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:id="@+id/ui_light_width_fl"
+                    android:layout_height="50dp" >
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@drawable/line" />
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="4dp"
+                        android:layout_gravity="center" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="边沿呼吸距离:100%"
+                            android:id="@+id/ui_light_width_tv"
+                            android:layout_marginLeft="8dp" />
+
+                        <SeekBar
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/ui_light_width_sb"
+                            android:indeterminate="false"
+                            android:max="100"
+
+                            android:progress="100" />
+                    </LinearLayout>
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:visibility="gone"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:visibility="gone"
+                    android:layout_height="50dp" >
+
+                    <LinearLayout
+                        android:orientation="vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="4dp"
+                        android:layout_gravity="center" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="边沿呼吸纵向偏移:0"
+                            android:id="@+id/ui_light_offset_tv"
+                            android:layout_marginLeft="8dp" />
+
+                        <SeekBar
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/ui_light_offset_sb"
+                            android:indeterminate="false"
+                            android:max="500"
+                            android:progress="0" />
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"

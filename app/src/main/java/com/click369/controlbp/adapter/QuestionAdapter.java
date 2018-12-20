@@ -1,25 +1,17 @@
 package com.click369.controlbp.adapter;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.click369.controlbp.R;
-import com.click369.controlbp.activity.IFWCompActivity;
-import com.click369.controlbp.activity.QuestionFragment;
+import com.click369.controlbp.fragment.QuestionFragment;
 import com.click369.controlbp.bean.Question;
-import com.click369.controlbp.util.PackageUtil;
-import com.click369.controlbp.util.PinyinCompareDisableReceiver;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class QuestionAdapter extends BaseAdapter{
 	public ArrayList<Question> bjdatas = new ArrayList<Question>();

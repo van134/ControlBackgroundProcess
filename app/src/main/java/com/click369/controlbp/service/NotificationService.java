@@ -1,6 +1,7 @@
 package com.click369.controlbp.service;
 
 import android.annotation.TargetApi;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -13,12 +14,15 @@ import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.util.AppLoaderUtil;
 
+import java.util.HashSet;
+
 /**
  * Created by asus on 2017/7/5.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class NotificationService extends NotificationListenerService {
     public static boolean isNotifyRunning = false;
+    public static final HashSet<String> notifyLights = new HashSet<String>();
 //    public static boolean isClockOpen = false;
 //    public static boolean isMusicOpen = false;
 //    public static HashSet<String> notifs = new HashSet<>();
@@ -26,7 +30,7 @@ public class NotificationService extends NotificationListenerService {
 //    public long lastTime = 0;
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        addNotify(this,sbn.getPackageName());
+        addNotify(this,sbn.getPackageName(),sbn.getNotification().flags>= Notification.FLAG_NO_CLEAR);
     }
 
     @Override
@@ -46,9 +50,14 @@ public class NotificationService extends NotificationListenerService {
     }
 
     public static void removedNotify(final Context cxt,final String pkg){
+
         final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
         if(!asi.isHasNotify){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
             return;
+        }
+        if(!WatchDogService.notLightPkgs.contains(pkg)) {
+            notifyLights.remove(pkg);
+            ScreenLightServiceUtil.sendHideLight(cxt);
         }
         asi.isHasNotify = false;
 //        WatchDogService.allAppStateInfos.put(pkg,asi);
@@ -87,11 +96,16 @@ public class NotificationService extends NotificationListenerService {
         WatchDogService.lastNotifyTime = System.currentTimeMillis();
     }
 
-    public static void addNotify(Context cxt,String pkg){
+    public static void addNotify(Context cxt,String pkg,boolean isnoclear){
         final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+        if(!WatchDogService.notLightPkgs.contains(pkg)&&!isnoclear){
+            notifyLights.add(pkg);
+            ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MSG,cxt);
+        }
         if(asi.isHasNotify){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
             return;
         }
+
 //        WatchDogService.notifs.add(pkg);
         asi.isHasNotify = true;
 //        WatchDogService.allAppStateInfos.put(pkg,asi);

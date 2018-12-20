@@ -73,6 +73,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedRencent {
+    private static long lastFlashTime = 0;
     public static  String getPkgByTask(Class cls,String taskName,Object obj){
         try {
             Field mTaskField = cls.getDeclaredField(taskName);
@@ -103,7 +104,6 @@ public class XposedRencent {
 
     public static String getInfoByPkg(XSharedPreferences recentPrefs,
                                       XSharedPreferences appStartiPrefs,
-//                                      XSharedPreferences muBeiPrefs,
                                       String pkg){
 //        muBeiPrefs.reload();
         recentPrefs.reload();
@@ -132,7 +132,6 @@ public class XposedRencent {
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
                                    final XSharedPreferences recentPrefs,
                                    final XSharedPreferences barPrefs,
-//                                   final XSharedPreferences muBeiPrefs,
                                    final XSharedPreferences appStartiPrefs,
                                    final boolean isRecentOpen,final boolean isUIChangeOpen){
         try {
@@ -178,24 +177,6 @@ public class XposedRencent {
                                         }
                                     }
 
-//                                    Field mTaskBarField = tvtCls.getDeclaredField("mTaskBar");
-//                                    mTaskBarField.setAccessible(true);
-//                                    View mTaskBar = (View) mTaskBarField.get(methodHookParam.thisObject);
-//                                    Object thumbnailData = methodHookParam.args[0];
-//                                    Bitmap bitmap = null;
-//                                    if (thumbnailData instanceof Bitmap) {
-//                                        bitmap = (Bitmap) thumbnailData;
-//                                    } else {
-//                                        Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
-//                                        Field scaleField = thumbnailData.getClass().getDeclaredField("scale");
-//                                        thumbnailField.setAccessible(true);
-//                                        scaleField.setAccessible(true);
-//                                        Object bmObj = thumbnailField.get(thumbnailData);
-//                                        bitmap = (Bitmap) bmObj;
-//                                    }
-//                                    int pixel = bitmap.getPixel(1, bitmap.getHeight()/2);
-//                                    mTaskBar.setBackgroundColor(pixel);
-//                                    XposedBridge.log("【颜色值】  bitmap "+bitmap+ Integer.toHexString(pixel).toUpperCase());
                                 }
                             } catch (RuntimeException e) {
                                 e.printStackTrace();
@@ -234,51 +215,22 @@ public class XposedRencent {
 //                            }
 //                        }
                     };
-                    if (clss != null) {
-                        XposedUtil.hookMethod(tvtCls,clss,"setThumbnail",hook);
-//                        if (clss.length == 1) {
-//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], hook);
-//                        } else if (clss.length == 2) {
-//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], hook);
-//                        } else if (clss.length == 4) {
-//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], clss[2], clss[3], hook);
-//                        }  else if (clss.length == 3) {
-//                            XposedHelpers.findAndHookMethod(tvtCls, "setThumbnail", clss[0], clss[1], clss[2], hook);
-//                        } else {
-//                            XposedBridge.log("^^^^^^^^^^^^^^setThumbnail else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-//                            for (Class c : clss) {
-//                                XposedBridge.log("^^^^^^^^^^^^^^setThumbnail canshu " + c.getName() + " ^^^^^^^^^^^^^^^^^");
-//                            }
-//                        }
-                    } else {
-                        XposedBridge.log("^^^^^^^^^^^^^^setThumbnail 函数未找到 ^^^^^^^^^^^^^^^^^");
-                    }
+                    XposedUtil.hookMethod(tvtCls,clss,"setThumbnail",hook);
                     Class clss1[] = XposedUtil.getParmsByName(recentActCls, "onStop");
-                    if (clss1 != null) {
-                        XC_MethodHook hook1 = new XC_MethodHook() {
-                            @Override
-                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                Map thbs = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbs");
-                                Map thbcolors = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbcolors");
-                                if (thbs!=null){
-                                    thbs.clear();
-                                }
-                                if (thbcolors!=null){
-                                    thbcolors.clear();
-                                }
-                            }
-                        };
-                        XposedUtil.hookMethod(recentActCls,clss1,"onStop",hook1);
-//                        if (clss1.length == 0) {
-//                            XposedHelpers.findAndHookMethod(recentActCls, "onStop", hook1);
-//                        } else if (clss1.length == 2) {
-//                            XposedHelpers.findAndHookMethod(recentActCls, "onStop", clss1[0], clss1[1], hook1);
-//                        } else {
-//                            XposedBridge.log("^^^^^^^^^^^^^^onStop else " + clss1.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-//                        }
-                    } else {
-                        XposedBridge.log("^^^^^^^^^^^^^^onStop 函数未找到 ^^^^^^^^^^^^^^^^^");
-                    }
+                    XC_MethodHook hook1 = new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                        Map thbs = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbs");
+                        Map thbcolors = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbcolors");
+                        if (thbs!=null){
+                            thbs.clear();
+                        }
+                        if (thbcolors!=null){
+                            thbcolors.clear();
+                        }
+                        }
+                    };
+                    XposedUtil.hookMethod(recentActCls,clss1,"onStop",hook1);
                 }
             }else if(lpparam.packageName.equals("android")&&isRecentOpen&&Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                 final Class arCls = XposedHelpers.findClass("com.android.server.am.ActivityRecord", lpparam.classLoader);
@@ -304,21 +256,68 @@ public class XposedRencent {
                             }
                         }
                     };
+                    XposedUtil.hookMethod(arCls,clss,"updateThumbnailLocked",hook);
+                }
+            }
+            if("com.android.systemui".equals(lpparam.packageName)){//
+                try {
+                    final Class flashCls = XposedHelpers.findClass("com.android.systemui.statusbar.policy.FlashlightControllerImpl", lpparam.classLoader);
+                    if(flashCls!=null){
+                        XC_MethodHook hook = new XC_MethodHook() {
+                            @Override
+                            protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+                                Field field = flashCls.getDeclaredField("mContext");
+                                field.setAccessible(true);
+                                Context context = (Context)(field.get(param.thisObject));
 
-                    if (clss != null) {
-                        XposedUtil.hookMethod(arCls,clss,"updateThumbnailLocked",hook);
-//                        if (clss.length == 2) {
-//                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], clss[1], hook);
-//                        } else if (clss.length == 1) {
-//                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], hook);
-//                        } else if (clss.length == 3) {
-//                            XposedHelpers.findAndHookMethod(arCls, "updateThumbnailLocked", clss[0], clss[1], clss[2], hook);
-//                        } else {
-//                            XposedBridge.log("^^^^^^^^^^^^^^updateThumbnailLocked else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-//                        }
-                    } else {
-                        XposedBridge.log("^^^^^^^^^^^^^^updateThumbnailLocked 函数未找到 ^^^^^^^^^^^^^^^^^");
+                                final Method setFlashlightMethod = flashCls.getDeclaredMethod("setFlashlight",boolean.class);
+                                final Method isEnabledMethod = flashCls.getDeclaredMethod("isEnabled");
+                                setFlashlightMethod.setAccessible(true);
+                                isEnabledMethod.setAccessible(true);
+                                BroadcastReceiver br = new BroadcastReceiver() {
+                                    @Override
+                                    public void onReceive(Context context, Intent intent) {
+                                        try {
+                                            String action = intent.getAction();
+                                            if("com.click369.control.sysui.changeflash".equals(action)){
+                                                if(System.currentTimeMillis()-lastFlashTime<200){
+                                                    return;
+                                                }
+                                                boolean isEnable = (Boolean)(isEnabledMethod.invoke(param.thisObject));
+                                                setFlashlightMethod.invoke(param.thisObject,!isEnable);
+                                                lastFlashTime = System.currentTimeMillis();
+                                            }else if("com.click369.control.sysui.msgflash".equals(action)){
+                                                new Thread(){
+                                                    @Override
+                                                    public void run() {
+                                                        try {
+                                                            for(int i = 0;i<6;i++){
+                                                                Thread.sleep(i%2==0?150:50);
+                                                                boolean isEnable = (Boolean)(isEnabledMethod.invoke(param.thisObject));
+                                                                setFlashlightMethod.invoke(param.thisObject,!isEnable);
+                                                            }
+                                                        }catch (Throwable e){
+
+                                                        }
+                                                    }
+                                                }.start();
+                                            }
+                                        }catch (Throwable e){
+
+                                        }
+                                    }
+                                };
+                                IntentFilter intentFilter = new IntentFilter();
+                                intentFilter.addAction("com.click369.control.sysui.changeflash");
+                                intentFilter.addAction("com.click369.control.sysui.msgflash");
+                                context.registerReceiver(br,intentFilter);
+                                XposedBridge.log("FlashlightControllerImpl  注册完成 ...");
+                            }
+                        };
+                        XposedUtil.hookConstructorMethod(flashCls,new Class[]{Context.class},hook);
                     }
+                }catch (Throwable e){
+                    XposedBridge.log("FlashlightControllerImpl  hook出错 ..."+e);
                 }
             }
             if(isUIChangeOpen&&"com.android.systemui".equals(lpparam.packageName)) {
@@ -364,26 +363,8 @@ public class XposedRencent {
                                     }
                                 };
                                 XposedUtil.hookConstructorMethod(taskCls,clss,hook);
-//                                if (clss.length == 11) {
-//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], hook);
-//                                } else if (clss.length == 20) {
-//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], clss[13], clss[14], clss[15], clss[16], clss[17], clss[18], clss[19], hook);
-//                                }else if (clss.length == 21) {
-//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], clss[13], clss[14], clss[15], clss[16], clss[17], clss[18], clss[19],  clss[20], hook);
-//                                }else if (clss.length == 13) {
-//                                    XposedHelpers.findAndHookConstructor(taskCls, clss[0], clss[1], clss[2], clss[3], clss[4], clss[5], clss[6], clss[7], clss[8], clss[9], clss[10], clss[11], clss[12], hook);
-//                                } else {
-//                                    XposedBridge.log("^^^^^^^^^^^^^^Task else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-//                                }
                                 Class clss1[] = XposedUtil.getParmsByName(taskCls,"notifyTaskDataLoaded");
                                 XposedUtil.hookMethod(taskCls,clss1,"notifyTaskDataLoaded",hook);
-//                                if (clss1.length == 2) {
-//                                    XposedHelpers.findAndHookMethod(taskCls, "notifyTaskDataLoaded", clss1[0],clss1[1], hook);
-//                                }else if (clss1.length == 3) {
-//                                    XposedHelpers.findAndHookMethod(taskCls, "notifyTaskDataLoaded", clss1[0],clss1[1],clss1[2], hook);
-//                                } else {
-//                                    XposedBridge.log("^^^^^^^^^^^^^^notifyTaskDataLoaded else " + clss1.length + " ^^^^^^^^^^^^^^^^^");
-//                                }
                             } else {
                                 XposedBridge.log("^^^^^^^^^^^^^^Task 构造函数未找到 ^^^^^^^^^^^^^^^^^");
                             }
@@ -626,11 +607,6 @@ public class XposedRencent {
                             }
                         };
                         XposedUtil.hookMethod(recentViewCls,clss,"onFinishInflate",hook);
-//                        if (clss.length == 0) {
-//                            XposedHelpers.findAndHookMethod(recentViewCls, "onFinishInflate", hook);
-//                        } else {
-//                            XposedBridge.log("^^^^^^^^^^^^^^onFinishInflate else " + clss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-//                        }
                     } else {
                         XposedBridge.log("^^^^^^^^^^^^^^onFinishInflate  函数未找到 ^^^^^^^^^^^^^^^^^");
                     }
@@ -669,13 +645,6 @@ public class XposedRencent {
                                 }
                             };
                             XposedUtil.hookConstructorMethod(thumbViewCls,clss,hook);
-//                            if (clss.length == 4) {
-//                                XposedHelpers.findAndHookConstructor(thumbViewCls, clss[0], clss[1], clss[2], clss[3], hook);
-//                            } else if (clss.length == 5) {
-//                                XposedHelpers.findAndHookConstructor(thumbViewCls, clss[0], clss[1], clss[2], clss[3], clss[4], hook);
-//                            } else {
-//                                XposedBridge.log("^^^^^^^^^^^^^^yhumbnail else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-//                            }
                         } else {
                             XposedBridge.log("^^^^^^^^^^^^^^yhumbnail  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                         }
@@ -694,13 +663,6 @@ public class XposedRencent {
                                 }
                             };
                             XposedUtil.hookMethod(thumbViewCls,clsss,"updateClipToTaskBar",hook);
-//                            if (clsss.length == 1) {
-//                                XposedHelpers.findAndHookMethod(thumbViewCls, "updateClipToTaskBar", clsss[0], hook);
-//                            } else if (clsss.length == 2) {
-//                                XposedHelpers.findAndHookMethod(thumbViewCls, "updateClipToTaskBar", clsss[0], clsss[1], hook);
-//                            } else {
-//                                XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar else " + clsss.length + "函数未找到 ^^^^^^^^^^^^^^^^^");
-//                            }
                         } else {
                             XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar  函数未找到 ^^^^^^^^^^^^^^^^^");
                         }
@@ -731,13 +693,6 @@ public class XposedRencent {
                                     }
                                 };
                                 XposedUtil.hookConstructorMethod(avbCls,clss,hook);
-//                                if (clss.length == 2) {
-//                                    XposedHelpers.findAndHookConstructor(avbCls, clss[0], clss[1], hook);
-//                                } else if (clss.length == 3) {
-//                                    XposedHelpers.findAndHookConstructor(avbCls, clss[0], clss[1], clss[2], hook);
-//                                } else {
-//                                    XposedBridge.log("^^^^^^^^^^^^^^avbCls else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-//                                }
                             } else {
                                 XposedBridge.log("^^^^^^^^^^^^^^avbCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                             }
@@ -845,33 +800,6 @@ public class XposedRencent {
         }
     }
 
-//    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-//    public static Bitmap blurBitmap(Context context, Bitmap image) {
-//        // 计算图片缩小后的长宽
-//        int width = Math.round(image.getWidth() * 0.4f);
-//        int height = Math.round(image.getHeight() * 0.4f);
-//        // 将缩小后的图片做为预渲染的图片
-//        Bitmap inputBitmap = Bitmap.createScaledBitmap(image, width, height, false);
-//        // 创建一张渲染后的输出图片
-//        Bitmap outputBitmap = Bitmap.createBitmap(inputBitmap);
-//        // 创建RenderScript内核对象
-//        RenderScript rs = RenderScript.create(context);
-//        // 创建一个模糊效果的RenderScript的工具对象
-//        ScriptIntrinsicBlur blurScript = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-//        // 由于RenderScript并没有使用VM来分配内存,所以需要使用Allocation类来创建和分配内存空间
-//        // 创建Allocation对象的时候其实内存是空的,需要使用copyTo()将数据填充进去
-//        Allocation tmpIn = Allocation.createFromBitmap(rs, inputBitmap);
-//        Allocation tmpOut = Allocation.createFromBitmap(rs, outputBitmap);
-//        // 设置渲染的模糊程度, 25f是最大模糊度
-//        blurScript.setRadius(15f);
-//        // 设置blurScript对象的输入内存
-//        blurScript.setInput(tmpIn);
-//        // 将输出数据保存到输出内存中
-//        blurScript.forEach(tmpOut);
-//        // 将数据填充到Allocation中
-//        tmpOut.copyTo(outputBitmap);
-//        return outputBitmap;
-//    }
 
     //模糊图片
     @TargetApi(Build.VERSION_CODES.KITKAT)

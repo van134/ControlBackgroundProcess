@@ -156,7 +156,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			XposedEnd.loadPackage(lpparam,settingPrefs,autoStartPrefs,controlPrefs);
 
 		}catch (Throwable e){
-			XposedBridge.log("^^^^^^^^^^^^^重要！！！ MAIN  HOOK出错"+e+"^^^^^^^^^^^^^^^");
+			XposedBridge.log(lpparam.packageName+"^^^^^^^^^^^^^重要！！！ MAIN  HOOK出错"+e+"^^^^^^^^^^^^^^^");
 		}
 	}
 

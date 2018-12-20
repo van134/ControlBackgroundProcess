@@ -13,14 +13,12 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
-import com.click369.controlbp.activity.ControlFragment;
+import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.WhiteApp;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
-import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtilBackStop;
 
@@ -168,7 +166,7 @@ public class ControlAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+BaseActivity.getProcTimeStr(data.packageName));
+		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
 		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
 //		viewHolder.appIcon.setImageBitmap();
 //		viewHolder.appIcon.setImageDrawable(PackageUtil.getBitmap(c,data.packageName));
@@ -243,8 +241,9 @@ public class ControlAdapter extends BaseAdapter{
 					ai.isServiceStop = false;
 				}
 				XposedStopApp.stopApk(ai.getPackageName(),c);
-				buttonView.setImageResource(ai.isServiceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-//				buttonView.setTextColor(ai.isServiceStop? Color.RED:Color.BLACK);
+				notifyDataSetChanged();
+//				buttonView.setImageResource(ai.isServiceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+////				buttonView.setTextColor(ai.isServiceStop? Color.RED:Color.BLACK);
 			}
 		});
 		viewHolder.broadIv.setOnClickListener(new View.OnClickListener() {
@@ -272,8 +271,10 @@ public class ControlAdapter extends BaseAdapter{
 							if(tag == 1){
 								ai.isBroadStop = !isStop;
 								modPrefs.edit().putBoolean(ai.getPackageName()+"/broad",!isStop).commit();
-								ShellUtilBackStop.kill(ai.getPackageName());
-								buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//								ShellUtilBackStop.kill(ai.getPackageName());
+								XposedStopApp.stopApk(ai.getPackageName(),c);
+//								buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+								notifyDataSetChanged();
 							}
 						}
 					});
@@ -287,7 +288,8 @@ public class ControlAdapter extends BaseAdapter{
 					ed.commit();
 					ai.isBroadStop = !isStop;
 					XposedStopApp.stopApk(ai.getPackageName(),c);
-					buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//					buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+					notifyDataSetChanged();
 				}
 			}
 		});
@@ -312,8 +314,10 @@ public class ControlAdapter extends BaseAdapter{
 							if(tag == 1){
 								ai.isWakelockStop = !isStop;
 								modPrefs.edit().putBoolean(ai.getPackageName()+"/wakelock",!isStop).commit();
-								ShellUtilBackStop.kill(ai.getPackageName());
-								buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+								XposedStopApp.stopApk(ai.getPackageName(),c);
+								notifyDataSetChanged();
+//								ShellUtilBackStop.kill(ai.getPackageName());
+//								buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 							}
 						}
 					});
@@ -327,7 +331,8 @@ public class ControlAdapter extends BaseAdapter{
 					ed.commit();
 					ai.isWakelockStop = !isStop;
 					XposedStopApp.stopApk(ai.getPackageName(),c);
-					buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//					buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+					notifyDataSetChanged();
 				}
 			}
 		});
@@ -352,8 +357,10 @@ public class ControlAdapter extends BaseAdapter{
 							if(tag == 1){
 								ai.isAlarmStop = !isStop;
 								modPrefs.edit().putBoolean(ai.getPackageName()+"/alarm",!isStop).commit();
-								ShellUtilBackStop.kill(ai.getPackageName());
-								buttonView.setImageResource(ai.isAlarmStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+								XposedStopApp.stopApk(ai.getPackageName(),c);
+								notifyDataSetChanged();
+//								ShellUtilBackStop.kill(ai.getPackageName());
+//								buttonView.setImageResource(ai.isAlarmStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 							}
 						}
 					});
@@ -367,7 +374,8 @@ public class ControlAdapter extends BaseAdapter{
 					ed.commit();
 					ai.isAlarmStop = !isStop;
 					XposedStopApp.stopApk(ai.getPackageName(),c);
-					buttonView.setImageResource(ai.isAlarmStop ? R.mipmap.icon_disable : R.mipmap.icon_notdisable);
+//					buttonView.setImageResource(ai.isAlarmStop ? R.mipmap.icon_disable : R.mipmap.icon_notdisable);
+					notifyDataSetChanged();
 				}
 			}
 		});

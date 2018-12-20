@@ -14,6 +14,9 @@ import android.widget.SeekBar;
 import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.ColorNavBarService;
+import com.click369.controlbp.service.LightView;
+import com.click369.controlbp.service.ScreenLightServiceUtil;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
@@ -32,7 +35,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
     private String title="";
     private String key = "";
     private SharedPreferences barPrefs;
-    private int bgcolor,textcolor,keyColor;
+    private int bgcolor,textcolor,keyColor,lightColor;
     private boolean isbg;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -75,11 +78,16 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
             bgcolor =  barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTBGCOLOR,Color.BLACK);
             textcolor = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTTEXTCOLOR,Color.WHITE);
             keyColor = barPrefs.getInt(Common.PREFS_SETTING_UI_KEYCOLOR,Color.WHITE);
+            lightColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_LIGHTCOLOR,"#01d8ff"));
             int color = Color.WHITE;
             if(key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
                 bt.setBackgroundColor(keyColor);
                 bt.setTextColor(Color.CYAN);
                 color = keyColor;
+            }else  if(key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)){
+                bt.setBackgroundColor(lightColor);
+                bt.setTextColor(Color.WHITE);
+                color = lightColor;
             }else{
                 bt.setBackgroundColor(bgcolor);
                 bt.setTextColor(textcolor);
@@ -122,7 +130,9 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
     public void onStopTrackingTouch(SeekBar seekBar) {
 //        color = Color.argb(sbAlpa.getProgress(),redSb.getProgress(),greenSb.getProgress(),blueSb.getProgress());
         colorStr = changeHex(Integer.toHexString(sbAlpa.getProgress()))+changeHex(Integer.toHexString(redSb.getProgress()))+changeHex(Integer.toHexString(greenSb.getProgress()))+changeHex(Integer.toHexString(blueSb.getProgress()));
-        if(key.equals(Common.PREFS_SETTING_UI_TOASTBGCOLOR)||key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
+        if(key.equals(Common.PREFS_SETTING_UI_TOASTBGCOLOR)||
+                key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)||
+                key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)){
             bt.setBackgroundColor(Color.parseColor("#"+colorStr));
             bt.setText("#"+colorStr);
         }else{
@@ -149,14 +159,17 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
             this.setResult(0x1,intent);
             this.finish();
         }else{
-
             if(key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
                 barPrefs.edit().putInt(key,Color.parseColor("#"+colorStr.substring(2))).commit();
+            }else if(key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)){
+                barPrefs.edit().putString(key,"#"+colorStr.substring(2)).commit();
+                WatchDogService.lightColor = "#"+colorStr.substring(2);
+                ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_TEST,this);
             }else{
                 barPrefs.edit().putInt(key,Color.parseColor("#"+colorStr)).commit();
             }
             Log.i("CONTROL",key+colorStr.substring(2));
-            showT("设置成功，重启生效");
+            showT("设置成功");
             h.postDelayed(new Runnable() {
                 @Override
                 public void run() {

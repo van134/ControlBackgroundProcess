@@ -1,13 +1,10 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.ForceStopAdapter;
 import com.click369.controlbp.bean.AppInfo;
-import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
@@ -305,6 +304,7 @@ public class ForceStopFragment extends BaseFragment {
         notifyTv.setOnClickListener(listener);
 //        loadApp();
         fresh();
+        loadY(listView,this.getClass(),adapter.sortType);
     }
 
     public void fresh(){
@@ -331,6 +331,7 @@ public class ForceStopFragment extends BaseFragment {
         if (!hidden){
 //            adapter.notifyDataSetChanged();
             fresh();
+            loadY(listView,this.getClass(),adapter.sortType);
         }
         Log.i("CONTROL","返回force");
         ((MainActivity)getActivity()).startAccess();
@@ -427,6 +428,7 @@ public class ForceStopFragment extends BaseFragment {
                 t.setTextColor(curColor);
             }
             tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            loadY(listView,ForceStopFragment.this.getClass(),adapter.sortType);
         }
     }
 }

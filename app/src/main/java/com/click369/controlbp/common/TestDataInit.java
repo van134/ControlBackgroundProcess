@@ -100,6 +100,7 @@ public class TestDataInit {
         SharedPreferences.Editor controls = controlPrefs.edit();
         controls.putBoolean("com.netease.cloudmusic.service.PlayService/service",true);
         controls.putBoolean("com.netease.cloudmusic.service.PlayNannyService/service",true);
+        controls.putBoolean("com.tencent.mm.booter.NotifyReceiver$NotifyService/service",true);
         controls.commit();
 
 //        SharedPreferences tvPrefs = SharedPrefsUtil.getPreferences(cxt,Common.IPREFS_TVLIST);// cxt.getSharedPreferences(Common.IPREFS_COLORBARTEST,Context.MODE_WORLD_READABLE);

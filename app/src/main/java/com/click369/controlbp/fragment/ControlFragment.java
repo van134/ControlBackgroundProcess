@@ -1,14 +1,11 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.AlarmActivity;
+import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.TopSearchView;
+import com.click369.controlbp.activity.WakeLockActivity;
 import com.click369.controlbp.adapter.ControlAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
@@ -260,6 +261,7 @@ public class ControlFragment extends BaseFragment {
         alarmTv.setOnClickListener(listener);
 //        loadApp();
         fresh();
+        loadY(listView,this.getClass(),adapter.sortType);
     }
 
     @Override
@@ -281,22 +283,20 @@ public class ControlFragment extends BaseFragment {
 //        }else
         if (!hidden){
             fresh();
+            loadY(listView,this.getClass(),adapter.sortType);
         }
         super.onHiddenChanged(hidden);
     }
 
     public void fresh(){
+        listView.setTag(this.getClass().getName());
         h.postDelayed(new Runnable() {
             @Override
             public void run() {
                 topView.showText();
-//                adapter.fliterName = TopSearchView.searchText;
-////                isBroadStop = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPRECEIVER,false);
-//                adapter.fliterList(adapter.fliterName,MainActivity.allAppInfos);
             }
         },250);
     }
-
     class TitleClickListener implements View.OnClickListener{
         @Override
         public void onClick(View v) {
@@ -312,6 +312,7 @@ public class ControlFragment extends BaseFragment {
                 t.setTextColor(curColor);
             }
             tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            loadY(listView,ControlFragment.this.getClass(),adapter.sortType);
         }
     }
 }

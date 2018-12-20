@@ -1,6 +1,5 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
-import android.app.Dialog;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,22 +9,17 @@ import android.didikee.donate.WeiXinDonate;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
-import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;

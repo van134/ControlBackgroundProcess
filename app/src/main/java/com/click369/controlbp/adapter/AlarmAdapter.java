@@ -15,7 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
-import com.click369.controlbp.activity.ControlFragment;
+import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.bean.PkgAndName;
 import com.click369.controlbp.common.ContainsKeyWord;
 import com.click369.controlbp.util.AlertUtil;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

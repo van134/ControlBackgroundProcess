@@ -1,4 +1,4 @@
-package com.click369.controlbp.activity;
+package com.click369.controlbp.fragment;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +25,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.DozeWhiteListActivity;
+import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.adapter.DozeLogAdapter;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.MyDozeService;
