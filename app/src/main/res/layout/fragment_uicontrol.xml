@@ -184,7 +184,24 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="通知栏有消息时显示边沿呼吸效果"
+                        android:text="显示在锁屏之上(个别系统打开后无法正常显示甚至导致应用控制器无法打开，例如MIUI10)"
+                        android:id="@+id/ui_light_floatonsys_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="通知栏有消息时显示边缘呼吸效果"
                         android:id="@+id/ui_light_msg_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -201,7 +218,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="有电话呼入时显示边沿呼吸效果"
+                        android:text="有电话呼入时显示边缘呼吸效果"
                         android:id="@+id/ui_light_call_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -219,7 +236,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="播放音乐时显示边沿呼吸效果"
+                        android:text="播放音乐时显示边缘呼吸效果"
                         android:id="@+id/ui_light_music_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -236,8 +253,8 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="点亮屏幕时显示边沿呼吸效果"
-                        android:id="@+id/ui_light_scon_sw"
+                        android:text="接入/断开电源时时显示边缘呼吸效果"
+                        android:id="@+id/ui_light_charge_sw"
                         android:checked="false" />
                 </FrameLayout>
                 <FrameLayout
@@ -253,7 +270,40 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="随机显示边沿呼吸颜色"
+                        android:text="唤醒屏幕时显示边缘呼吸效果"
+                        android:id="@+id/ui_light_scon_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/ui_light_animscale_fl">
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@drawable/line" />
+                    <Switch
+                        android:layout_marginLeft="4dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="位置为上下或左右时显示伸缩动画"
+                        android:id="@+id/ui_light_animscale_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="随机显示边缘呼吸颜色"
                         android:id="@+id/ui_light_mode_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -272,7 +322,7 @@
                         android:layout_marginLeft="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="自定义边沿呼吸颜色"
+                        android:text="自定义边缘呼吸颜色"
                         android:id="@+id/ui_light_color_tv"
                         android:textAlignment="gravity"
                         android:gravity="center_vertical" />
@@ -290,7 +340,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="边沿呼吸速度（点击切换）:中"
+                        android:text="边缘呼吸速度（点击切换）:中"
                         android:id="@+id/ui_light_speed_tv"
                         android:textAlignment="gravity"
                         android:gravity="center_vertical" />
@@ -308,7 +358,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="边沿呼吸位置（点击切换）:两侧"
+                        android:text="边缘呼吸位置（点击切换）:两侧"
                         android:id="@+id/ui_light_weizhi_tv"
                         android:textAlignment="gravity"
                         android:gravity="center_vertical" />
@@ -326,7 +376,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="边沿呼吸效果（点击切换）:弧度"
+                        android:text="边缘呼吸效果（点击切换）:弧度"
                         android:id="@+id/ui_light_xiaoguo_tv"
                         android:textAlignment="gravity"
                         android:gravity="center_vertical" />
@@ -349,7 +399,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="边沿呼吸粗细:8%"
+                            android:text="边缘呼吸粗细:8%"
                             android:id="@+id/ui_light_size_tv"
                             android:layout_marginLeft="8dp" />
 
@@ -381,7 +431,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="边沿呼吸距离:100%"
+                            android:text="边缘呼吸距离:100%"
                             android:id="@+id/ui_light_width_tv"
                             android:layout_marginLeft="8dp" />
 
@@ -415,7 +465,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="边沿呼吸纵向偏移:0"
+                            android:text="边缘呼吸纵向偏移:0"
                             android:id="@+id/ui_light_offset_tv"
                             android:layout_marginLeft="8dp" />
 
@@ -427,6 +477,45 @@
                             android:max="500"
                             android:progress="0" />
                     </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/alert_backgroundshape"
+                android:visibility="visible" >
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="有通知时闪光灯闪动"
+                        android:id="@+id/ui_flash_notify_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="有电话呼入时闪光灯闪动"
+                        android:id="@+id/ui_flash_call_sw"
+                        android:checked="false" />
                 </FrameLayout>
             </LinearLayout>
             <LinearLayout

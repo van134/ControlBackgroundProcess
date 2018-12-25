@@ -146,7 +146,8 @@ public class XposedStartListener {
                                         Intent broad = new Intent("com.click369.control.notify");
                                         broad.putExtra("type","add");
                                         broad.putExtra("pkg", pkg);
-                                        broad.putExtra("isnoclear", sbn.getNotification().flags>=Notification.FLAG_NO_CLEAR);
+                                        broad.putExtra("flags", sbn.getNotification().flags);
+                                        broad.putExtra("clearable", sbn.isClearable());
                                         Field cxtField = managerCls.getDeclaredField("mContext");
                                         cxtField.setAccessible(true);
                                         Object cxtObject = cxtField.get(methodHookParam.thisObject);

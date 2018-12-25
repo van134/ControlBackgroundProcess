@@ -30,37 +30,38 @@ import java.lang.reflect.Method;
 public class ScreenLightServiceUtil {
     private RoundedCornerService service;
     private WindowManager windowManager;
+    private WindowManager.LayoutParams wmParams;
     private FrameLayout fl;
+    private boolean isInit =false;
     public ScreenLightServiceUtil(RoundedCornerService service,WindowManager windowManager){
         this.service = service;
         this.windowManager = windowManager;
-
     }
 
     public void init(){
         try {
-           final WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams(
+            if(!WatchDogService.isHasXPFloatVewPermission&&
+                    !WatchDogService.isHasSysFloatVewPermission){
+                return;
+            }
+            isInit = true;
+           wmParams = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT,
-                    2015,
+                    RoundedCornerService.floatLeve,
                     536, -3);
             wmParams.format = PixelFormat.RGBA_8888;
-            wmParams.gravity = Gravity.TOP;
+            wmParams.gravity = Gravity.BOTTOM;
             wmParams.x = 0;
+            wmParams.width = service.context.getResources().getDisplayMetrics().widthPixels;
             wmParams.height = getHasVirtualKey();
-            Configuration config = service.getResources().getConfiguration();
-            // 如果当前是横屏
-            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
-                wmParams.y = 0;
-            }else {
-                wmParams.y = -1 * RoundedCornerService.getZhuangTaiHeight(service);//-1*RoundedCornerService.getZhuangTaiHeight(service)+WatchDogService.lightOffset;
-            }
-                LayoutInflater inflater = LayoutInflater.from(service);
+//            wmParams.y = -1 * RoundedCornerService.getZhuangTaiHeight(service.context);//-1*RoundedCornerService.getZhuangTaiHeight(service)+WatchDogService.lightOffset;
+            LayoutInflater inflater = LayoutInflater.from(service.context);
             //获取浮动窗口视图所在布局
             fl = (FrameLayout) inflater.inflate(R.layout.float_lightlayout, null);
             lv = (LightView) fl.findViewById(R.id.float_light_fl);
-            lv.init();
-            windowManager.addView(fl,wmParams);
+            lv.setWidowManager(windowManager,wmParams,fl);
+//            windowManager.addView(fl,wmParams);
         }catch (Throwable e){
             e.printStackTrace();
         }
@@ -68,7 +69,7 @@ public class ScreenLightServiceUtil {
 
     public void remove(){
         try {
-            if(windowManager!=null){
+            if(isInit&&windowManager!=null&&LightView.isStart){
                 if(lv!=null) {
                     lv.stopBl();
                 }
@@ -80,12 +81,28 @@ public class ScreenLightServiceUtil {
     }
     LightView lv =null;
     public void showLight(final int type){
-        if(lv!=null){
+        if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null){
+//            windowManager.addView(fl,wmParams);
+//            lv.checkFullScreen(service.pv);
             lv.startBl(type);
         }
     }
+
+    public void changDir(){
+        if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null) {
+            wmParams.width = service.context.getResources().getDisplayMetrics().widthPixels;
+            wmParams.height = getHasVirtualKey();
+//            wmParams.y = -1 * RoundedCornerService.getZhuangTaiHeight(service.context);//-1*RoundedCornerService.getZhuangTaiHeight(service)+WatchDogService.lightOffset;
+//            lv.checkFullScreen(service.pv);
+            lv.setAlpha(0.0f);
+            if(lv.isStart){
+                lv.isNeedTest = true;
+            }
+        }
+    }
     public void hideLight(){
-        if(lv!=null) {
+        if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null) {
+//            windowManager.removeViewImmediate(fl);
             lv.stopBl();
         }
     }

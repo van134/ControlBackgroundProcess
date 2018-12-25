@@ -13,15 +13,25 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.media.AudioManager;
 import android.media.Image;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.click369.controlbp.R;
+
+import java.util.Arrays;
 
 /**
  * Created by 41856 on 2018/12/19.
@@ -29,12 +39,16 @@ import com.click369.controlbp.R;
 
 //@SuppressLint("AppCompatCustomView")
 public class LightView extends View {
+    private WindowManager widowManager;
+    private WindowManager.LayoutParams wmParams;
+    private  FrameLayout fl;
     public static final int durs[] ={500,1000,1500};
     public static final int LIGHT_TYPE_TEST= 0;
     public static final int LIGHT_TYPE_SCON= 1;
-    public static final int LIGHT_TYPE_MSG= 2;
-    public static final int LIGHT_TYPE_CALL= 3;
-    public static final int LIGHT_TYPE_MUSIC= 4;
+    public static final int LIGHT_TYPE_CHARGE= 2;
+    public static final int LIGHT_TYPE_MSG= 3;
+    public static final int LIGHT_TYPE_CALL= 4;
+    public static final int LIGHT_TYPE_MUSIC= 5;
     public static boolean isStart = false;
 //    boolean isSuiJi =true;
     int index = 0;
@@ -43,6 +57,7 @@ public class LightView extends View {
     final int CALL_COUNT = 50;
     final int MUSIC_COUNT = Animation.INFINITE;
     final int SCON_COUNT = 2;
+    final int CHARGE_COUNT = 3;
     final int TEST_COUNT = 2;
     int type = 0;//0 消息  1 电话
     int count = 0;
@@ -54,6 +69,7 @@ public class LightView extends View {
     Rect mSrcRectTop,mDestRectTop;
     Rect mSrcRectRight,mDestRectRight;
     Rect mSrcRectBottom,mDestRectBottom;
+    Paint paint;
     public LightView(Context context) {
         super(context);
     }
@@ -64,6 +80,12 @@ public class LightView extends View {
 
     public LightView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+    }
+
+    public void setWidowManager(WindowManager widowManager, WindowManager.LayoutParams wmParams, FrameLayout fl){
+        this.widowManager = widowManager;
+        this.wmParams = wmParams;
+        this.fl = fl;
     }
 
     private float[] getRandomColor(){
@@ -99,18 +121,11 @@ public class LightView extends View {
         super.onDraw(canvas);
         setVisibility(View.INVISIBLE);
         //获取View的宽高
-        int width = getWidth()/2;
-        int height = getHeight();
-        initBm(width,height);
-//        int size = (WatchDogService.lightSize*width/100);
-//        int voffset = (height-(WatchDogService.lightWidth*height/100))/2;
-//        int hoffset = (width*2-(WatchDogService.lightWidth*width*2/100))/2;
-        Paint paint = new Paint();
+//        int width = getWidth()/2;
+//        int height = getHeight();
+        initBm();
+
         float rgb[] = WatchDogService.isLightRandomMode?getRandomColor():getfloatColorByCode(WatchDogService.lightColor);
-//        float rgb[] = getAfloatColor();
-//        float r = rgb[0];
-//        float g = rgb[1];
-//        float b = rgb[2];
         // 根据SeekBar定义RGBA的矩阵
         float[] src = new float[]{
                 rgb[0], 0, 0, 0, 0,
@@ -122,39 +137,25 @@ public class LightView extends View {
         colorMatrix.set(src);
         // 设置Paint的颜色
         paint.setColorFilter(new ColorMatrixColorFilter(src));
-//        Rect mSrcRect = new Rect(0, 0, bm.getWidth(), bm.getHeight());
-//        Rect mDestRect = new Rect(0, voffset, size, height-voffset);
         if(WatchDogService.lightShowMode == 0||WatchDogService.lightShowMode == 2){
             canvas.drawBitmap(bm,mSrcRect, mDestRect, paint);
-//            mDestRect = new Rect(width*2-size, voffset, width*2, height-voffset);
-//            Matrix mx = new Matrix();
-//            mx.setScale(-1, 1);
-//            Bitmap rightBm = Bitmap.createBitmap(bm, 0, 0,bm.getWidth(), bm.getHeight(), mx, true);
             canvas.drawBitmap(rightBm,mSrcRectRight, mDestRectRight, paint);
         }
         if(WatchDogService.lightShowMode == 1||WatchDogService.lightShowMode == 2){
-//            Matrix mxtop = new Matrix();
-//            mxtop.setSinCos(1,0,bm.getWidth()/2,bm.getHeight()/2);
-//            Bitmap topBm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mxtop, true);
-//            mSrcRect = new Rect(0, 0, topBm.getWidth(), topBm.getHeight());
-//            mDestRect = new Rect(hoffset, 0, width*2-hoffset, size);
             canvas.drawBitmap(topBm,mSrcRectTop, mDestRectTop, paint);
-
-//            Matrix mxbottom = new Matrix();
-//            mxbottom.setSinCos(-1,0,bm.getWidth()/2,bm.getHeight()/2);
-//            Bitmap bottomBm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mxbottom, true);
-//            mSrcRect = new Rect(0, 0, bottomBm.getWidth(), bottomBm.getHeight());
-//            mDestRect = new Rect(hoffset, height-size, width*2-hoffset, height);
             canvas.drawBitmap(bottomBm,mSrcRectBottom, mDestRectBottom, paint);
         }
-
     }
 
+
     private int lastXiaoGuo = 0;
-    public void initBm(int width,int height){
-        int pics[] = {R.drawable.light,R.drawable.light_1};
+    public void initBm(){
+        int width = wmParams.width;
+        int height = wmParams.height;
+        int pics[] = {R.drawable.light,R.drawable.light_1,R.drawable.light_2};
         if(bm==null||bm.isRecycled()||(lastXiaoGuo!=WatchDogService.lightXiaoGuo)){
             bm = BitmapFactory.decodeResource(this.getContext().getResources(),pics[WatchDogService.lightXiaoGuo]);
+            paint = new Paint();
         }else if(type!=LIGHT_TYPE_TEST){
             return;
         }
@@ -163,14 +164,14 @@ public class LightView extends View {
         if(WatchDogService.lightXiaoGuo ==1){
             tempWidthPercent = 100;
         }
-        int size = (WatchDogService.lightSize*width/100);
+        int size = (WatchDogService.lightSize*width/200);
         int voffset = (height-(tempWidthPercent*height/100))/2;
-        int hoffset = (width*2-(tempWidthPercent*width*2/100))/2;
+        int hoffset = (width-(tempWidthPercent*width/100))/2;
         mSrcRect = new Rect(0, 0, bm.getWidth(), bm.getHeight());
         mDestRect = new Rect(0, voffset, size, height-voffset);
 
         mSrcRectRight = new Rect(0, 0, bm.getWidth(), bm.getHeight());
-        mDestRectRight = new Rect(width*2-size, voffset, width*2, height-voffset);
+        mDestRectRight = new Rect(width-size, voffset, width, height-voffset);
         Matrix mx = new Matrix();
         mx.setScale(-1, 1);
         rightBm = Bitmap.createBitmap(bm, 0, 0,bm.getWidth(), bm.getHeight(), mx, true);
@@ -179,45 +180,80 @@ public class LightView extends View {
         mxtop.setSinCos(1,0,bm.getWidth()/2,bm.getHeight()/2);
         topBm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mxtop, true);
         mSrcRectTop = new Rect(0, 0, topBm.getWidth(), topBm.getHeight());
-        mDestRectTop = new Rect(hoffset, 0, width*2-hoffset, size);
+        mDestRectTop = new Rect(hoffset, 0, width-hoffset, size);
 
 
         Matrix mxbottom = new Matrix();
         mxbottom.setSinCos(-1,0,bm.getWidth()/2,bm.getHeight()/2);
         bottomBm = Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), mxbottom, true);
         mSrcRectBottom = new Rect(0, 0, bottomBm.getWidth(), bottomBm.getHeight());
-        mDestRectBottom = new Rect(hoffset, height-size, width*2-hoffset, height);
+        mDestRectBottom = new Rect(hoffset, height-size, width-hoffset, height);
     }
 
-    public void init(){
-        alphaAnimation = new AlphaAnimation(0.0f, 1.0f);//第一个参数开始的透明度，第二个参数结束的透明度
-        alphaAnimation.setDuration(durs[WatchDogService.lightSpeed]);//多长时间完成这个动作
-        alphaAnimation.setRepeatCount(1);
+    public void unInitAnimation(){
+        clearAnimation();
+        if(animationset!=null){
+            animationset.cancel();
+            animationset.reset();
+            animationset = null;
+        }
+    }
+    public void initAnimation(){
+        unInitAnimation();
+        animationset = new AnimationSet(false);
+        final AlphaAnimation alphaAnimation = new AlphaAnimation(0.0f, 1.0f);//第一个参数开始的透明度，第二个参数结束的透明度
 //        alphaAnimation.setFillAfter(true);
+//        alphaAnimation.setDuration(durs[WatchDogService.lightSpeed]);//多长时间完成这个动作
+        alphaAnimation.setRepeatCount(1);
         alphaAnimation.setRepeatMode(Animation.REVERSE);
+        animationset.addAnimation(alphaAnimation);
+
+        if(WatchDogService.isLightAnimScale&&(WatchDogService.lightShowMode==0||WatchDogService.lightShowMode==1)&&WatchDogService.lightXiaoGuo!=1){
+            ScaleAnimation scaleAnimation = new ScaleAnimation(1f,1,0.2f,1,ScaleAnimation.RELATIVE_TO_PARENT,0.5f,ScaleAnimation.RELATIVE_TO_PARENT,0.5f);
+            if(WatchDogService.lightShowMode==1){
+                scaleAnimation = new ScaleAnimation(0f,1f,1f,1,ScaleAnimation.RELATIVE_TO_PARENT,0.5f,ScaleAnimation.RELATIVE_TO_PARENT,0.5f);
+            }
+//            scaleAnimation.setDuration(durs[WatchDogService.lightSpeed]);
+            scaleAnimation.setRepeatCount(1);
+            scaleAnimation.setRepeatMode(Animation.REVERSE);
+//            scaleAnimation.setFillAfter(true);
+            animationset.addAnimation(scaleAnimation);
+        }
+        animationset.setDuration(type == LIGHT_TYPE_MUSIC ? 1500 : durs[WatchDogService.lightSpeed]);//多长时间完成这个动作
+        setAnimation(animationset);
         alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
                 setVisibility(View.VISIBLE);
                 setAlpha(1.0f);
                 count++;
+                Log.i("CONTROL","start anima   "+animation);
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if ((type==LIGHT_TYPE_MSG&&count>=MSG_COUNT)||
-                    (type==LIGHT_TYPE_CALL&&count>=CALL_COUNT)||
-                    (type==LIGHT_TYPE_TEST&&count>=TEST_COUNT)||
-                    (type==LIGHT_TYPE_SCON&&count>=SCON_COUNT)){
+                if ((type == LIGHT_TYPE_MSG && count >= MSG_COUNT) ||
+                        (type == LIGHT_TYPE_CALL && count >= CALL_COUNT) ||
+                        (type == LIGHT_TYPE_CHARGE && count >= CHARGE_COUNT) ||
+                        (type == LIGHT_TYPE_TEST && count >= TEST_COUNT) ||
+                        (type == LIGHT_TYPE_SCON && count >= SCON_COUNT)||
+                        isNeedTest) {
+//                    Log.i("CONTROL","stop anima   "+animation);
+
                     stopBl();
+                    if(isNeedTest){
+                        isNeedTest = false;
+                        startBl(type);
+
+                    }
                     return;
                 }
-                if(isStart){
-                    if(WatchDogService.isLightRandomMode||lastXiaoGuo!=WatchDogService.lightXiaoGuo) {
+                Log.i("CONTROL","restart anima   "+animation);
+                if (isStart) {
+                    if (WatchDogService.isLightRandomMode || lastXiaoGuo != WatchDogService.lightXiaoGuo) {
                         invalidate();
                     }
-                    alphaAnimation.reset();
-                    startAnimation(alphaAnimation);
+                    animationset.start();
                 }
             }
 
@@ -229,34 +265,130 @@ public class LightView extends View {
     }
 
     public void stopBl(){
-        if(!isStart){
-            return;
-        }
-        this.type = 0;
-        isStart = false;
-        setVisibility(View.GONE);
-        setAlpha(0.0f);
-        if(alphaAnimation!=null){
-            alphaAnimation.cancel();
-        }
+        try {
+//            synchronized (this) {
+            if (!isStart) {
+                return;
+            }
+//            Log.i("CONTROL ", "stop bl  type "+type+"  亮屏  "+!WatchDogService.isScreenOff);
+            if(WatchDogService.isLightMusic&&type==LIGHT_TYPE_MUSIC&&!WatchDogService.isScreenOff){
+                Log.i("CONTROL ", "stop remove bl   11111");
+                final AudioManager audioManager = (AudioManager)this.getContext().getSystemService(Context.AUDIO_SERVICE);
+                if(audioManager.isMusicActive()){
+                    Log.i("CONTROL ", "stop remove bl   111112");
+                    Handler h = new Handler();
+                    h.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(audioManager.isMusicActive()) {
+                                Log.i("CONTROL ", "stop remove bl   111113");
+                                startBl(LIGHT_TYPE_MUSIC);
+                            }
+                        }
+                    },1000);
+                }
+            }
+            isStart = false;
+            this.type = 0;
+            setAlpha(0.0f);
+            unInitAnimation();
+            setVisibility(View.GONE);
+            if (bm != null) {
+                bm.recycle();
+            }
+            if (rightBm != null) {
+                rightBm.recycle();
+            }
+            if (topBm != null) {
+                topBm.recycle();
+            }
+            if (bottomBm != null) {
+                bottomBm.recycle();
+            }
+            bm = null;
+            rightBm = null;
+            topBm = null;
+            bottomBm = null;
+            destroyDrawingCache();
+            System.gc();
 
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                    Log.i("CONTROL ", "stop remove bl");
+                    widowManager.removeView(fl);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                }
+            });
+//            }
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
     }
 
-    AlphaAnimation alphaAnimation;
+    boolean isNeedTest = false;
+    AnimationSet animationset;
+//    AlphaAnimation alphaAnimation;
     public void startBl(int type){
-        if(this.type<=type){
-            this.type = type;
-        }
-        count = 0;
-        alphaAnimation.setDuration(type==LIGHT_TYPE_MUSIC?1500:durs[WatchDogService.lightSpeed]);//多长时间完成这个动作
-        if(isStart){
-            return;
-        }
-        isStart = true;
-        setAlpha(0.0f);
-        setVisibility(View.VISIBLE);
-        alphaAnimation.reset();
-        startAnimation(alphaAnimation);
-    }
+        try {
+            int dur = 100;
+            if(type == LIGHT_TYPE_TEST&&isStart){
+                if(WatchDogService.isLightAnimScale){
+                    isNeedTest = true;
+                    return;
+                }else{
+                    stopBl();
+                    dur = 200;
+                }
+            }
+            if (this.type <= type) {
+                this.type = type;
+            }
+            Handler h = new Handler();
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        count = 0;
+                        initAnimation();
+                        if (isStart) {
+                            animationset.start();
+                            return;
+                        }
+                        initBm();
+                        wmParams.type = RoundedCornerService.floatLeve;
+                        widowManager.addView(fl, wmParams);
+                        setAlpha(0.0f);
+                        setVisibility(View.VISIBLE);
+                        animationset.start();
+                        isStart = true;
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        try {
+                            widowManager.removeView(fl);
+                        }catch (Exception e1){
+                            e1.printStackTrace();
+                        }
+                    }
 
+                }
+            };
+            h.removeCallbacks(r);
+            h.postDelayed(r,dur);
+        }catch (Throwable e){
+            e.printStackTrace();
+        }
+    }
+    public void checkFullScreen(View v){
+        try {
+            int[] location = new int[2];
+            v.getLocationOnScreen(location);
+//            wmParams.y = location[1]*-1;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 }

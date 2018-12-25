@@ -275,4 +275,25 @@ public class WakeLockActivity extends BaseActivity {
             }.start();
         }
     };
+
+    public static void delTempFiles(Context c){
+        try {
+            File file1 = new File(c.getFilesDir()+ File.separator+"wakeLockAllowCounts");
+            File file2 = new File(c.getFilesDir()+ File.separator+"wakeLockNotAllowCounts");
+            File file3 = new File(c.getFilesDir()+ File.separator+"wakeLockAllowTimes");
+            File file4 = new File(c.getFilesDir()+ File.separator+"wakeLockNotAllowTimes");
+            File file5 = new File(c.getFilesDir()+ File.separator+"wakeLockAllTimes");
+            File file6 = new File(c.getFilesDir()+ File.separator+"wakeLockNotAllowAllTimes");
+            File file7 = new File(c.getFilesDir()+ File.separator+"wakeLocks");
+            file1.delete();
+            file2.delete();
+            file3.delete();
+            file4.delete();
+            file5.delete();
+            file6.delete();
+            file7.delete();
+        }catch (Exception e){
+
+        }
+    }
 }

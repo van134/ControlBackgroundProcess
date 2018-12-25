@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
 
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.MyCrashHandler;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
@@ -14,6 +15,8 @@ public class MyApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        SharedPrefsUtil.getInstance(this);
+        AppLoaderUtil.getInstance(this);
         MyCrashHandler crashHandler = MyCrashHandler.getInstance();
         crashHandler.init(this);
 //        SharedPrefsUtil.getInstance(this);

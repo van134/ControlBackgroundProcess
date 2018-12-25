@@ -112,6 +112,8 @@ public class ContainsKeyWord {
         ArrayList<String> full4 = new ArrayList<String>();
         full4.add("com.tencent.mobileqq.richmedia.capture.activity.CameraCaptureActivity");
         fullCpuCoreApp.put("com.tencent.mobileqq",full4);
+
+
     }
 
     public static boolean isContainsWord(String str){

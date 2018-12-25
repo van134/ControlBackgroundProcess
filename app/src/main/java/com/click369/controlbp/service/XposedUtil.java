@@ -39,14 +39,17 @@ public class XposedUtil {
     public static void reloadInfos(Context c,
                                    SharedPreferences autoStartPrefs,
                                    SharedPreferences controlPrefs,
-//                                   SharedPreferences muBeiPrefs,
                                    SharedPreferences settingPrefs,
-                                   SharedPreferences skipDialogPrefs){
+                                   SharedPreferences skipDialogPrefs,
+                                   SharedPreferences uiBarpRrefs){
 //        if(System.currentTimeMillis()-lastReloadTime<200){
 //            return;
 //        }
 //        lastReloadTime = System.currentTimeMillis();
+        boolean isneed = uiBarpRrefs.getBoolean(Common.PREFS_SETTING_UI_ISNEEDFLOATONSYS,false);
+//        Log.i("CONTROL","isneed  "+isneed);
         Intent intentb = new Intent("com.click369.control.ams.initreload");
+        intentb.putExtra("isNeedFloadOnSys", isneed);
         intentb.putExtra("autoStartPrefs", (Serializable) autoStartPrefs.getAll());
         intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
 //        intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());

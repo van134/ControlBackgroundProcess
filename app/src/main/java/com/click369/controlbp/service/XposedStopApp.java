@@ -41,8 +41,8 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedStopApp {
-    public static  int tag = -1;
-    public static  boolean isXPstop = false;
+//    public static  int tag = -1;
+
     public static void stopApk(String pkg,Context cxt){
         try {
             if(ContainsKeyWord.isContainsPkg(pkg)
@@ -51,10 +51,9 @@ public class XposedStopApp {
             {
                 return;
             }
-            if(tag == -1){
-                isXPstop = SharedPrefsUtil.getPreferences(cxt,Common.PREFS_APPSETTINGS).getBoolean(Common.PREFS_SETTING_STOPAPPBYXP,true);
-                tag = 0;
-            }
+//            if(tag == -1){
+//                tag = 0;
+//            }
             if (WatchDogService.isSaveBackLog) {
                 FileUtil.writeLog(FileUtil.getLog("杀死 " + PackageUtil.getAppNameByPkg(cxt, pkg)));
             }
@@ -68,6 +67,9 @@ public class XposedStopApp {
             if(ai.isLockApp){
                 SharedPrefsUtil.getInstance(cxt).autoStartNetPrefs.edit().remove(pkg+"/lockok").commit();
             }
+            if(ai.getPackageName().equals(WatchDogService.musicPlayPkg)){
+                WatchDogService.musicPlayPkg = "";
+            }
             if(ai.isNotStop){
                 Log.i("CONTROL","changepersistent  "+pkg);
                 Intent intent1 = new Intent("com.click369.control.ams.changepersistent");
@@ -77,7 +79,7 @@ public class XposedStopApp {
                 AppLoaderUtil.getInstance(cxt).notifyRuningStateChange();
                 return;
             }
-            if (!isXPstop){
+            if (!WatchDogService.isXPstop){
                 ShellUtilNoBackData.kill(pkg);
                 Log.i("CONTROL","ROOT 杀死进程"+pkg);
             }else{

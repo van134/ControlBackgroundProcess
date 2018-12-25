@@ -41,9 +41,12 @@ import java.lang.reflect.Method;
 /**
  * Created by asus on 2017/5/27.
  */
-public class RoundedCornerService extends Service {
-    public static boolean isRoundRun = false;
-    boolean isShow = true,isShowKeyBar;
+public class RoundedCornerService{
+    public static int floatLeve = 2003;
+
+//    public static boolean isRoundRun = false;
+//    public PixelView pv;
+    boolean isShow = false,isShowKeyBar;
     //定义浮动窗口布局
     FrameLayout mFloatLayoutTop,mFloatLayoutTop1,mFloatLayoutBottom,imeFloatLayout,infoFloatLayout;
     boolean infoFloatIsShow = false;
@@ -55,20 +58,15 @@ public class RoundedCornerService extends Service {
     Handler hander = new Handler();
     MyReciver rec;
     SharedPreferences barPrefs;
+//    ScreenLightServiceUtilNew screenLightServiceUtil;
     ScreenLightServiceUtil screenLightServiceUtil;
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        barPrefs = SharedPrefsUtil.getInstance(this).uiBarPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_UIBARLIST);
-
-        mWindowManager = (WindowManager) getApplication().getSystemService(getApplication().WINDOW_SERVICE);
-
+    public RoundedCornerService(){}
+    Context context;
+    public  RoundedCornerService(Context context) {
+        this.context = context;
+        barPrefs = SharedPrefsUtil.getInstance(context).uiBarPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_UIBARLIST);
+        mWindowManager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+//        screenLightServiceUtil = new ScreenLightServiceUtilNew(this,mWindowManager);
         screenLightServiceUtil = new ScreenLightServiceUtil(this,mWindowManager);
         isShowKeyBar = barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR,false);
         rec = new MyReciver();
@@ -84,11 +82,37 @@ public class RoundedCornerService extends Service {
         filter.addAction("com.click369.control.light.show");
         filter.addAction("com.click369.control.light.hide");
         filter.addAction("com.click369.control.light.changeposition");
+        filter.addAction("com.click369.control.float.checkxp");
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        this.registerReceiver(rec,filter);
+        context.registerReceiver(rec,filter);
+        Intent check = new Intent("com.click369.control.ams.float.checkxp");
+        check.putExtra("isNeedFloadOnSys",WatchDogService.isNeedFloatOnSys);
+        context.sendBroadcast(check);
+        hander.postDelayed(checkRunable,1000);
+
+    }
+    Runnable checkRunable = new Runnable() {
+        @Override
+        public void run() {
+            Intent check = new Intent("com.click369.control.float.checkxp");
+            check.putExtra("isfloatok",false);
+            context.sendBroadcast(check);
+        }
+    };
+
+
+    boolean isAllReadyInit = false;
+    private void init(){
+        if(isAllReadyInit){
+            return;
+        }
+        Log.i("CONTROL","start float view");
+        isAllReadyInit = true;
         screenLightServiceUtil.init();
+//        pv = new PixelView(context);
+//        pv.setWidowManager(mWindowManager,context);
         if(WatchDogService.isRoundCorOpen){
-            Configuration config = getResources().getConfiguration();
+            Configuration config = context.getResources().getConfiguration();
             // 如果当前是横屏
             if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
                 createFloatView(1);
@@ -106,11 +130,11 @@ public class RoundedCornerService extends Service {
     private void createFloatView(int type)//0竖 1横
     {
 //        if ((Build.VERSION.SDK_INT >=Build.VERSION_CODES.M&&Settings.canDrawOverlays(this))||Build.VERSION.SDK_INT <Build.VERSION_CODES.M) {
-            isRoundRun = true;
+//            isRoundRun = true;
             wmParamsBottom = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.WRAP_CONTENT,
-                    2015,
+                    floatLeve,
                     536, -3);
             wmParamsTop = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
@@ -120,7 +144,7 @@ public class RoundedCornerService extends Service {
             wmParamsTop1 = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.WRAP_CONTENT,
-                    2015,
+                    floatLeve,
                     536, -3);
             wmParamsInfo = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -160,8 +184,8 @@ public class RoundedCornerService extends Service {
             wmParamsBottom.width = WindowManager.LayoutParams.MATCH_PARENT;
             wmParamsTop.width = WindowManager.LayoutParams.MATCH_PARENT;
             wmParamsTop1.width = WindowManager.LayoutParams.MATCH_PARENT;
-            dhheight = getVirtualBarHeigh(this);
-            statusheight = getZhuangTaiHeight(this);
+            dhheight = getVirtualBarHeigh(context);
+            statusheight = getZhuangTaiHeight(context);
             topoffset = barPrefs.getInt(Common.PREFS_SETTING_UI_ROUNDTOPOFFSET,statusheight);
             offset = barPrefs.getInt(Common.PREFS_SETTING_UI_ROUNDOFFSET,dhheight);
             roundSize = barPrefs.getInt(Common.PREFS_SETTING_UI_ROUNDSIZE,35);
@@ -185,7 +209,7 @@ public class RoundedCornerService extends Service {
                 wmParamsTop1.width = p.x;
                 wmParamsBottom.width = p.x;
             }
-            LayoutInflater inflater = LayoutInflater.from(getApplication());
+            LayoutInflater inflater = LayoutInflater.from(context);
             //获取浮动窗口视图所在布局
             mFloatLayoutBottom = (FrameLayout) inflater.inflate(R.layout.float_roundlayout_bottom, null);
             mFloatLayoutTop = (FrameLayout) inflater.inflate(R.layout.float_roundlayout_top, null);
@@ -259,29 +283,28 @@ public class RoundedCornerService extends Service {
     Runnable r = new Runnable() {
         @Override
         public void run() {
-            ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
             // 将文本内容放到系统剪贴板里。
             cm.setText(actInfoSB.toString());
-            Toast.makeText(RoundedCornerService.this,"已复制到粘贴板",Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,"已复制到粘贴板",Toast.LENGTH_SHORT).show();
         }
     };
 
-    @Override
-    public void onDestroy() {
+
+    public void destroy() {
         try{
-            mWindowManager.removeView(mFloatLayoutBottom);
-            mWindowManager.removeView(mFloatLayoutTop);
-            mWindowManager.removeView(mFloatLayoutTop1);
-            if(infoFloatIsShow){
-                mWindowManager.removeView(infoFloatLayout);
+            if(isAllReadyInit&&WatchDogService.isRoundCorOpen&&isShow){
+                addOrRemoveCor(false);
+                if(infoFloatIsShow){
+                    mWindowManager.removeView(infoFloatLayout);
+                }
             }
             screenLightServiceUtil.remove();
-            this.unregisterReceiver(rec);
-            isRoundRun = false;
+            context.unregisterReceiver(rec);
+//            isRoundRun = false;
         }catch (Throwable e){
             e.printStackTrace();
         }
-        super.onDestroy();
     }
 
 
@@ -323,12 +346,17 @@ public class RoundedCornerService extends Service {
         }
         return vh;
     }
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+
+    private void addOrRemoveCor(boolean isAdd){
         try {
-            if(WatchDogService.isRoundCorOpen){
+            if(WatchDogService.isRoundCorOpen&&
+                    (WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&
+                    isAdd){
                 if(!isShow){
                     if(mFloatLayoutBottom!=null){
+                        wmParamsBottom.type = floatLeve;
+//                        wmParamsTop.type = floatLeve;
+                        wmParamsTop1.type = floatLeve;
                         mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
                         mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
                         mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
@@ -337,12 +365,12 @@ public class RoundedCornerService extends Service {
                     }
                     isShow = true;
                 }
-            }else{
+            }else if(!isAdd){
                 if(isShow){
                     if(mFloatLayoutTop!=null){
-                        mWindowManager.removeView(mFloatLayoutTop);
-                        mWindowManager.removeView(mFloatLayoutTop1);
-                        mWindowManager.removeView(mFloatLayoutBottom);
+                        mWindowManager.removeViewImmediate(mFloatLayoutTop);
+                        mWindowManager.removeViewImmediate(mFloatLayoutTop1);
+                        mWindowManager.removeViewImmediate(mFloatLayoutBottom);
                     }
                     isShow = false;
                 }
@@ -350,61 +378,73 @@ public class RoundedCornerService extends Service {
         }catch (Throwable e){
             e.printStackTrace();
         }
-        return super.onStartCommand(intent, flags, startId);
     }
     StringBuilder actInfoSB = new StringBuilder();
     class  MyReciver extends BroadcastReceiver{
         @Override
         public void onReceive(Context context, Intent intent) {
             try{
+                if(!WatchDogService.isUICONTROLOPEN){
+                    return;
+                }
                 if(intent.getAction().equals("com.click369.control.openinstall")){
-                    if(isShow){
-                        mWindowManager.removeView(mFloatLayoutBottom);
-                        mWindowManager.removeView(mFloatLayoutTop);
-                        mWindowManager.removeView(mFloatLayoutTop1);
-                        isShow = false;
-                    }
+                    addOrRemoveCor(false);
+//                    if(isShow){
+//                        mWindowManager.removeView(mFloatLayoutBottom);
+//                        mWindowManager.removeView(mFloatLayoutTop);
+//                        mWindowManager.removeView(mFloatLayoutTop1);
+//                        isShow = false;
+//                    }
                 }else if(intent.getAction().equals("com.click369.control.closeinstall")){
-                    if(!isShow){
-                        mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
-                        mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
-                        mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
-                        isShow = true;
-                    }
+                    addOrRemoveCor(true);
+//                    if(!isShow){
+//                        mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
+//                        mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
+//                        mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
+//                        isShow = true;
+//                    }
                 }else if(intent.getAction().equals("com.click369.control.restartcor")){
-                    if(isShow){
-                        mWindowManager.removeView(mFloatLayoutTop);
-                        mWindowManager.removeView(mFloatLayoutTop1);
-                        mWindowManager.removeView(mFloatLayoutBottom);
-                        mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
-                        mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
-                        mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
-                    }
+                    addOrRemoveCor(false);
+                    addOrRemoveCor(true);
+//                    if(isShow){
+//                        mWindowManager.removeView(mFloatLayoutTop);
+//                        mWindowManager.removeView(mFloatLayoutTop1);
+//                        mWindowManager.removeView(mFloatLayoutBottom);
+//                        mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
+//                        mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
+//                        mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
+//                    }
                 }else if(intent.getAction().equals("com.click369.control.imeopen")){
                     Log.i("CONTROL","imeopen");
-                    isShowKeyBar = barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR,false);
-                    if(isShow&&offset+10>=dhheight&&isShowKeyBar){
-                        imeFloatLayout.setBackgroundColor(Color.WHITE);
-                        if(intent.hasExtra("color")){
-                            imeFloatLayout.setBackgroundColor(intent.getIntExtra("color",Color.BLACK));
+                    if(WatchDogService.isRoundCorOpen&&isAllReadyInit){
+                        isShowKeyBar = barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR,false);
+                        if(isShow&&offset+10>=dhheight&&isShowKeyBar){
+                            imeFloatLayout.setBackgroundColor(Color.WHITE);
+                            if(intent.hasExtra("color")){
+                                imeFloatLayout.setBackgroundColor(intent.getIntExtra("color",Color.BLACK));
+                            }
+                            imeFloatLayout.setVisibility(View.VISIBLE);
                         }
-                        imeFloatLayout.setVisibility(View.VISIBLE);
                     }
                 }else if(intent.getAction().equals("com.click369.control.imeclose")){
                     Log.i("CONTROL","imeclose");
-                    if(isShow){
+                    if(WatchDogService.isRoundCorOpen&&isAllReadyInit&&isShow){
                         hander.postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                imeFloatLayout.setBackgroundColor(Color.TRANSPARENT);
-                                imeFloatLayout.setVisibility(View.GONE);
+                                try{
+                                    imeFloatLayout.setBackgroundColor(Color.TRANSPARENT);
+                                    imeFloatLayout.setVisibility(View.GONE);
+                                }catch (Throwable e){
+                                    e.printStackTrace();
+                                }
                             }
                         },200);
                     }
                 }else if(intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)||
                         intent.getAction().equals("com.click369.control.corchangeposition")){
-                    if(isShow){
-                        Configuration config = getResources().getConfiguration();
+                    if(isShow&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)){
+                        Configuration config = context.getResources().getConfiguration();
                         // 如果当前是横屏
                         if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
                             Log.i("wall","横屏");
@@ -421,8 +461,8 @@ public class RoundedCornerService extends Service {
                         }
                     }
                     if(intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)){
-                        screenLightServiceUtil.remove();
-                        screenLightServiceUtil.init();
+                        screenLightServiceUtil.changDir();
+//                        screenLightServiceUtil.init();
 //                        screenLightServiceUtil.showLight(LightView.LIGHT_TYPE_TEST);
                     }
                 }else if(intent.getAction().equals("com.click369.control.float.infouishow")){
@@ -468,6 +508,58 @@ public class RoundedCornerService extends Service {
                     screenLightServiceUtil.remove();
                     screenLightServiceUtil.init();
                     screenLightServiceUtil.showLight(LightView.LIGHT_TYPE_TEST);
+                }else if(intent.getAction().equals("com.click369.control.float.checkxp")){
+                    hander.removeCallbacks(checkRunable);
+                    if(intent.hasExtra("isfloatok")){
+                        WatchDogService.isHasXPFloatVewPermission = intent.getBooleanExtra("isfloatok",false);
+                    }
+                   WatchDogService.isHasSysFloatVewPermission = (Build.VERSION.SDK_INT >=Build.VERSION_CODES.M&&Settings.canDrawOverlays(context))||Build.VERSION.SDK_INT <Build.VERSION_CODES.M;
+                   if((!WatchDogService.isLightCharge&&
+                           !WatchDogService.isLightScOn&&
+                           !WatchDogService.isLightMusic&&
+                           !WatchDogService.isLightMsg&&
+                           !WatchDogService.isLightCall&&
+                           !WatchDogService.isRoundCorOpen)){
+                       if(isAllReadyInit){
+//                           pv.remove();
+                           addOrRemoveCor(false);
+                       }
+                        return;
+                   }
+                    if(WatchDogService.isHasXPFloatVewPermission){
+                       floatLeve = 2015;
+                   }else if(!WatchDogService.isHasXPFloatVewPermission&&WatchDogService.isHasSysFloatVewPermission){
+                       floatLeve = 2003;
+                   }else if(!WatchDogService.isHasXPFloatVewPermission&&!WatchDogService.isHasSysFloatVewPermission){
+                       WatchDogService.isNeedGetFloatPremission = true;
+                       Toast.makeText(context,"圆角或边缘呼吸效果需要浮动权限，请重启手机或打开界面控制进行设置",Toast.LENGTH_LONG).show();
+                   }
+                    Log.i("CONTROL","checkxp float view  isHasXPFloat "+WatchDogService.isHasXPFloatVewPermission+" isHasSysFloat "+WatchDogService.isHasSysFloatVewPermission);
+                   if(WatchDogService.isHasSysFloatVewPermission||
+                           WatchDogService.isHasXPFloatVewPermission){
+                       if (!isAllReadyInit){
+                           init();
+                       }else{
+                           if(WatchDogService.isRoundCorOpen){
+                               addOrRemoveCor(false);
+                               hander.postDelayed(new Runnable() {
+                                   @Override
+                                   public void run() {
+                                       addOrRemoveCor(true);
+                                   }
+                               },300);
+
+                           }
+                           screenLightServiceUtil.remove();
+                       }
+                   }else{
+                       if (isAllReadyInit){
+                           if(WatchDogService.isRoundCorOpen){
+                               addOrRemoveCor(false);
+                           }
+                           screenLightServiceUtil.remove();
+                       }
+                   }
                 }
             }catch (Throwable e){
                 e.printStackTrace();

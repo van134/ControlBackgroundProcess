@@ -161,6 +161,12 @@ public class OtherFragment extends BaseFragment {
             e.printStackTrace();
         }
 //        adSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ADJUMP,false));
+        int time = settings.getInt(Common.PREFS_SETTING_OTHER_CLEANDELAYTIME,0);
+        cleanSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_ISCLEAN,false));
+        homeErrorSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_HOMEERROR,false));
+        stopScanMeidaSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,false));
+        cleanSb.setProgress(time);
+
         selSw.setTag(0);
         cleanSw.setTag(1);
         homeErrorSw.setTag(2);
@@ -169,11 +175,7 @@ public class OtherFragment extends BaseFragment {
         cleanSw.setOnCheckedChangeListener(swLis);
         homeErrorSw.setOnCheckedChangeListener(swLis);
         stopScanMeidaSw.setOnCheckedChangeListener(swLis);
-        int time = settings.getInt(Common.PREFS_SETTING_OTHER_CLEANDELAYTIME,0);
-        cleanSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_ISCLEAN,false));
-        homeErrorSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_HOMEERROR,false));
-        stopScanMeidaSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,false));
-        cleanSb.setProgress(time);
+
 
         blur  = settings.getInt(Common.PREFS_SETTING_OTHER_BGBLUR,0);
         alpha = settings.getInt(Common.PREFS_SETTING_OTHER_BGBRIGHT,100);

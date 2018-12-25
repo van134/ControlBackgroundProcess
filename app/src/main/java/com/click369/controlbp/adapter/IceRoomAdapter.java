@@ -1,6 +1,7 @@
 package com.click369.controlbp.adapter;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.util.PackageUtil;
@@ -118,7 +120,8 @@ public class IceRoomAdapter extends BaseAdapter {
 		}
 		viewHolder.titleTv.setText(data.appName);
 		viewHolder.ice.setVisibility(data.isDisable? View.VISIBLE: View.INVISIBLE);
-		viewHolder.iv.setImageBitmap(data.getBitmap());
+//		viewHolder.iv.setImageBitmap(data.getBitmap());
+		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.iv );
 		return convertView;
 	}
 	

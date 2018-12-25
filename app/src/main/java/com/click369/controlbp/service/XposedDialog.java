@@ -65,7 +65,10 @@ public class XposedDialog {
                                     dialog.setCanceledOnTouchOutside(true);
                                     dialog.setCancelable(true);
                                     dialog.dismiss();
-                                    Toast.makeText(context,"对话框被拦截，若要显示请到应用控制器中设置",Toast.LENGTH_LONG).show();
+                                    boolean isShow = dialogPrefs.getBoolean(Common.PREFS_SKIPDIALOG_ISSHOWTOAST,true);
+                                    if(isShow){
+                                        Toast.makeText(context,"对话框被拦截，若要显示请到应用控制器中设置",Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             }
                         }

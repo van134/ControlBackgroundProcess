@@ -33,7 +33,7 @@ public class XposedActivity {
     private static long sddowntime = 0;
     private static Activity act = null;
     private static Handler handler = new Handler();
-
+    private static boolean isDown = false;
     private static Runnable r = new Runnable() {
         @Override
         public void run() {
@@ -82,54 +82,63 @@ public class XposedActivity {
                             if(x>(width*3/7)&&x<(width*4/7)&&y<(height*1/10)) {
                                 Configuration config = act.getResources().getConfiguration();
                                 // 如果当前是横屏
-                                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
-                                   return;
-                                }
-                                switch (me.getAction()) {
-                                    case MotionEvent.ACTION_DOWN:
-                                        handler.postDelayed(r,600);
-                                        downtime = System.currentTimeMillis();
-                                        break;
-                                    case MotionEvent.ACTION_UP:
-                                        handler.removeCallbacks(r);
-                                        if(System.currentTimeMillis()-downtime>=600){
-                                            methodHookParam.setResult(true);
-                                            return;
-                                        }
-                                        break;
-                                    case MotionEvent.ACTION_CANCEL:
-                                    case MotionEvent.ACTION_OUTSIDE:
-                                        handler.removeCallbacks(r);
-                                        break;
+                                if (config.orientation == Configuration.ORIENTATION_PORTRAIT){
+                                    switch (me.getAction()) {
+                                        case MotionEvent.ACTION_DOWN:
+                                            isDown = true;
+                                            handler.postDelayed(r,600);
+                                            downtime = System.currentTimeMillis();
+                                            break;
+                                        case MotionEvent.ACTION_UP:
+                                            handler.removeCallbacks(r);
+                                            isDown = false;
+                                            if(System.currentTimeMillis()-downtime>=600){
+                                                methodHookParam.setResult(true);
+                                                return;
+                                            }
+                                            break;
+                                        case MotionEvent.ACTION_CANCEL:
+                                        case MotionEvent.ACTION_OUTSIDE:
+                                            handler.removeCallbacks(r);
+                                            isDown = false;
+                                            break;
+                                    }
                                 }
                             }else if(x>(width*22/23)&&y<(height*1/8)) {
                                 Configuration config = act.getResources().getConfiguration();
                                 // 如果当前是横屏
-                                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
-                                    return;
-                                }
-                                File f = new File(Environment.getExternalStorageDirectory(),"zroms");
-                                if(f.exists()){
-                                    switch (me.getAction()) {
-                                        case MotionEvent.ACTION_DOWN:
-                                            handler.postDelayed(rsd,400);
-                                            sddowntime = System.currentTimeMillis();
-                                            methodHookParam.setResult(true);
-                                            return;
+                                if (config.orientation == Configuration.ORIENTATION_PORTRAIT){
+                                    File f = new File(Environment.getExternalStorageDirectory(),"zroms");
+                                    if(f.exists()){
+                                        switch (me.getAction()) {
+                                            case MotionEvent.ACTION_DOWN:
+                                                isDown = true;
+                                                handler.postDelayed(rsd,400);
+                                                sddowntime = System.currentTimeMillis();
+                                                methodHookParam.setResult(true);
+                                                return;
 //                                            break;
-                                        case MotionEvent.ACTION_UP:
-                                            handler.removeCallbacks(rsd);
+                                            case MotionEvent.ACTION_UP:
+                                                handler.removeCallbacks(rsd);
+                                                isDown = false;
 //                                            if(System.currentTimeMillis()-sddowntime>=400){
                                                 methodHookParam.setResult(true);
+
                                                 return;
 //                                            }
 //                                            break;
-                                        case MotionEvent.ACTION_CANCEL:
-                                        case MotionEvent.ACTION_OUTSIDE:
-                                            handler.removeCallbacks(rsd);
-                                            break;
+                                            case MotionEvent.ACTION_CANCEL:
+                                            case MotionEvent.ACTION_OUTSIDE:
+                                                handler.removeCallbacks(rsd);
+                                                isDown = false;
+                                                break;
+                                        }
                                     }
                                 }
+                            }else if(isDown){
+                                handler.removeCallbacks(rsd);
+                                handler.removeCallbacks(r);
+                                isDown = false;
                             }
                         }
                     } catch (Throwable e) {

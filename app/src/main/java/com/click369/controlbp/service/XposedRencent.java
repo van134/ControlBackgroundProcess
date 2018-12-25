@@ -178,7 +178,7 @@ public class XposedRencent {
                                     }
 
                                 }
-                            } catch (RuntimeException e) {
+                            } catch (Throwable e) {
                                 e.printStackTrace();
                             }
                         }
@@ -251,7 +251,7 @@ public class XposedRencent {
                                         // XposedBridge.log("^^^^^^^^^^^^^^最近任务强制模糊" +pkg+ " ^^^^^^^^^^^^^^^^^");
                                     }
                                 }
-                            } catch (RuntimeException e) {
+                            } catch (Throwable e) {
                                 e.printStackTrace();
                             }
                         }

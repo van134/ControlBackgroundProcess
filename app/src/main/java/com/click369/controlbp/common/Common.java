@@ -161,6 +161,8 @@ public class Common {
     public static String PREFS_SETTING_UI_LIGHTMODE ="lightmode";
     public static String PREFS_SETTING_UI_LIGHTSCON="lightscon";
     public static String PREFS_SETTING_UI_LIGHTMUSIC="lightmusic";
+    public static String PREFS_SETTING_UI_LIGHTCHARGE="lightcharge";
+    public static String PREFS_SETTING_UI_LIGHTANIMSCALE="lightanimscale";
     public static String PREFS_SETTING_UI_LIGHTWIDTH="lightwidth";
     public static String PREFS_SETTING_UI_LIGHTSIZE="lightsize";
     public static String PREFS_SETTING_UI_LIGHTOFFSET="lightoffset";
@@ -169,11 +171,17 @@ public class Common {
     public static String PREFS_SETTING_UI_LIGHTCOLOR="lightcolor";
     public static String PREFS_SETTING_UI_LIGHTXIAOGUO="lightxiaoguo";
 
+    public static String PREFS_SETTING_UI_ISNEEDFLOATONSYS="isneedfloatonsys";
+
+    public static String PREFS_SETTING_UI_FLASHNOTIFY="flashnotify";
+    public static String PREFS_SETTING_UI_FLASHCALL="flashcall";
+
     public static String PREFS_SETTING_APPPWD ="apppwd";
 
 
     public static String PREFS_SKIPDIALOG_KEYWORDS ="keywords";
     public static String PREFS_SKIPNOTIFY_KEYWORDS ="notifykeywords";
+    public static String PREFS_SKIPDIALOG_ISSHOWTOAST ="isshowtoast";
 //    public static String PREFS_SETTING_UI_ALWAYS_CHANGE ="alwayschange";
 
 //    public static String EX_PREVENTSERVICE = "preventService";

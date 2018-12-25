@@ -41,7 +41,8 @@ public class XposedAlarm {
                                    final boolean isOneOpen,
                                    final boolean isTwoOpen,
                                    final boolean isMubeiStopOther) {//,final boolean isMubeStopBroad
-        if (lpparam.packageName.equals("com.click369.controlbp")) {
+        if (lpparam.packageName.equals("com.click369.controlbp")||
+                lpparam.packageName.equals("com.system.ui")) {
             return;
         }
         final Class pendingIntentClass = XposedHelpers.findClass("android.app.PendingIntent", lpparam.classLoader);

@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.BytesBitmap;
 
 import java.io.File;
@@ -69,7 +70,6 @@ public class AppInfo implements Serializable {
     public int broadCastCount;
 
     public int setTimeStopAppTime;
-
     public int activityDisableCount;
     public int serviceDisableCount;
     public int broadCastDisableCount;
@@ -80,7 +80,8 @@ public class AppInfo implements Serializable {
     public long updateTime;
     public String versionName;
     public long versionCode;
-    public byte bits[];
+//    public byte bits[];
+    public File iconFile;
 //    public AppStateInfo stateInfo;
     public AppInfo(){}
     public AppInfo(String appName){
@@ -90,14 +91,15 @@ public class AppInfo implements Serializable {
         this.appName = appName;
         this.packageName = packageName;
     }
-    public AppInfo(String appName, String packageName, Bitmap bm, boolean isUser, boolean isDisable){
+    public AppInfo(String appName, String packageName, boolean isUser, boolean isDisable){
         this.appName = appName;
         this.packageName = packageName;
 //        this.drawable = drawable;
-        bits = BytesBitmap.getBytes(bm);
+//        bits = BytesBitmap.getBytes(bm);
         this.isUser = isUser;
         this.isDisable = isDisable;
 //        stateInfo = new AppStateInfo();
+        iconFile = new File(AppLoaderUtil.iconPath,packageName);
     }
 
 
@@ -123,20 +125,20 @@ public class AppInfo implements Serializable {
         this.packageName = packageName;
     }
 
-    public Bitmap getBitmap() {
-        return getRoundedCornerBitmap(BytesBitmap.getBitmap(bits));
+//    public Bitmap getBitmap() {
 //        return getRoundedCornerBitmap(BytesBitmap.getBitmap(bits));
-    }
+////        return getRoundedCornerBitmap(BytesBitmap.getBitmap(bits));
+//    }
 
-    public void setBitmap(Bitmap bitamp) {
-        this.bits = BytesBitmap.getBytes(bitamp);
-    }
-
-    public void recDradwable(){
-        if (bits != null&&bits.length>0) {
-            bits = null;
-        }
-    }
+//    public void setBitmap(Bitmap bitamp) {
+//        this.bits = BytesBitmap.getBytes(bitamp);
+//    }
+//
+//    public void recDradwable(){
+//        if (bits != null&&bits.length>0) {
+//            bits = null;
+//        }
+//    }
 
     public static void writeArrays(ArrayList<AppInfo> infos, Context cxt){
         try {
@@ -172,27 +174,5 @@ public class AppInfo implements Serializable {
         }
     }
 
-    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
-        try {
-            Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(output);
-            final Paint paint = new Paint();
-
-            final Rect rect = new Rect(0, 0, bitmap.getWidth(),bitmap.getHeight());
-            final RectF rectF = new RectF(new Rect(0, 0, bitmap.getWidth(),  bitmap.getHeight()));
-            final float roundPx = bitmap.getWidth()>bitmap.getHeight()?bitmap.getWidth()/2:bitmap.getHeight()/2;
-            paint.setAntiAlias(true);
-//            canvas.drawRGB(0,0,0);
-            canvas.drawARGB(0, 0, 0, 0);
-            paint.setColor(Color.BLACK);
-            canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-            final Rect src = new Rect(0, 0, bitmap.getWidth(),  bitmap.getHeight());
-            canvas.drawBitmap(bitmap, src, rect, paint);
-            return output;
-        } catch (Exception e) {
-            return bitmap;
-        }
-    }
 
 }

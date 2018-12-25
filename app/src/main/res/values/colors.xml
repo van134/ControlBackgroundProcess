@@ -5,6 +5,7 @@
     <color name="colorPrimaryDark">#1a9dac</color>
     <color name="colorAccent">#1a9dac</color>
     <color name="checked_color">#ffffff</color>
+    <color name="text_color_primary">#1a9dac</color>
     <color name="uncheck_color">#bddddd</color>
     <color name="uncheck_colordark">#b4b4b4</color>
     <color name="trans">#00000000</color>

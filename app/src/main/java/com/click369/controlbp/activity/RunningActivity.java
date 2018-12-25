@@ -36,10 +36,9 @@ public class RunningActivity extends BaseActivity {
                 @Override
                 public void run() {
                     if (NewWatchDogService.isOpenNewDogService){
-                        try{
-                            NewWatchDogService.run_from = 0;
-                            start("com.android.settings.DevelopmentSettings" );
-                        }catch (Exception e){
+                        NewWatchDogService.run_from = 0;
+                        boolean isok = start("com.android.settings.DevelopmentSettings" );
+                        if(!isok){
                             NewWatchDogService.run_from = 1;
                             start("com.android.settings.Settings$SystemDashboardActivity" );
                         }
@@ -51,19 +50,18 @@ public class RunningActivity extends BaseActivity {
                     }
                 }
             };
-            h.postDelayed(r,1000);
+            h.postDelayed(r,1500);
             h.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     RunningActivity.this.finish();
                 }
-            },1500);
+            },1900);
 //            moveTaskToBack(false);
         }else{
-            try{
-                NewWatchDogService.run_from = 0;
-                start("com.android.settings.DevelopmentSettings" );
-            }catch (Exception e){
+            NewWatchDogService.run_from = 0;
+            boolean isok = start("com.android.settings.DevelopmentSettings" );
+            if(!isok){
                 NewWatchDogService.run_from = 1;
                 start("com.android.settings.Settings$SystemDashboardActivity" );
             }
@@ -71,14 +69,20 @@ public class RunningActivity extends BaseActivity {
         //SavePerfrence.savePerfrence(this, SavePerfrence.PERF_SETTING_FILE, SavePerfrence.PERF_RUNNING_STATE, "ok");
     }
 
-    private void start(String name){
-        NewWatchDogService.run_state = 1;
-        Intent mIntent = new Intent();//"com.android.settings.DevelopmentSettings"  "com.android.settings.Settings$SystemDashboardActivity"
-        ComponentName comp = new ComponentName("com.android.settings",name);
-        mIntent.setComponent(comp);
-        mIntent.setAction("android.intent.action.VIEW");
-        startActivity(mIntent);
-        this.finish();
+    private boolean start(String name){
+        try {
+            NewWatchDogService.run_state = 1;
+            Intent mIntent = new Intent();//"com.android.settings.DevelopmentSettings"  "com.android.settings.Settings$SystemDashboardActivity"
+            ComponentName comp = new ComponentName("com.android.settings",name);
+            mIntent.setComponent(comp);
+            mIntent.setAction("android.intent.action.VIEW");
+            startActivity(mIntent);
+            this.finish();
+            return true;
+        }catch (Exception e){
+//            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override

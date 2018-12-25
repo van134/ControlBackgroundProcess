@@ -1,6 +1,7 @@
 package com.click369.controlbp.adapter;
 
 import android.graphics.Color;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.ColorNavBarActivity;
 import com.click369.controlbp.bean.AppInfo;
@@ -136,7 +138,8 @@ public class ColorNavAppChooseAdapter extends BaseAdapter {
 //		Util.isEnable()
 		viewHolder.titleTv.setText(data.appName);
 		viewHolder.run.setVisibility(View.VISIBLE);
-		viewHolder.iv.setImageBitmap(data.getBitmap());
+		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.iv );
+//		viewHolder.iv.setImageBitmap(data.getBitmap());
 		viewHolder.run.setImageBitmap(null);
 		if(ColorNavBarService.appColors.containsKey(data.getPackageName())&&ColorNavBarService.appColors.get(data.getPackageName())!=null){
 			viewHolder.run.setBackgroundColor(Color.parseColor("#"+ColorNavBarService.appColors.get(data.getPackageName())));

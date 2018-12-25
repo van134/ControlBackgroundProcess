@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -132,8 +133,8 @@ public class MainActivity extends BaseActivity
     public NavInfoAdapter navAdapter;
     private MyUpdateListReceiver updateReceiver;
     public static boolean isRoot = true;
-    private File muBeiPrefsFile = null;
-    private long lastMuBeiUpdate = 0;
+//    private File muBeiPrefsFile = null;
+//    private long lastMuBeiUpdate = 0;
     public File bgFile,bgBlurFile;
     public GetPhoto getPhoto;
     BaseFragment fragments[];
@@ -156,7 +157,6 @@ public class MainActivity extends BaseActivity
         }
 
         backupRestoreUtil = new BackupRestoreUtil(this);
-        muBeiPrefsFile = new File(getFilesDir() + "/../shared_prefs/" + Common.IPREFS_MUBEILIST + ".xml");
 
         isNightMode = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_MODE,false);
         boolean isAutoChange = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,false);
@@ -259,17 +259,28 @@ public class MainActivity extends BaseActivity
                 return true;
             }
         });
-        int[][] states = new int[][]{new int[]{ -android.R.attr.state_checked},new int[]{android.R.attr.state_checked} };
-        int[] colors = new int[]{ getResources().getColor(R.color.uncheck_color),  getResources().getColor(R.color.checked_color) };
+        ColorStateList csl = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            csl = getResources().getColorStateList(R.color.nav_item_check,getTheme());
+        }else{
+            csl = getResources().getColorStateList(R.color.nav_item_check);
+        }
+
+//        int[][] states = new int[][]{new int[]{android.R.attr.state_checked},new int[]{android.R.attr.state_checked} };
+//        int[] colors = new int[]{ getResources().getColor(R.color.uncheck_color),  getResources().getColor(R.color.checked_color) };
         if(isNightMode){
             toolbar.setBackgroundColor(getResources().getColor(R.color.darkblack));
 //            navigationView.setBackgroundResource(R.drawable.saidbg);
             navigationView.setBackgroundColor(getResources().getColor(R.color.darkblack));
             navigationView.getHeaderView(0).setBackgroundColor(getResources().getColor(R.color.darkblack));
             navInfoLL.setBackgroundColor(getResources().getColor(R.color.darkblack));
-
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                csl = getResources().getColorStateList(R.color.nav_item_checkdark,getTheme());
+            }else{
+                csl = getResources().getColorStateList(R.color.nav_item_checkdark);
+            }
 //            navigationView.getHeaderView(0).setBackgroundResource(R.drawable.saidbg);
-            colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color) };
+//            colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color) };
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Window window = this.getWindow();
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -288,7 +299,8 @@ public class MainActivity extends BaseActivity
                 }
             }
         }
-        ColorStateList csl = new ColorStateList(states, colors);
+
+//        ColorStateList csl = new ColorStateList(states, colors);
         navigationView.setItemTextColor(csl);
         navigationView.setItemIconTintList(csl);
         navigationView.setNavigationItemSelectedListener(this);
@@ -365,7 +377,7 @@ public class MainActivity extends BaseActivity
         chooseFragment = fragments[index];
         navigationView.getMenu().getItem(index).setChecked(true);
         this.setTitle(navigationView.getMenu().getItem(index).getTitle());
-        uiControlFragment.startRound(this);
+//        uiControlFragment.startRound(this);
         if(this.getIntent().hasExtra("from")&&this.getIntent().getStringExtra("from").equals("doze")){
             this.setTitle("打盹");
             navigationView.getMenu().getItem(4).setChecked(true);
@@ -443,7 +455,7 @@ public class MainActivity extends BaseActivity
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            startAccess();
+//            startAccess();
             whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
         }else{
             h.post(new Runnable() {
@@ -465,29 +477,29 @@ public class MainActivity extends BaseActivity
             });
             return;
         }
-        if (!sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true)) {
-            h.postDelayed(st, 6000);
-        }
+//        if (!sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true)) {
+//            h.postDelayed(st, 6000);
+//        }
     }
 
-    Runnable st = new Runnable() {
-        @Override
-        public void run() {
-            if(NewWatchDogService.isOpenNewDogService){
-                return;
-            }else if(!WatchDogService.isNotNeedAccessibilityService){
-                    AlertUtil.showConfirmAlertMsg(MainActivity.this, "无障碍服务自动开启失败，很多功能需要该服务，部分手机显示开启但实际没开启，如果开启无效请尝试重启手机。是否设置？", new AlertUtil.InputCallBack() {
-                        @Override
-                        public void backData(String txt, int tag) {
-                            if(tag == 1){
-                                Intent accessibleIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                                startActivity(accessibleIntent);
-                            }
-                        }
-                    });
-                }
-        }
-    };
+//    Runnable st = new Runnable() {
+//        @Override
+//        public void run() {
+//            if(NewWatchDogService.isOpenNewDogService){
+//                return;
+//            }else if(!WatchDogService.isNotNeedAccessibilityService){
+//                    AlertUtil.showConfirmAlertMsg(MainActivity.this, "无障碍服务自动开启失败，很多功能需要该服务，部分手机显示开启但实际没开启，如果开启无效请尝试重启手机。是否设置？", new AlertUtil.InputCallBack() {
+//                        @Override
+//                        public void backData(String txt, int tag) {
+//                            if(tag == 1){
+//                                Intent accessibleIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+//                                startActivity(accessibleIntent);
+//                            }
+//                        }
+//                    });
+//                }
+//        }
+//    };
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -527,10 +539,11 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onRestart() {
         super.onRestart();
+        if(uiControlFragment.ischeck){
+            uiControlFragment.ischeck = false;
+            uiControlFragment.startRound(this);
+        }
         restartMethod();
-//        h.removeCallbacks(reUpdateR);
-//        h.postDelayed(reUpdateR,3000);
-
     }
 
     @Override
@@ -555,8 +568,6 @@ public class MainActivity extends BaseActivity
             Intent intent = new Intent("com.click369.control.uss.getappidlestate");
             intent.putExtra("pkgs", pkgs);
             sendBroadcast(intent);
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -583,9 +594,9 @@ public class MainActivity extends BaseActivity
 //        }
 //    };
     private void restartMethod(){
-        if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
-            lastMuBeiUpdate = muBeiPrefsFile.lastModified();
-        }
+//        if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
+//            lastMuBeiUpdate = muBeiPrefsFile.lastModified();
+//        }
         Log.i("CONTROL","WatchDogService.isKillRun  "+WatchDogService.isKillRun);
         if(!WatchDogService.isKillRun) {
             showT("检测到后台服务未启动，准备启动后台服务");
@@ -690,7 +701,12 @@ public class MainActivity extends BaseActivity
 //        }
         //更新AMS中的数据
         if(WatchDogService.isNeedAMSReadLoad){
-            XposedUtil.reloadInfos(this,sharedPrefs.autoStartNetPrefs,sharedPrefs.modPrefs,sharedPrefs.settings,sharedPrefs.skipDialogPrefs);
+            XposedUtil.reloadInfos(this,
+                    sharedPrefs.autoStartNetPrefs,
+                    sharedPrefs.modPrefs,
+                    sharedPrefs.settings,
+                    sharedPrefs.skipDialogPrefs,
+                    sharedPrefs.uiBarPrefs);
             WatchDogService.isNeedAMSReadLoad= false;
             Log.i("CONTROL","更新AMS中的数据....");
         }
@@ -967,7 +983,7 @@ public class MainActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
         isUIRun = false;
-        h.removeCallbacks(st);
+//        h.removeCallbacks(st);
         if (sharedPrefs.settings.getBoolean(Common.ALLSWITCH_THREE,true)) {
             ifwFragment.destory();
         }
@@ -1073,10 +1089,12 @@ public class MainActivity extends BaseActivity
         @Override
         public void onLoadLocalAppFinish() {
             if(appLoaderUtil.allAppInfos.size()>0&&!appLoaderUtil.isAppChange){
+//                chooseFragment.fresh();
                 appLoaderUtil.loadAppSetting();
             }
-//            else if(appLoaderUtil.isAppChange||appLoaderUtil.allAppInfos.size()==0){
-//                appLoaderUtil.loadApp();
+//            if(pd!=null&&pd.isShowing()){
+//                pd.dismiss();
+//                pd = null;
 //            }
         }
         @Override

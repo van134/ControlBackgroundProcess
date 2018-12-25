@@ -15,6 +15,7 @@ import android.widget.Toast;
 //import com.click369.dozex.util.DozeAbout;
 //import com.click369.dozex.util.SavePerfrence;
 
+import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
@@ -50,7 +51,7 @@ public class NewWatchDogService extends AccessibilityService {
                 run_state!=1&&
                 !"android".equals(String.valueOf(accessibilityEvent.getPackageName()))) {
             final String pkgName = String.valueOf(accessibilityEvent.getPackageName());
-            Log.i("CONTROL","========"+pkgName+"  "+String.valueOf(accessibilityEvent.getClassName()));
+//            Log.i("CONTROL","========"+pkgName+"  "+String.valueOf(accessibilityEvent.getClassName()));
             if (WatchDogService.homePkg.equals(pkgName)&&
                     !"com.android.settings".equals(pkgName)){
                 if(accessibilityEvent.getClassName()==null||accessibilityEvent.getClassName().toString().startsWith("android.widget")){
@@ -67,7 +68,8 @@ public class NewWatchDogService extends AccessibilityService {
                 intent.putExtra("action", "");
                 sendBroadcast(intent);
             }else {
-                if(accessibilityEvent.getClassName()==null||accessibilityEvent.getClassName().toString().startsWith("android.widget")){
+                if(accessibilityEvent.getClassName()==null||
+                        accessibilityEvent.getClassName().toString().startsWith("android.widget")){
                     return;
                 }
                 String cls = accessibilityEvent.getClassName().toString();
@@ -83,6 +85,7 @@ public class NewWatchDogService extends AccessibilityService {
             }
         }else if(run_state == 1&& String.valueOf(accessibilityEvent.getPackageName()).startsWith("com.android.settings")){
             openRunning(accessibilityEvent);
+//            Log.i("CONTROL","newdog  "+WatchDogService.isNotNeedAccessibilityService);
             if (WatchDogService.isNotNeedAccessibilityService) {
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -91,7 +94,7 @@ public class NewWatchDogService extends AccessibilityService {
                             OpenCloseUtil.closeOpenAccessibilitySettingsOn(NewWatchDogService.this, false);
                         }
                     }
-                }, 1500);
+                }, 2500);
             }
         }
     }
@@ -124,6 +127,9 @@ public class NewWatchDogService extends AccessibilityService {
 
         SharedPreferences settings = SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);
         WatchDogService.isNotNeedAccessibilityService = settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true);
+        if(!MainActivity.isModuleActive()){
+            WatchDogService.isNotNeedAccessibilityService = false;
+        }
         if (!WatchDogService.isKillRun) {
             Intent intent = new Intent(NewWatchDogService.this, WatchDogService.class);
             startService(intent);
@@ -211,32 +217,41 @@ public class NewWatchDogService extends AccessibilityService {
     AccessibilityNodeInfo nodeInfo = null;
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void openRunning(AccessibilityEvent event) {
-        Log.i("CONTROL", "点击跳过  "+event.getClassName());
-        if ("com.android.settings.Settings$DevelopmentSettingsActivity".equals(event.getClassName())||(run_from==1&&"com.android.settings.SubSettings".equals(event.getClassName()))) {
-            run_state = 0;
-            nodeInfo = getRootInActiveWindow();
-            if (nodeInfo==null){
-                Toast.makeText(this,"无法找到正在运行的服务", Toast.LENGTH_LONG).show();
-                return;
-            }
-            List<AccessibilityNodeInfo> list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY);
-            if(list1.size()==0){
-                list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY1);
-                if(list1.size()==0) {
-                    if (nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY1) != null && nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY1).size() > 0) {
-                        nodeInfo = nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY1).get(0).getParent().getParent();
-                        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-                        handler.postDelayed(r, 250);
-                    } else if (nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY2) != null && nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY2).size() > 0) {
-                        nodeInfo = nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY2).get(0).getParent().getParent();
-                        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-                        handler.postDelayed(r, 250);
-                    }else if (nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY3) != null && nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY3).size() > 0) {
-                        nodeInfo = nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY3).get(0).getParent().getParent();
-                        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-                        handler.postDelayed(r, 250);
-                    } else {
-                        Toast.makeText(this, "无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+        try {
+            Log.i("CONTROL", "点击跳过  "+event.getClassName());
+            if ("com.android.settings.Settings$DevelopmentSettingsActivity".equals(event.getClassName())||(run_from==1&&"com.android.settings.SubSettings".equals(event.getClassName()))) {
+                run_state = 0;
+                nodeInfo = getRootInActiveWindow();
+                if (nodeInfo==null){
+                    Toast.makeText(this,"无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                List<AccessibilityNodeInfo> list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY);
+                if(list1.size()==0){
+                    list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY1);
+                    if(list1.size()==0) {
+                        if (nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY1) != null && nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY1).size() > 0) {
+                            nodeInfo = nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY1).get(0).getParent().getParent();
+                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                            handler.postDelayed(r, 250);
+                        } else if (nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY2) != null && nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY2).size() > 0) {
+                            nodeInfo = nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY2).get(0).getParent().getParent();
+                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                            handler.postDelayed(r, 250);
+                        }else if (nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY3) != null && nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY3).size() > 0) {
+                            nodeInfo = nodeInfo.findAccessibilityNodeInfosByText(TEXT_FIND_KEY3).get(0).getParent().getParent();
+                            nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                            handler.postDelayed(r, 250);
+                        } else {
+                            Toast.makeText(this, "无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        for(AccessibilityNodeInfo nf:list1){
+                            AccessibilityNodeInfo parent = nf.getParent();
+                            parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            run_state = 0;
+                            break;
+                        }
                     }
                 }else{
                     for(AccessibilityNodeInfo nf:list1){
@@ -246,60 +261,64 @@ public class NewWatchDogService extends AccessibilityService {
                         break;
                     }
                 }
-            }else{
-                for(AccessibilityNodeInfo nf:list1){
-                    AccessibilityNodeInfo parent = nf.getParent();
-                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    run_state = 0;
-                    break;
+            }else if ("com.android.settings.Settings$SystemDashboardActivity".equals(event.getClassName())) {
+                // run_state = 0;
+                nodeInfo = getRootInActiveWindow();
+                if (nodeInfo==null){
+                    Toast.makeText(this,"无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+                    return;
                 }
-            }
-        }else if ("com.android.settings.Settings$SystemDashboardActivity".equals(event.getClassName())) {
-           // run_state = 0;
-            nodeInfo = getRootInActiveWindow();
-            if (nodeInfo==null){
-                Toast.makeText(this,"无法找到正在运行的服务", Toast.LENGTH_LONG).show();
-                return;
-            }
-            List<AccessibilityNodeInfo> list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEYDEV);
-            if(list1.size()==0){
-                list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEYDEV1);
-                if(list1.size()!=0) {
+                List<AccessibilityNodeInfo> list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEYDEV);
+                if(list1.size()==0){
+                    list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEYDEV1);
+                    if(list1.size()!=0) {
+                        for(AccessibilityNodeInfo nf:list1){
+                            AccessibilityNodeInfo parent = nf.getParent();
+                            parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+//                        run_state = 0;
+                            break;
+                        }
+                    }
+                }else{
                     for(AccessibilityNodeInfo nf:list1){
                         AccessibilityNodeInfo parent = nf.getParent();
                         parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-//                        run_state = 0;
+//                    run_state = 0;
                         break;
                     }
                 }
-            }else{
-                for(AccessibilityNodeInfo nf:list1){
-                    AccessibilityNodeInfo parent = nf.getParent();
-                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-//                    run_state = 0;
-                    break;
-                }
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
     int c = 0;
     Runnable r = new Runnable(){
         public void run() {
-            c++;
-            if (nodeInfo==null){
-                Toast.makeText(NewWatchDogService.this,"无法找到正在运行的服务", Toast.LENGTH_LONG).show();
-                return;
-            }
-            List<AccessibilityNodeInfo> list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY);
-            if(list1.size()==0){
-                list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY1);
-                if(list1.size()==0) {
-                    nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
-                    if (c < 4) {
-                        handler.postDelayed(r, 250);
-                    } else {
-                        run_state = 0;
-                        Toast.makeText(NewWatchDogService.this, "无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+            try {
+                c++;
+                if (nodeInfo==null){
+                    Toast.makeText(NewWatchDogService.this,"无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                List<AccessibilityNodeInfo> list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY);
+                if(list1.size()==0){
+                    list1 = nodeInfo.findAccessibilityNodeInfosByText(TEXT_KEY1);
+                    if(list1.size()==0) {
+                        nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
+                        if (c < 4) {
+                            handler.postDelayed(r, 250);
+                        } else {
+                            run_state = 0;
+                            Toast.makeText(NewWatchDogService.this, "无法找到正在运行的服务", Toast.LENGTH_LONG).show();
+                        }
+                    }else{
+                        for(AccessibilityNodeInfo nf:list1){
+                            AccessibilityNodeInfo parent = nf.getParent();
+                            parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+                            run_state = 0;
+                            break;
+                        }
                     }
                 }else{
                     for(AccessibilityNodeInfo nf:list1){
@@ -309,13 +328,8 @@ public class NewWatchDogService extends AccessibilityService {
                         break;
                     }
                 }
-            }else{
-                for(AccessibilityNodeInfo nf:list1){
-                    AccessibilityNodeInfo parent = nf.getParent();
-                    parent.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-                    run_state = 0;
-                    break;
-                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     };

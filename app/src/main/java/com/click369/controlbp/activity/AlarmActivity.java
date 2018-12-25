@@ -274,4 +274,21 @@ public class AlarmActivity extends BaseActivity {
             }.start();
         }
     };
+
+    public static void delTempFiles(Context c){
+        try {
+            File file1 = new File(c.getFilesDir()+ File.separator+"alarmAllowCounts");
+            File file2 = new File(c.getFilesDir()+ File.separator+"alarmNotAllowCounts");
+            File file3 = new File(c.getFilesDir()+ File.separator+"alarmAllTimes");
+            File file4 = new File(c.getFilesDir()+ File.separator+"alarmNotAllowAllTimes");
+            File file5 = new File(c.getFilesDir()+ File.separator+"alarms");
+            file1.delete();
+            file2.delete();
+            file3.delete();
+            file4.delete();
+            file5.delete();
+        }catch (Exception e){
+
+        }
+    }
 }

@@ -134,8 +134,8 @@ public class SettingFragment extends BaseFragment {
         setTimeStopZWModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPMODE,false));
         setTimeStopPwdModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPPWDMODE,false));
         setTimeStopNotShowDialogSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,false));
-        setTimeStopZWModeSw.setEnabled(setTimeStopNotShowDialogSw.isChecked());
-        setTimeStopPwdModeSw.setEnabled(setTimeStopNotShowDialogSw.isChecked());
+        setTimeStopZWModeSw.setEnabled(!setTimeStopNotShowDialogSw.isChecked());
+        setTimeStopPwdModeSw.setEnabled(!setTimeStopNotShowDialogSw.isChecked());
         stopAppModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_STOPAPPBYXP,true));
         muBeiStopReceiverSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false));
         exitRemoveRecentSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_EXITREMOVERECENT,true));
@@ -243,7 +243,7 @@ public class SettingFragment extends BaseFragment {
                     settings.edit().putBoolean(Common.PREFS_SETTING_SETTIMESTOPPWDMODE,false).commit();
                 }
             }else if(tag ==8){
-                XposedStopApp.isXPstop= isChecked;
+                WatchDogService.isXPstop= isChecked;
             }else if(tag ==9){
                 WatchDogService.isSetTimeStopByPWD= isChecked;
                 if (isChecked){
@@ -274,8 +274,8 @@ public class SettingFragment extends BaseFragment {
                 WatchDogService.isAlwaysKillOff = isChecked;
             }else if(tag ==19){
                 WatchDogService.isSetTimeStopNotShowDialog = isChecked;
-                setTimeStopZWModeSw.setEnabled(isChecked);
-                setTimeStopPwdModeSw.setEnabled(isChecked);
+                setTimeStopZWModeSw.setEnabled(!isChecked);
+                setTimeStopPwdModeSw.setEnabled(!isChecked);
             }
             settings.edit().putBoolean(names[tag],isChecked).commit();
         }

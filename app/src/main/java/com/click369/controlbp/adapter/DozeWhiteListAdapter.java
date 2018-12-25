@@ -3,6 +3,7 @@ package com.click369.controlbp.adapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.activity.DozeWhiteListActivity;
@@ -145,7 +147,8 @@ public class DozeWhiteListAdapter extends BaseAdapter{
 		}
 		viewHolder.appNameTv.setText(data.appName);
 		viewHolder.appNameTv.setTextColor(data.isRunning?data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):Color.parseColor(MainActivity.COLOR_RUN):(data.isDisable?Color.LTGRAY:DozeWhiteListActivity.curColor));
-		viewHolder.appIcon.setImageBitmap(data.getBitmap());
+//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
+		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
 		viewHolder.iceIv.setVisibility(data.isDisable?View.VISIBLE:View.GONE);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.openStopIv.setTag(position);

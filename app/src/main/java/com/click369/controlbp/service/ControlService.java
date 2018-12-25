@@ -36,7 +36,9 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPackage{//,IXposedHookInitPackageResources
 //	private static final String TAG = ControlService.class.getSimpleName();
-	private XSharedPreferences controlPrefs,wakeLockPrefs,alarmPrefs,settingPrefs,autoStartPrefs,barPrefs,recentPrefs,dozePrefs;
+	private XSharedPreferences controlPrefs,
+		wakeLockPrefs,alarmPrefs,settingPrefs,
+		autoStartPrefs,barPrefs,recentPrefs,dozePrefs;
 	private XSharedPreferences pmPrefs,testPrefs,adPrefs,tvPrefs,dialogPrefs;
 	@Override
 	public void initZygote(IXposedHookZygoteInit.StartupParam paramStartupParam) throws Throwable {
@@ -99,7 +101,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			}
 
 			settingPrefs.reload();
-			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,recentPrefs,dialogPrefs);
+			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,recentPrefs,barPrefs,dialogPrefs);
 			XposedMedia.loadPackage(lpparam);
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_FIVE,true)){
 				XposedAppStart.loadPackage(lpparam, autoStartPrefs);

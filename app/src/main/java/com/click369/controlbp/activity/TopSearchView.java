@@ -23,7 +23,7 @@ public class TopSearchView {
     public EditText editText;
     public FrameLayout alertFl;
     public TextView alertTv,closeOpenTv,sysAppTv,userAppTv;
-    public int appType = 0;//0用户  1系统  2用户系统
+    public static int appType = 0;//0用户  1系统  2用户系统
     private CallBack cb;
     private View v;
     private int curColor = Color.BLACK;
@@ -52,7 +52,7 @@ public class TopSearchView {
             editText.setTextColor(curColor);
             editText.setHintTextColor(Color.GRAY);
         }
-        userAppTv.setTextColor(Color.parseColor("#40d0b7"));
+//        userAppTv.setTextColor(Color.parseColor("#40d0b7"));
         sysAppTv = (TextView)v.findViewById(R.id.main_sysapp_tv);
         alertFl = (FrameLayout)v.findViewById(R.id.main_alert_fl);
         alertFl.setVisibility(View.GONE);
@@ -65,6 +65,10 @@ public class TopSearchView {
 //                XposedStopApp.stopApk("com.tencent.mm",(ActivityManager) act.getSystemService(Context.ACTIVITY_SERVICE));
             }
         });
+
+        userAppTv.setTextColor(appType==1?curColor:Color.parseColor("#40d0b7"));
+        sysAppTv.setTextColor(appType==0?curColor:Color.parseColor("#40d0b7"));
+
         sysAppTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -125,6 +129,7 @@ public class TopSearchView {
                     searchText = editText.getText().toString().trim().length()>0?editText.getText().toString().trim():(appType==0?"u":(appType==1?"s":""));
                     cb.backAppType(searchText);
                 }
+
             }
             @Override
             public void afterTextChanged(Editable s) {
@@ -148,6 +153,8 @@ public class TopSearchView {
         }
         editText.setText(searchText);
         editText.setSelection(editText.getText().length());
+        userAppTv.setTextColor(appType==1?curColor:Color.parseColor("#40d0b7"));
+        sysAppTv.setTextColor(appType==0?curColor:Color.parseColor("#40d0b7"));
     }
 
     public interface CallBack{

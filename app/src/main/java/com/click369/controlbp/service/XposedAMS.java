@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -54,6 +55,8 @@ public class XposedAMS {
     static boolean isSkipAdOpen = true;
     static boolean isStopScanMedia = false;
     static boolean isMubeiStopOther = false;
+    static boolean isFloatOk = false;
+    static boolean isNeedFloadOnSys = false;
     final static HashMap<String,Object> appStartPrefHMs = new HashMap<String,Object>();
     final static HashSet<String> muBeiHSs = new HashSet<String>();
     final static HashSet<String> notifySkipKeyWords = new HashSet<String>();
@@ -64,6 +67,7 @@ public class XposedAMS {
                                    final XSharedPreferences controlPrefs,
                                    final XSharedPreferences autoStartPrefs,
                                    final XSharedPreferences recentPrefs,
+                                   final XSharedPreferences uiBarPrefs,
                                    final XSharedPreferences skipDialogPrefs){
 
         if(lpparam.packageName.equals("com.android.systemui")) {
@@ -90,7 +94,8 @@ public class XposedAMS {
                                                     controlPrefs.reload();
                                                     settingPrefs.reload();
                                                     skipDialogPrefs.reload();
-                                                    XposedUtil.reloadInfos(context,autoStartPrefs,controlPrefs,settingPrefs,skipDialogPrefs);
+                                                    uiBarPrefs.reload();
+                                                    XposedUtil.reloadInfos(context,autoStartPrefs,controlPrefs,settingPrefs,skipDialogPrefs,uiBarPrefs);
                                                 }else if("com.click369.control.startservice".equals(action)) {
                                                     try {
                                                         Intent explicitIntent = new Intent("com.click369.service");
@@ -404,6 +409,15 @@ public class XposedAMS {
                                             XposedUtil.stopAllProcess(amsCls, processRecordCls, ams, Common.PACKAGENAME);
                                         }else if("com.click369.control.ams.heart".equals(action)){
                                             h.removeCallbacks(startService);
+                                        }else if("com.click369.control.ams.float.checkxp".equals(action)){
+                                            if(intent.hasExtra("isNeedFloadOnSys")){
+                                                isNeedFloadOnSys = intent.getBooleanExtra("isNeedFloadOnSys",false);
+                                            }
+//                                            XposedBridge.log("CONTROL----isNeedFloadOnSys"+isNeedFloadOnSys);
+//                                            XposedBridge.log("CONTROL----isFloatOk"+isFloatOk);
+                                            Intent check = new Intent("com.click369.control.float.checkxp");
+                                            check.putExtra("isfloatok",isFloatOk&&isNeedFloadOnSys);
+                                            sysCxt.sendBroadcast(check);
                                         }else if("com.click369.control.ams.removemubei".equals(action)){
                                             String apk = intent.getStringExtra("apk");
                                             muBeiHSs.remove(apk);
@@ -417,6 +431,7 @@ public class XposedAMS {
                                                 notifySkipKeyWords.addAll(sets);
                                             }
                                         }else if("com.click369.control.ams.initreload".equals(action)){
+                                            isNeedFloadOnSys = intent.getBooleanExtra("isNeedFloadOnSys",false);
                                             Map autoMap = (Map)intent.getSerializableExtra("autoStartPrefs");
                                             Map controlMap = (Map)(Map)intent.getSerializableExtra("controlPrefs");
                                             Set<String> skipDiaSet = (Set<String>)((Map)intent.getSerializableExtra("skipDialogPrefs")).get(Common.PREFS_SKIPNOTIFY_KEYWORDS);
@@ -461,6 +476,7 @@ public class XposedAMS {
                                 filter.addAction("com.click369.control.ams.reloadskipnotify");
                                 filter.addAction("com.click369.control.ams.confirmforcestop");
                                 filter.addAction("com.click369.control.ams.checktimeoutapp");
+                                filter.addAction("com.click369.control.ams.float.checkxp");
                                 filter.addAction(Intent.ACTION_SCREEN_ON);
                                 sysCxt.registerReceiver(br, filter);
                                 sysCxt.sendBroadcast(new Intent("com.click369.control.getinitinfo"));
@@ -1045,7 +1061,7 @@ public class XposedAMS {
                                 }
                             }
                             }
-                        }catch (RuntimeException e){
+                        }catch (Throwable e){
                             e.printStackTrace();
                         }
                         }
@@ -1109,7 +1125,7 @@ public class XposedAMS {
                                         }else{
                                             XposedBridge.log("CONTROL -----未找到idle函数  ");
                                         }
-                                    } catch (Exception e) {
+                                    } catch (Throwable e) {
                                         e.printStackTrace();
                                         XposedBridge.log("CONTROL -----设置待机出错  "+e.getMessage());
                                     }
@@ -1153,10 +1169,14 @@ public class XposedAMS {
                                 }
                             }
                         };
-                        IntentFilter filter = new IntentFilter();
-                        filter.addAction("com.click369.control.uss.setappidle");
-                        filter.addAction("com.click369.control.uss.getappidlestate");
-                        context.registerReceiver(br, filter);
+                        try {
+                            IntentFilter filter = new IntentFilter();
+                            filter.addAction("com.click369.control.uss.setappidle");
+                            filter.addAction("com.click369.control.uss.getappidlestate");
+                            context.registerReceiver(br, filter);
+                        }catch (Throwable e){
+
+                        }
                     }
                 });
             }
@@ -1171,23 +1191,35 @@ public class XposedAMS {
 //            final Class wmServiceCls = XposedHelpers.findClass("com.android.server.wm.WindowManagerService", lpparam.classLoader);
             final Class pwmServiceCls = XposedHelpers.findClass("com.android.server.policy.PhoneWindowManager", lpparam.classLoader);
             Class clsswm[] = XposedUtil.getParmsByName(pwmServiceCls,"checkAddPermission");
-            XposedUtil.hookMethod(pwmServiceCls, clsswm, "checkAddPermission", new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    WindowManager.LayoutParams attrs = (WindowManager.LayoutParams)param.args[0];
-                    if(Common.PACKAGENAME.equals(attrs.packageName)){
-//                        XposedBridge.log("windowmangerservice   ok");
-                        param.setResult(0);
-                        return;
+            Method m = pwmServiceCls.getDeclaredMethod("checkAddPermission",WindowManager.LayoutParams.class,int[].class);
+//            Class type = m.getReturnType();
+            if(clsswm!=null&&clsswm.length>0){
+                XposedUtil.hookMethod(pwmServiceCls, clsswm, "checkAddPermission", new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        try {
+                            WindowManager.LayoutParams attrs = (WindowManager.LayoutParams)param.args[0];
+                            if(isNeedFloadOnSys&&Common.PACKAGENAME.equals(attrs.packageName)&&attrs.type>2000){
+                                param.setResult(0);
+                                return;
+                            }
+                        }catch (Throwable e){
+                            isFloatOk = false;
+                            e.printStackTrace();
+                        }
                     }
-                }
-            });
+                });
+                isFloatOk = true;
+            }
         }catch (Throwable e) {
             e.printStackTrace();
+            isFloatOk = false;
             XposedBridge.log("CONTROL -----未找到PhoneWindowManager "+e);
         }
         try {
             final Class notifyCls = XposedHelpers.findClass("com.android.server.notification.NotificationManagerService$NotificationListeners",lpparam.classLoader);
+            final Class managerCls = XposedHelpers.findClass("com.android.server.notification.ManagedServices",lpparam.classLoader);
+
             Class clss[] = XposedUtil.getParmsByName(notifyCls,"notifyPostedLocked");
             XC_MethodHook hook = new XC_MethodHook() {
                 @Override
@@ -1197,15 +1229,45 @@ public class XposedAMS {
                             StatusBarNotification sbn = (StatusBarNotification)methodHookParam.args[0];
                             CharSequence title = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE);
                             CharSequence text = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT);
-                            if (title != null && title.toString().contains("应用控制器") && title.toString().contains("可能有害")) {
+
+                            String apppkg = sbn.getPackageName();
+//
+//                            CharSequence t1 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_CONVERSATION_TITLE);
+//                            CharSequence t2 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_MESSAGES);
+//                            CharSequence t3 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT_LINES);
+//                            CharSequence t4 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_BIG_TEXT);
+//                            CharSequence t5 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_SUMMARY_TEXT);
+//                            CharSequence t6 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_INFO_TEXT);
+//                            CharSequence t7 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_SUB_TEXT);
+//                            CharSequence t8 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE_BIG);
+//                            XposedBridge.log(sbn.getPackageName()+" "+t1+"  "+t2+"  "+t3+"  "+t4+"  "+t5+"  "+t6+"  "+t7+"  "+t8+"  "+title+"  "+text+"  ");
+                            if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
                                 methodHookParam.setResult(null);
                                 return;
-                            } else if (text != null && text.toString().contains("应用控制器") && text.toString().contains("可能有害")) {
+                            } else if (text != null && text.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {
                                 methodHookParam.setResult(null);
                                 return;
                             }
+//                            else if (title != null && text.toString().contains("应用控制器") && title.toString().contains("上层显示内容")) {
+//                                methodHookParam.setResult(null);
+//                                return;
+//                            }else if (text != null && text.toString().contains("应用控制器") && text.toString().contains("上层显示内容")) {
+//                                methodHookParam.setResult(null);
+//                                return;
+//                            }
                             if (!Common.PACKAGENAME.equals(sbn.getPackageName())) {
+
+
                                 if (notifySkipKeyWords.size()>0){
+                                    Field cxtField = managerCls.getDeclaredField("mContext");
+                                    cxtField.setAccessible(true);
+                                    Context cxtObject = (Context)cxtField.get(methodHookParam.thisObject);
+                                    PackageManager pm = cxtObject.getPackageManager();
+                                    PackageInfo packageInfo = pm.getPackageInfo(apppkg,PackageManager.GET_GIDS);
+                                    String appName = null;
+                                    if(packageInfo.applicationInfo!=null&&packageInfo.applicationInfo.loadLabel(pm)!=null){
+                                        appName = packageInfo.applicationInfo.loadLabel(pm).toString();
+                                    }
                                     for(String s:notifySkipKeyWords){
                                         if (title != null && title.toString().contains(s)) {
                                             methodHookParam.setResult(null);
@@ -1213,12 +1275,18 @@ public class XposedAMS {
                                         } else if (text != null && text.toString().contains(s)) {
                                             methodHookParam.setResult(null);
                                             return;
+                                        }else if (apppkg != null && apppkg.toString().equals(s)) {
+                                            methodHookParam.setResult(null);
+                                            return;
+                                        }else if (appName != null && appName.equals(s)) {
+                                            methodHookParam.setResult(null);
+                                            return;
                                         }
                                     }
                                 }
                             }
                         }
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
                         XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
                     }
                 }

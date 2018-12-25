@@ -6,8 +6,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.click369.controlbp.R;
@@ -32,6 +35,8 @@ public class SkipDialogActivity extends BaseActivity {
     private ImageView add;
     private TextView alert;
     private SkipDialogListAdapter adapter;
+    private FrameLayout swFl;
+    private Switch isShowToastSw;
 //    private TopSearchView topView;
     private SharedPreferences skipDialogPrefs;
     public static  boolean isClick = false;
@@ -47,8 +52,20 @@ public class SkipDialogActivity extends BaseActivity {
         type = this.getIntent().getIntExtra("type",0);
         skipDialogPrefs =sharedPrefs.skipDialogPrefs;// SharedPrefsUtil.getPreferences(this,Common.PREFS_SKIPDIALOG);
 
-//        et = (EditText)this.findViewById(R.id.main_edittext);
+        swFl = (FrameLayout) this.findViewById(R.id.skip_dialog_fl);
+        isShowToastSw = (Switch) this.findViewById(R.id.skip_dialog_sw);
+        swFl.setVisibility(type==0?View.VISIBLE:View.GONE);
+        isShowToastSw.setChecked(skipDialogPrefs.getBoolean(Common.PREFS_SKIPDIALOG_ISSHOWTOAST,true));
+
+        isShowToastSw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                skipDialogPrefs.edit().putBoolean(Common.PREFS_SKIPDIALOG_ISSHOWTOAST,isChecked).commit();
+            }
+        });
         alert = (TextView) this.findViewById(R.id.skipdialog_alert);
+
+        isShowToastSw.setTextColor(alert.getCurrentTextColor());
         listView = (ListView)this.findViewById(R.id.skipdialog_listview);
         add = (ImageView) this.findViewById(R.id.skipdialog_add);
         add.setOnClickListener(new AddClickListener());
@@ -58,7 +75,7 @@ public class SkipDialogActivity extends BaseActivity {
         adapter.bjdatas.addAll(skipDialogPrefs.getStringSet(type==0?Common.PREFS_SKIPDIALOG_KEYWORDS:Common.PREFS_SKIPNOTIFY_KEYWORDS,new LinkedHashSet<String>()));
         listView.setAdapter(adapter);
         setTitle(type==0?"对话框跳过":"通知屏蔽");
-        String t = type == 0?"请添加要跳过的对话框中显示的关键文字，添加后重启对应的进程生效。(关键文字可以是对话框的标题、内容或按钮标题,三种中的一种，内容尽可能精确)":"请添加屏蔽的通知中显示的关键文字，添加后立即生效。(关键文字必须是通知内容的一部分，不能以标题为关键文字，内容尽可能精确";
+        String t = type == 0?"请添加要跳过的对话框中显示的关键文字，添加后重启对应的进程生效。(关键文字可以是对话框的标题、内容或按钮标题,三种中的一种，内容尽可能精确)":"请添加屏蔽的通知中显示的关键文字或要屏蔽的应用名称，添加后立即生效。(关键文字必须是通知内容的一部分，不能以标题为关键文字，内容尽可能精确";
         alert.setText(t);
 //        ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MSG,this);
     }

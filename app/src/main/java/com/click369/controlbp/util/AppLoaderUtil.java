@@ -8,15 +8,24 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.UserHandle;
+import android.support.v7.widget.DrawableUtils;
 import android.util.Log;
 
 import com.click369.controlbp.activity.MainActivity;
@@ -25,6 +34,7 @@ import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.service.WatchDogService;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,6 +46,7 @@ import java.util.Set;
  * Created by asus on 2017/10/15.
  */
 public class AppLoaderUtil {
+    public static File iconPath;
     private static AppLoaderUtil instance;
     private SharedPrefsUtil sharedPrefs;
     private Context context;
@@ -65,15 +76,21 @@ public class AppLoaderUtil {
     private AppLoaderUtil(Context context) {
         this.context = context;
         sharedPrefs = SharedPrefsUtil.getInstance(context);
+        try {
+            iconPath = new File(context.getFilesDir(),"icon");
+            iconPath.mkdirs();
+        }catch (Exception e){
+
+        }
 
     }
 
     public void reloadRunList(){
         runLists.clear();
         runLists.addAll(PackageUtil.getRunngingAppList(context));
-        if(runLists.size()==0){
-            runLists.addAll(AppLoaderUtil.allHMAppInfos.keySet());
-        }
+//        if(runLists.size()==0){
+//            runLists.addAll(AppLoaderUtil.allHMAppInfos.keySet());
+//        }
     }
 
     private void initLocalApp(){
@@ -114,23 +131,25 @@ public class AppLoaderUtil {
         }
     }
     public void loadLocalApp(){
-        final Handler handler = new Handler(Looper.getMainLooper());
-        initLocalApp();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    for (LoadAppCallBack lc : listeners) {
-                        if(lc!=null){
-                            lc.onLoadLocalAppFinish();
+        synchronized (this) {
+            final Handler handler = new Handler(Looper.getMainLooper());
+            initLocalApp();
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        for (LoadAppCallBack lc : listeners) {
+                            if (lc != null) {
+                                lc.onLoadLocalAppFinish();
+                            }
                         }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
                     }
-                }catch (Throwable e){
-                    e.printStackTrace();
                 }
-            }
-        });
-        checkAppChange();
+            });
+            checkAppChange();
+        }
     }
 
     public void checkAppChange(){
@@ -143,7 +162,8 @@ public class AppLoaderUtil {
             }
         }
         long lastTime = sharedPrefs.settings.getLong("LASTAPPINSTALLTIME",0);
-        isAppChange = firTime != lastTime||allAppInfos.size()==0;
+        File fs[] = iconPath.listFiles();
+        isAppChange = firTime != lastTime||allAppInfos.size()==0||fs==null||fs.length<10;
         if(isAppChange){
             Log.i("CONTROL","app发生变化  start loadApp");
             loadApp();
@@ -177,6 +197,9 @@ public class AppLoaderUtil {
                         if ("com.click369.controlbp".equals(packageName) ||
                                 "android".equals(packageName) ||
                                 "com.android.systemui".equals(packageName)) {
+                            if("com.click369.controlbp".equals(packageName)){
+                                loadAppImage(packgeInfo,pm,false);
+                            }
                             continue;
                         }
                         AppInfo appInfo = getOneAppInfo(packgeInfo,pm,context);
@@ -216,11 +239,26 @@ public class AppLoaderUtil {
                         });
                     }
 
+
+
                 }
                 isLoadAppThreadRun = false;
                 Log.i("CONTROL","-----------stop loadApp");
             }
         }.start();
+    }
+
+    public void loadAppImage(PackageInfo packageInfo,PackageManager pm,boolean isReload){
+        File f = new File(iconPath,packageInfo.packageName);
+        try {
+            if(!f.exists()||isReload){
+                Drawable d = packageInfo.applicationInfo.loadIcon(pm);
+                Bitmap bm = zoomDrawable(d, 120, 120);
+                bm.compress(Bitmap.CompressFormat.PNG,90,new FileOutputStream(f));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public AppInfo getOneAppInfo(PackageInfo packgeInfo,PackageManager pm,Context context){
@@ -238,8 +276,10 @@ public class AppLoaderUtil {
         }
 
         try {
-            Drawable d = packgeInfo.applicationInfo.loadIcon(pm);
-            appInfo = new AppInfo(appName, packgeInfo.packageName, zoomDrawable(d, 90, 90), (packgeInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0, !packgeInfo.applicationInfo.enabled);
+            loadAppImage(packgeInfo,pm,false);
+            // zoomDrawable(d, 90, 90)
+            appInfo = new AppInfo(appName, packgeInfo.packageName, (packgeInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0, !packgeInfo.applicationInfo.enabled);
+            appInfo.iconFile = new File(iconPath,packgeInfo.packageName);
             appInfo.instanllTime = packgeInfo.firstInstallTime;
             appInfo.updateTime = packgeInfo.lastUpdateTime;
             appInfo.versionCode = packgeInfo.versionCode;
@@ -446,8 +486,31 @@ public class AppLoaderUtil {
         }catch (Exception e){
             return  null;
         }
-
     }
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap) {
+        try {
+            Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(output);
+            final Paint paint = new Paint();
+
+            final Rect rect = new Rect(0, 0, bitmap.getWidth(),bitmap.getHeight());
+            final RectF rectF = new RectF(new Rect(0, 0, bitmap.getWidth(),  bitmap.getHeight()));
+            final float roundPx = bitmap.getWidth()>bitmap.getHeight()?bitmap.getWidth()/2:bitmap.getHeight()/2;
+            paint.setAntiAlias(true);
+//            canvas.drawRGB(0,0,0);
+            canvas.drawARGB(0, 0, 0, 0);
+            paint.setColor(Color.BLACK);
+            canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            final Rect src = new Rect(0, 0, bitmap.getWidth(),  bitmap.getHeight());
+            canvas.drawBitmap(bitmap, src, rect, paint);
+            return output;
+        } catch (Exception e) {
+            return bitmap;
+        }
+    }
+
+
     public interface LoadAppCallBack{
 //        void onInitAppFinish();
         void onLoadLocalAppFinish();

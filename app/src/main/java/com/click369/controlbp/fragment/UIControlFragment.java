@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,12 +43,14 @@ public class UIControlFragment extends BaseFragment {
             lightSpeedTv,lightWeiZhiTv,lightColorTv,lightXiaoGuoTv;
     private String lightSpeedNames[] = {"快速","中速","慢速"};
     private String lightWeiZhiNames[] = {"左右","上下","上下左右"};
-    private String lightXiaoGuoNames[] = {"弧度","直线"};
+    private String lightXiaoGuoNames[] = {"小弧度","直线","大弧度"};
     private SeekBar toastPositionSb,corOffsetSb,corTopOffsetSb,
             roundSizeSb,recentRoundSizeSb,recentAlphaSb,lightSizeSb,lightWidthSb,lightOffsetSb;
     private Switch topBarSw,bottomBarSw,alwaysColorSw,bottomDengTopSw,
             toastSw,keyColorSw,roundSw,recentBarColorSw,recentBarHideSw,
-            recentMemSw,recentInfoSw,actInfoSw,lightMsgSw,lightCallSw,lightModeSw,lightScOnSw,lightMusicSw;
+            recentMemSw,recentInfoSw,actInfoSw,lightMsgSw,lightCallSw,
+            lightModeSw,lightScOnSw,lightMusicSw,lightChargeSw,lightScaleSw,
+            flashNotifySw,flashCallSw,floatOnSysSw;
     private FrameLayout lightColorFl,lightWidthFl;
     private int curColor = Color.BLACK;
     private int toastBgColor = Color.BLACK,toastTextColor = Color.WHITE,
@@ -84,6 +87,11 @@ public class UIControlFragment extends BaseFragment {
         lightScOnSw = (Switch) v.findViewById(R.id.ui_light_scon_sw);
         lightModeSw = (Switch) v.findViewById(R.id.ui_light_mode_sw);
         lightMusicSw = (Switch) v.findViewById(R.id.ui_light_music_sw);
+        lightChargeSw = (Switch) v.findViewById(R.id.ui_light_charge_sw);
+        lightScaleSw = (Switch) v.findViewById(R.id.ui_light_animscale_sw);
+        flashNotifySw = (Switch) v.findViewById(R.id.ui_flash_notify_sw);
+        flashCallSw = (Switch) v.findViewById(R.id.ui_flash_call_sw);
+        floatOnSysSw = (Switch) v.findViewById(R.id.ui_light_floatonsys_sw);
 
         keyColorTv = (TextView) v.findViewById(R.id.ui_key_color_tv);
         blackListTv = (TextView) v.findViewById(R.id.ui_blacklist_tv);
@@ -131,6 +139,11 @@ public class UIControlFragment extends BaseFragment {
         lightModeSw.setTextColor(curColor);
         lightScOnSw.setTextColor(curColor);
         lightMusicSw.setTextColor(curColor);
+        lightChargeSw.setTextColor(curColor);
+        lightScaleSw.setTextColor(curColor);
+        flashNotifySw.setTextColor(curColor);
+        flashCallSw.setTextColor(curColor);
+        floatOnSysSw.setTextColor(curColor);
         ItemClick itemClick = new ItemClick();
         blackListTv.setOnClickListener(itemClick);
         toastGrvityTv.setOnClickListener(itemClick);
@@ -158,6 +171,11 @@ public class UIControlFragment extends BaseFragment {
         lightModeSw.setTag(13);
         lightScOnSw.setTag(14);
         lightMusicSw.setTag(15);
+        lightChargeSw.setTag(16);
+        lightScaleSw.setTag(17);
+        flashNotifySw.setTag(18);
+        flashCallSw.setTag(19);
+        floatOnSysSw.setTag(20);
 //        activityManager = (ActivityManager)getActivity().getSystemService(Context.ACTIVITY_SERVICE);
         barPrefs = SharedPrefsUtil.getInstance(getActivity()).uiBarPrefs;//;SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_UIBARLIST);//getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS,Context.MODE_WORLD_READABLE);
         recentBarColorSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_RECENTBARCOLOR,false));
@@ -175,6 +193,11 @@ public class UIControlFragment extends BaseFragment {
         lightModeSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTMODE,false));
         lightScOnSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTSCON,false));
         lightMusicSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTMUSIC,false));
+        lightChargeSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTCHARGE,false));
+        lightScaleSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_LIGHTANIMSCALE,false));
+        flashNotifySw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_FLASHNOTIFY,false));
+        flashCallSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_FLASHCALL,false));
+        floatOnSysSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_ISNEEDFLOATONSYS,false));
         roundSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_ROUNDOPEN,false));
         lightColorFl.setVisibility(lightModeSw.isChecked()?View.GONE:View.VISIBLE);
         if(!roundSw.isChecked()){
@@ -205,6 +228,11 @@ public class UIControlFragment extends BaseFragment {
         lightModeSw.setOnCheckedChangeListener(swLis);
         lightScOnSw.setOnCheckedChangeListener(swLis);
         lightMusicSw.setOnCheckedChangeListener(swLis);
+        lightChargeSw.setOnCheckedChangeListener(swLis);
+        lightScaleSw.setOnCheckedChangeListener(swLis);
+        flashNotifySw.setOnCheckedChangeListener(swLis);
+        flashCallSw.setOnCheckedChangeListener(swLis);
+        floatOnSysSw.setOnCheckedChangeListener(swLis);
 
         lightWidth = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTWIDTH, 100);
         lightSize = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTSIZE, 8);
@@ -218,7 +246,7 @@ public class UIControlFragment extends BaseFragment {
         lightSpeedTv.setText("边沿呼吸速度（点击切换）:"+lightSpeedNames[lightSpeed]);
         lightWeiZhiTv.setText("边沿呼吸位置（点击切换）:"+lightWeiZhiNames[lightWeiZhi]);
         lightXiaoGuoTv.setText("边沿呼吸效果（点击切换）:"+lightXiaoGuoNames[lightXiaoGuo]);
-        lightWidthFl.setVisibility(lightXiaoGuo==0?View.VISIBLE:View.GONE);
+        lightWidthFl.setVisibility(lightXiaoGuo==1?View.GONE:View.VISIBLE);
 
 
         lightWidthSb.setProgress(lightWidth);
@@ -303,7 +331,10 @@ public class UIControlFragment extends BaseFragment {
                         Common.PREFS_SETTING_UI_RECENTMEMSHOW,Common.PREFS_SETTING_UI_RECENTIFNO,
                         Common.PREFS_SETTING_UI_ALWAYSCOLORBAR,Common.PREFS_SETTING_UI_LIGHTMSG,
                         Common.PREFS_SETTING_UI_LIGHTCALL,Common.PREFS_SETTING_UI_LIGHTMODE,
-                        Common.PREFS_SETTING_UI_LIGHTSCON,Common.PREFS_SETTING_UI_LIGHTMUSIC};
+                        Common.PREFS_SETTING_UI_LIGHTSCON,Common.PREFS_SETTING_UI_LIGHTMUSIC,
+                        Common.PREFS_SETTING_UI_LIGHTCHARGE,Common.PREFS_SETTING_UI_LIGHTANIMSCALE,
+                        Common.PREFS_SETTING_UI_FLASHNOTIFY,Common.PREFS_SETTING_UI_FLASHCALL,
+                        Common.PREFS_SETTING_UI_ISNEEDFLOATONSYS};
                 if (buttonView.equals(keyColorSw)){
                     if (isChecked){
                         keyColorTv.setEnabled(true);
@@ -356,7 +387,7 @@ public class UIControlFragment extends BaseFragment {
                         }
                         WatchDogService.isRoundCorOpen = isChecked;
 //                        barPrefs.edit().putBoolean(keys[index], isChecked).commit();
-                        startRound(getActivity());
+                        checkAndStartRound(getActivity(),isChecked);
                     }else if(index == 6||index == 7||index == 8||index == 9){
                         if (index== 6 &&isChecked&&recentBarHideSw.isChecked()){
                             recentBarHideSw.setChecked(false);
@@ -375,7 +406,7 @@ public class UIControlFragment extends BaseFragment {
                         }else{
                             ScreenLightServiceUtil.sendHideLight(getContext());
                         }
-                        startRound(getActivity());
+                        checkAndStartRound(getActivity(),isChecked);
                     }else if(index == 12){
                         WatchDogService.isLightCall = isChecked;
                         if(isChecked){
@@ -383,14 +414,14 @@ public class UIControlFragment extends BaseFragment {
                         }else{
                             ScreenLightServiceUtil.sendHideLight(getContext());
                         }
-                        startRound(getActivity());
+                        checkAndStartRound(getActivity(),isChecked);
                     }else if(index == 13){
                         WatchDogService.isLightRandomMode = isChecked;
                         if(lightCallSw.isChecked()||lightMsgSw.isChecked()){
                             ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_TEST,getContext());
                         }
                         lightColorFl.setVisibility(lightModeSw.isChecked()?View.GONE:View.VISIBLE);
-                        startRound(getActivity());
+                        checkAndStartRound(getActivity(),isChecked);
                     }else if(index == 14){
                         WatchDogService.isLightScOn = isChecked;
                         if(isChecked){
@@ -398,7 +429,7 @@ public class UIControlFragment extends BaseFragment {
                         }else{
                             ScreenLightServiceUtil.sendHideLight(getContext());
                         }
-                        startRound(getActivity());
+                        checkAndStartRound(getActivity(),isChecked);
                     }else if(index == 15){
                         WatchDogService.isLightMusic = isChecked;
                         if(isChecked){
@@ -406,7 +437,39 @@ public class UIControlFragment extends BaseFragment {
                         }else{
                             ScreenLightServiceUtil.sendHideLight(getContext());
                         }
-                        startRound(getActivity());
+                        checkAndStartRound(getActivity(),isChecked);
+                    }else if(index == 16){
+                        WatchDogService.isLightCharge = isChecked;
+                        if(isChecked){
+                            ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_TEST,getContext());
+                        }else{
+                            ScreenLightServiceUtil.sendHideLight(getContext());
+                        }
+                        checkAndStartRound(getActivity(),isChecked);
+                    }else if(index == 17){
+                        WatchDogService.isLightAnimScale = isChecked;
+                        if(isChecked){
+                            ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_TEST,getContext());
+                        }else{
+                            ScreenLightServiceUtil.sendHideLight(getContext());
+                        }
+                        checkAndStartRound(getActivity(),isChecked);
+                    }else if(index == 18){
+                        WatchDogService.isFlashNofity = isChecked;
+                    }else if(index == 19){
+                        WatchDogService.isFlashCall = isChecked;
+                    }else if(index == 20){
+                        WatchDogService.isNeedFloatOnSys = isChecked;
+                        if(!isChecked&&!WatchDogService.isHasSysFloatVewPermission){
+                            WatchDogService.isNeedGetFloatPremission = true;
+                        }else{
+                            WatchDogService.isNeedGetFloatPremission = false;
+                        }
+                        Intent intent = new Intent("com.click369.control.ams.float.checkxp");
+                        intent.putExtra("isNeedFloadOnSys",WatchDogService.isNeedFloatOnSys);
+                        getActivity().sendBroadcast(intent);
+//                        Log.i("CONTROL----1","WatchDogService.isNeedFloatOnSys  "+WatchDogService.isNeedFloatOnSys);
+                        checkAndStartRound(getActivity(),true);
                     }else{
                         XposedToast.makeToast(getContext(), "重启手机或杀死当前运行的其他应用后生效", Toast.LENGTH_LONG,toastGrivity,toastBgColor,toastTextColor,toastPostion).show();
                     }
@@ -419,16 +482,42 @@ public class UIControlFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        startRound(getActivity());
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public boolean ischeck = false;
+    public void checkAndStartRound(Context cxt,boolean isChecked){
+        if(WatchDogService.isNeedGetFloatPremission&&isChecked){
+            AlertUtil.showConfirmAlertMsg(getActivity(), "该功能需要打开允许应用控制器在上层显示选项，是否去打开？", new AlertUtil.InputCallBack() {
+                @Override
+                public void backData(String txt, int tag) {
+                    if(tag == 1){
+                        ischeck = true;
+                        WatchDogService.isNeedGetFloatPremission = false;
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivityForResult(intent, 1);
+                    }
+                }
+            });
+        }else if(isChecked){
+            startRound(cxt);
+        }
+    }
+
     public static void startRound(Context cxt){
-        Intent intent = new Intent(cxt, RoundedCornerService.class);
         if(WatchDogService.isRoundCorOpen||
                 WatchDogService.isLightCall||
                 WatchDogService.isLightScOn||
                 WatchDogService.isLightMusic||
+                WatchDogService.isLightCharge||
                 WatchDogService.isLightMsg){
-            cxt.startService(intent);
-        }else{
-            cxt.stopService(intent);
+            Intent intent = new Intent("com.click369.control.float.checkxp");
+            cxt.sendBroadcast(intent);
+            Log.i("CONTROL----","WatchDogService.isNeedFloatOnSys  "+WatchDogService.isNeedFloatOnSys);
         }
     }
 
@@ -492,13 +581,15 @@ public class UIControlFragment extends BaseFragment {
                     if(xiaoguo == 0){
                         save = 1;
                     }else if(xiaoguo == 1){
+                        save = 2;
+                    }else if(xiaoguo == 2){
                         save = 0;
                     }
                     lightXiaoGuo = save;
                     WatchDogService.lightXiaoGuo = save;
                     barPrefs.edit().putInt(Common.PREFS_SETTING_UI_LIGHTXIAOGUO,save).commit();
                     lightXiaoGuoTv.setText("边沿呼吸效果（点击切换）:"+lightXiaoGuoNames[save]);
-                    lightWidthFl.setVisibility(lightXiaoGuo==0?View.VISIBLE:View.GONE);
+                    lightWidthFl.setVisibility(lightXiaoGuo==1?View.GONE:View.VISIBLE);
                     ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_TEST,getContext());
                 }else if(v.equals(toastFontColorTv)){
                     Intent intent = new Intent(getActivity(),ColorSetActivity.class);

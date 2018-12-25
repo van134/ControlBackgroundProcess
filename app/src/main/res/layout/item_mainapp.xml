@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:weightSum="16">
 
     <LinearLayout
@@ -14,14 +15,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
-            <ImageView
+            <!--<ImageView-->
+                <!--android:layout_width="40dp"-->
+                <!--android:layout_height="40dp"-->
+                <!--android:background="@drawable/round"-->
+                <!--android:id="@+id/item_main_appicon"-->
+                <!--android:layout_marginTop="8dp"-->
+                <!--android:layout_marginBottom="8dp" />-->
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/item_main_appicon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="@drawable/round"
-                android:id="@+id/item_main_appicon"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp" />
-
+                android:layout_marginBottom="8dp"
+                app:civ_border_width="2px"
+                app:civ_border_color="@color/colorPrimary"
+                app:civ_border_overlay="true"/>
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

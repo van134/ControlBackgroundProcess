@@ -53,10 +53,28 @@
                     android:layout_gravity="center"
                     android:src="@mipmap/icon_add"/>
             </LinearLayout>
+
+
+            <FrameLayout
+                android:id="@+id/skip_dialog_fl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <Switch
+                    android:layout_marginLeft="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="被屏蔽的对话框弹出时显示简短提示"
+                    android:id="@+id/skip_dialog_sw"
+                    android:checked="false" />
+            </FrameLayout>
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="1px"
-                android:background="@color/gray"></FrameLayout>
+                android:layout_height="2px"
+                android:background="@drawable/line" />
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

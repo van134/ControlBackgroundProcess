@@ -30,7 +30,7 @@ public class NotificationService extends NotificationListenerService {
 //    public long lastTime = 0;
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        addNotify(this,sbn.getPackageName(),sbn.getNotification().flags>= Notification.FLAG_NO_CLEAR);
+        addNotify(this,sbn.getPackageName(),sbn.getNotification().flags,sbn.isClearable());
     }
 
     @Override
@@ -96,11 +96,20 @@ public class NotificationService extends NotificationListenerService {
         WatchDogService.lastNotifyTime = System.currentTimeMillis();
     }
 
-    public static void addNotify(Context cxt,String pkg,boolean isnoclear){
+    static long lastFlashTime =0;
+    public static void addNotify(Context cxt,String pkg,int flags,boolean isclearAble){
         final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
-        if(!WatchDogService.notLightPkgs.contains(pkg)&&!isnoclear){
+        if(!WatchDogService.notLightPkgs.contains(pkg)&&isclearAble){
             notifyLights.add(pkg);
             ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MSG,cxt);
+        }
+        if(WatchDogService.isFlashNofity&&
+                !WatchDogService.notLightPkgs.contains(pkg)&&
+                isclearAble&&
+                System.currentTimeMillis()-lastFlashTime>5000){
+            Intent intent = new Intent("com.click369.control.sysui.msgflash");
+            cxt.sendBroadcast(intent);
+            lastFlashTime = System.currentTimeMillis();
         }
         if(asi.isHasNotify){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
             return;

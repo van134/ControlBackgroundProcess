@@ -121,7 +121,7 @@ public class AppConfigActivity extends BaseActivity {
             }else{
                 PackageManager pm = getPackageManager();
                 try {
-                    PackageInfo packgeInfo = pm.getPackageInfo(ai.packageName,PackageManager.GET_ACTIVITIES);
+                    PackageInfo packgeInfo = pm.getPackageInfo(ai.packageName,PackageManager.GET_GIDS);
                     ai = AppLoaderUtil.getInstance(this).getOneAppInfo(packgeInfo,pm,this);
                 } catch (PackageManager.NameNotFoundException e) {
                     e.printStackTrace();
@@ -912,7 +912,12 @@ public class AppConfigActivity extends BaseActivity {
 //        if (isClick){
 //            isClick = false;
             if(WatchDogService.isNeedAMSReadLoad){
-                XposedUtil.reloadInfos(this,sharedPrefs.autoStartNetPrefs,sharedPrefs.modPrefs,sharedPrefs.settings,sharedPrefs.skipDialogPrefs);
+                XposedUtil.reloadInfos(this,
+                        sharedPrefs.autoStartNetPrefs,
+                        sharedPrefs.modPrefs,
+                        sharedPrefs.settings,
+                        sharedPrefs.skipDialogPrefs,
+                        sharedPrefs.uiBarPrefs);
                 WatchDogService.isNeedAMSReadLoad= false;
                 Log.i("CONTROL","更新AMS中的数据....");
             }

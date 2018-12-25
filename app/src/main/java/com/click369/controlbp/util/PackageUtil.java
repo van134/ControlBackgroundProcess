@@ -213,8 +213,26 @@ public class PackageUtil {
             }
 //        Log.i("CONTROL","running  "+sb.toString());
         }
-        if(runLists.size()<3){
-            return new HashSet<String>();
+        if(runLists.size()<5){
+            runLists.clear();
+            String info = ShellUtils.execCommand("ps",true,true).successMsg;
+            if(info.length()>0){
+                info = info.replaceAll(" +"," ");
+                String lines[] = info.split("\n");
+                if(lines.length>0){
+                    for(String line:lines){
+                        String words[] = line.split(" ");
+                        if(words.length>8){
+                            if(words[0].startsWith("u0")||
+                                    words[0].startsWith("sys")){
+                                runLists.add(words[8].trim());
+//                                Log.i("CONTROL","words[8].trim()  "+words[8].trim()+"  "+words[8].trim().length());
+                            }
+                        }
+                    }
+                }
+            }
+//            return new HashSet<String>();
         }
         return runLists;
     }
