@@ -42,7 +42,7 @@ public class XposedAlarm {
                                    final boolean isTwoOpen,
                                    final boolean isMubeiStopOther) {//,final boolean isMubeStopBroad
         if (lpparam.packageName.equals("com.click369.controlbp")||
-                lpparam.packageName.equals("com.system.ui")) {
+                lpparam.packageName.equals("com.android.systemui")) {
             return;
         }
         final Class pendingIntentClass = XposedHelpers.findClass("android.app.PendingIntent", lpparam.classLoader);

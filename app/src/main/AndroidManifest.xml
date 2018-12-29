@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.click369.controlbp">
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -147,7 +148,7 @@
         <activity android:name=".activity.DozeWhiteListActivity" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ColorNavBarActivity" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ADBTestActivity"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.ColorSetActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".activity.ColorSetActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.UIBarBlackListActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.WakeLockActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.AlarmActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>

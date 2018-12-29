@@ -4,9 +4,12 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,11 +37,11 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 /**
  * Created by asus on 2017/10/30.
  */
-public class XposedStartListener {
+public class XposedStartListenerNotify {
     final static HashSet<String> mmnotifys = new HashSet<String>();
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam){
         try {
-            Class actCls = XposedHelpers.findClass("android.app.Activity",lpparam.classLoader);
+             Class actCls = XposedHelpers.findClass("android.app.Activity",lpparam.classLoader);
             if (actCls!=null){
                 XposedHelpers.findAndHookMethod(actCls, "onResume", new XC_MethodHook() {
                     @Override
@@ -65,7 +68,6 @@ public class XposedStartListener {
             }
             if(lpparam.packageName.equals("android")) {
                 try {
-                    final  Class notSerCls = XposedHelpers.findClass("com.android.server.notification.NotificationManagerService",lpparam.classLoader);
                     final Class notifyCls = XposedHelpers.findClass("com.android.server.notification.NotificationManagerService$NotificationListeners",lpparam.classLoader);
                     final Class managerCls = XposedHelpers.findClass("com.android.server.notification.ManagedServices",lpparam.classLoader);
 
@@ -117,17 +119,17 @@ public class XposedStartListener {
                                         }
                                     }
                                 } catch (Exception e) {
-                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved error "+e+"^^^^^^^^^^^^^^^^^");
+                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyRemoved error "+e+"^^^^^^^^^^^^^^^^^");
                                 }
                                 }
                             };
                             if(clss!=null){
                                 XposedUtil.hookMethod(notifyCls,clss,"notifyRemoved",hook);
                             }else{
-                                XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved null 未找到^^^^^^^^^^^^^^^^^");
+                                XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyRemoved null 未找到^^^^^^^^^^^^^^^^^");
                             }
                         }else{
-                            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyRemoved clss null 未找到^^^^^^^^^^^^^^^^^");
+                            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyRemoved clss null 未找到^^^^^^^^^^^^^^^^^");
                         }
                         if(notifyPosted!=null){
                             Class clss[] = notifyPosted.getParameterTypes();
@@ -136,7 +138,6 @@ public class XposedStartListener {
                                 @Override
                                 protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                 try {
-
                                     StatusBarNotification sbn = (StatusBarNotification)methodHookParam.args[1];
                                     int id = sbn.getId();
                                     String pkg = sbn.getPackageName();
@@ -157,29 +158,18 @@ public class XposedStartListener {
                                         }
                                     }
                                 } catch (Exception e) {
-                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
+                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
                                 }
                                 }
                             };
                             if(clss!=null){
                                 XposedUtil.hookMethod(notifyCls,clss,"notifyPosted",hook);
-//                                if(clss.length == 3){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2],hook );
-//                                }else if(clss.length == 4){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2], clss[3],hook );
-//                                }else if(clss.length == 2){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1],hook );
-//                                }else if(clss.length == 5){
-//                                    XposedHelpers.findAndHookMethod(notifyCls, "notifyPosted", clss[0], clss[1], clss[2], clss[3], clss[4],hook );
-//                                }else{
-//                                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted clss else 未找到^^^^^^^^^^^^^^^^^");
-//                                }
                             }else{
-                                XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted null 未找到^^^^^^^^^^^^^^^^^");
+                                XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted null 未找到^^^^^^^^^^^^^^^^^");
                             }
 
                         }else{
-                            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted clss null 未找到^^^^^^^^^^^^^^^^^");
+                            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted clss null 未找到^^^^^^^^^^^^^^^^^");
                         }
                     }
                     final Class windowManagerCls = XposedHelpers.findClass("com.android.server.policy.PhoneWindowManager",lpparam.classLoader);
@@ -218,25 +208,16 @@ public class XposedStartListener {
                                 }
                             };
                             XposedUtil.hookMethod(windowManagerCls,clss,"interceptKeyBeforeDispatching",hook);
-//                            if (clss.length == 3) {
-//                                XposedHelpers.findAndHookMethod(windowManagerCls, "interceptKeyBeforeDispatching",clss[0],clss[1],clss[2], hook);
-//                            }else if (clss.length == 4) {
-//                                XposedHelpers.findAndHookMethod(windowManagerCls, "interceptKeyBeforeDispatching",clss[0],clss[1],clss[2],clss[3], hook);
-//                            }else{
-//                                XposedBridge.log("^^^^^^^^^^^^^^interceptKeyBeforeDispatching else "+clss.length+"^^^^^^^^^^^^^^^^^");
-//                            }
                         }else{
                             XposedBridge.log("^^^^^^^^^^^^^^interceptKeyBeforeDispatching null 未找到^^^^^^^^^^^^^^^^^");
                         }
                     }
                 } catch (XposedHelpers.ClassNotFoundError e) {
-                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener error1 "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
+                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify error1 "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
                 }
             }
-        }catch (XposedHelpers.ClassNotFoundError e){
-            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener error 2"+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
-        }catch (RuntimeException e){
-            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener error 3"+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
+        }catch (Throwable e){
+            XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify error 2"+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
         }
     }
 

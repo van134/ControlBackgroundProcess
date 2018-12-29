@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
@@ -18,6 +21,7 @@ import com.click369.controlbp.service.LightView;
 import com.click369.controlbp.service.ScreenLightServiceUtil;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.FileUtil;
+import com.click369.controlbp.util.Notify;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.io.File;
@@ -28,14 +32,14 @@ import java.util.HashMap;
  */
 public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarChangeListener{
     public static final String COLOR_DEFAULT = "#ffffff";
-    private Button bt;
+    private EditText editText;
     private SeekBar sbAlpa,redSb,greenSb,blueSb;
 //    private int color = 0;
     private String apppkg,colorStr="ffffffff";
     private String title="";
     private String key = "";
     private SharedPreferences barPrefs;
-    private int bgcolor,textcolor,keyColor,lightColor;
+    private int bgcolor,textcolor,keyColor,lightColor,notifyColor;
     private boolean isbg;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,7 +59,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
         if(this.getIntent().hasExtra("key")){
             key = this.getIntent().getStringExtra("key");
         }
-        bt = (Button)this.findViewById(R.id.color_fliter_bt);
+        editText = (EditText) this.findViewById(R.id.color_fliter_et);
         sbAlpa = (SeekBar)this.findViewById(R.id.color_alphasb);
         redSb = (SeekBar)this.findViewById(R.id.color_red_sb);
         greenSb = (SeekBar)this.findViewById(R.id.color_green_sb);
@@ -72,25 +76,30 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
             redSb.setProgress(Integer.parseInt(colors[3]+colors[4],16));
             greenSb.setProgress(Integer.parseInt(colors[5]+colors[6],16));
             blueSb.setProgress(Integer.parseInt(colors[7]+colors[8],16));
-            bt.setText("#"+colorStr);
-            bt.setBackgroundColor(Color.parseColor("#"+colorStr));
+            editText.setText("#"+colorStr);
+            editText.setBackgroundColor(Color.parseColor("#"+colorStr));
         }else{
             bgcolor =  barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTBGCOLOR,Color.BLACK);
             textcolor = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTTEXTCOLOR,Color.WHITE);
             keyColor = barPrefs.getInt(Common.PREFS_SETTING_UI_KEYCOLOR,Color.WHITE);
             lightColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_LIGHTCOLOR,"#01d8ff"));
+            notifyColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR,"#FFFFFF"));
             int color = Color.WHITE;
             if(key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
-                bt.setBackgroundColor(keyColor);
-                bt.setTextColor(Color.CYAN);
+                editText.setBackgroundColor(keyColor);
+                editText.setTextColor(Color.CYAN);
                 color = keyColor;
             }else  if(key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)){
-                bt.setBackgroundColor(lightColor);
-                bt.setTextColor(Color.WHITE);
+                editText.setBackgroundColor(lightColor);
+                editText.setTextColor(Color.WHITE);
                 color = lightColor;
+            }else  if(key.equals(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR)){
+                editText.setBackgroundColor(notifyColor);
+                editText.setTextColor(Color.WHITE);
+                color = notifyColor;
             }else{
-                bt.setBackgroundColor(bgcolor);
-                bt.setTextColor(textcolor);
+                editText.setBackgroundColor(bgcolor);
+                editText.setTextColor(textcolor);
                 isbg = Common.PREFS_SETTING_UI_TOASTBGCOLOR.equals(key);
                 color = (isbg?bgcolor:textcolor);
             }
@@ -102,6 +111,36 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
             redSb.setProgress(red);
             greenSb.setProgress(green);
             blueSb.setProgress(blue);
+            editText.setSelection(editText.getText().toString().length());
+            editText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    String c = s.toString();
+                    if(c.startsWith("#")&&c.length()==9){
+                        try {
+                            int cint = Color.parseColor(c);
+                            int alpha = (cint & 0xff000000) >>> 24;;
+                            int red = (cint & 0x00ff0000) >> 16;
+                            int green = (cint & 0x0000ff00) >> 8;
+                            int blue = (cint & 0x000000ff);
+                            sbAlpa.setProgress(alpha);
+                            redSb.setProgress(red);
+                            greenSb.setProgress(green);
+                            blueSb.setProgress(blue);
+                        }catch (Exception e){
+
+                        }
+                    }
+                }
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            });
         }
     }
 
@@ -114,12 +153,15 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         colorStr = changeHex(Integer.toHexString(sbAlpa.getProgress()))+changeHex(Integer.toHexString(redSb.getProgress()))+changeHex(Integer.toHexString(greenSb.getProgress()))+changeHex(Integer.toHexString(blueSb.getProgress()));
         Log.i("CONTROL","colorStr  "+colorStr);
-        if(key.equals(Common.PREFS_SETTING_UI_TOASTBGCOLOR)||key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
-            bt.setBackgroundColor(Color.parseColor("#"+colorStr));
-            bt.setText("#"+colorStr);
+        if(key.equals(Common.PREFS_SETTING_UI_TOASTBGCOLOR)||
+                key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)||
+                key.equals(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR)||
+                key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)){
+            editText.setBackgroundColor(Color.parseColor("#"+colorStr));
+            editText.setText("#"+colorStr);
         }else{
-            bt.setTextColor(Color.parseColor("#"+colorStr));
-            bt.setText("#"+colorStr);
+            editText.setTextColor(Color.parseColor("#"+colorStr));
+            editText.setText("#"+colorStr);
         }
     }
     @Override
@@ -132,13 +174,15 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
         colorStr = changeHex(Integer.toHexString(sbAlpa.getProgress()))+changeHex(Integer.toHexString(redSb.getProgress()))+changeHex(Integer.toHexString(greenSb.getProgress()))+changeHex(Integer.toHexString(blueSb.getProgress()));
         if(key.equals(Common.PREFS_SETTING_UI_TOASTBGCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)||
+                key.equals(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)){
-            bt.setBackgroundColor(Color.parseColor("#"+colorStr));
-            bt.setText("#"+colorStr);
+            editText.setBackgroundColor(Color.parseColor("#"+colorStr));
+            editText.setText("#"+colorStr);
         }else{
-            bt.setTextColor(Color.parseColor("#"+colorStr));
-            bt.setText("#"+colorStr);
+            editText.setTextColor(Color.parseColor("#"+colorStr));
+            editText.setText("#"+colorStr);
         }
+        editText.setSelection(editText.getText().toString().length());
     }
 
     public void okClick(View v){
@@ -165,6 +209,12 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 barPrefs.edit().putString(key,"#"+colorStr.substring(2)).commit();
                 WatchDogService.lightColor = "#"+colorStr.substring(2);
                 ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_TEST,this);
+            }else if(key.equals(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR)){
+                barPrefs.edit().putString(key,"#"+colorStr.substring(2)).commit();
+                Intent sysIntent = new Intent("com.click369.control.sysui.loadconfig");
+                sysIntent.putExtra("notifycolor","#"+colorStr.substring(2));
+                sendBroadcast(sysIntent);
+                Notify.testNotify(ColorSetActivity.this);
             }else{
                 barPrefs.edit().putInt(key,Color.parseColor("#"+colorStr)).commit();
             }

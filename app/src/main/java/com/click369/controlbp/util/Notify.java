@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.MainActivity;
@@ -60,5 +61,46 @@ public class Notify {
         NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // 取消通知
         nm.cancel(1);
+    }
+
+
+
+    public static void testNotify(Context context) {
+
+        final NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.cancel(0);
+        // 创建一个启动其他Activity的Intent
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        PendingIntent pi = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        final Notification notify = new Notification.Builder(context)
+                // 设置打开该通知，该通知自动消失
+                .setAutoCancel(true)
+                .setSmallIcon(R.mipmap.icon)
+                // 设置显示在状态栏的通知提示信息
+                // 设置通知内容的标题
+                .setContentTitle("这是一条测试通知")
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setContentIntent(pi)
+                .setFullScreenIntent(pi, true)
+                .getNotification();
+        Handler h = new Handler();
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // 发送通知
+                nm.notify(0, notify);
+            }
+        },500);
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 发送通知
+                    nm.cancel(0);
+                }catch (Exception e){
+                }
+            }
+        },3500);
     }
 }

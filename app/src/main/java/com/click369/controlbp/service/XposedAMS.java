@@ -1199,7 +1199,7 @@ public class XposedAMS {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         try {
                             WindowManager.LayoutParams attrs = (WindowManager.LayoutParams)param.args[0];
-                            if(isNeedFloadOnSys&&Common.PACKAGENAME.equals(attrs.packageName)&&attrs.type>2000){
+                            if(isNeedFloadOnSys&&Common.PACKAGENAME.equals(attrs.packageName)&&(attrs.type==2003||attrs.type==2015)){
                                 param.setResult(0);
                                 return;
                             }
@@ -1217,51 +1217,34 @@ public class XposedAMS {
             XposedBridge.log("CONTROL -----未找到PhoneWindowManager "+e);
         }
         try {
-            final Class notifyCls = XposedHelpers.findClass("com.android.server.notification.NotificationManagerService$NotificationListeners",lpparam.classLoader);
-            final Class managerCls = XposedHelpers.findClass("com.android.server.notification.ManagedServices",lpparam.classLoader);
-
-            Class clss[] = XposedUtil.getParmsByName(notifyCls,"notifyPostedLocked");
-            XC_MethodHook hook = new XC_MethodHook() {
+//            final Class notifyCls = XposedHelpers.findClass("com.android.server.notification.NotificationManagerService$NotificationListeners",lpparam.classLoader);
+//            final Class managerCls = XposedHelpers.findClass("com.android.server.notification.ManagedServices",lpparam.classLoader);
+            final Class nmsCls = XposedHelpers.findClass("com.android.server.notification.NotificationManagerService",lpparam.classLoader);
+            final Class sysCls = XposedHelpers.findClass("com.android.server.SystemService",lpparam.classLoader);
+//            Class clss[] = XposedUtil.getParmsByName(notifyCls,"notifyPostedLocked");
+            Class clss1[] = XposedUtil.getParmsByName(nmsCls,"enqueueNotificationInternal");
+            XC_MethodHook hook1 = new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                     try {
                         if (isSkipAdOpen&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                            StatusBarNotification sbn = (StatusBarNotification)methodHookParam.args[0];
-                            CharSequence title = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE);
-                            CharSequence text = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT);
-
-                            String apppkg = sbn.getPackageName();
-//
-//                            CharSequence t1 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_CONVERSATION_TITLE);
-//                            CharSequence t2 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_MESSAGES);
-//                            CharSequence t3 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT_LINES);
-//                            CharSequence t4 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_BIG_TEXT);
-//                            CharSequence t5 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_SUMMARY_TEXT);
-//                            CharSequence t6 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_INFO_TEXT);
-//                            CharSequence t7 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_SUB_TEXT);
-//                            CharSequence t8 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE_BIG);
-//                            XposedBridge.log(sbn.getPackageName()+" "+t1+"  "+t2+"  "+t3+"  "+t4+"  "+t5+"  "+t6+"  "+t7+"  "+t8+"  "+title+"  "+text+"  ");
-                            if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
-                                methodHookParam.setResult(null);
-                                return;
-                            } else if (text != null && text.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {
-                                methodHookParam.setResult(null);
-                                return;
-                            }
-//                            else if (title != null && text.toString().contains("应用控制器") && title.toString().contains("上层显示内容")) {
-//                                methodHookParam.setResult(null);
-//                                return;
-//                            }else if (text != null && text.toString().contains("应用控制器") && text.toString().contains("上层显示内容")) {
-//                                methodHookParam.setResult(null);
-//                                return;
-//                            }
-                            if (!Common.PACKAGENAME.equals(sbn.getPackageName())) {
-
-
+                            String apppkg = (String)methodHookParam.args[0];
+                            if (!Common.PACKAGENAME.equals(apppkg)) {
+//                                XposedBridge.log(apppkg+" notify "+title+" "+text);
                                 if (notifySkipKeyWords.size()>0){
-                                    Field cxtField = managerCls.getDeclaredField("mContext");
+                                    Notification not = (Notification)methodHookParam.args[6];
+                                    CharSequence title = (CharSequence) not.extras.get(Notification.EXTRA_TITLE);
+                                    CharSequence text = (CharSequence) not.extras.get(Notification.EXTRA_TEXT);
+                                    if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    } else if (text != null && text.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    }
+                                    Method cxtField = sysCls.getDeclaredMethod("getContext");
                                     cxtField.setAccessible(true);
-                                    Context cxtObject = (Context)cxtField.get(methodHookParam.thisObject);
+                                    Context cxtObject = (Context)cxtField.invoke(methodHookParam.thisObject);
                                     PackageManager pm = cxtObject.getPackageManager();
                                     PackageInfo packageInfo = pm.getPackageInfo(apppkg,PackageManager.GET_GIDS);
                                     String appName = null;
@@ -1287,13 +1270,86 @@ public class XposedAMS {
                             }
                         }
                     } catch (Throwable e) {
-                        XposedBridge.log("^^^^^^^^^^^^^^XposedStartListener notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
+                        XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
                     }
                 }
             };
-            if(clss!=null){
-                XposedUtil.hookMethod(notifyCls, clss, "notifyPostedLocked",hook);
+
+            if(clss1!=null){
+                XposedUtil.hookMethod(nmsCls, clss1, "enqueueNotificationInternal",hook1);
             }
+//            XC_MethodHook hook = new XC_MethodHook() {
+//                @Override
+//                protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                    try {
+//                        if (isSkipAdOpen&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//
+////                            Object o = methodHookParam.args[0] instanceof StatusBarNotification ? methodHookParam.args[0] : methodHookParam.args[1];
+////                            if (o instanceof StatusBarNotification) {
+//                                StatusBarNotification sbn = (StatusBarNotification)methodHookParam.args[0];
+////                                StatusBarNotification oldsbn = (StatusBarNotification)methodHookParam.args[1];
+//                                CharSequence title = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE);
+//                                CharSequence text = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT);
+////                                CharSequence title = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE);
+////                                CharSequence text = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT);
+//
+//                                String apppkg = sbn.getPackageName();
+////
+////                            CharSequence t1 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_CONVERSATION_TITLE);
+////                            CharSequence t2 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_MESSAGES);
+////                            CharSequence t3 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TEXT_LINES);
+////                            CharSequence t4 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_BIG_TEXT);
+////                            CharSequence t5 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_SUMMARY_TEXT);
+////                            CharSequence t6 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_INFO_TEXT);
+////                            CharSequence t7 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_SUB_TEXT);
+////                            CharSequence t8 = (CharSequence) sbn.getNotification().extras.get(Notification.EXTRA_TITLE_BIG);
+////                            XposedBridge.log(sbn.getPackageName()+" "+t1+"  "+t2+"  "+t3+"  "+t4+"  "+t5+"  "+t6+"  "+t7+"  "+t8+"  "+title+"  "+text+"  ");
+//                                if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
+//                                    methodHookParam.setResult(null);
+//                                    return;
+//                                } else if (text != null && text.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {
+//                                    methodHookParam.setResult(null);
+//                                    return;
+//                                }
+//                                if (!Common.PACKAGENAME.equals(sbn.getPackageName())) {
+//                                    if (notifySkipKeyWords.size()>0){
+//                                        Field cxtField = managerCls.getDeclaredField("mContext");
+//                                        cxtField.setAccessible(true);
+//                                        Context cxtObject = (Context)cxtField.get(methodHookParam.thisObject);
+//                                        PackageManager pm = cxtObject.getPackageManager();
+//                                        PackageInfo packageInfo = pm.getPackageInfo(apppkg,PackageManager.GET_GIDS);
+//                                        String appName = null;
+//                                        if(packageInfo.applicationInfo!=null&&packageInfo.applicationInfo.loadLabel(pm)!=null){
+//                                            appName = packageInfo.applicationInfo.loadLabel(pm).toString();
+//                                        }
+//                                        for(String s:notifySkipKeyWords){
+//                                            if (title != null && title.toString().contains(s)) {
+//                                                methodHookParam.setResult(null);
+//                                                return;
+//                                            } else if (text != null && text.toString().contains(s)) {
+//                                                methodHookParam.setResult(null);
+//                                                return;
+//                                            }else if (apppkg != null && apppkg.toString().equals(s)) {
+//                                                methodHookParam.setResult(null);
+//                                                return;
+//                                            }else if (appName != null && appName.equals(s)) {
+//                                                methodHookParam.setResult(null);
+//                                                return;
+//                                            }
+//                                        }
+//                                    }
+//                                }
+////                            }
+//                        }
+//                    } catch (Throwable e) {
+//                        XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
+//                    }
+//                }
+//            };
+//            if(clss!=null){
+////                XposedUtil.hookMethod(notifyCls, clss, "notifyPostedLocked",hook);
+//            }
+
         } catch (RuntimeException e){
             e.printStackTrace();
         }catch (XposedHelpers.ClassNotFoundError e){
@@ -1303,5 +1359,4 @@ public class XposedAMS {
         }
 
     }
-
 }

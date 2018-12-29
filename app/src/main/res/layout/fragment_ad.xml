@@ -67,6 +67,7 @@
                     android:layout_height="match_parent"
                     android:id="@+id/textView5"
                     android:layout_weight="7"
+                    android:text="优请先使用模式三"
                     android:textAlignment="gravity"
                     android:gravity="left|center" />
 

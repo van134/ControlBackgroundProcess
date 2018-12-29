@@ -30,7 +30,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  */
 public class XposedActivity {
     private static long downtime = 0;
-    private static long sddowntime = 0;
+//    private static long sddowntime = 0;
     private static Activity act = null;
     private static Handler handler = new Handler();
     private static boolean isDown = false;
@@ -78,8 +78,9 @@ public class XposedActivity {
                                 height = dm.heightPixels;
                                 width = dm.widthPixels;
                             }
+                            int action = me.getAction();
 //                            XposedBridge.log(act.getPackageName()+" x "+x+"  y "+y+"  "+me.getAction());
-                            if(x>(width*3/7)&&x<(width*4/7)&&y<(height*1/10)) {
+                            if(x>(width*3/7)&&x<(width*4/7)&&y<(height*1/10)&&(action==MotionEvent.ACTION_DOWN||isDown==true)) {
                                 Configuration config = act.getResources().getConfiguration();
                                 // 如果当前是横屏
                                 if (config.orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -91,8 +92,8 @@ public class XposedActivity {
                                             break;
                                         case MotionEvent.ACTION_UP:
                                             handler.removeCallbacks(r);
-                                            isDown = false;
-                                            if(System.currentTimeMillis()-downtime>=600){
+                                            if(System.currentTimeMillis()-downtime>=600&&isDown){
+                                                isDown = false;
                                                 methodHookParam.setResult(true);
                                                 return;
                                             }
@@ -104,7 +105,7 @@ public class XposedActivity {
                                             break;
                                     }
                                 }
-                            }else if(x>(width*22/23)&&y<(height*1/8)) {
+                            }else if(x>(width*22/23)&&y<(height*1/8)&&(action==MotionEvent.ACTION_DOWN||isDown==true)) {
                                 Configuration config = act.getResources().getConfiguration();
                                 // 如果当前是横屏
                                 if (config.orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -114,19 +115,17 @@ public class XposedActivity {
                                             case MotionEvent.ACTION_DOWN:
                                                 isDown = true;
                                                 handler.postDelayed(rsd,400);
-                                                sddowntime = System.currentTimeMillis();
+//                                                sddowntime = System.currentTimeMillis();
                                                 methodHookParam.setResult(true);
                                                 return;
-//                                            break;
                                             case MotionEvent.ACTION_UP:
                                                 handler.removeCallbacks(rsd);
-                                                isDown = false;
-//                                            if(System.currentTimeMillis()-sddowntime>=400){
-                                                methodHookParam.setResult(true);
-
-                                                return;
-//                                            }
-//                                            break;
+                                                if(isDown){
+                                                    isDown = false;
+                                                    methodHookParam.setResult(true);
+                                                    return;
+                                                }
+                                                break;
                                             case MotionEvent.ACTION_CANCEL:
                                             case MotionEvent.ACTION_OUTSIDE:
                                                 handler.removeCallbacks(rsd);

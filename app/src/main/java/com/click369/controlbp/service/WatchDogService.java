@@ -20,11 +20,13 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.activity.AlarmActivity;
 import com.click369.controlbp.activity.AppConfigActivity;
 import com.click369.controlbp.activity.BaseActivity;
@@ -33,6 +35,7 @@ import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.activity.RunningActivity;
 import com.click369.controlbp.activity.ShowDialogActivity;
 import com.click369.controlbp.activity.WakeLockActivity;
+import com.click369.controlbp.common.TestDataInit;
 import com.click369.controlbp.fragment.UIControlFragment;
 import com.click369.controlbp.activity.UnLockActivity;
 import com.click369.controlbp.bean.AppInfo;
@@ -267,6 +270,10 @@ public class WatchDogService extends Service {
         cpuPrefs = SharedPrefsUtil.getInstance(this).cpuPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_SETCPU);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         skipDialogPrefs = SharedPrefsUtil.getInstance(this).skipDialogPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_SETCPU);//getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
 //        muBeiPrefs.edit().clear().commit();
+        int saveCode = settings.getInt(Common.BUILDCODE,0);
+        if(saveCode!= BuildConfig.VERSION_CODE) {
+            TestDataInit.init(this);
+        }
         removeImp();
         appLoader = AppLoaderUtil.getInstance(WatchDogService.this);
         appLoader.addAppChangeListener(appLoadListener);
@@ -892,7 +899,7 @@ public class WatchDogService extends Service {
                    nowOff+= System.currentTimeMillis()-batteryOffScTime;
                    batteryInfos.put(102,nowOff);
                }
-               if(isLightMusic&&audioManager.isMusicActive()&&musicPlayPkg.length()>0){
+               if(isLightMusic&&audioManager.isMusicActive()&& !TextUtils.isEmpty(musicPlayPkg)){
                    ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MUSIC,WatchDogService.this);
                }else if(NotificationService.notifyLights.size()>0){
                    NotificationService.notifyLights.clear();
@@ -1451,8 +1458,7 @@ public class WatchDogService extends Service {
             sendBroadcast(intent1);
         }
 //        Log.i("CONTROL","---apk："+ apk+"  ---cls："+ cls);
-        if (apk==null||
-            apk.trim().length()==0||
+        if (TextUtils.isEmpty(apk)||
             ContainsKeyWord.isContainsNotListenerApk(apk)||
             isScreenOff||
                 (Common.PACKAGENAME.equals(apk)&&(AppConfigActivity.class.getName().equals(cls)||
@@ -1550,7 +1556,7 @@ public class WatchDogService extends Service {
     public static HashSet<String> getLauncherPackageName(Context context) {
         HashSet<String> packageNames = new HashSet<String>();
         String hpkg = getDefaultHome(context);
-        if(hpkg!=null&&hpkg.length()>0){
+        if(!TextUtils.isEmpty(hpkg)){
             packageNames.add(hpkg);
         }else{
             final Intent intent = new Intent(Intent.ACTION_MAIN);

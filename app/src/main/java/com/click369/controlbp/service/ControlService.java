@@ -1,50 +1,24 @@
 package com.click369.controlbp.service;
 
-import android.app.Activity;
-import android.app.Application;
-import android.content.ClipboardManager;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.Environment;
-import android.os.Handler;
-
-import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.common.Common;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
-import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 
 public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPackage{//,IXposedHookInitPackageResources
-//	private static final String TAG = ControlService.class.getSimpleName();
 	private XSharedPreferences controlPrefs,
 		wakeLockPrefs,alarmPrefs,settingPrefs,
-		autoStartPrefs,barPrefs,recentPrefs,dozePrefs;
-	private XSharedPreferences pmPrefs,testPrefs,adPrefs,tvPrefs,dialogPrefs;
+		autoStartPrefs,barPrefs,recentPrefs,dozePrefs,
+	    pmPrefs,testPrefs,adPrefs,tvPrefs,dialogPrefs;
 	@Override
 	public void initZygote(IXposedHookZygoteInit.StartupParam paramStartupParam) throws Throwable {
-//		loadPrefs();
 		initData();
-//		SharedPreferences modPrefs = getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_PRIVATE);
 	}
 
 	private void initData(){
@@ -61,7 +35,6 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 		adPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_ADLIST);
 		tvPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_TVLIST);
 		pmPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_PMLIST);
-//		muBeiPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_MUBEILIST);
 		dialogPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_SKIPDIALOG);
 		controlPrefs.makeWorldReadable();
 		wakeLockPrefs.makeWorldReadable();
@@ -110,14 +83,8 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			boolean isTwoOpen = settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true);
 			if (isOneOpen||isTwoOpen){
 				boolean isMubeiStopOther = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,false);
-//				XposedService.loadPackage(lpparam, controlPrefs,wakeLockPrefs,muBeiPrefs,isOneOpen,isTwoOpen,isMubeiStopBroad);
-//				if(wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)){
-					XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
-//				}
-//				if(alarmPrefs.getBoolean(Common.PREFS_SETTING_ALARM_LOOK,false)){
-					XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
-//				}
-//				XposedBroadCast.loadPackage(lpparam, controlPrefs, muBeiPrefs, isOneOpen, isTwoOpen, isMubeiStopBroad);
+				XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
+				XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,isOneOpen,isTwoOpen,isMubeiStopOther);
 			}
 			if (settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true)){
 				XposedAccessKeyListener.loadPackage(lpparam,testPrefs);
@@ -134,7 +101,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			}
 			//如果不用辅助服务 则用hook形式处理
 			if (settingPrefs.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true)){
-				XposedStartListener.loadPackage(lpparam);
+				XposedStartListenerNotify.loadPackage(lpparam);
 			}
 
 			if (isUIChangeOpen){
@@ -154,9 +121,8 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 				int h = settingPrefs.getInt(Common.PREFS_SETTING_SCREENHEIGHT,0);
 				XposedActivity.loadPackage(lpparam,isLongClickOpenConfig,w,h);
 			}
-
 			XposedEnd.loadPackage(lpparam,settingPrefs,autoStartPrefs,controlPrefs);
-
+//			XposedNotifyBackground.loadPackage(lpparam);
 		}catch (Throwable e){
 			XposedBridge.log(lpparam.packageName+"^^^^^^^^^^^^^重要！！！ MAIN  HOOK出错"+e+"^^^^^^^^^^^^^^^");
 		}

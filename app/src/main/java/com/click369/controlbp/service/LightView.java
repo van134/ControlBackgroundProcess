@@ -358,8 +358,10 @@ public class LightView extends View {
                             animationset.start();
                             return;
                         }
-                        initBm();
                         wmParams.type = RoundedCornerService.floatLeve;
+//                        wmParams.width = getContext().getResources().getDisplayMetrics().widthPixels;
+//                        wmParams.height = ScreenLightServiceUtil.getHasVirtualKey(widowManager);
+                        initBm();
                         widowManager.addView(fl, wmParams);
                         setAlpha(0.0f);
                         setVisibility(View.VISIBLE);

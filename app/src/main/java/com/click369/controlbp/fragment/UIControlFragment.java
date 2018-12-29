@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
@@ -32,7 +33,11 @@ import com.click369.controlbp.service.ScreenLightServiceUtil;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedToast;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.FileUtil;
+import com.click369.controlbp.util.Notify;
 import com.click369.controlbp.util.SharedPrefsUtil;
+
+import java.io.File;
 
 
 public class UIControlFragment extends BaseFragment {
@@ -40,22 +45,23 @@ public class UIControlFragment extends BaseFragment {
             toastFontColorTv,keyColorTv,toastPositionTv,
             corTv,topCorTv,roundSizeTv,recentRoundSizeTv,
             recentAlphaTv,lightSizeTv,lightWidthTv,lightOffsetTv,
-            lightSpeedTv,lightWeiZhiTv,lightColorTv,lightXiaoGuoTv;
+            lightSpeedTv,lightWeiZhiTv,lightColorTv,lightXiaoGuoTv,
+            notifyAlphaTv,notifySetColorTv;
     private String lightSpeedNames[] = {"快速","中速","慢速"};
     private String lightWeiZhiNames[] = {"左右","上下","上下左右"};
     private String lightXiaoGuoNames[] = {"小弧度","直线","大弧度"};
     private SeekBar toastPositionSb,corOffsetSb,corTopOffsetSb,
-            roundSizeSb,recentRoundSizeSb,recentAlphaSb,lightSizeSb,lightWidthSb,lightOffsetSb;
+            roundSizeSb,recentRoundSizeSb,recentAlphaSb,lightSizeSb,lightWidthSb,lightOffsetSb,notifyAlphaSb;
     private Switch topBarSw,bottomBarSw,alwaysColorSw,bottomDengTopSw,
             toastSw,keyColorSw,roundSw,recentBarColorSw,recentBarHideSw,
             recentMemSw,recentInfoSw,actInfoSw,lightMsgSw,lightCallSw,
             lightModeSw,lightScOnSw,lightMusicSw,lightChargeSw,lightScaleSw,
-            flashNotifySw,flashCallSw,floatOnSysSw;
-    private FrameLayout lightColorFl,lightWidthFl;
+            flashNotifySw,flashCallSw,floatOnSysSw,notifyColorSw,notifyRandomColorSw,notifyImgFileSw;
+    private FrameLayout lightColorFl,lightWidthFl,notifyColorFl;
     private int curColor = Color.BLACK;
     private int toastBgColor = Color.BLACK,toastTextColor = Color.WHITE,
             toastGrivity,toastPostion = 0;
-    private int lightSize = 8,lightWidth = 100,lightOffset = 0,lightSpeed = 1,lightWeiZhi=0,lightXiaoGuo = 0;
+    private int lightSize = 8,lightWidth = 100,lightOffset = 0,lightSpeed = 1,lightWeiZhi=0,lightXiaoGuo = 0,notifyAlpha=100;
     private SharedPreferences barPrefs;
     public UIControlFragment() {
     }
@@ -70,6 +76,7 @@ public class UIControlFragment extends BaseFragment {
         View v = inflater.inflate(R.layout.fragment_uicontrol, container, false);
         lightColorFl = (FrameLayout) v.findViewById(R.id.ui_light_color_fl);
         lightWidthFl = (FrameLayout) v.findViewById(R.id.ui_light_width_fl);
+        notifyColorFl = (FrameLayout) v.findViewById(R.id.ui_notify_setcolor_fl);
         recentBarColorSw = (Switch) v.findViewById(R.id.ui_recentbar_color_sw);
         recentBarHideSw = (Switch) v.findViewById(R.id.ui_recentbar_hide_sw);
         recentMemSw = (Switch) v.findViewById(R.id.ui_recentbar_mem_sw);
@@ -92,6 +99,9 @@ public class UIControlFragment extends BaseFragment {
         flashNotifySw = (Switch) v.findViewById(R.id.ui_flash_notify_sw);
         flashCallSw = (Switch) v.findViewById(R.id.ui_flash_call_sw);
         floatOnSysSw = (Switch) v.findViewById(R.id.ui_light_floatonsys_sw);
+        notifyColorSw = (Switch) v.findViewById(R.id.ui_notify_color_sw);
+        notifyRandomColorSw = (Switch) v.findViewById(R.id.ui_notify_colorrandom_sw);
+        notifyImgFileSw = (Switch) v.findViewById(R.id.ui_notify_imgbg_sw);
 
         keyColorTv = (TextView) v.findViewById(R.id.ui_key_color_tv);
         blackListTv = (TextView) v.findViewById(R.id.ui_blacklist_tv);
@@ -111,6 +121,8 @@ public class UIControlFragment extends BaseFragment {
         lightWeiZhiTv = (TextView) v.findViewById(R.id.ui_light_weizhi_tv);
         lightColorTv = (TextView) v.findViewById(R.id.ui_light_color_tv);
         lightXiaoGuoTv = (TextView) v.findViewById(R.id.ui_light_xiaoguo_tv);
+        notifySetColorTv = (TextView) v.findViewById(R.id.ui_notify_setcolor_tv);
+        notifyAlphaTv = (TextView) v.findViewById(R.id.ui_notify_alpha_tv);
 
         toastPositionSb = (SeekBar) v.findViewById(R.id.ui_toast_position_sb);
         corOffsetSb = (SeekBar) v.findViewById(R.id.ui_round_offset_sb);
@@ -121,6 +133,7 @@ public class UIControlFragment extends BaseFragment {
         lightSizeSb = (SeekBar) v.findViewById(R.id.ui_light_size_sb);
         lightWidthSb = (SeekBar) v.findViewById(R.id.ui_light_width_sb);
         lightOffsetSb = (SeekBar) v.findViewById(R.id.ui_light_offset_sb);
+        notifyAlphaSb = (SeekBar) v.findViewById(R.id.ui_notify_alpha_sb);
         curColor = blackListTv.getCurrentTextColor();
         recentBarColorSw.setTextColor(curColor);
         recentBarHideSw.setTextColor(curColor);
@@ -144,6 +157,9 @@ public class UIControlFragment extends BaseFragment {
         flashNotifySw.setTextColor(curColor);
         flashCallSw.setTextColor(curColor);
         floatOnSysSw.setTextColor(curColor);
+        notifyColorSw.setTextColor(curColor);
+        notifyImgFileSw.setTextColor(curColor);
+        notifyRandomColorSw.setTextColor(curColor);
         ItemClick itemClick = new ItemClick();
         blackListTv.setOnClickListener(itemClick);
         toastGrvityTv.setOnClickListener(itemClick);
@@ -154,6 +170,7 @@ public class UIControlFragment extends BaseFragment {
         lightWeiZhiTv.setOnClickListener(itemClick);
         lightColorTv.setOnClickListener(itemClick);
         lightXiaoGuoTv.setOnClickListener(itemClick);
+        notifySetColorTv.setOnClickListener(itemClick);
 
         topBarSw.setTag(0);
         bottomBarSw.setTag(1);
@@ -176,6 +193,9 @@ public class UIControlFragment extends BaseFragment {
         flashNotifySw.setTag(18);
         flashCallSw.setTag(19);
         floatOnSysSw.setTag(20);
+        notifyColorSw.setTag(21);
+        notifyRandomColorSw.setTag(22);
+        notifyImgFileSw.setTag(23);
 //        activityManager = (ActivityManager)getActivity().getSystemService(Context.ACTIVITY_SERVICE);
         barPrefs = SharedPrefsUtil.getInstance(getActivity()).uiBarPrefs;//;SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_UIBARLIST);//getActivity().getSharedPreferences(Common.PREFS_APPSETTINGS,Context.MODE_WORLD_READABLE);
         recentBarColorSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_RECENTBARCOLOR,false));
@@ -199,7 +219,12 @@ public class UIControlFragment extends BaseFragment {
         flashCallSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_FLASHCALL,false));
         floatOnSysSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_ISNEEDFLOATONSYS,false));
         roundSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_ROUNDOPEN,false));
+        notifyColorSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_COLOROPEN,false));
+        notifyRandomColorSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_RANDOMCOLOR,false));
+        notifyImgFileSw.setChecked(barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_ISUSEIMGFILE,false));
         lightColorFl.setVisibility(lightModeSw.isChecked()?View.GONE:View.VISIBLE);
+        notifyColorFl.setVisibility((notifyImgFileSw.isChecked()||notifyRandomColorSw.isChecked())?View.GONE:View.VISIBLE);
+        notifyRandomColorSw.setEnabled(notifyImgFileSw.isChecked()?false:true);
         if(!roundSw.isChecked()){
             roundSizeSb.setEnabled(false);
             corOffsetSb.setEnabled(false);
@@ -209,6 +234,12 @@ public class UIControlFragment extends BaseFragment {
             corTopOffsetSb.setAlpha(0.5f);
             roundSizeSb.setAlpha(0.5f);
             actInfoSw.setAlpha(0.5f);
+        }
+        if (!notifyColorSw.isChecked()){
+            notifyRandomColorSw.setEnabled(false);
+            notifySetColorTv.setEnabled(false);
+            notifyAlphaSb.setEnabled(false);
+            notifyImgFileSw.setEnabled(false);
         }
 
         SwCheckListener swLis = new SwCheckListener();
@@ -233,6 +264,9 @@ public class UIControlFragment extends BaseFragment {
         flashNotifySw.setOnCheckedChangeListener(swLis);
         flashCallSw.setOnCheckedChangeListener(swLis);
         floatOnSysSw.setOnCheckedChangeListener(swLis);
+        notifyColorSw.setOnCheckedChangeListener(swLis);
+        notifyRandomColorSw.setOnCheckedChangeListener(swLis);
+        notifyImgFileSw.setOnCheckedChangeListener(swLis);
 
         lightWidth = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTWIDTH, 100);
         lightSize = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTSIZE, 8);
@@ -240,18 +274,21 @@ public class UIControlFragment extends BaseFragment {
         lightSpeed = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTSPEED, 1);
         lightWeiZhi = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTWEIZHI, 0);
         lightXiaoGuo = barPrefs.getInt(Common.PREFS_SETTING_UI_LIGHTXIAOGUO, 0);
+        notifyAlpha = barPrefs.getInt(Common.PREFS_SETTING_UI_NOTIFY_ALPHA, 100);
         lightWidthTv.setText("边沿呼吸距离:"+lightWidth+"%");
         lightSizeTv.setText("边沿呼吸粗细:"+lightSize+"%");
         lightOffsetTv.setText("边沿呼吸纵向偏移:"+lightOffset);
         lightSpeedTv.setText("边沿呼吸速度（点击切换）:"+lightSpeedNames[lightSpeed]);
         lightWeiZhiTv.setText("边沿呼吸位置（点击切换）:"+lightWeiZhiNames[lightWeiZhi]);
         lightXiaoGuoTv.setText("边沿呼吸效果（点击切换）:"+lightXiaoGuoNames[lightXiaoGuo]);
+        notifyAlphaTv.setText("消息通知背景不透明度:"+notifyAlpha+"%");
         lightWidthFl.setVisibility(lightXiaoGuo==1?View.GONE:View.VISIBLE);
 
 
         lightWidthSb.setProgress(lightWidth);
         lightSizeSb.setProgress(lightSize);
         lightOffsetSb.setProgress(lightOffset);
+        notifyAlphaSb.setProgress(notifyAlpha);
         toastGrivity = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTGRIVITY, Gravity.BOTTOM);
         toastBgColor = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTBGCOLOR, Color.BLACK);
         toastTextColor = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTTEXTCOLOR, Color.WHITE);
@@ -284,6 +321,7 @@ public class UIControlFragment extends BaseFragment {
         lightWidthSb.setOnSeekBarChangeListener(sbl);
         lightSizeSb.setOnSeekBarChangeListener(sbl);
         lightOffsetSb.setOnSeekBarChangeListener(sbl);
+        notifyAlphaSb.setOnSeekBarChangeListener(sbl);
         toastPositionSb.setTag(0);
         corOffsetSb.setTag(1);
         roundSizeSb.setTag(2);
@@ -293,6 +331,7 @@ public class UIControlFragment extends BaseFragment {
         lightSizeSb.setTag(6);
         lightWidthSb.setTag(7);
         lightOffsetSb.setTag(8);
+        notifyAlphaSb.setTag(9);
         if (!keyColorSw.isChecked()){
             keyColorTv.setEnabled(false);
             keyColorTv.setAlpha(0.4f);
@@ -334,7 +373,8 @@ public class UIControlFragment extends BaseFragment {
                         Common.PREFS_SETTING_UI_LIGHTSCON,Common.PREFS_SETTING_UI_LIGHTMUSIC,
                         Common.PREFS_SETTING_UI_LIGHTCHARGE,Common.PREFS_SETTING_UI_LIGHTANIMSCALE,
                         Common.PREFS_SETTING_UI_FLASHNOTIFY,Common.PREFS_SETTING_UI_FLASHCALL,
-                        Common.PREFS_SETTING_UI_ISNEEDFLOATONSYS};
+                        Common.PREFS_SETTING_UI_ISNEEDFLOATONSYS,Common.PREFS_SETTING_UI_NOTIFY_COLOROPEN,
+                        Common.PREFS_SETTING_UI_NOTIFY_RANDOMCOLOR,Common.PREFS_SETTING_UI_NOTIFY_ISUSEIMGFILE};
                 if (buttonView.equals(keyColorSw)){
                     if (isChecked){
                         keyColorTv.setEnabled(true);
@@ -349,23 +389,6 @@ public class UIControlFragment extends BaseFragment {
                 }
                     if(index == 5){
                         if(isChecked){
-//                            if ((Build.VERSION.SDK_INT >=Build.VERSION_CODES.M&&!Settings.canDrawOverlays(getActivity()))) {
-//                                buttonView.setChecked(false);
-//                                barPrefs.edit().putBoolean(keys[index],false);
-//                                AlertUtil.showConfirmAlertMsg(getActivity(), "该功能需要打开允许应用控制器在上层显示选项，是否去打开？", new AlertUtil.InputCallBack() {
-//                                    @Override
-//                                    public void backData(String txt, int tag) {
-//                                        if(tag == 1){
-//                                            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-//                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                                            startActivityForResult(intent, 1);
-//                                        }
-//                                    }
-//                                });
-//                                return;
-//                            }else if(Build.VERSION.SDK_INT <Build.VERSION_CODES.M){
-//                                Toast.makeText(getActivity(),"请确保允许应用控制器在上层显示",Toast.LENGTH_SHORT).show();
-//                            }
                             corOffsetSb.setEnabled(true);
                             roundSizeSb.setEnabled(true);
                             corTopOffsetSb.setEnabled(true);
@@ -465,11 +488,53 @@ public class UIControlFragment extends BaseFragment {
                         }else{
                             WatchDogService.isNeedGetFloatPremission = false;
                         }
+                        if(isChecked){
+                            AlertUtil.showAlertMsg(getActivity(),"如果打开后出现无法进入应用控制器就证明系统不支持（白屏或黑屏）出现此问题请到xp框架中去掉应用控制器的勾选并重启手机，再次进入应用控制器后关闭该选项。");
+                        }
                         Intent intent = new Intent("com.click369.control.ams.float.checkxp");
                         intent.putExtra("isNeedFloadOnSys",WatchDogService.isNeedFloatOnSys);
                         getActivity().sendBroadcast(intent);
 //                        Log.i("CONTROL----1","WatchDogService.isNeedFloatOnSys  "+WatchDogService.isNeedFloatOnSys);
                         checkAndStartRound(getActivity(),true);
+                    }else if(index == 21){
+                        Intent sysIntent = new Intent("com.click369.control.sysui.loadconfig");
+                        sysIntent.putExtra("isnotifycoloropen",isChecked);
+                        getActivity().sendBroadcast(sysIntent);
+                        if (!notifyColorSw.isChecked()){
+                            notifyRandomColorSw.setEnabled(false);
+                            notifySetColorTv.setEnabled(false);
+                            notifyAlphaSb.setEnabled(false);
+                            notifyImgFileSw.setEnabled(false);
+                        }else{
+                            notifyRandomColorSw.setEnabled(true);
+                            notifySetColorTv.setEnabled(true);
+                            notifyAlphaSb.setEnabled(true);
+                            notifyImgFileSw.setEnabled(true);
+                        }
+                        Notify.testNotify(getContext());
+                    }else if(index == 22){
+                        Intent sysIntent = new Intent("com.click369.control.sysui.loadconfig");
+                        sysIntent.putExtra("israndomnotifycolor",isChecked);
+                        getActivity().sendBroadcast(sysIntent);
+                        notifyColorFl.setVisibility((notifyImgFileSw.isChecked()||notifyRandomColorSw.isChecked())?View.GONE:View.VISIBLE);
+                        Notify.testNotify(getContext());
+                    }else if(index == 23){
+                        Intent sysIntent = new Intent("com.click369.control.sysui.loadconfig");
+                        sysIntent.putExtra("notifyuseimgfile",isChecked);
+                        getActivity().sendBroadcast(sysIntent);
+                       if(isChecked){
+                           File f = new File(Environment.getExternalStorageDirectory()+File.separator+"processcontrol","nb.jpg");
+                           if(!f.exists()){
+                               f =  new File(Environment.getExternalStorageDirectory()+File.separator+"processcontrol","nb.png");
+                           }
+//                           Log.i("CONTROL",f.getAbsolutePath());
+                           if(!f.exists()){
+                               FileUtil.copyAssets(getActivity(),"nb.png",f.getAbsolutePath());
+                           }
+                       }
+                        notifyColorFl.setVisibility((notifyImgFileSw.isChecked()||notifyRandomColorSw.isChecked())?View.GONE:View.VISIBLE);
+                        notifyRandomColorSw.setEnabled(notifyImgFileSw.isChecked()?false:true);
+                        Notify.testNotify(getContext());
                     }else{
                         XposedToast.makeToast(getContext(), "重启手机或杀死当前运行的其他应用后生效", Toast.LENGTH_LONG,toastGrivity,toastBgColor,toastTextColor,toastPostion).show();
                     }
@@ -503,22 +568,22 @@ public class UIControlFragment extends BaseFragment {
                     }
                 }
             });
-        }else if(isChecked){
+        }else if(WatchDogService.isHasXPFloatVewPermission||WatchDogService.isHasSysFloatVewPermission){
             startRound(cxt);
         }
     }
 
     public static void startRound(Context cxt){
-        if(WatchDogService.isRoundCorOpen||
-                WatchDogService.isLightCall||
-                WatchDogService.isLightScOn||
-                WatchDogService.isLightMusic||
-                WatchDogService.isLightCharge||
-                WatchDogService.isLightMsg){
+//        if(WatchDogService.isRoundCorOpen||
+//                WatchDogService.isLightCall||
+//                WatchDogService.isLightScOn||
+//                WatchDogService.isLightMusic||
+//                WatchDogService.isLightCharge||
+//                WatchDogService.isLightMsg){
             Intent intent = new Intent("com.click369.control.float.checkxp");
             cxt.sendBroadcast(intent);
-            Log.i("CONTROL----","WatchDogService.isNeedFloatOnSys  "+WatchDogService.isNeedFloatOnSys);
-        }
+//            Log.i("CONTROL----","WatchDogService.isNeedFloatOnSys  "+WatchDogService.isNeedFloatOnSys);
+//        }
     }
 
     class ItemClick implements View.OnClickListener{
@@ -608,8 +673,13 @@ public class UIControlFragment extends BaseFragment {
                     startActivity(intent);
                 }else if(v.equals(lightColorTv)){
                     Intent intent = new Intent(getActivity(),ColorSetActivity.class);
-                    intent.putExtra("data","边沿呼吸颜色");
+                    intent.putExtra("data","边缘呼吸颜色");
                     intent.putExtra("key",Common.PREFS_SETTING_UI_LIGHTCOLOR);
+                    startActivity(intent);
+                }else if(v.equals(notifySetColorTv)){
+                    Intent intent = new Intent(getActivity(),ColorSetActivity.class);
+                    intent.putExtra("data","消息通知颜色");
+                    intent.putExtra("key",Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR);
                     startActivity(intent);
                 }
             }else{
@@ -631,7 +701,8 @@ public class UIControlFragment extends BaseFragment {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             int tag= (Integer) seekBar.getTag();
             String names[] = {"Toast位置偏移:","底部圆角偏移:","圆角半径:","最近任务卡片圆角半径:",
-                    "最近任务卡片不透明度:","顶部圆角偏移:","边沿呼吸粗细:","边沿呼吸距离:","边沿呼吸纵向偏移:"};
+                    "最近任务卡片不透明度:","顶部圆角偏移:","边沿呼吸粗细:","边沿呼吸距离:",
+                    "边沿呼吸纵向偏移:","消息通知背景不透明度:"};
             if (tag == 1||tag == 2||tag == 5){
                 h.removeCallbacks(r);
                 h.postDelayed(r,100);
@@ -654,6 +725,8 @@ public class UIControlFragment extends BaseFragment {
                 lightWidthTv.setText(names[tag]+seekBar.getProgress()+"%");
             }else if (tag==8){
                 lightOffsetTv.setText(names[tag]+seekBar.getProgress());
+            }else if (tag==9){
+                notifyAlphaTv.setText(names[tag]+seekBar.getProgress()+"%");
             }
         }
         @Override
@@ -666,7 +739,8 @@ public class UIControlFragment extends BaseFragment {
             String keys[] = {Common.PREFS_SETTING_UI_TOASTPOSTION,Common.PREFS_SETTING_UI_ROUNDOFFSET,
                     Common.PREFS_SETTING_UI_ROUNDSIZE,Common.PREFS_SETTING_UI_RECENTBARROUNDNUM,
                     Common.PREFS_SETTING_UI_RECENTBARALPHANUM,Common.PREFS_SETTING_UI_ROUNDTOPOFFSET,
-            Common.PREFS_SETTING_UI_LIGHTSIZE,Common.PREFS_SETTING_UI_LIGHTWIDTH,Common.PREFS_SETTING_UI_LIGHTOFFSET};
+            Common.PREFS_SETTING_UI_LIGHTSIZE,Common.PREFS_SETTING_UI_LIGHTWIDTH,
+                    Common.PREFS_SETTING_UI_LIGHTOFFSET,Common.PREFS_SETTING_UI_NOTIFY_ALPHA};
             barPrefs.edit().putInt(keys[tag],seekBar.getProgress()).commit();
             BaseActivity.zhenDong(getContext());
             if(tag == 0){
@@ -685,7 +759,11 @@ public class UIControlFragment extends BaseFragment {
                     WatchDogService.lightOffset = seekBar.getProgress();
                     ScreenLightServiceUtil.sendReloadLight(getContext());
                 }
-
+            }else if(tag == 9){
+                Intent sysIntent = new Intent("com.click369.control.sysui.loadconfig");
+                sysIntent.putExtra("notifyalpha",seekBar.getProgress());
+                getActivity().sendBroadcast(sysIntent);
+                Notify.testNotify(getContext());
             }
         }
     }

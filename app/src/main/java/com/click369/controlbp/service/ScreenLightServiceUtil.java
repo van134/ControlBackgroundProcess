@@ -54,7 +54,7 @@ public class ScreenLightServiceUtil {
             wmParams.gravity = Gravity.BOTTOM;
             wmParams.x = 0;
             wmParams.width = service.context.getResources().getDisplayMetrics().widthPixels;
-            wmParams.height = getHasVirtualKey();
+            wmParams.height = getHasVirtualKey(windowManager);
 //            wmParams.y = -1 * RoundedCornerService.getZhuangTaiHeight(service.context);//-1*RoundedCornerService.getZhuangTaiHeight(service)+WatchDogService.lightOffset;
             LayoutInflater inflater = LayoutInflater.from(service.context);
             //获取浮动窗口视图所在布局
@@ -84,21 +84,24 @@ public class ScreenLightServiceUtil {
         if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null){
 //            windowManager.addView(fl,wmParams);
 //            lv.checkFullScreen(service.pv);
+
             lv.startBl(type);
         }
     }
 
     public void changDir(){
-        if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null) {
+        if(isInit){
             wmParams.width = service.context.getResources().getDisplayMetrics().widthPixels;
-            wmParams.height = getHasVirtualKey();
-//            wmParams.y = -1 * RoundedCornerService.getZhuangTaiHeight(service.context);//-1*RoundedCornerService.getZhuangTaiHeight(service)+WatchDogService.lightOffset;
-//            lv.checkFullScreen(service.pv);
-            lv.setAlpha(0.0f);
-            if(lv.isStart){
-                lv.isNeedTest = true;
+            wmParams.height = getHasVirtualKey(windowManager);
+            if((WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null) {
+                lv.setWidowManager(windowManager,wmParams,fl);
+                lv.setVisibility(View.GONE);
+                if(lv.isStart){
+                    lv.isNeedTest = true;
+                }
             }
         }
+
     }
     public void hideLight(){
         if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null) {
@@ -111,7 +114,7 @@ public class ScreenLightServiceUtil {
 //        return false;
 //    }
 
-    private int getHasVirtualKey() {
+    public static int getHasVirtualKey(WindowManager windowManager) {
         int dpi = 0;
         Display display = windowManager.getDefaultDisplay();
         DisplayMetrics dm = new DisplayMetrics();

@@ -214,6 +214,18 @@ public class AppLoaderUtil {
                             }
                         }
                     }
+                    if(!tempallHMAppInfos.containsKey("com.tencent.mm")){
+                        try {
+                            PackageInfo packageInfo = pm.getPackageInfo("com.tencent.mm",PackageManager.GET_GIDS);
+                            AppInfo appInfo = getOneAppInfo(packageInfo,pm,context);
+                            if(appInfo!=null){
+                                tempallHMAppInfos.put(appInfo.getPackageName(),appInfo);
+                                tempallAppInfos.add(appInfo);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                     sharedPrefs.settings.edit().putLong("LASTAPPINSTALLTIME",firTime).commit();
                     PinyinCompare comparent = new PinyinCompare();
                     Collections.sort(tempallAppInfos, comparent);
@@ -327,18 +339,19 @@ public class AppLoaderUtil {
             appInfo.isSetTimeStopOneTime = sharedPrefs.setTimeStopPrefs.contains(appInfo.getPackageName()+"/one");
             appInfo.setTimeStopAppTime = appInfo.isSetTimeStopOneTime?sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0):sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0);
             appInfo.isRunning = runLists.contains(appInfo.getPackageName());
-            try {
-                appInfo.isDisable = !pm.getPackageInfo(appInfo.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.enabled;
-            } catch (Throwable e) {
-            }
+//            try {
+//                appInfo.isDisable = !pm.getPackageInfo(appInfo.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.enabled;
+//            } catch (Throwable e) {
+//                pm = context.getPackageManager();
+//            }
             PackageInfo piS = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_SERVICES | PackageManager.GET_DISABLED_COMPONENTS);
+            appInfo.serviceCount = piS.services != null ? piS.services.length : 0;
             PackageInfo piB = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_RECEIVERS | PackageManager.GET_DISABLED_COMPONENTS);
+            appInfo.broadCastCount = piB.receivers != null ? piB.receivers.length : 0;
             PackageInfo piA = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_ACTIVITIES | PackageManager.GET_DISABLED_COMPONENTS);
             appInfo.activityCount = piA.activities != null ? piA.activities.length : 0;
-            appInfo.serviceCount = piS.services != null ? piS.services.length : 0;
-            appInfo.broadCastCount = piB.receivers != null ? piB.receivers.length : 0;
-
         } catch (Throwable e) {
+            pm = context.getPackageManager();
         }
         return appInfo;
     }

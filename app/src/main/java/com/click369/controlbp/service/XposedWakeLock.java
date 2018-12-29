@@ -33,7 +33,7 @@ public class XposedWakeLock {
 //                                   final XSharedPreferences muBeiPrefs,
                                    final boolean isOneOpen,final boolean isTwoOpen,final boolean isMubeiStopOther){//,final boolean isMubeiStopOther
         if (lpparam.packageName.equals("com.click369.controlbp")||
-                lpparam.packageName.equals("com.system.ui")) {
+                lpparam.packageName.equals("com.android.systemui")) {
             return;
         }
         final Class powerMangerClass = XposedHelpers.findClass("android.os.PowerManager", lpparam.classLoader);

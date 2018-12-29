@@ -176,6 +176,13 @@ public class Common {
     public static String PREFS_SETTING_UI_FLASHNOTIFY="flashnotify";
     public static String PREFS_SETTING_UI_FLASHCALL="flashcall";
 
+
+    public static String PREFS_SETTING_UI_NOTIFY_COLOROPEN="notifycoloropen";
+    public static String PREFS_SETTING_UI_NOTIFY_ISUSEIMGFILE="notifyisuseimgfile";
+    public static String PREFS_SETTING_UI_NOTIFY_RANDOMCOLOR="notifyrandomcolor";
+    public static String PREFS_SETTING_UI_NOTIFY_SETCOLOR="notifysetcolor";
+    public static String PREFS_SETTING_UI_NOTIFY_ALPHA="notifyalpha";
+
     public static String PREFS_SETTING_APPPWD ="apppwd";
 
 

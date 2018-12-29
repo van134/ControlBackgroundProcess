@@ -259,28 +259,16 @@ public class MainActivity extends BaseActivity
                 return true;
             }
         });
-        ColorStateList csl = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            csl = getResources().getColorStateList(R.color.nav_item_check,getTheme());
-        }else{
-            csl = getResources().getColorStateList(R.color.nav_item_check);
-        }
-
-//        int[][] states = new int[][]{new int[]{android.R.attr.state_checked},new int[]{android.R.attr.state_checked} };
-//        int[] colors = new int[]{ getResources().getColor(R.color.uncheck_color),  getResources().getColor(R.color.checked_color) };
+        int[][] states = new int[][]{new int[]{ -android.R.attr.state_checked},new int[]{android.R.attr.state_checked} };
+        int[] colors = new int[]{ getResources().getColor(R.color.uncheck_color),  getResources().getColor(R.color.checked_color) };
         if(isNightMode){
             toolbar.setBackgroundColor(getResources().getColor(R.color.darkblack));
 //            navigationView.setBackgroundResource(R.drawable.saidbg);
             navigationView.setBackgroundColor(getResources().getColor(R.color.darkblack));
             navigationView.getHeaderView(0).setBackgroundColor(getResources().getColor(R.color.darkblack));
             navInfoLL.setBackgroundColor(getResources().getColor(R.color.darkblack));
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                csl = getResources().getColorStateList(R.color.nav_item_checkdark,getTheme());
-            }else{
-                csl = getResources().getColorStateList(R.color.nav_item_checkdark);
-            }
 //            navigationView.getHeaderView(0).setBackgroundResource(R.drawable.saidbg);
-//            colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color) };
+            colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color) };
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 Window window = this.getWindow();
                 window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -300,7 +288,7 @@ public class MainActivity extends BaseActivity
             }
         }
 
-//        ColorStateList csl = new ColorStateList(states, colors);
+        ColorStateList csl = new ColorStateList(states, colors);
         navigationView.setItemTextColor(csl);
         navigationView.setItemIconTintList(csl);
         navigationView.setNavigationItemSelectedListener(this);
@@ -322,21 +310,9 @@ public class MainActivity extends BaseActivity
                 },500);
             }
         }
-
 //        runing = PackageUtil.getRunngingApp(this);
         initView();
-        new Thread(){
-            @Override
-            public void run() {
-                checkRoot();
-                TestDataInit.init(MainActivity.this);
-                isZhenDong = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true);
-                sharedPrefs.settings.edit().remove("homeapk").commit();
-                sharedPrefs.autoStartNetPrefs.edit().remove("homeapk").commit();
-                sharedPrefs.settings.edit().putString("nowhomeapk",WatchDogService.getDefaultHome(MainActivity.this)).commit();
-                sharedPrefs.autoStartNetPrefs.edit().putString("nowhomeapk",WatchDogService.getDefaultHome(MainActivity.this)).commit();
-            }
-        }.start();
+        isZhenDong = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true);
         updateReceiver = new MyUpdateListReceiver();
         getPhoto = new GetPhoto(this);
         bgFile = new File(FileUtil.IMAGEPATH,"bg.jpg");
@@ -353,10 +329,10 @@ public class MainActivity extends BaseActivity
         }
         pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,false);
         appLoaderUtil.loadLocalApp();
+        checkRoot();
     }
 
     private void initView(){
-
         controlFragment = new ControlFragment();
         forceStopFragment = new ForceStopFragment();
         ifwFragment = new IFWFragment();
@@ -447,24 +423,29 @@ public class MainActivity extends BaseActivity
 
 
     private void checkRoot(){
-        isRoot = ShellUtils.checkRootPermission();//runing==null||runing.length()==0?
-        if(isRoot){
-            try {
-                Thread.sleep(50);
-                ShellUtilDoze.execCommand("dumpsys deviceidle whitelist +com.click369.controlbp");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-//            startAccess();
-            whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
-        }else{
-            h.post(new Runnable() {
-                @Override
-                public void run() {
-                    showT("没有获取到ROOT权限");
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                    isRoot = ShellUtils.checkRootPermission();//runing==null||runing.length()==0?
+                    if(isRoot){
+                        Thread.sleep(50);
+                        ShellUtilDoze.execCommand("dumpsys deviceidle whitelist +com.click369.controlbp");
+                        whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
+                    }else{
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                showT("没有获取到ROOT权限,部分功能将无法使用");
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            });
-        }
+            }
+        }.start();
     }
 
     public void startAccess(){

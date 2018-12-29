@@ -231,48 +231,7 @@ public class XposedEnd {
                 e.printStackTrace();
             }
         }else if("com.android.systemui".equals(lpparam.packageName)){
-            try {
-                final Class appSysuiCls = XposedHelpers.findClass("com.android.systemui.SystemUIApplication", lpparam.classLoader);
-                Class clss[] = XposedUtil.getParmsByName(appSysuiCls,"onCreate");
-                if (clss!=null) {
-                    XC_MethodHook hook = new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                            try {
-                                BroadcastReceiver br = new BroadcastReceiver() {
-                                    @Override
-                                    public void onReceive(Context context, Intent intent) {
-//                                        XposedBridge.log("^^^^^^^^^^^^^^重启系统界面^^^^^^^^^^^^^^^^^");
-                                        System.exit(0);
-                                    }
-                                };
-                                IntentFilter intentFilter = new IntentFilter();
-                                intentFilter.addAction("com.click369.control.rebootsystemui");
-                                if(methodHookParam.thisObject!=null&&methodHookParam.thisObject instanceof Application){
-                                    Application app = ((Application)methodHookParam.thisObject);
-                                    app.registerReceiver(br,intentFilter);
-                                }
-                            } catch (RuntimeException e) {
-                                XposedBridge.log("^^^^^^^^^^^^^^SystemUIApplication " + e + "^^^^^^^^^^^^^^^^^");
-                            }
-                        }
-                    };
-                    if (clss.length == 0) {
-                        XposedHelpers.findAndHookMethod(appSysuiCls, "onCreate", hook);
-                    } else {
-                        XposedBridge.log("^^^^^^^^^^^^^^SystemUIApplication else 函数未找到" + clss.length + " ^^^^^^^^^^^^^^^^^");
-                        for (Class c : clss) {
-                            XposedBridge.log("^^^^^^^^^^^^^^SystemUIApplication " + c.getName() + "^^^^^^^^^^^^^^^^^");
-                        }
-                    }
-                }else{
-                    XposedBridge.log("^^^^^^^^^^^^^^appNotResponding null 函数未找到 ^^^^^^^^^^^^^^^^^");
-                }
-            }catch (RuntimeException e){
-                e.printStackTrace();
-            }catch (XposedHelpers.ClassNotFoundError e){
-                e.printStackTrace();
-            }
+
         }else if(lpparam.packageName.equals("com.google.vr.apps.ornament")&&settingPrefs.getBoolean("archange",false)){
             final Class surClass = XposedHelpers.findClass("android.graphics.SurfaceTexture", lpparam.classLoader);
             XposedHelpers.findAndHookMethod(surClass,"setDefaultBufferSize",int.class,int.class, new XC_MethodHook() {

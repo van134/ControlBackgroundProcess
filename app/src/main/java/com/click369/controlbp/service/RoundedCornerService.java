@@ -51,7 +51,7 @@ public class RoundedCornerService{
     FrameLayout mFloatLayoutTop,mFloatLayoutTop1,mFloatLayoutBottom,imeFloatLayout,infoFloatLayout;
     boolean infoFloatIsShow = false;
     LinearLayout actInfoLL;
-    TextView actInfoTV;
+    TextView actInfoTV,actInfoShouSuo,actInfoQingKong,actInfoGuanBi;
     WindowManager.LayoutParams wmParamsBottom,wmParamsTop,wmParamsTop1,wmParamsInfo;
     //创建浮动窗口设置布局参数的对象
     WindowManager mWindowManager;
@@ -150,7 +150,7 @@ public class RoundedCornerService{
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.WRAP_CONTENT);
             //设置window type
-            wmParamsInfo.type = WindowManager.LayoutParams.TYPE_PHONE;
+            wmParamsInfo.type = 2003;
             //设置图片格式，效果为背景透明
             wmParamsInfo.format = PixelFormat.RGBA_8888;
             //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
@@ -158,7 +158,7 @@ public class RoundedCornerService{
             //调整悬浮窗显示的停靠位置为左侧置顶
             wmParamsInfo.gravity = Gravity.LEFT | Gravity.TOP;
             wmParamsInfo.height = WindowManager.LayoutParams.WRAP_CONTENT;//height-dhheight+offset;
-            wmParamsInfo.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            wmParamsInfo.width = WindowManager.LayoutParams.WRAP_CONTENT;
             // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
             wmParamsInfo.x = 0;
             wmParamsInfo.y = 0;
@@ -223,7 +223,10 @@ public class RoundedCornerService{
             imeFloatLayout.setVisibility(View.GONE);
             actInfoLL = (LinearLayout) infoFloatLayout.findViewById(R.id.float_show_act_info_ll);
             actInfoTV = (TextView) infoFloatLayout.findViewById(R.id.float_show_act_info_tv);
-            actInfoTV.setText("长按关闭,点击复制,双击清空");
+            actInfoShouSuo = (TextView) infoFloatLayout.findViewById(R.id.float_show_act_info_btn_ss);
+            actInfoQingKong = (TextView) infoFloatLayout.findViewById(R.id.float_show_act_info_btn_qk);
+            actInfoGuanBi = (TextView) infoFloatLayout.findViewById(R.id.float_show_act_info_btn_gb);
+            actInfoTV.setText("长按复制");
             ImageView ltImg = (ImageView)mFloatLayoutTop.findViewById(R.id.round_lt_img);
             ImageView ltImg1 = (ImageView)mFloatLayoutTop1.findViewById(R.id.round_lt_img);
             ltImg.setLayoutParams(new FrameLayout.LayoutParams(roundSize,roundSize,Gravity.LEFT));
@@ -249,46 +252,71 @@ public class RoundedCornerService{
             }catch (Throwable e){
                 e.printStackTrace();
             }
-
-            infoFloatLayout.setOnLongClickListener(new View.OnLongClickListener() {
+            actInfoQingKong.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public boolean onLongClick(View view) {
+                public void onClick(View v) {
+                    actInfoTV.setText("");
+                    actInfoSB.delete(0,actInfoSB.length());
+                }
+            });
+            actInfoShouSuo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    actInfoShouSuo.setText(actInfoTV.isShown()?"显示":"隐藏");
+                    actInfoQingKong.setVisibility(actInfoTV.isShown()?View.GONE:View.VISIBLE);
+                    actInfoGuanBi.setVisibility(actInfoTV.isShown()?View.GONE:View.VISIBLE);
+                    actInfoTV.setVisibility(actInfoTV.isShown()?View.GONE:View.VISIBLE);
+
+                }
+            });
+            actInfoGuanBi.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
                     infoFloatIsShow = false;
                     mWindowManager.removeView(infoFloatLayout);
                     actInfoTV.setText("");
                     actInfoSB.delete(0,actInfoSB.length());
                     WatchDogService.isShowActInfo = false;
+                }
+            });
+            infoFloatLayout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    // 将文本内容放到系统剪贴板里。
+                    cm.setText(actInfoSB.toString());
+                    Toast.makeText(context,"已复制到粘贴板",Toast.LENGTH_SHORT).show();
                     return true;
                 }
             });
-            infoFloatLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    actInfoTV.removeCallbacks(r);
-                    if(System.currentTimeMillis()-clickTime<300){
-                        actInfoTV.setText("");
-                        actInfoSB.delete(0,actInfoSB.length());
-                        infoFloatLayout.setVisibility(View.GONE);
-                    }else{
-                        actInfoTV.postDelayed(r,400);
-                    }
-                    clickTime = System.currentTimeMillis();
-                }
-            });
+//            infoFloatLayout.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    actInfoTV.removeCallbacks(r);
+//                    if(System.currentTimeMillis()-clickTime<300){
+//                        actInfoTV.setText("");
+//                        actInfoSB.delete(0,actInfoSB.length());
+//                        infoFloatLayout.setVisibility(View.GONE);
+//                    }else{
+//                        actInfoTV.postDelayed(r,400);
+//                    }
+//                    clickTime = System.currentTimeMillis();
+//                }
+//            });
 //        }else{
 //            this.stopSelf();
 //        }
     }
 
-    Runnable r = new Runnable() {
-        @Override
-        public void run() {
-            ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
-            // 将文本内容放到系统剪贴板里。
-            cm.setText(actInfoSB.toString());
-            Toast.makeText(context,"已复制到粘贴板",Toast.LENGTH_SHORT).show();
-        }
-    };
+//    Runnable r = new Runnable() {
+//        @Override
+//        public void run() {
+//            ClipboardManager cm = (ClipboardManager)context.getSystemService(Context.CLIPBOARD_SERVICE);
+//            // 将文本内容放到系统剪贴板里。
+//            cm.setText(actInfoSB.toString());
+//            Toast.makeText(context,"已复制到粘贴板",Toast.LENGTH_SHORT).show();
+//        }
+//    };
 
 
     public void destroy() {
@@ -548,7 +576,8 @@ public class RoundedCornerService{
                                        addOrRemoveCor(true);
                                    }
                                },300);
-
+                           }else{
+                               addOrRemoveCor(false);
                            }
                            screenLightServiceUtil.remove();
                        }

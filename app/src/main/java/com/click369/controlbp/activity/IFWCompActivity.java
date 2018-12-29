@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -54,6 +55,8 @@ public class IFWCompActivity extends BaseActivity {
     public ArrayList<ActivityInfo> activityInfos = new ArrayList<ActivityInfo>();
     private SharedPreferences ifwCountPrefs;
     public static int curColor = Color.BLACK;
+    private   PowerManager powerManager;
+    PowerManager.WakeLock mWakeLock = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,13 +84,14 @@ public class IFWCompActivity extends BaseActivity {
         et = (EditText) this.findViewById(R.id.ifwcomp_et);
         et.setTextColor(curColor);
         alertFl.setVisibility(View.GONE);
+        powerManager =(PowerManager)getSystemService(POWER_SERVICE);
+
         if(type == 0){
             alertTv.append("如果设置并重启后还出现已禁用但正在运行，请重启，禁用服务功能不仅使用了IFW防火墙还使用了XPOSED的HOOK压制，30个以上的组件不提供禁用全部功能。");
             adapter = new IFWCompServiceAdapter(this,getPackageManager());
             new Thread(){
                 @Override
                 public void run() {
-
                     ServiceInfo sis[] = PackageUtil.getServicesByPkg(IFWCompActivity.this,pkg);
                     if(sis!=null&&sis.length>0) {
                         for (ServiceInfo si : sis) {
@@ -98,9 +102,9 @@ public class IFWCompActivity extends BaseActivity {
                         @Override
                         public void run() {
                             ((IFWCompServiceAdapter)adapter).setData(serviceInfos);
-                            if (serviceInfos.size()>=50){
-                                disableAllTv.setEnabled(false);
-                            }
+//                            if (serviceInfos.size()>=50){
+//                                disableAllTv.setEnabled(false);
+//                            }
                         }
                     });
                     ifwString = FileUtil.readIFWList(pkg+EXT_SERVICE);
@@ -132,9 +136,9 @@ public class IFWCompActivity extends BaseActivity {
                         @Override
                         public void run() {
                             ((IFWCompActBroadAdapter)adapter).setData(activityInfos);
-                            if (activityInfos.size()>30){
-                                disableAllTv.setEnabled(false);
-                            }
+//                            if (activityInfos.size()>30){
+//                                disableAllTv.setEnabled(false);
+//                            }
                         }
                     });
                     ifwString = FileUtil.readIFWList(pkg+(type==1?EXT_BROADCASE:EXT_ACTIVITY));
@@ -286,7 +290,6 @@ public class IFWCompActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 isShowAllName = !isShowAllName;
-
                 showAllNameTv.setTextColor(isShowAllName?Color.parseColor("#40d0b7"):curColor);
                 adapter.notifyDataSetChanged();
             }
@@ -302,56 +305,81 @@ public class IFWCompActivity extends BaseActivity {
                             new Thread(){
                                 @Override
                                 public void run() {
-                                    if(type == 0){
-                                        ArrayList<ServiceInfo> sis = ((IFWCompServiceAdapter)adapter).bjdatas;
-                                        for(final ServiceInfo si:sis){
-                                            if(!ifwString.contains(si.name)){
-                                                h.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                       pd.setMessage("正在禁用"+si.name);
-                                                    }
-                                                });
-                                                FileUtil.writeIFWList(si.packageName+EXT_SERVICE,si.packageName,si.name,type);
-                                                ShellUtils.execCommand("pm disable " + si.packageName + "/" + si.name, true, true);
-                                                ifwString+= si.name;
-                                            }
+                                    try{
+                                        if(powerManager!=null){
+                                            mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK,"WakeLock");
+                                            mWakeLock.acquire();
                                         }
-                                        IFWFragment.ai.serviceDisableCount =  IFWFragment.ai.serviceCount;
-                                        ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwservice",IFWFragment.ai.serviceDisableCount).commit();
-                                    }else{
-                                        ArrayList<ActivityInfo> sis = ((IFWCompActBroadAdapter)adapter).bjdatas;
-                                        for(final ActivityInfo si:sis){
-                                            if(!ifwString.contains(si.name)){
-                                                h.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        pd.setMessage("正在禁用"+si.name);
-                                                    }
-                                                });
-                                                ShellUtils.execCommand("pm disable " + si.packageName + "/" + si.name, true, true);
-                                                FileUtil.writeIFWList(si.packageName+(type==1?EXT_BROADCASE:EXT_ACTIVITY),si.packageName,si.name,type);
-                                                ifwString+= si.name;
+                                        if(type == 0){
+                                            ArrayList<ServiceInfo> sis = ((IFWCompServiceAdapter)adapter).bjdatas;
+                                            int i = 0;
+                                            for(final ServiceInfo si:sis){
+                                                if (isActStop){
+                                                    break;
+                                                }
+                                                if(!ifwString.contains(si.name)){
+                                                    h.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                           pd.setMessage("正在禁用"+si.name);
+                                                        }
+                                                    });
+                                                    FileUtil.writeIFWList(si.packageName+EXT_SERVICE,si.packageName,si.name,type);
+                                                    ShellUtils.execCommand("pm disable " + si.packageName + "/" + si.name, true, true);
+                                                    ifwString+= si.name;
+                                                    i++;
+                                                }
                                             }
-                                        }
-                                        if(type == 1){
-                                            IFWFragment.ai.broadCastDisableCount =  IFWFragment.ai.broadCastCount;
-                                            ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwreceiver",IFWFragment.ai.broadCastDisableCount).commit();
+                                            IFWFragment.ai.serviceDisableCount +=i;
+    //                                        IFWFragment.ai.serviceDisableCount =  IFWFragment.ai.serviceCount;
+                                            ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwservice",IFWFragment.ai.serviceDisableCount).commit();
                                         }else{
-                                            IFWFragment.ai.activityDisableCount =  IFWFragment.ai.activityCount;
-                                            ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwactivity",IFWFragment.ai.activityDisableCount).commit();
-                                        }
-                                    }
-                                    h.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            showT("禁用完成，请重启手机");
-                                            if(pd!=null&&pd.isShowing()){
-                                                pd.dismiss();
+                                            int i = 0;
+                                            ArrayList<ActivityInfo> sis = ((IFWCompActBroadAdapter)adapter).bjdatas;
+                                            for(final ActivityInfo si:sis){
+                                                if (isActStop){
+                                                    break;
+                                                }
+                                                if(!ifwString.contains(si.name)){
+                                                    h.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            pd.setMessage("正在禁用"+si.name);
+                                                        }
+                                                    });
+                                                    ShellUtils.execCommand("pm disable " + si.packageName + "/" + si.name, true, true);
+                                                    FileUtil.writeIFWList(si.packageName+(type==1?EXT_BROADCASE:EXT_ACTIVITY),si.packageName,si.name,type);
+                                                    ifwString+= si.name;
+                                                    i++;
+                                                }
                                             }
-                                            adapter.notifyDataSetChanged();
+                                            if(type == 1){
+    //                                            IFWFragment.ai.broadCastDisableCount =  IFWFragment.ai.broadCastCount;
+                                                IFWFragment.ai.broadCastDisableCount +=i;
+                                                ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwreceiver",IFWFragment.ai.broadCastDisableCount).commit();
+                                            }else{
+    //                                            IFWFragment.ai.activityDisableCount =  IFWFragment.ai.activityCount;
+                                                IFWFragment.ai.activityDisableCount +=i;
+                                                ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwactivity",IFWFragment.ai.activityDisableCount).commit();
+                                            }
                                         }
-                                    });
+                                        h.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                showT("禁用完成，请重启手机");
+                                                if(pd!=null&&pd.isShowing()){
+                                                    pd.dismiss();
+                                                }
+                                                adapter.notifyDataSetChanged();
+                                            }
+                                        });
+                                        if(mWakeLock!=null){
+                                            mWakeLock.release();
+                                        }
+
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
                                 }
                             }.start();
                         }
@@ -366,49 +394,95 @@ public class IFWCompActivity extends BaseActivity {
                     @Override
                     public void backData(String txt, int tag) {
                         if(tag == 1){
+
                             final ProgressDialog pd = ProgressDialog.show(IFWCompActivity.this,"","正在启用，请稍候",true,false);
                             new Thread(){
                                 @Override
                                 public void run() {
-                                    PackageManager pm = getPackageManager();
-                                    if(type == 0){
-                                        FileUtil.delIFWList(pkg+EXT_SERVICE);
-                                        IFWFragment.ai.serviceDisableCount = 0;
-                                        ArrayList<ServiceInfo> sis = ((IFWCompServiceAdapter)adapter).bjdatas;
-                                        for(ServiceInfo si:sis){
-                                            if(ifwString.contains(si.name)||!PackageUtil.isEnable(si.packageName,si.name,pm)){
-                                                ShellUtils.execCommand("pm enable " + si.packageName + "/" + si.name, true, true);
-                                            }
+                                    try{
+                                        if(powerManager!=null){
+                                            mWakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK,"WakeLock");
+                                            mWakeLock.acquire();
                                         }
-                                        ifwCountPrefs.edit().remove(IFWFragment.ai.getPackageName()+"/ifwservice").commit();
-                                    }else{
-                                        FileUtil.delIFWList(pkg+(type==1?EXT_BROADCASE:EXT_ACTIVITY));
-                                        ArrayList<ActivityInfo> sis = ((IFWCompActBroadAdapter)adapter).bjdatas;
-                                        for(ActivityInfo si:sis){
-                                            if(ifwString.contains(si.name)||!PackageUtil.isEnable(si.packageName,si.name,pm)){
-                                                ShellUtils.execCommand("pm enable " + si.packageName + "/" + si.name, true, true);
+                                        PackageManager pm = getPackageManager();
+                                        if(type == 0){
+                                            FileUtil.delIFWList(pkg+EXT_SERVICE);
+                                            ArrayList<ServiceInfo> sis = ((IFWCompServiceAdapter)adapter).bjdatas;
+                                            for(ServiceInfo si:sis){
+                                                if (isActStop){
+                                                    break;
+                                                }
+                                                if(ifwString.contains(si.name)||!PackageUtil.isEnable(si.packageName,si.name,pm)){
+                                                    ShellUtils.execCommand("pm enable " + si.packageName + "/" + si.name, true, true);
+                                                    IFWFragment.ai.serviceDisableCount--;
+                                                }
                                             }
-                                        }
-                                        if(type == 1){
-                                            IFWFragment.ai.broadCastDisableCount = 0;
-                                            ifwCountPrefs.edit().remove(IFWFragment.ai.getPackageName()+"/ifwreceiver").commit();
+                                            if(isActStop){
+                                                if(IFWFragment.ai.serviceDisableCount < 0){
+                                                    IFWFragment.ai.serviceDisableCount = 0;
+                                                }
+                                                ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwservice",IFWFragment.ai.serviceDisableCount).commit();
+                                            }else{
+                                                IFWFragment.ai.serviceDisableCount = 0;
+                                                ifwCountPrefs.edit().remove(IFWFragment.ai.getPackageName()+"/ifwservice").commit();
+                                            }
+
                                         }else{
-                                            IFWFragment.ai.activityDisableCount = 0;
-                                            ifwCountPrefs.edit().remove(IFWFragment.ai.getPackageName()+"/ifwactivity").commit();
+                                            FileUtil.delIFWList(pkg+(type==1?EXT_BROADCASE:EXT_ACTIVITY));
+                                            ArrayList<ActivityInfo> sis = ((IFWCompActBroadAdapter)adapter).bjdatas;
+                                            for(ActivityInfo si:sis){
+                                                if (isActStop){
+                                                    break;
+                                                }
+                                                if(ifwString.contains(si.name)||!PackageUtil.isEnable(si.packageName,si.name,pm)){
+                                                    ShellUtils.execCommand("pm enable " + si.packageName + "/" + si.name, true, true);
+                                                    if(type == 1){
+                                                        IFWFragment.ai.broadCastDisableCount--;
+                                                    }else{
+                                                        IFWFragment.ai.activityDisableCount--;
+                                                    }
+                                                }
+                                            }
+                                            if(!isActStop){
+                                                if(type == 1){
+                                                    IFWFragment.ai.broadCastDisableCount = 0;
+                                                    ifwCountPrefs.edit().remove(IFWFragment.ai.getPackageName()+"/ifwreceiver").commit();
+                                                }else{
+                                                    IFWFragment.ai.activityDisableCount = 0;
+                                                    ifwCountPrefs.edit().remove(IFWFragment.ai.getPackageName()+"/ifwactivity").commit();
+                                                }
+                                            }else{
+                                                if(type == 1){
+                                                    if(IFWFragment.ai.broadCastDisableCount<0){
+                                                        IFWFragment.ai.broadCastDisableCount = 0;
+                                                    }
+                                                    ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwreceiver",IFWFragment.ai.broadCastDisableCount).commit();
+                                                }else{
+                                                    if(IFWFragment.ai.activityDisableCount<0){
+                                                        IFWFragment.ai.activityDisableCount = 0;
+                                                    }
+                                                    ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwactivity",IFWFragment.ai.activityDisableCount).commit();
+                                                }
+                                            }
+                                        }
+                                        ifwString = "";
+                                        h.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                showT("启用完成");
+                                                if(pd!=null&&pd.isShowing()){
+                                                    pd.dismiss();
+                                                }
+                                                adapter.notifyDataSetChanged();
+                                            }
+                                        });
+                                        if(mWakeLock!=null){
+                                            mWakeLock.release();
                                         }
 
+                                    }catch (Exception e){
+                                        e.printStackTrace();
                                     }
-                                    ifwString = "";
-                                    h.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            showT("启用完成");
-                                            if(pd!=null&&pd.isShowing()){
-                                                pd.dismiss();
-                                            }
-                                            adapter.notifyDataSetChanged();
-                                        }
-                                    });
                                 }
                             }.start();
                         }
@@ -460,6 +534,26 @@ public class IFWCompActivity extends BaseActivity {
 
             }
         });
+    }
+    boolean isActStop = false;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isActStop = false;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        isActStop = true;
+        try{
+            if(mWakeLock!=null){
+                mWakeLock.release();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override

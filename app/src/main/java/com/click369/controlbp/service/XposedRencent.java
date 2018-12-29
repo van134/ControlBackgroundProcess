@@ -4,6 +4,8 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.Application;
+import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -32,12 +35,14 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.InputEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,6 +50,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.click369.controlbp.activity.ColorSetActivity;
 import com.click369.controlbp.common.Common;
 
 
@@ -73,6 +79,17 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedRencent {
+
+    private static final int TAG_COLOR_ID = 100;
+    private static final String colors[] = {"#ff0000","#00ff00","#ffff00","#00ffff","#ff00ff","#23e2fe","#aa46ff","#7bff11",
+            "#e011ff","#fa0093","#f7fa00","#fac200","#3af1bb","#9a74f2","#fd00ad","#90014f"};
+    private static boolean isOpenNotifyColor = false;
+    private static boolean isNotifyUseImgFile = false;
+    private static boolean isRandomNotifyColor = false;
+    private static String notifyColor = "#FFFFFF";
+    private static int notifyAlpha = 100;
+    private static HashMap<String,Integer> colorHMs = new HashMap<String,Integer>();
+//    private static Drawable mDrawable;
     private static long lastFlashTime = 0;
     public static  String getPkgByTask(Class cls,String taskName,Object obj){
         try {
@@ -105,13 +122,11 @@ public class XposedRencent {
     public static String getInfoByPkg(XSharedPreferences recentPrefs,
                                       XSharedPreferences appStartiPrefs,
                                       String pkg){
-//        muBeiPrefs.reload();
         recentPrefs.reload();
         appStartiPrefs.reload();
         boolean isNotClean = recentPrefs.getBoolean(pkg + "/notclean", false);
         boolean isForceClean = recentPrefs.getBoolean(pkg+"/forceclean",false);
         boolean isBlur = recentPrefs.getBoolean(pkg+"/blur",false);
-//        boolean isInMuBei = muBeiPrefs.getInt(pkg, -1) == 0;
         boolean isNotStop = appStartiPrefs.getBoolean(pkg + "/notstop", false);
         if (isNotClean ||isForceClean || isBlur || isNotStop) {
             String msgs[] = {"模糊", "保留", "常驻", "杀死"};
@@ -552,10 +567,10 @@ public class XposedRencent {
                 }catch (XposedHelpers.ClassNotFoundError e){
                     e.printStackTrace();
                 }
-                if (!isColorBar && !isHideBar && roundNumber == 10 && alphaNumber == 1.0f) {
-                    return;
-                }
-               if (recentViewCls != null) {
+//                if (!isColorBar && !isHideBar && roundNumber == 10 && alphaNumber == 1.0f) {
+//                    return;
+//                }
+               if (recentViewCls != null&&!(!isColorBar && !isHideBar && roundNumber == 10 && alphaNumber == 1.0f)) {
                     Class clss[] = XposedUtil.getParmsByName(recentViewCls,"onFinishInflate");;
                     if (clss != null) {
                         XC_MethodHook hook = new XC_MethodHook() {
@@ -783,19 +798,211 @@ public class XposedRencent {
                                     XposedBridge.log("^^^^^^^^^^^^^^tsvCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                                 }
                             }
-                        }catch (RuntimeException e){
-                            XposedBridge.log("^^^^^^^^^^^^^TaskStackView 未找到 ^^^^^^^^^^^^^^^^^");
-                        }catch (NoSuchMethodError e){
-                            XposedBridge.log("^^^^^^^^^^^^^TaskStackView 未找到 ^^^^^^^^^^^^^^^^^");
-                        }catch (XposedHelpers.ClassNotFoundError e){
+                        }catch (Throwable e){
                             XposedBridge.log("^^^^^^^^^^^^^TaskStackView1 未找到 ^^^^^^^^^^^^^^^^^");
                         }
                     }
                 }
             }
-        }catch (RuntimeException e){
-            e.printStackTrace();
-        }catch (XposedHelpers.ClassNotFoundError e){
+
+            if (lpparam.packageName.equals("com.android.systemui")) {
+                try {
+                    isOpenNotifyColor = barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_COLOROPEN,false);
+                    isNotifyUseImgFile = barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_ISUSEIMGFILE,false);
+                    isRandomNotifyColor = barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_RANDOMCOLOR,false);
+                    notifyColor = barPrefs.getString(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR,"#FFFFFF");
+                    notifyAlpha = barPrefs.getInt(Common.PREFS_SETTING_UI_NOTIFY_ALPHA,100);
+                    final Class anvClass = XposedHelpers.findClass("com.android.systemui.statusbar.ActivatableNotificationView", lpparam.classLoader);
+                    final Class enrClass = XposedHelpers.findClass("com.android.systemui.statusbar.ExpandableNotificationRow", lpparam.classLoader);
+                    final Class nbvClass = XposedHelpers.findClass("com.android.systemui.statusbar.NotificationBackgroundView", lpparam.classLoader);
+                    final Class nsslClass = XposedHelpers.findClass("com.android.systemui.statusbar.stack.NotificationStackScrollLayout", lpparam.classLoader);
+//                    Class clss[] = XposedUtil.getParmsByName(nsslClass,"onDraw");
+                    Class clss1[] = XposedUtil.getParmsByName(anvClass,"updateOutlineAlpha");
+//                    Class clss5[] = XposedUtil.getParmsByName(nbvClass,"setDrawableAlpha");
+                    Class clss3[] = XposedUtil.getParmsByName(nbvClass,"setTint");
+                    Class clss4[] = XposedUtil.getParmsByName(nbvClass,"onDraw");
+                    //通知滑动后背景修改
+                    XC_MethodHook hook = new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            try {
+                                if(isOpenNotifyColor){
+                                    if (notifyAlpha>95){
+                                        param.setResult(null);
+                                        return;
+                                    }
+                                    Field mBackgroundPaintField = nsslClass.getDeclaredField("mBackgroundPaint");
+                                    mBackgroundPaintField.setAccessible(true);
+                                    Paint p = (Paint)mBackgroundPaintField.get(param.thisObject);
+//                                    Canvas canvas = (Canvas)param.args[0];
+                                    p.setColor(Color.argb(255-((int)((notifyAlpha*1.0f/100)*255)),255,255,255));
+
+                                }
+                            }catch (Throwable e){
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+//                    XC_MethodHook hookinitView = new XC_MethodHook() {
+//                        @Override
+//                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//                            try {
+//                                if(isOpenNotifyColor){
+//
+////                                    Field mIncreasedPaddingBetweenElementsField = enrClass.getDeclaredField("mIncreasedPaddingBetweenElements");
+////                                    mIncreasedPaddingBetweenElementsField.setAccessible(true);
+////                                    mIncreasedPaddingBetweenElementsField.set(param.thisObject,100);
+//                                }
+//                            }catch (Throwable e){
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    };
+                    //通知背景修改
+                    XposedUtil.hookMethod(nsslClass,XposedUtil.getParmsByName(nsslClass,"onDraw"),"onDraw",hook);
+//                    XposedUtil.hookMethod(nsslClass,XposedUtil.getParmsByName(nsslClass,"setOwnScrollY"),"setOwnScrollY",hookinitView);
+                    XC_MethodHook hook1 = new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            try {
+                                if(isOpenNotifyColor) {
+                                    Field mShadowAlphaField = anvClass.getDeclaredField("mShadowAlpha");
+                                    mShadowAlphaField.setAccessible(true);
+                                    mShadowAlphaField.set(param.thisObject,0f);
+                                    Class cls = Class.forName("com.android.systemui.statusbar.ExpandableOutlineView");
+                                    Method m = cls.getDeclaredMethod("setOutlineAlpha",float.class);
+                                    m.setAccessible(true);
+                                    m.invoke(param.thisObject,0f);
+                                    param.setResult(null);
+                                    return;
+                                }
+                            }catch (Throwable e){
+                                e.printStackTrace();
+                            }
+                        }
+                    };
+                    XposedUtil.hookMethod(anvClass,clss1,"updateOutlineAlpha",hook1);
+                    //通知背景透明度修改
+                    XC_MethodHook hook3 = new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            if(isOpenNotifyColor) {
+                                View v = (View) (param.thisObject);
+                                try {
+                                    if(isNotifyUseImgFile){
+                                        Object o = v.getTag();
+                                        if("OK".equals(o)){
+                                            v.invalidate();
+                                            param.setResult(null);
+                                            return;
+                                        }else{
+                                            File f = new File(Environment.getExternalStorageDirectory()+File.separator+"processcontrol","nb.png");
+                                            if(!f.exists()){
+                                                f =  new File(Environment.getExternalStorageDirectory()+File.separator+"processcontrol","nb.jpg");
+                                            }
+                                            if(f.exists()){
+                                                Field field = nbvClass.getDeclaredField("mBackground");
+                                                field.setAccessible(true);
+                                                Drawable mDrawable = Drawable.createFromPath(f.getAbsolutePath());
+
+//                                                mDrawable.setAlpha((int)((notifyAlpha*1.0f/100)*255));
+                                                field.set(param.thisObject,mDrawable);
+                                                v.setTag("OK");
+                                                v.invalidate();
+                                                param.setResult(null);
+                                                return;
+                                            }
+                                        }
+                                    }
+                                    if(v.getTag()==null||!(v.getTag() instanceof Integer)){
+                                        int c = Color.WHITE;
+                                        if(isRandomNotifyColor){
+                                            String cs = colors[(int) (Math.random() * colors.length)];
+                                            c = Color.parseColor(cs);
+                                        }else{
+                                            c = Color.parseColor(notifyColor);
+                                        }
+                                        v.setTag(c);
+                                    }
+                                    int c = (Integer) v.getTag();
+                                    param.args[0] = c;
+                                }catch (Throwable e){
+                                    e.printStackTrace();
+                                    XposedBridge.log(e);
+                                }
+                            }
+                        }
+                    };
+                    XposedUtil.hookMethod(nbvClass,clss3,"setTint",hook3);
+                    XC_MethodHook hook4 = new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                            if(isOpenNotifyColor) {
+                                View v = (View) (param.thisObject);
+                                v.setAlpha(notifyAlpha*1.0f/100);
+                            }
+                        }
+                    };
+                    XposedUtil.hookMethod(nbvClass,clss4,"onDraw",hook4);
+                }catch (Throwable e){
+                    e.printStackTrace();
+                }
+                try {
+                    final Class appSysuiCls = XposedHelpers.findClass("com.android.systemui.SystemUIApplication", lpparam.classLoader);
+                    Class clss[] = XposedUtil.getParmsByName(appSysuiCls, "onCreate");
+                    if (clss != null) {
+                        XC_MethodHook hook = new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                                try {
+                                    BroadcastReceiver br = new BroadcastReceiver() {
+                                        @Override
+                                        public void onReceive(Context context, Intent intent) {
+                                            String action = intent.getAction();
+                                            if(action.equals("com.click369.control.rebootsystemui")){
+                                                System.exit(0);
+                                            }else if(action.equals("com.click369.control.sysui.loadconfig")){
+                                                if(intent.hasExtra("notifyalpha")){
+                                                    notifyAlpha = intent.getIntExtra("notifyalpha",100);
+                                                }
+                                                if(intent.hasExtra("israndomnotifycolor")){
+                                                    isRandomNotifyColor = intent.getBooleanExtra("israndomnotifycolor",false);
+                                                }
+                                                if(intent.hasExtra("isnotifycoloropen")){
+                                                    isOpenNotifyColor = intent.getBooleanExtra("isnotifycoloropen",false);
+                                                }
+                                                if(intent.hasExtra("notifycolor")){
+                                                    notifyColor = intent.getStringExtra("notifycolor");
+                                                }
+                                                if(intent.hasExtra("notifyuseimgfile")){
+                                                    isNotifyUseImgFile = intent.getBooleanExtra("notifyuseimgfile",false);
+                                                }
+//                                                XposedBridge.log("sysui isOpenNotifyColor "+isOpenNotifyColor+" isRandomNotifyColor "+isRandomNotifyColor+" notifyColor "+notifyColor);
+                                            }
+                                        }
+                                    };
+                                    IntentFilter intentFilter = new IntentFilter();
+                                    intentFilter.addAction("com.click369.control.rebootsystemui");
+                                    intentFilter.addAction("com.click369.control.sysui.loadconfig");
+                                    if (methodHookParam.thisObject != null && methodHookParam.thisObject instanceof Application) {
+                                        Application app = ((Application) methodHookParam.thisObject);
+                                        app.registerReceiver(br, intentFilter);
+                                    }
+                                } catch (RuntimeException e) {
+                                    XposedBridge.log("^^^^^^^^^^^^^^SystemUIApplication " + e + "^^^^^^^^^^^^^^^^^");
+                                }
+                            }
+                        };
+                        Class clss2[] = XposedUtil.getParmsByName(appSysuiCls,"onCreate");
+                        XposedUtil.hookMethod(appSysuiCls,clss2,"onCreate",hook);
+                    } else {
+                        XposedBridge.log("^^^^^^^^^^^^^^appNotResponding null 函数未找到 ^^^^^^^^^^^^^^^^^");
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }catch (Throwable e){
             e.printStackTrace();
         }
     }
