@@ -64,6 +64,35 @@ public class ControlFragment extends BaseFragment {
         return v;
     }
 
+    public void initAlert(){
+        if(MainActivity.isModuleActive()){
+            String msg = "1.部分应用禁用后会出现无响应或无法打开，甚至禁用某些系统应用会导致无法开机，如果出现请取消禁用，如果无法开机禁用框架后清除本应用数据重新安装即可。\n2.服务禁用后如果需要下载或后台的软件将会出现异常，所以请慎重处理。\n3.长按顶部的服务、唤醒锁、定时器可以一键全选,单击可以按对应的项目排序。\n4.说明：1.服务主要是用来保持后台运行的，如果你觉得某些应用不需要下载音乐播放等后台则可以禁止。2.广播用来监听一些系统动作和拉起服务的，比如熄屏亮屏开机启动等，禁用广播后不仅不能接收并且也不能发送。3.唤醒锁和定时器主要是在熄屏时用来执行任务的，所以待机耗电很大一部分来自与唤醒锁定时器耗电，所以如果你不需要让某应用在待机时执行任务则可禁止。";
+            topView.setAlertText(msg,0,false);
+            listView.setEnabled(true);
+            topView.sysAppTv.setEnabled(true);
+            topView.userAppTv.setEnabled(true);
+            topView.editText.setEnabled(true);
+            serviceTv.setEnabled(true);
+            wakelockTv.setEnabled(true);
+            broadTv.setEnabled(true);
+            alarmTv.setEnabled(true);
+            strongWakeLockTv.setEnabled(true);
+            strongAlarmTv.setEnabled(true);
+        }else{
+            String msg = "检测到xposed框架未生效，请勾选后重启,如果已勾选并重启过请反复勾选一次再重启即可,本功能需要框架支持。";
+            topView.setAlertText(msg,Color.RED,true);
+            listView.setEnabled(false);
+            topView.sysAppTv.setEnabled(false);
+            topView.userAppTv.setEnabled(false);
+            topView.editText.setEnabled(false);
+            serviceTv.setEnabled(false);
+            wakelockTv.setEnabled(false);
+            broadTv.setEnabled(false);
+            alarmTv.setEnabled(false);
+            strongWakeLockTv.setEnabled(false);
+            strongAlarmTv.setEnabled(false);
+        }
+    }
     @SuppressLint("WorldReadableFiles")
     private void initView(View v){
 //        settingPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
@@ -84,21 +113,7 @@ public class ControlFragment extends BaseFragment {
         BaseActivity.addListClickListener(listView,adapter,getActivity());
         topView = new TopSearchView(this.getActivity(),v);
         topView.initView();
-        if(MainActivity.isModuleActive()){
-            String msg = "1.部分应用禁用后会出现无响应或无法打开，甚至禁用某些系统应用会导致无法开机，如果出现请取消禁用，如果无法开机禁用框架后清除本应用数据重新安装即可。\n2.服务禁用后如果需要下载或后台的软件将会出现异常，所以请慎重处理。选择或取消后应用会被杀死。\n3.长按顶部的服务、唤醒锁、定时器可以一键全选,单击可以按对应的项目排序。\n4.说明：1.服务主要是用来保持后台运行的，如果你觉得某些应用不需要下载音乐播放等后台则可以禁止。2.广播用来监听一些系统动作和拉起服务的，比如熄屏亮屏开机启动等，禁用广播后不仅不能接收并且也不能发送。3.唤醒锁和定时器主要是在熄屏时用来执行任务的，所以待机耗电很大一部分来自与唤醒锁定时器耗电，所以如果你不需要让某应用在待机时执行任务则可禁止。";
-            topView.setAlertText(msg,0,false);
-        }else{
-            String msg = "检测到xposed框架未生效，请勾选后重启,如果已勾选并重启过请反复勾选一次再重启即可。本功能需要框架支持，其他功能只需root即可。";
-            topView.setAlertText(msg,Color.RED,true);
-            listView.setEnabled(false);
-            topView.sysAppTv.setEnabled(false);
-            topView.userAppTv.setEnabled(false);
-            topView.editText.setEnabled(false);
-            serviceTv.setEnabled(false);
-            wakelockTv.setEnabled(false);
-            broadTv.setEnabled(false);
-            alarmTv.setEnabled(false);
-        }
+        initAlert();
         serviceTv.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -311,7 +326,7 @@ public class ControlFragment extends BaseFragment {
             for(TextView t:tvs){
                 t.setTextColor(curColor);
             }
-            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
             loadY(listView,ControlFragment.this.getClass(),adapter.sortType);
         }
     }

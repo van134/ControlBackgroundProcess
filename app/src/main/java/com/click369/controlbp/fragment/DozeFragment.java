@@ -154,8 +154,8 @@ public class DozeFragment extends BaseFragment {
             sconTv.setAlpha(0.5f);
             scoffTv.setAlpha(0.5f);
         }
-        sconTv.setTextColor(dozePrefs.getBoolean(Common.PREFS_SETTING_DOZE_SCON,false)?Color.parseColor("#40d0b7"):curColor);
-        scoffTv.setTextColor(dozePrefs.getBoolean(Common.PREFS_SETTING_DOZE_SCOFF,false)?Color.parseColor("#40d0b7"):curColor);
+        sconTv.setTextColor(dozePrefs.getBoolean(Common.PREFS_SETTING_DOZE_SCON,false)?Color.parseColor(MainActivity.THEME_TEXT_COLOR):curColor);
+        scoffTv.setTextColor(dozePrefs.getBoolean(Common.PREFS_SETTING_DOZE_SCOFF,false)?Color.parseColor(MainActivity.THEME_TEXT_COLOR):curColor);
         sconTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,14 +167,14 @@ public class DozeFragment extends BaseFragment {
                     Toast.makeText(getContext(),"请打开打盹总开关",Toast.LENGTH_LONG).show();
                     return;
                 }
-                if (!MainActivity.isRoot){
-                    MainActivity.isRoot = ShellUtils.checkRootPermission();
+                if (!WatchDogService.isRoot){
+                    WatchDogService.isRoot = ShellUtils.checkRootPermission();
                 }
-                if (!MainActivity.isRoot){
+                if (!WatchDogService.isRoot){
                     Toast.makeText(getActivity(),"请给予ROOT权限",Toast.LENGTH_SHORT).show();
-                    MainActivity.isRoot = ShellUtils.checkRootPermission();
+                    WatchDogService.isRoot = ShellUtils.checkRootPermission();
                 }
-                if(!MainActivity.isRoot){
+                if(!WatchDogService.isRoot){
                     Toast.makeText(getActivity(),"未获取ROOT权限，无法使用",Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -188,7 +188,7 @@ public class DozeFragment extends BaseFragment {
                 }else{
                     dozePrefs.edit().putBoolean(Common.PREFS_SETTING_DOZE_SCON,true).commit();
                     MyDozeService.issconDoze = true;
-                    sconTv.setTextColor(Color.parseColor("#40d0b7"));
+                    sconTv.setTextColor(Color.parseColor(MainActivity.THEME_TEXT_COLOR));
                     if(dozePrefs.getBoolean(Common.PREFS_SETTING_DOZE_UPDATETIME,false)){
                         Intent in = new Intent("com.click369.control.updatetime");
                         getActivity().sendBroadcast(in);
@@ -218,14 +218,14 @@ public class DozeFragment extends BaseFragment {
                     Toast.makeText(getContext(),"请打开打盹总开关",Toast.LENGTH_LONG).show();
                     return;
                 }
-                if (!MainActivity.isRoot){
-                    MainActivity.isRoot = ShellUtils.checkRootPermission();
+                if (!WatchDogService.isRoot){
+                    WatchDogService.isRoot = ShellUtils.checkRootPermission();
                 }
-                if (!MainActivity.isRoot){
+                if (!WatchDogService.isRoot){
                     Toast.makeText(getActivity(),"请给予ROOT权限",Toast.LENGTH_SHORT).show();
-                    MainActivity.isRoot = ShellUtils.checkRootPermission();
+                    WatchDogService.isRoot = ShellUtils.checkRootPermission();
                 }
-                if(!MainActivity.isRoot){
+                if(!WatchDogService.isRoot){
                     Toast.makeText(getActivity(),"未获取ROOT权限，无法使用",Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -235,7 +235,7 @@ public class DozeFragment extends BaseFragment {
                     MyDozeService.isscoffDoze = false;
                 }else{
                     dozePrefs.edit().putBoolean(Common.PREFS_SETTING_DOZE_SCOFF,true).commit();
-                    scoffTv.setTextColor(Color.parseColor("#40d0b7"));
+                    scoffTv.setTextColor(Color.parseColor(MainActivity.THEME_TEXT_COLOR));
                     MyDozeService.isscoffDoze = true;
                 }
             }
@@ -278,14 +278,14 @@ public class DozeFragment extends BaseFragment {
                         Toast.makeText(getActivity(),"安卓6.0及以上才可以使用打盹",Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if (!MainActivity.isRoot){
-                        MainActivity.isRoot = ShellUtils.checkRootPermission();
+                    if (!WatchDogService.isRoot){
+                        WatchDogService.isRoot = ShellUtils.checkRootPermission();
                     }
-                    if (!MainActivity.isRoot){
+                    if (!WatchDogService.isRoot){
                         Toast.makeText(getActivity(),"请给予ROOT权限",Toast.LENGTH_SHORT).show();
-                        MainActivity.isRoot = ShellUtils.checkRootPermission();
+                        WatchDogService.isRoot = ShellUtils.checkRootPermission();
                     }
-                    if(!MainActivity.isRoot){
+                    if(!WatchDogService.isRoot){
                         Toast.makeText(getActivity(),"未获取ROOT权限，无法使用",Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -337,7 +337,7 @@ public class DozeFragment extends BaseFragment {
                     }
                     listView.setVisibility(View.VISIBLE);
                     adapter.setData(MyDozeService.logs);
-                    dozeLogTv.setTextColor(Color.parseColor(MainActivity.COLOR));
+                    dozeLogTv.setTextColor(Color.parseColor(MainActivity.THEME_TEXT_COLOR));
                 }
             }
         });

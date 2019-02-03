@@ -26,6 +26,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu0"></TextView>
@@ -48,6 +49,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu1"></TextView>
@@ -70,6 +72,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu2"></TextView>
@@ -92,6 +95,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu3"></TextView>
@@ -114,6 +118,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu4"></TextView>
@@ -136,6 +141,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu5"></TextView>
@@ -158,6 +164,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu6"></TextView>
@@ -180,6 +187,7 @@
             android:orientation="vertical">
 
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="cpu7"></TextView>
@@ -191,5 +199,50 @@
                 android:layout_marginTop="10dp"
                 android:src="@mipmap/icon_notdisable" />
         </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cpu_item8_ll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/mtextSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cpu8"></TextView>
+
+            <ImageView
+                android:id="@+id/cpu_item8_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/icon_notdisable" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/cpu_item9_ll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/mtextSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cpu9"></TextView>
+
+            <ImageView
+                android:id="@+id/cpu_item9_iv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:src="@mipmap/icon_notdisable" />
+        </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

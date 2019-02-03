@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.fragment.ControlFragment;
@@ -24,9 +23,12 @@ import com.click369.controlbp.activity.IFWCompActivity;
 import com.click369.controlbp.fragment.IFWFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.service.WatchDogService;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -104,6 +106,7 @@ public class IFWAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
@@ -117,6 +120,10 @@ public class IFWAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -128,6 +135,7 @@ public class IFWAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 		this.notifyDataSetChanged();
 	}
 	public void chooseAll(){
@@ -163,6 +171,7 @@ public class IFWAdapter extends BaseAdapter{
 			convertView= inflater.inflate(R.layout.item_ifwapp, null);
 			viewHolder = new ViewHolder();
 			viewHolder.appNameTv = (TextView)convertView.findViewById(R.id.item_main_appname);
+			viewHolder.appTimeTv = (TextView)convertView.findViewById(R.id.item_main_apptime);
 			viewHolder.serviceTv = (TextView)convertView.findViewById(R.id.item_main_service);
 			viewHolder.broadTv = (TextView)convertView.findViewById(R.id.item_main_wakelock);
 			viewHolder.activiyTv = (TextView)convertView.findViewById(R.id.item_main_alarm);
@@ -175,11 +184,20 @@ public class IFWAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
-		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
+		int color = data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor);
+		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appTimeTv.setText((data.isRunning?BaseActivity.getProcStartTimeStr(data.packageName)+"\n"+BaseActivity.getProcTimeStr(data.packageName):""));
+		viewHolder.appTimeTv.setVisibility(data.isRunning?View.VISIBLE:View.GONE);
+		viewHolder.appTimeTv.setTextColor(color);
+		viewHolder.appNameTv.setTextColor(color);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		File file = null;
+//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
+//			BaseActivity.loadeds.add(data.packageName);
+//			file = data.iconFile;
+//		}
+//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.serFl.setTag(position);
 		viewHolder.broFl.setTag(position);
@@ -218,11 +236,11 @@ public class IFWAdapter extends BaseAdapter{
 		viewHolder.serFl.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!MainActivity.isRoot){
+				if (!WatchDogService.isRoot){
 					Toast.makeText(c,"请给予ROOT权限",Toast.LENGTH_SHORT).show();
-					MainActivity.isRoot = ShellUtils.checkRootPermission();
+					WatchDogService.isRoot = ShellUtils.checkRootPermission();
 				}
-				if(!MainActivity.isRoot){
+				if(!WatchDogService.isRoot){
 					Toast.makeText(c,"未获取ROOT权限，无法使用",Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -235,11 +253,11 @@ public class IFWAdapter extends BaseAdapter{
 		viewHolder.broFl.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!MainActivity.isRoot){
+				if (!WatchDogService.isRoot){
 					Toast.makeText(c,"请给予ROOT权限",Toast.LENGTH_SHORT).show();
-					MainActivity.isRoot = ShellUtils.checkRootPermission();
+					WatchDogService.isRoot = ShellUtils.checkRootPermission();
 				}
-				if(!MainActivity.isRoot){
+				if(!WatchDogService.isRoot){
 					Toast.makeText(c,"未获取ROOT权限，无法使用",Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -252,11 +270,11 @@ public class IFWAdapter extends BaseAdapter{
 		viewHolder.actFl.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (!MainActivity.isRoot){
+				if (!WatchDogService.isRoot){
 					Toast.makeText(c,"请给予ROOT权限",Toast.LENGTH_SHORT).show();
-					MainActivity.isRoot = ShellUtils.checkRootPermission();
+					WatchDogService.isRoot = ShellUtils.checkRootPermission();
 				}
-				if(!MainActivity.isRoot){
+				if(!WatchDogService.isRoot){
 					Toast.makeText(c,"未获取ROOT权限，无法使用",Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -271,7 +289,7 @@ public class IFWAdapter extends BaseAdapter{
 	}
 	
 	static class ViewHolder{
-		public TextView appNameTv,serviceTv,activiyTv,broadTv;
+		public TextView appNameTv,appTimeTv,serviceTv,activiyTv,broadTv;
 		public ImageView appIcon,iceIv;
 		public LinearLayout serFl,actFl,broFl;
 	}

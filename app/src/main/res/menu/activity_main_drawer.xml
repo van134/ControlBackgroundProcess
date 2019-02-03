@@ -3,47 +3,54 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_one"
-            android:title="服务、广播、唤醒锁、定时器" />
+            android:id="@+id/nav_service_broad_control"
+            android:title="服务/广播/唤醒锁/定时器" />
         <item
-            android:id="@+id/nav_two"
-            android:title="强退设置、墓碑、待机模式"/>
+            android:id="@+id/nav_backstop_mubei_control"
+            android:title="返回强退/后台墓碑/待机"/>
         <item
-            android:id="@+id/nav_three"
-            android:title="IFW阻止服务、活动、广播" />
+            android:id="@+id/nav_ifw_control"
+            android:title="IFW阻止服务/活动/广播" />
         <item
-            android:id="@+id/nav_twelve"
-            android:title="最近任务卡片设置" />
+            android:id="@+id/nav_recentcard_control"
+            android:title="最近任务保留/杀死/模糊/隐藏" />
         <item
-            android:id="@+id/nav_nine"
-            android:title="应用锁、启动控制、常驻内存" />
+            android:id="@+id/nav_autostart_lock_control"
+            android:title="应用锁/启动控制/常驻内存" />
         <item
-            android:id="@+id/nav_four"
-            android:title="冻结、阻止卸载、卸载" />
+            android:id="@+id/nav_uninstall_ice_control"
+            android:title="冻结/卸载控制/数据清除" />
         <item
-            android:id="@+id/nav_five"
+            android:id="@+id/nav_xpblacklist_control"
+            android:title="框架禁用/反检测" />
+        <item
+            android:id="@+id/nav_privacy_control"
+            android:title="网络/位置/权限" />
+        <item
+            android:id="@+id/nav_adskip_control"
+            android:title="广告/通知/对话框" />
+        <item
+            android:id="@+id/nav_doze_control"
             android:title="强制打盹" />
         <item
-            android:id="@+id/nav_ten"
+            android:id="@+id/nav_ui_control"
             android:title="界面控制" />
+
         <item
-            android:id="@+id/nav_eleven"
-            android:title="广告跳过" />
-        <item
-            android:id="@+id/nav_fourteen"
+            android:id="@+id/nav_cpuset_control"
             android:title="CPU控制" />
         <item
-            android:id="@+id/nav_six"
+            android:id="@+id/nav_others_control"
             android:title="杂项" />
         <item
-            android:id="@+id/nav_seven"
+            android:id="@+id/nav_setting_control"
             android:title="设置" />
         <item
-            android:id="@+id/nav_eight"
+            android:id="@+id/nav_juanzeng_control"
             android:title="捐赠" />
         <item
-            android:id="@+id/nav_thridteen"
-            android:title="常见问题及日志" />
+            android:id="@+id/nav_question_log_control"
+            android:title="问题/日志" />
         <!--<item-->
             <!--android:id="@+id/nav_nine"-->
             <!--android:title="关于" />-->

@@ -329,9 +329,9 @@ public class AlertUtil {
         et.setHint(hit);
         et.setText(value);
         et.setSelection(et.getText().length());
-        et.setFilters(new InputFilter[]{new InputFilter.LengthFilter(6)});
+        et.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
         et.setInputType(InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE);
-        et.setKeyListener(DigitsKeyListener.getInstance("1234567890"));
+        et.setKeyListener(DigitsKeyListener.getInstance("1234567890 -:"));
         et.setBackgroundColor(Color.argb(20,0,0,0));
         et.setPadding(0,30,0,30);
         et.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);

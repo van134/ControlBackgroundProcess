@@ -29,6 +29,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="SELINUX开关"
@@ -47,29 +48,47 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="开机阻止系统扫描媒体"
                         android:id="@+id/other_scanmedia_sw"
                         android:checked="false" />
                 </FrameLayout>
- <FrameLayout
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
-     android:visibility="gone"
                     android:background="@drawable/line" />
 
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:visibility="gone"
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="防止桌面崩溃(没问题的请不要开启)"
-                        android:id="@+id/other_homeerr_sw"
+                        android:text="自动获取短信验证码并复制到粘贴板(需重启)"
+                        android:id="@+id/other_getmsgcode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="自动获取短信验证码并自动填入文本框(需重启)"
+                        android:id="@+id/other_getmsgcodetoed_sw"
                         android:checked="false" />
                 </FrameLayout>
 
@@ -84,6 +103,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="熄屏清理内存冗余数据(并非杀进程)"
@@ -114,6 +134,7 @@
                             android:layout_weight="8.5" >
 
                             <TextView
+                                style="@style/mtextSize"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="熄屏清理内存冗余数据延迟:0秒"
@@ -141,127 +162,151 @@
                     </LinearLayout>
                 </FrameLayout>
 
+                <!--<FrameLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="2px"-->
+                    <!--android:background="@drawable/line" />-->
+
+                <!--<FrameLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_marginLeft="4dp" >-->
+
+                    <!--<TextView-->
+                        <!--style="@style/mtextSize"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="50dp"-->
+                        <!--android:text="修改控制器背景\n(应用锁背景在应用锁界面长按修改)"-->
+                        <!--android:id="@+id/other_changbg_tv"-->
+                        <!--android:textAlignment="gravity"-->
+                        <!--android:gravity="left|center_vertical" />-->
+                <!--</FrameLayout>-->
+
+                <!--<FrameLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="2px"-->
+                    <!--android:background="@drawable/line" />-->
+
+                <!--<FrameLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="50dp" >-->
+
+                    <!--<LinearLayout-->
+                        <!--android:orientation="horizontal"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:weightSum="10" >-->
+
+                        <!--<LinearLayout-->
+                            <!--android:orientation="vertical"-->
+                            <!--android:layout_width="0dp"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_marginRight="4dp"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:layout_weight="8.5" >-->
+
+                            <!--<TextView-->
+                                <!--style="@style/mtextSize"-->
+                                <!--android:layout_width="wrap_content"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:text="应用控制器背景图片模糊度:0"-->
+                                <!--android:id="@+id/other_bg_blurvalue"-->
+                                <!--android:layout_marginLeft="8dp" />-->
+
+                            <!--<SeekBar-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:id="@+id/other_bg_blursb"-->
+                                <!--android:indeterminate="false"-->
+                                <!--android:max="100"-->
+                                <!--android:progress="0"-->
+                                <!--android:layout_marginTop="5dp" />-->
+                        <!--</LinearLayout>-->
+
+                        <!--<ImageView-->
+                            <!--android:layout_width="0dp"-->
+                            <!--android:layout_height="match_parent"-->
+                            <!--android:id="@+id/other_pen2_iv"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:src="@mipmap/pen"-->
+                            <!--android:layout_weight="1.5"-->
+                            <!--android:scaleType="center" />-->
+                    <!--</LinearLayout>-->
+                <!--</FrameLayout>-->
+
+                <!--<FrameLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="2px"-->
+                    <!--android:background="@drawable/line" />-->
+
+                <!--<FrameLayout-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="50dp" >-->
+
+                    <!--<LinearLayout-->
+                        <!--android:orientation="horizontal"-->
+                        <!--android:layout_width="match_parent"-->
+                        <!--android:layout_height="match_parent"-->
+                        <!--android:weightSum="10" >-->
+
+                        <!--<LinearLayout-->
+                            <!--android:orientation="vertical"-->
+                            <!--android:layout_width="0dp"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:layout_marginRight="4dp"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:layout_weight="8.5" >-->
+
+                            <!--<TextView-->
+                                <!--style="@style/mtextSize"-->
+                                <!--android:layout_width="wrap_content"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:text="应用控制器背景图片不透明度:0"-->
+                                <!--android:id="@+id/other_bg_brightvalue"-->
+                                <!--android:layout_marginLeft="8dp" />-->
+
+                            <!--<SeekBar-->
+                                <!--android:layout_width="match_parent"-->
+                                <!--android:layout_height="wrap_content"-->
+                                <!--android:id="@+id/other_bg_brightsb"-->
+                                <!--android:indeterminate="false"-->
+                                <!--android:max="100"-->
+                                <!--android:progress="100"-->
+                                <!--android:layout_marginTop="5dp" />-->
+                        <!--</LinearLayout>-->
+
+                        <!--<ImageView-->
+                            <!--android:layout_width="0dp"-->
+                            <!--android:layout_height="match_parent"-->
+                            <!--android:id="@+id/other_pen3_iv"-->
+                            <!--android:layout_gravity="center_vertical"-->
+                            <!--android:src="@mipmap/pen"-->
+                            <!--android:layout_weight="1.5"-->
+                            <!--android:scaleType="center" />-->
+                    <!--</LinearLayout>-->
+                <!--</FrameLayout>-->
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
+                    android:visibility="gone"
                     android:background="@drawable/line" />
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
+                    android:layout_height="50dp"
+                    android:visibility="gone"
+                    android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="修改控制器背景\n(应用锁背景在应用锁界面长按修改)"
-                        android:id="@+id/other_changbg_tv"
+                        android:text="虚拟定位（微信、轻聊QQ、高德）(需重启进程)"
+                        android:id="@+id/other_changloc_tv"
                         android:textAlignment="gravity"
-                        android:gravity="left|center_vertical" />
+                        android:gravity="left|center_vertical"
+                        />
                 </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp" >
-
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:weightSum="10" >
-
-                        <LinearLayout
-                            android:orientation="vertical"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="4dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="8.5" >
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="应用控制器背景图片模糊度:0"
-                                android:id="@+id/other_bg_blurvalue"
-                                android:layout_marginLeft="8dp" />
-
-                            <SeekBar
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/other_bg_blursb"
-                                android:indeterminate="false"
-                                android:max="100"
-                                android:progress="0"
-                                android:layout_marginTop="5dp" />
-                        </LinearLayout>
-
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:id="@+id/other_pen2_iv"
-                            android:layout_gravity="center_vertical"
-                            android:src="@mipmap/pen"
-                            android:layout_weight="1.5"
-                            android:scaleType="center" />
-                    </LinearLayout>
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp" >
-
-                    <LinearLayout
-                        android:orientation="horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:weightSum="10" >
-
-                        <LinearLayout
-                            android:orientation="vertical"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginRight="4dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="8.5" >
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="应用控制器背景图片不透明度:0"
-                                android:id="@+id/other_bg_brightvalue"
-                                android:layout_marginLeft="8dp" />
-
-                            <SeekBar
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:id="@+id/other_bg_brightsb"
-                                android:indeterminate="false"
-                                android:max="100"
-                                android:progress="100"
-                                android:layout_marginTop="5dp" />
-                        </LinearLayout>
-
-                        <ImageView
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:id="@+id/other_pen3_iv"
-                            android:layout_gravity="center_vertical"
-                            android:src="@mipmap/pen"
-                            android:layout_weight="1.5"
-                            android:scaleType="center" />
-                    </LinearLayout>
-                </FrameLayout>
-
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
@@ -273,6 +318,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="文字替换"
@@ -293,6 +339,7 @@
                     android:visibility="gone">
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="Toast优化"
@@ -312,6 +359,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="重启选项"
@@ -332,6 +380,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="ADB命令"
@@ -352,6 +401,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="查看WIFI密码"
@@ -372,6 +422,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="极限清理内存"
@@ -392,6 +443,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="清理系统缓存"
@@ -412,6 +464,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="清理缓存进程"
@@ -435,6 +488,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="创建正在运行快捷方式"
@@ -455,6 +509,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="创建冷藏室快捷方式"
@@ -475,6 +530,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="创建缓存清理快捷方式"
@@ -494,6 +550,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="创建极限清理快捷方式"
@@ -513,6 +570,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="创建重启选项快捷方式"
@@ -532,6 +590,7 @@
                     android:layout_marginLeft="4dp">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="创建CPU设置快捷方式"

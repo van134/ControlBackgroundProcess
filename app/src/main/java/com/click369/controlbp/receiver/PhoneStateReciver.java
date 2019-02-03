@@ -24,9 +24,13 @@ public class PhoneStateReciver  extends BroadcastReceiver {
                 Log.i("DOZE", "call state idle...");
                 WatchDogService.isHookOff = false;
                 ScreenLightServiceUtil.sendHideLight(context);
+
                 if(WatchDogService.isFlashCall){
-                    Intent intent1 = new Intent("com.click369.control.callflash.stop");
-                    context.sendBroadcast(intent1);
+                    if(!WatchDogService.isFlashInOffSc||(WatchDogService.isFlashInOffSc&&
+                            (System.currentTimeMillis()-WatchDogService.lastScreenOnTime<500||WatchDogService.isScreenOff))) {
+                        Intent intent1 = new Intent("com.click369.control.callflash.stop");
+                        context.sendBroadcast(intent1);
+                    }
                 }
             }else if(tm.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK) {
                 Log.i("DOZE", "call state offhook...");
@@ -41,8 +45,11 @@ public class PhoneStateReciver  extends BroadcastReceiver {
                 WatchDogService.isHookOff = true;
                 ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_CALL,context);
                 if(WatchDogService.isFlashCall){
-                    Intent intent1 = new Intent("com.click369.control.callflash.start");
-                    context.sendBroadcast(intent1);
+                    if(!WatchDogService.isFlashInOffSc||(WatchDogService.isFlashInOffSc&&
+                            (System.currentTimeMillis()-WatchDogService.lastScreenOnTime<500||WatchDogService.isScreenOff))) {
+                        Intent intent1 = new Intent("com.click369.control.callflash.start");
+                        context.sendBroadcast(intent1);
+                    }
                 }
             }
         }else if("android.intent.action.NEW_OUTGOING_CALL".equals(intent.getAction())){

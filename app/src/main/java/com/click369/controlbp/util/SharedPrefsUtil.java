@@ -21,7 +21,6 @@ public class SharedPrefsUtil {
             wakeLockPrefs,
             alarmPrefs,
             forceStopPrefs,
-//            muBeiPrefs,
             settings,
             ifwCountPrefs,
             uiBarPrefs,
@@ -33,14 +32,15 @@ public class SharedPrefsUtil {
             skipDialogPrefs,
             pmPrefs,
             tvPrefs,
-            cpuPrefs;
+            cpuPrefs,
+        privacyPrefs,
+        xpBlackListPrefs;
 
     private static SharedPrefsUtil instance;
     private Context context;
     public static SharedPrefsUtil getInstance(Context context){
         if(instance==null){
             instance = new SharedPrefsUtil(context);
-            //            muBeiPrefsFile = new File(getFilesDir() + "/../shared_prefs/" + Common.IPREFS_MUBEILIST + ".xml");
         }
         return instance;
     }
@@ -51,7 +51,6 @@ public class SharedPrefsUtil {
         wakeLockPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_WAKELOCKNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         alarmPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_ALARMNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         forceStopPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_FORCESTOPNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
-//        muBeiPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_MUBEILIST);
         autoStartNetPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_AUTOSTARTNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
         uiBarPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_UIBARLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
         settings = SharedPrefsUtil.getPreferences(context,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
@@ -63,25 +62,14 @@ public class SharedPrefsUtil {
         pmPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_PMLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         tvPrefs = SharedPrefsUtil.getPreferences(context,Common.IPREFS_TVLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
         cpuPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_SETCPU);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        Listener listener = new Listener();
-//        forceStopPrefs.registerOnSharedPreferenceChangeListener(listener);
-//        autoStartNetPrefs.registerOnSharedPreferenceChangeListener(listener);
-//        setTimeStopPrefs.registerOnSharedPreferenceChangeListener(listener);
+        xpBlackListPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_XPBLACKLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
+        privacyPrefs = SharedPrefsUtil.getPreferences(context,Common.PREFS_PRIVACY);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
     }
-
-
 
     public static SharedPreferences getPreferences(Context ctx, String prefName) {
         SharedPreferences prefs = ctx.getSharedPreferences(prefName, Context.MODE_WORLD_READABLE);
-//        final File prefsFile = new File(ctx.getFilesDir() + "/../shared_prefs/" + prefName + ".xml");
-//        Log.i("CONTROL","prefsFile exists"+prefsFile.exists());
-//        boolean isOk  = prefsFile.setReadable(true, false);
-//        Log.i("CONTROL","prefsFile isOk"+isOk);
-//        prefsFile.setReasable(true, false);
         return prefs;
     }
-//    public static void changeQx(SharedPreferences sp){
-//    }
 
     public void clearAppSettings(AppInfo ai,boolean isDel){
         SharedPreferences.Editor modEd = modPrefs.edit();
@@ -96,8 +84,8 @@ public class SharedPrefsUtil {
         forceEd.remove(ai.getPackageName() + "/backmubei");
         forceEd.remove(ai.getPackageName() + "/offstop");
         forceEd.remove(ai.getPackageName() + "/offmubei");
-//        muBeiPrefs.edit().remove(ai.getPackageName()).commit();
         forceEd.remove(ai.getPackageName() + "/homemubei");
+        forceEd.remove(ai.getPackageName() + "/idle");
         forceEd.remove(ai.getPackageName() + "/notifynotexit");
         forceEd.commit();
 
@@ -125,13 +113,36 @@ public class SharedPrefsUtil {
         barEd.remove(ai.getPackageName() + "/locklist");
         barEd.remove(ai.getPackageName() + "/colorlist");
         barEd.commit();
+        SharedPreferences.Editor xpEd = xpBlackListPrefs.edit();
+        xpEd.remove(ai.getPackageName() + "/allxpblack");
+        xpEd.remove(ai.getPackageName() + "/contorlxpblack");
+        xpEd.remove(ai.getPackageName() + "/nocheckxp");
+        xpEd.remove(ai.getPackageName() + "/setcanhook");
+        xpEd.commit();
+
+        SharedPreferences.Editor priEd = privacyPrefs.edit();
+        priEd.remove(ai.getPackageName() + "/priswitch");
+        priEd.remove(ai.getPackageName() + "/priwifi");
+        priEd.remove(ai.getPackageName() + "/primobile");
+        priEd.remove(ai.getPackageName() + "/prilist");
+        priEd.remove(ai.getPackageName() + "/changetime");
+        priEd.remove(ai.getPackageName() + "/isrechange");
+        priEd.remove(ai.getPackageName() + "/lon");
+        priEd.remove(ai.getPackageName() + "/lat");
+        priEd.commit();
 
         pmPrefs.edit().remove(ai.getPackageName() + "/notunstall").commit();
         adPrefs.edit().remove(ai.getPackageName() + "/ad").commit();
         setTimeStopPrefs.edit().remove(ai.getPackageName() + "/one").commit();
         setTimeStopPrefs.edit().remove(ai.getPackageName() + "/long").commit();
+        ai.resetSetting();
         if(!isDel){
             AppLoaderUtil.getInstance(context).loadAppSetting();
+        }else{
+            File f = new File(AppLoaderUtil.iconPath, ai.packageName);
+            if(f.exists()){
+                f.delete();
+            }
         }
         XposedStopApp.stopApk(ai.packageName,context);
     }

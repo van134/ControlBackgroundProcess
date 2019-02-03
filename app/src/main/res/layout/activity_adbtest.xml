@@ -35,6 +35,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:text="执行"
+                style="@style/mtextSize"
                 android:id="@+id/adbtest_ok_tv"
 
                 android:layout_weight="2"
@@ -47,6 +48,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:text="清空"
+                style="@style/mtextSize"
                 android:id="@+id/adbtest_clean_tv"
 
                 android:layout_weight="2"
@@ -72,6 +74,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="..."
+                    style="@style/mtextSize"
                     android:id="@+id/adbtest_info_tv" />
             </HorizontalScrollView>
         </ScrollView>

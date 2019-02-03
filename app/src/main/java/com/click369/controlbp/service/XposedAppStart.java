@@ -56,7 +56,7 @@ public class XposedAppStart {
         }.start();
     }
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences autoStartPrefs){
-        Class actCls = XposedHelpers.findClass("android.app.Activity",lpparam.classLoader);
+        Class actCls = XposedUtil.findClass("android.app.Activity",lpparam.classLoader);
         try {
             XposedHelpers.findAndHookMethod(actCls, "startActivityForResult", Intent.class, int.class, Bundle.class, new XC_MethodHook() {
                 @Override
@@ -128,7 +128,7 @@ public class XposedAppStart {
 //                });
 //            }
 
-        }catch (RuntimeException e){
+        }catch (Throwable e){
             XposedBridge.log("^^^^^^^^^^^^^^autostart error "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
             e.printStackTrace();
         }
@@ -162,12 +162,12 @@ public class XposedAppStart {
                                     }
                                 }
                             }
-                        } catch (RuntimeException e) {
+                        } catch (Throwable e) {
                             e.printStackTrace();
                         }
                     }
                 });
-            }catch (RuntimeException e){
+            }catch (Throwable e){
                 e.printStackTrace();
             }
         }

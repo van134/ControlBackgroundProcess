@@ -378,8 +378,10 @@ public class UnLockActivity extends Activity {
     @Override
     public void onBackPressed() {
 //        moveTaskToBack(false);
-        AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyHome = true;
-        AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyBack = false;
+        if(AppLoaderUtil.allAppStateInfos!=null&&AppLoaderUtil.allAppStateInfos.containsKey(pkg)){
+            AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyHome = true;
+            AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyBack = false;
+        }
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);// 注意
         intent.addCategory(Intent.CATEGORY_HOME);

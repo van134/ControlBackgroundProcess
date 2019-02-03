@@ -11,11 +11,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.net.wifi.ScanResult;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -39,10 +45,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.R;
@@ -62,10 +70,12 @@ import com.click369.controlbp.fragment.IFWFragment;
 import com.click369.controlbp.fragment.IceUnstallFragment;
 import com.click369.controlbp.fragment.JuanZengFragment;
 import com.click369.controlbp.fragment.OtherFragment;
+import com.click369.controlbp.fragment.PrivacyFragment;
 import com.click369.controlbp.fragment.QuestionFragment;
 import com.click369.controlbp.fragment.RecentFragment;
 import com.click369.controlbp.fragment.SettingFragment;
 import com.click369.controlbp.fragment.UIControlFragment;
+import com.click369.controlbp.fragment.XpBlackListFragment;
 import com.click369.controlbp.receiver.BootStartReceiver;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
@@ -74,14 +84,14 @@ import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.BackupRestoreUtil;
 import com.click369.controlbp.util.FileUtil;
+import com.click369.controlbp.util.GCUtil;
 import com.click369.controlbp.util.GetPhoto;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PermissionUtils;
-import com.click369.controlbp.util.ShellUtilDoze;
-import com.click369.controlbp.util.ShellUtils;
 import com.click369.controlbp.util.ShortCutUtil;
 import com.click369.controlbp.util.SoftKeyboardStateHelper;
 import com.click369.controlbp.util.TimeUtil;
+import com.githang.statusbar.StatusBarCompat;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -90,10 +100,17 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+//    public static final boolean TEST = false;
+    public static String THEME_COLOR = "#1a9dac";
+    public static String THEME_BG_COLOR = "#f4f4f4";
+    public static String THEME_TEXT_COLOR = "#1a9dac";
+
     public static boolean isUIRun = false;
+    public static boolean isShow = false;
     public static HashMap<String,WhiteApp> whiteApps = new HashMap<String,WhiteApp>();
     public RelativeLayout mainRL;
     private AppCompatTextView menuTv;
@@ -108,7 +125,9 @@ public class MainActivity extends BaseActivity
     public AppStartFragment appStartFragment;
     public UIControlFragment uiControlFragment;
     public RecentFragment recentFragment;
+    public PrivacyFragment privacyFragment;
     public AdFragment adFragment;
+    public XpBlackListFragment xpBlackFragement;
     public CPUSetFragment cpuFragment;
     public QuestionFragment questionFragment;
     public BaseFragment chooseFragment;
@@ -120,6 +139,7 @@ public class MainActivity extends BaseActivity
     public static String COLOR_MUBEI = "#FF8C00";
     public static String COLOR_IDLE = "#6dcb21";
     public static boolean isNightMode = false;
+    public static boolean isAutoChange = false;
     public static boolean isLinkStopAndAuto = true;
     public static boolean isLinkStopAndRemoveStop = true;
     public static boolean isLinkRecentAndAuto = true;
@@ -132,10 +152,8 @@ public class MainActivity extends BaseActivity
     public ListView navInfoListView;
     public NavInfoAdapter navAdapter;
     private MyUpdateListReceiver updateReceiver;
-    public static boolean isRoot = true;
-//    private File muBeiPrefsFile = null;
-//    private long lastMuBeiUpdate = 0;
-    public File bgFile,bgBlurFile;
+
+    public File bgFile,bgBlurFile,sideBgFile,sideBgBlurFile;
     public GetPhoto getPhoto;
     BaseFragment fragments[];
     private AppLoaderUtil.LoadAppCallBack loadAppCallBack;
@@ -143,23 +161,31 @@ public class MainActivity extends BaseActivity
     TextView sysTimeTitle;
     public static HashSet<String> pkgIdleStates = new HashSet<String>();
     boolean isClickSysTime = false;
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    public static boolean isModuleActive() {
+        return false||WatchDogService.ISHOOKOK;
+    }
+    public static int getActivatedModuleVersion(){
+        return  -1;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         isUIRun = true;
+        bgFile = new File(FileUtil.IMAGEPATH,"bg");
+        bgBlurFile = new File(FileUtil.IMAGEPATH,"bg_blur");
+        sideBgFile = new File(FileUtil.IMAGEPATH,"side");
+        sideBgBlurFile = new File(FileUtil.IMAGEPATH,"side_blur");
 
+        pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,true);
         loadAppCallBack = new LoadAppCallBackImp();
         appLoaderUtil.addAppChangeListener(loadAppCallBack);
-        if(!WatchDogService.isKillRun) {
-            Intent intent = new Intent(MainActivity.this, WatchDogService.class);
-            MainActivity.this.startService(intent);
-        }
-
         backupRestoreUtil = new BackupRestoreUtil(this);
-
-        isNightMode = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_MODE,false);
-        boolean isAutoChange = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,false);
+        isNightMode = sharedPrefs.uiBarPrefs.getBoolean(Common.PREFS_SETTING_UI_THEME_MODE,false);
+        THEME_COLOR = sharedPrefs.uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_COLOR,"#1a9dac");
+        THEME_TEXT_COLOR = sharedPrefs.uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_TEXT_COLOR,"#1a9dac");
+        THEME_BG_COLOR = sharedPrefs.uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_BG_COLOR,"#f4f4f4");
+        isAutoChange = sharedPrefs.uiBarPrefs.getBoolean(Common.PREFS_SETTING_UI_THEME_AUTOCHANGEMODE,false);
         if(!isNightMode&&isAutoChange){
             int hour = Integer.parseInt(TimeUtil.changeMils2String(System.currentTimeMillis(),"H"));
             if(hour>=22||hour<7){
@@ -172,6 +198,8 @@ public class MainActivity extends BaseActivity
         }
         setContentView(R.layout.activity_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitleMarginStart(0);
+        toolbar.setContentInsetStartWithNavigation(0);
         mainRL =(RelativeLayout) findViewById(R.id.main_fragment_rl);
         mainRL.setBackgroundColor(isNightMode?Color.BLACK:Color.WHITE);
         menuTv = (AppCompatTextView) findViewById(R.id.main_menu_actv);
@@ -179,15 +207,21 @@ public class MainActivity extends BaseActivity
         menuClick();
         setSupportActionBar(toolbar);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        if(drawer!=null){
+            drawer.setDrawerListener(toggle);
+        }
+
         toggle.syncState();
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navInfoLL = (LinearLayout)navigationView.findViewById(R.id.nav_info_ll);
+
         navInfoTitle = (TextView)navigationView.findViewById(R.id.nav_info_title);
         navInfoSamllTitle = (TextView)navigationView.findViewById(R.id.nav_info_smalltitle);
         navInfoListView = (ListView) navigationView.findViewById(R.id.nav_info_listview);
+        initMenuView();
+        initView();
+        TextView head_bigtitle_tv = (TextView)navigationView.getHeaderView(0).findViewById(R.id.head_bigtitle_tv);
         TextView subTitle = (TextView)navigationView.getHeaderView(0).findViewById(R.id.head_subtitle_tv);
         sysTimeTitle = (TextView)navigationView.getHeaderView(0).findViewById(R.id.head_threetitle_tv);//+"\n微信号:Van418"
         subTitle.setText("版本:"+PackageUtil.getAppVersionName(this)+"\n交流群:624055295");//+"\n朋友搞机公众号:MRYZSL"
@@ -198,7 +232,6 @@ public class MainActivity extends BaseActivity
             public void onClick(View v) {
                 sharedPrefs.settings.edit().putBoolean("isclicksystime",true).commit();
                 isClickSysTime = true;
-                Log.i("CONTROL","WatchDogService.batteryInfos  "+WatchDogService.batteryInfos.size());
                 if(WatchDogService.batteryInfos.size()==0){
                     AlertUtil.showAlertMsg(MainActivity.this,"还没有电量记录，待会再试哦");
                 }else{
@@ -211,13 +244,11 @@ public class MainActivity extends BaseActivity
                     if(batteryInfo.size()>1){
                         Integer now = batteryInfo.get(0);
                         Integer first = batteryInfo.get(batteryInfo.size()-1);
-                        Log.i("CONTROL"," now  "+now+" first  "+first);
                         long time = System.currentTimeMillis()-WatchDogService.batteryInfos.get(first);
                         String title = (SystemClock.elapsedRealtime()-time>1000*60*5?"从拔下电源使用时长:":"从开机使用时长:")+TimeUtil.changeMils2StringMin(time)+",消耗电量:"+(first-now)+"%,";
                         if(WatchDogService.batteryInfos.containsKey(101)&&WatchDogService.batteryInfos.containsKey(102)){
                             title+="亮屏时长:"+TimeUtil.changeMils2StringMin(WatchDogService.batteryInfos.get(101)+(System.currentTimeMillis()-WatchDogService.batteryOnScTime))+",熄屏时长:"+TimeUtil.changeMils2StringMin(WatchDogService.batteryInfos.get(102));
                         }
-                        Log.i("CONTROL"," title  "+title);
                         titls[0] = title;
                         for(int i = 1;i<batteryInfo.size()+1;i++){
                             Integer integer = batteryInfo.get(i-1);
@@ -231,6 +262,12 @@ public class MainActivity extends BaseActivity
                     }
                     AlertUtil.showListAlert(MainActivity.this,"电池消耗时间点",titls,null);
                 }
+            }
+        });
+        head_bigtitle_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OtherFragment.showRestartAlert(MainActivity.this);
             }
         });
         navAdapter = new NavInfoAdapter(this);
@@ -262,75 +299,177 @@ public class MainActivity extends BaseActivity
         int[][] states = new int[][]{new int[]{ -android.R.attr.state_checked},new int[]{android.R.attr.state_checked} };
         int[] colors = new int[]{ getResources().getColor(R.color.uncheck_color),  getResources().getColor(R.color.checked_color) };
         if(isNightMode){
-            toolbar.setBackgroundColor(getResources().getColor(R.color.darkblack));
-//            navigationView.setBackgroundResource(R.drawable.saidbg);
-            navigationView.setBackgroundColor(getResources().getColor(R.color.darkblack));
-            navigationView.getHeaderView(0).setBackgroundColor(getResources().getColor(R.color.darkblack));
-            navInfoLL.setBackgroundColor(getResources().getColor(R.color.darkblack));
-//            navigationView.getHeaderView(0).setBackgroundResource(R.drawable.saidbg);
-            colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color) };
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Window window = this.getWindow();
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(getResources().getColor(R.color.darkblack));
-                window.setNavigationBarColor(Color.BLACK);
-            }
-        }else{
-            navigationView.setBackgroundResource(R.drawable.slider_bg1);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                Window window = this.getWindow();
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));
-                if (new File(Environment.getExternalStorageDirectory(),"zroms").exists()){
-                    //底部导航栏
-                    window.setNavigationBarColor(Color.WHITE);
-                }
-            }
+//            toolbar.setBackgroundColor(getResources().getColor(R.color.darkblack));
+//            navigationView.setBackgroundColor(getResources().getColor(R.color.darkblack));
+//            navigationView.getHeaderView(0).setBackgroundColor(getResources().getColor(R.color.darkblack));
+//            navInfoLL.setBackgroundColor(getResources().getColor(R.color.darkblack));
+            colors = new int[]{ getResources().getColor(R.color.uncheck_colordark),  getResources().getColor(R.color.checked_color_dark) };
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//                Window window = this.getWindow();
+//                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+//                window.setStatusBarColor(getResources().getColor(R.color.darkblack));
+//                window.setNavigationBarColor(Color.BLACK);
+//            }
         }
-
+        initThemeColor();
         ColorStateList csl = new ColorStateList(states, colors);
         navigationView.setItemTextColor(csl);
         navigationView.setItemIconTintList(csl);
         navigationView.setNavigationItemSelectedListener(this);
-        initMenuView();
         toolbar.setTitle("");
-        if (!isModuleActive()){
-            menuTv.setAlpha(0.5f);
-            menuTv.setEnabled(false);
-            showNotActive();
-        }else{
-            int saveCode = sharedPrefs.settings.getInt(Common.BUILDCODE,0);
-            if(saveCode!=BuildConfig.VERSION_CODE){
-                sharedPrefs.settings.edit().putInt(Common.BUILDCODE,BuildConfig.VERSION_CODE).commit();
-                h.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        AlertUtil.showAlertMsg(MainActivity.this,getString(R.string.mainalert));
-                    }
-                },500);
-            }
-        }
-//        runing = PackageUtil.getRunngingApp(this);
-        initView();
         isZhenDong = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true);
         updateReceiver = new MyUpdateListReceiver();
         getPhoto = new GetPhoto(this);
-        bgFile = new File(FileUtil.IMAGEPATH,"bg.jpg");
-        bgBlurFile = new File(FileUtil.IMAGEPATH,"bg_blur.jpg");
-        if (bgFile!=null&&bgFile.exists()){
-            Drawable d = Drawable.createFromPath(bgBlurFile.exists()?bgBlurFile.getAbsolutePath():bgFile.getAbsolutePath());
-            if(d!=null){
-                d.setAlpha((int)(sharedPrefs.settings.getInt(Common.PREFS_SETTING_OTHER_BGBRIGHT,100)*2.55));
-                mainRL.setBackground(d);
-            }
-        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortCutUtil.initDynamicShortcuts(this);
         }
-        pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,false);
         appLoaderUtil.loadLocalApp();
-        checkRoot();
+        whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
+        h.postDelayed(showAlert,1000);
+        initFileBg(0);
+        Log.i("CONTROL","currentTimeMillis  "+System.currentTimeMillis());
     }
+
+    public void initThemeColor(){
+        navigationView.getHeaderView(0).setBackgroundColor(Color.TRANSPARENT);
+        if(!isNightMode){
+            toolbar.setBackgroundColor(Color.parseColor(THEME_COLOR));
+            if(!sideBgFile.exists()){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    navigationView.setBackground(null);
+                    navInfoLL.setBackground(null);
+                }else{
+                    navigationView.setBackgroundDrawable(null);
+                    navInfoLL.setBackgroundDrawable(null);
+                }
+                navInfoLL.setBackgroundColor(Color.parseColor(THEME_COLOR));
+                int color = Color.parseColor(THEME_COLOR);
+                int alpha = (color & 0xff000000) >>> 24;
+                int red = ((color & 0x00ff0000) >> 16)+10;
+                int green = ((color & 0x0000ff00) >> 8)+10;
+                int blue = (color & 0x000000ff)+10;
+                navigationView.setBackgroundColor(Color.argb(alpha,red>255?255:red,green>255?255:green,blue>255?255:blue));
+//            navigationView.setBackgroundResource(R.drawable.slider_bg1);
+
+            }
+
+        }else{
+            toolbar.setBackgroundColor(Color.BLACK);
+            if(!sideBgFile.exists()){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    navigationView.setBackground(null);
+                    navInfoLL.setBackground(null);
+                }else{
+                    navigationView.setBackgroundDrawable(null);
+                    navInfoLL.setBackgroundDrawable(null);
+                }
+                navInfoLL.setBackgroundColor(Color.BLACK);
+                navigationView.getHeaderView(0).setBackgroundColor(Color.BLACK);
+                navigationView.setBackgroundColor(Color.BLACK);
+            }
+
+        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            StatusBarCompat.setStatusBarColor(this,isNightMode?Color.BLACK:Color.parseColor(THEME_COLOR),false);
+//            Window window = this.getWindow();
+//            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+////                window.setStatusBarColor(getResources().getColor(R.color.colorPrimary));
+//            window.setStatusBarColor(isNightMode?Color.BLACK:Color.parseColor(THEME_COLOR));
+//            if (new File(Environment.getExternalStorageDirectory(),"zroms").exists()){
+//                //底部导航栏
+//                window.setNavigationBarColor(Color.WHITE);
+//            }
+//        }
+    }
+
+    private void initFileBg(int type){//0所有  1列表背景  2侧栏背景
+        try {
+            if(type==1||type==0){
+
+//                h.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+                        if (bgFile.exists()){
+                            Drawable d = Drawable.createFromPath(bgBlurFile.exists()?bgBlurFile.getAbsolutePath():bgFile.getAbsolutePath());
+                            if(d!=null){
+                                int alp = (int)(sharedPrefs.uiBarPrefs.getInt(Common.PREFS_SETTING_UI_BGBRIGHT,100)*2.55);
+                                Log.i("CONTROL","ALP "+alp);
+                                d.setAlpha(alp);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                                    mainRL.setBackground(d);
+                                }else{
+                                    mainRL.setBackgroundDrawable(d);
+                                }
+                            }else{
+                                mainRL.setBackgroundColor(Color.TRANSPARENT);
+                                setBgColor(Color.parseColor(THEME_BG_COLOR));
+                            }
+                        }else{
+                            mainRL.setBackgroundColor(Color.TRANSPARENT);
+                            setBgColor(Color.parseColor(THEME_BG_COLOR));
+                        }
+//                    }
+//                },500);
+
+            }
+            if(type==2||type==0) {
+
+//                h.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+                        if (sideBgFile.exists()) {
+                            Drawable d = Drawable.createFromPath(sideBgBlurFile.exists() ? sideBgBlurFile.getAbsolutePath() : sideBgFile.getAbsolutePath());
+                            if (d != null) {
+
+                                int alp = (int)(sharedPrefs.uiBarPrefs.getInt(Common.PREFS_SETTING_UI_SIDEBGBRIGHT,100)*2.55);
+                                Log.i("CONTROL","ALP "+alp+"  "+Common.PREFS_SETTING_UI_SIDEBGBRIGHT);
+                                d.setAlpha(alp);
+                                navigationView.setBackgroundColor(Color.TRANSPARENT);
+                                navInfoLL.setBackgroundColor(Color.TRANSPARENT);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                                    navigationView.setBackground(d);
+                                    navInfoLL.setBackground(d);
+                                } else {
+                                    navigationView.setBackgroundDrawable(d);
+                                    navInfoLL.setBackgroundDrawable(d);
+                                }
+                            } else {
+                                initThemeColor();
+                            }
+                        } else {
+                            initThemeColor();
+                        }
+//                    }
+//                },500);
+            }
+            System.gc();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    Runnable showAlert  = new Runnable() {
+        @Override
+        public void run() {
+            if (!isModuleActive()){
+                menuTv.setAlpha(0.5f);
+                menuTv.setEnabled(false);
+                showNotActive();
+            }else{
+                int saveCode = sharedPrefs.settings.getInt(Common.BUILDCODE,0);
+                if(saveCode!=BuildConfig.VERSION_CODE){
+                    sharedPrefs.settings.edit().putInt(Common.BUILDCODE,BuildConfig.VERSION_CODE).commit();
+                    h.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            AlertUtil.showAlertMsg(MainActivity.this,getString(R.string.mainalert));
+                        }
+                    },500);
+                }
+            }
+        }
+    };
 
     private void initView(){
         controlFragment = new ControlFragment();
@@ -342,18 +481,20 @@ public class MainActivity extends BaseActivity
         dozeFragment = new DozeFragment();
         uiControlFragment = new UIControlFragment();
         adFragment = new AdFragment();
+        xpBlackFragement = new XpBlackListFragment();
         cpuFragment = new CPUSetFragment();
+        privacyFragment = new PrivacyFragment();
         otherFragment = new OtherFragment();
         settingFragment = new SettingFragment();
         juanZengFragment = new JuanZengFragment();
         questionFragment = new QuestionFragment();
         fragments = new BaseFragment[]{controlFragment,forceStopFragment,ifwFragment,recentFragment, appStartFragment,
-                iceRoomFragment,dozeFragment,uiControlFragment,adFragment,cpuFragment,otherFragment,settingFragment,juanZengFragment,questionFragment};
+                iceRoomFragment,xpBlackFragement,privacyFragment,adFragment,dozeFragment,uiControlFragment,cpuFragment,otherFragment,
+                settingFragment,juanZengFragment,questionFragment};
         int index = initMenuView();
         chooseFragment = fragments[index];
         navigationView.getMenu().getItem(index).setChecked(true);
         this.setTitle(navigationView.getMenu().getItem(index).getTitle());
-//        uiControlFragment.startRound(this);
         if(this.getIntent().hasExtra("from")&&this.getIntent().getStringExtra("from").equals("doze")){
             this.setTitle("打盹");
             navigationView.getMenu().getItem(4).setChecked(true);
@@ -391,17 +532,19 @@ public class MainActivity extends BaseActivity
 
 
     private int initMenuView(){
-        boolean one = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_ONE,true);
-        boolean two = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_TWO,true);
-        boolean three = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_THREE,true);
-        boolean four = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_FOUR,true);
-        boolean five = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_FIVE,true);
-        boolean six = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SIX,true);
-        boolean seven = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SEVEN,true);
-        boolean eight = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_EIGHT,true);
-        boolean nine = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_NINE,true);
-        boolean ten = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_TEN,true);
-        boolean eleven = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_ELEVEN,true);
+        boolean one = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SERVICE_BROAD,true);
+        boolean two = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_BACKSTOP_MUBEI,true);
+        boolean three = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_IFW,true);
+        boolean four = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_RECNETCARD,true);
+        boolean five = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true);
+        boolean six = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_UNINSTALL_ICE,true);
+        boolean seven = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_XPBLACKLIST,true);
+        boolean eight = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_PRIVACY,true);
+        boolean nine = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_ADSKIP,true);
+        boolean ten = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_DOZE,true);
+        boolean eleven = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_UI,true);
+        boolean twelve = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_CPUSET,true);
+        boolean thirteen = sharedPrefs.settings.getBoolean(Common.ALLSWITCH_OTHERS,true);
         navigationView.getMenu().getItem(0).setVisible(one);
         navigationView.getMenu().getItem(1).setVisible(two);
         navigationView.getMenu().getItem(2).setVisible(three);
@@ -411,8 +554,10 @@ public class MainActivity extends BaseActivity
         navigationView.getMenu().getItem(6).setVisible(seven);
         navigationView.getMenu().getItem(7).setVisible(eight);
         navigationView.getMenu().getItem(8).setVisible(nine);
-        navigationView.getMenu().getItem(9).setVisible(eleven);
-        navigationView.getMenu().getItem(10).setVisible(ten);
+        navigationView.getMenu().getItem(9).setVisible(ten);
+        navigationView.getMenu().getItem(10).setVisible(eleven);
+        navigationView.getMenu().getItem(11).setVisible(twelve);
+        navigationView.getMenu().getItem(12).setVisible(thirteen);
         for(int i = 0;i<navigationView.getMenu().size();i++){
             if(navigationView.getMenu().getItem(i).isVisible()){
                 return i;
@@ -421,105 +566,43 @@ public class MainActivity extends BaseActivity
         return 0;
     }
 
-
-    private void checkRoot(){
-        new Thread(){
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500);
-                    isRoot = ShellUtils.checkRootPermission();//runing==null||runing.length()==0?
-                    if(isRoot){
-                        Thread.sleep(50);
-                        ShellUtilDoze.execCommand("dumpsys deviceidle whitelist +com.click369.controlbp");
-                        whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
-                    }else{
-                        h.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                showT("没有获取到ROOT权限,部分功能将无法使用");
-                            }
-                        });
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-    }
-
-    public void startAccess(){
-        if(!isRoot&&!isModuleActive()){
-            h.post(new Runnable() {
-                @Override
-                public void run() {
-                    showT("没有获取到ROOT权限并且XP未激活,返回强退、熄屏强退、冷藏室等功能无法使用");
-                }
-            });
-            return;
-        }
-//        if (!sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true)) {
-//            h.postDelayed(st, 6000);
-//        }
-    }
-
-//    Runnable st = new Runnable() {
-//        @Override
-//        public void run() {
-//            if(NewWatchDogService.isOpenNewDogService){
-//                return;
-//            }else if(!WatchDogService.isNotNeedAccessibilityService){
-//                    AlertUtil.showConfirmAlertMsg(MainActivity.this, "无障碍服务自动开启失败，很多功能需要该服务，部分手机显示开启但实际没开启，如果开启无效请尝试重启手机。是否设置？", new AlertUtil.InputCallBack() {
-//                        @Override
-//                        public void backData(String txt, int tag) {
-//                            if(tag == 1){
-//                                Intent accessibleIntent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-//                                startActivity(accessibleIntent);
-//                            }
-//                        }
-//                    });
-//                }
-//        }
-//    };
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public static boolean isModuleActive() {
-        return false;
-    }
-    public static int getActivatedModuleVersion(){
-        return  -1;
-    }
     @SuppressLint("RestrictedApi")
     private void showOrHidden(BaseFragment fragOne){
-        //Fragment的显示隐藏
-        FragmentManager fm =MainActivity.this.getSupportFragmentManager();
-        FragmentTransaction trans = fm.beginTransaction();
-        if(fm.getFragments()!=null){
-            for (Fragment frg : fm.getFragments()){//fm.getFragments()获取当前界面中所有的Fragment
-                trans.hide(frg);
+        try {
+            //Fragment的显示隐藏
+            FragmentManager fm =MainActivity.this.getSupportFragmentManager();
+            FragmentTransaction trans = fm.beginTransaction();
+            if(fm.getFragments()!=null){
+                for (Fragment frg : fm.getFragments()){//fm.getFragments()获取当前界面中所有的Fragment
+                    trans.hide(frg);
+                }
             }
-        }
-        if(fm.getFragments()==null||!fm.getFragments().contains(fragOne)){
-            trans.add(R.id.main_fragment_fl, fragOne);
-        }else{
-            trans.show(fragOne);
-        }
-        chooseFragment = fragOne;
-        trans.commit();
+            if(fm.getFragments()==null||!fm.getFragments().contains(fragOne)){
+                trans.add(R.id.main_fragment_fl, fragOne);
+            }else{
+                trans.show(fragOne);
+            }
+            chooseFragment = fragOne;
+            trans.commit();
 
-        if(isUpdateAppTime){
-            h.removeCallbacks(updateTimeInfo);
-            h.postDelayed(updateTimeInfo,1000);
+            if(isUpdateAppTime){
+                h.removeCallbacks(updateTimeInfo);
+                h.postDelayed(updateTimeInfo,1000);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
+
         if(uiControlFragment.ischeck){
             uiControlFragment.ischeck = false;
             uiControlFragment.startRound(this);
@@ -530,19 +613,28 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
+//        if(TEST){
+//            return;
+//        }
         try {
+            if(!WatchDogService.isKillRun) {
+                Intent intent = new Intent(MainActivity.this, WatchDogService.class);
+                MainActivity.this.startService(intent);
+            }
+
             h.removeCallbacks(updateTimeInfo);
             h.postDelayed(updateTimeInfo,1);
             HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
             appLoaderUtil.reloadRunList();
-//            HashSet<String> runs = PackageUtil.getRunngingAppList(this);
             for (String s : AppLoaderUtil.runLists) {
                 pkgs.put(s, false);
             }
             for(AppInfo ai:appLoaderUtil.allAppInfos){
                 ai.isRunning = AppLoaderUtil.runLists.contains(ai.getPackageName());
             }
-            chooseFragment.fresh();
+            if(chooseFragment!=null){
+                chooseFragment.fresh();
+            }
             appLoaderUtil.addAppChangeListener(loadAppCallBack);
             appLoaderUtil.loadAppSetting();
             sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
@@ -554,72 +646,59 @@ public class MainActivity extends BaseActivity
         }
     }
 
-//    Runnable reUpdateR = new Runnable() {
-//        @Override
-//        public void run() {
-//            String mruning = PackageUtil.getRunngingApp(MainActivity.this);
-//            if((mruning==null||mruning.length()==0)){
-//                mruning = ShellUtilBackStop.execCommand("ps",true);
-//                if (runing==null){
-//                    runing = "";
-//                }
-//            }
-//            long lastMuBei = 0;
-//            if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
-//                lastMuBei = muBeiPrefsFile.lastModified();
-//            }
-//            if(mruning!=null&&!mruning.equals(runing)||lastMuBei!=lastMuBeiUpdate){
-////                loadAppSetting();
-//                appLoaderUtil.loadAppSetting();
-//            }
-//        }
-//    };
     private void restartMethod(){
-//        if(muBeiPrefsFile!=null&&muBeiPrefsFile.exists()){
-//            lastMuBeiUpdate = muBeiPrefsFile.lastModified();
-//        }
-        Log.i("CONTROL","WatchDogService.isKillRun  "+WatchDogService.isKillRun);
-        if(!WatchDogService.isKillRun) {
-            showT("检测到后台服务未启动，准备启动后台服务");
-            Intent intent = new Intent(MainActivity.this, WatchDogService.class);
-            MainActivity.this.startService(intent);
-        }
-//        synchronized (allAppInfos) {
-//            ArrayList<AppInfo> apps = AppInfo.readArrays(getApplicationContext());
-//            if (apps != null && apps.size() > 0) {
-//                allAppInfos.clear();
-//                allAppInfos.addAll(apps);
-//                loadAppSetting();
         appLoaderUtil.checkAppChange();
         if(!appLoaderUtil.isAppChange){
             appLoaderUtil.loadAppSetting();
         }
-
-//            }
+//        Log.i("CONTROL","restart  "+AppLoaderUtil.allHMAppIcons.size()+"  "+(AppLoaderUtil.allHMAppInfos.size()+1));
+//        if(AppLoaderUtil.allHMAppIcons.size()==0||
+//                AppLoaderUtil.allHMAppIcons.size()!=(AppLoaderUtil.allHMAppInfos.size()+1)){//+1因为包含应用控制器
+            loadAppIcons();
 //        }
     }
 
-//    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onStart() {
+        super.onStart();
         isShow = true;
-        if(sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SEVEN,true)){
+//        if(TEST){
+//            return;
+//        }
+        if (updateReceiver!=null){
+            updateReceiver.reg();
+            if(!WatchDogService.ISHOOKOK){
+                sendBroadcast(new Intent("com.click369.control.ams.checkhook"));
+            }
+        }
+
+        if(sharedPrefs.settings.getBoolean(Common.ALLSWITCH_DOZE,true)&&dozeFragment!=null){
             dozeFragment.reg();
         }
-        isNightMode = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_MODE,false);
-        boolean isAutoChange = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,false);
-        if(!isNightMode&&isAutoChange){
+        isNightMode = sharedPrefs.uiBarPrefs.getBoolean(Common.PREFS_SETTING_UI_THEME_MODE,false);
+        boolean isAutoChange = sharedPrefs.uiBarPrefs.getBoolean(Common.PREFS_SETTING_UI_THEME_AUTOCHANGEMODE,false);
+        if(!isNightMode&&
+                isAutoChange){
             int hour = Integer.parseInt(TimeUtil.changeMils2String(System.currentTimeMillis(),"H"));
             if(hour>=22||hour<7){
                 isNightMode = true;
             }
         }
-        showSideBar();
         if (sharedPrefs.settings.getBoolean("nowmode",false)!=isNightMode){
             restartSelf();
+        }else{
+            showSideBar();
+            //异常阻止提示
+            if(WatchDogService.preventErrAppNames.size()>0){
+                StringBuilder sb = new StringBuilder();
+                for(String app:WatchDogService.preventErrAppNames){
+                    sb.append(app).append(" ");
+                }
+                AlertUtil.showAlertMsg(MainActivity.this,"系统检测到 "+sb.toString()+"被频繁启动且频繁阻止，检查对该应用的设置（可以尝试取消对其的禁止自启或关闭该应用的通知读取权限）");
+                WatchDogService.preventErrAppNames.clear();
+            }
         }
-//        showT("版本号："+getActivatedModuleVersion());
-        super.onStart();
+
     }
 
     private void restartSelf(){
@@ -669,17 +748,19 @@ public class MainActivity extends BaseActivity
     }
     @Override
     protected void onStop() {
+//        if(TEST){
+//            return;
+//        }
+        if (updateReceiver!=null){
+            updateReceiver.unReg();
+        }
         appLoaderUtil.removeAppChangeListener(loadAppCallBack);
         h.removeCallbacks(updateInfo);
         h.removeCallbacks(updateTimeInfo);
         isShow = false;
-        if(sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SEVEN,true)) {
+        if(sharedPrefs.settings.getBoolean(Common.ALLSWITCH_DOZE,true)) {
             dozeFragment.destory();
         }
-//        if(ControlFragment.isClick||ForceStopFragment.isClick||AppStartFragment.isClickItem){
-//            Intent intent = new Intent(this, WatchDogService.class);
-//            this.startService(intent);
-//        }
         //更新AMS中的数据
         if(WatchDogService.isNeedAMSReadLoad){
             XposedUtil.reloadInfos(this,
@@ -688,12 +769,29 @@ public class MainActivity extends BaseActivity
                     sharedPrefs.settings,
                     sharedPrefs.skipDialogPrefs,
                     sharedPrefs.uiBarPrefs);
-            WatchDogService.isNeedAMSReadLoad= false;
-            Log.i("CONTROL","更新AMS中的数据....");
         }
         super.onStop();
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        if(TEST){
+//            return;
+//        }
+        isUIRun = false;
+        if (sharedPrefs.settings.getBoolean(Common.ALLSWITCH_IFW,true)) {
+            ifwFragment.destory();
+        }
 
+        if(fragments!=null){
+            for(BaseFragment bf:fragments){
+                bf.onDestroyView();
+                bf = null;
+            }
+            fragments = null;
+        }
+
+    }
     long backTime= 0;
     @Override
     public void onBackPressed() {
@@ -701,13 +799,20 @@ public class MainActivity extends BaseActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            if(pd!=null&&pd.isShowing()){
+                pd.dismiss();
+                pd = null;
+                return;
+            }
             if(System.currentTimeMillis()-backTime>1500){
                 showT("再按一次退出程序！");
             }else{
-//                super.onBackPressed();
-//                sendBroadChangePrefs(this);
+                releaseAppIcons();
                 BaseActivity.isPressBack = true;
                 TopSearchView.searchText = "";
+//                super.onBackPressed();
+//                Intent intent = new Intent("com.click369.control.ams.removeselfactivity");
+//                sendBroadcast(intent);
                 moveTaskToBack(true);
             }
             backTime = System.currentTimeMillis();
@@ -718,23 +823,17 @@ public class MainActivity extends BaseActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(event.getKeyCode() == KeyEvent.KEYCODE_MENU){
-//            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             if (drawer.isDrawerOpen(GravityCompat.START)) {
                 drawer.closeDrawer(GravityCompat.START);
             }else{
                 drawer.openDrawer(GravityCompat.START);
             }
+        }else if(event.getKeyCode() == KeyEvent.KEYCODE_HOME){
+            releaseAppIcons();
         }
-//        else if(event.getKeyCode() == KeyEvent.KEYCODE_HOME){
-//            sendBroadChangePrefs(this);
-//        }
         return super.onKeyDown(keyCode, event);
     }
 
-//    public static void sendBroadChangePrefs(Context cxt){
-//        Intent intent = new Intent("com.click369.control.ams.reloadprefs");
-//        cxt.sendBroadcast(intent);
-//    }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -744,76 +843,65 @@ public class MainActivity extends BaseActivity
         menuTv.setVisibility(View.GONE);
         menuTv.setEnabled(true);
         menuTv.setAlpha(1.0f);
-        if (id == R.id.nav_one) {
+        page = id;
+        if (id == R.id.nav_service_broad_control) {
             showOrHidden(controlFragment);
             menuTv.setVisibility(View.VISIBLE);
             if (!isModuleActive()){
                 menuTv.setEnabled(false);
                 menuTv.setAlpha(0.5f);
             }
-            page = 0;
-        }else if (id == R.id.nav_two) {
+        }else if (id == R.id.nav_backstop_mubei_control) {
             showOrHidden(forceStopFragment);
             menuTv.setVisibility(View.VISIBLE);
-            page = 1;
-        }else if (id == R.id.nav_three) {
-            page = 2;
+        }else if (id == R.id.nav_ifw_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(ifwFragment);
-        }else if (id == R.id.nav_four) {
-            page = 3;
+        }else if (id == R.id.nav_uninstall_ice_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(iceRoomFragment);
         }
-        else if (id == R.id.nav_five) {
+        else if (id == R.id.nav_doze_control) {
             if( Build.VERSION.SDK_INT>=Build.VERSION_CODES.M) {
-                page = 4;
                 menuTv.setVisibility(View.VISIBLE);
                 showOrHidden(dozeFragment);
             }else {
-                navigationView.getMenu().getItem(page).setChecked(true);
-                showT("该功能只有安卓6.0及以上系统才能使用");
+                navigationView.getMenu().getItem(9).setChecked(true);
+                showT("打盹功能只有安卓6.0及以上系统才能使用");
             }
-        }else if (id == R.id.nav_six) {
-            page = 5;
+        }else if (id == R.id.nav_others_control) {
             menuTv.setVisibility(View.INVISIBLE);
             showOrHidden(otherFragment);
-        }else if (id == R.id.nav_seven) {
-            page = 6;
+        }else if (id == R.id.nav_setting_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(settingFragment);
-        }
-        else if (id == R.id.nav_eight) {
-            page = 7;
+        }else if (id == R.id.nav_juanzeng_control) {
             menuTv.setVisibility(View.INVISIBLE);
             showOrHidden(juanZengFragment);
-        }
-        else if (id == R.id.nav_nine) {
-            page = 8;
+        }else if (id == R.id.nav_autostart_lock_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(appStartFragment);
-        }
-        else if (id == R.id.nav_ten) {
-            page = 9;
+        }else if (id == R.id.nav_ui_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(uiControlFragment);
-        }
-        else if (id == R.id.nav_eleven) {
-            page = 10;
+        }else if (id == R.id.nav_adskip_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(adFragment);
-        }else if (id == R.id.nav_twelve) {
-            page = 11;
+        }else if (id == R.id.nav_recentcard_control) {
             menuTv.setVisibility(View.VISIBLE);
             showOrHidden(recentFragment);
-        }else if (id == R.id.nav_thridteen) {
-            page = 12;
+        }else if (id == R.id.nav_question_log_control) {
             menuTv.setVisibility(View.INVISIBLE);
             showOrHidden(questionFragment);
-        }else if (id == R.id.nav_fourteen) {
-            page = 13;
-            menuTv.setVisibility(View.INVISIBLE);
+        }else if (id == R.id.nav_cpuset_control) {
+            menuTv.setVisibility(View.VISIBLE);
             showOrHidden(cpuFragment);
+        }else if (id == R.id.nav_xpblacklist_control) {
+            menuTv.setVisibility(View.VISIBLE);
+            showOrHidden(xpBlackFragement);
+        }else if (id == R.id.nav_privacy_control) {
+            menuTv.setVisibility(View.VISIBLE);
+            showOrHidden(privacyFragment);
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -825,23 +913,18 @@ public class MainActivity extends BaseActivity
             @Override
             public void onClick(View v) {
                 String titles[] = {"备份设置","还原设置","清除所有","刷新应用"};
-                if(page == 0){
-                    titles = new String[]{"备份设置","还原设置","清除所有","刷新应用"};
-                }else if(page == 2){
+                if(page == R.id.nav_ifw_control){
                     titles = new String[]{"备份IFW","还原IFW","一键阉割","恢复阉割","清空所有"};
-                }else if(page == 6){
+                }else if(page == R.id.nav_setting_control){
                     titles = new String[]{"备份所有项设置(IFW除外)","还原所有项设置(IFW除外)","清除所有项设置(IFW除外)","刷新应用"};
-                }else if(page == 10){
+                }else if(page == R.id.nav_adskip_control){
                     titles = new String[]{"备份设置","还原设置","清除所有","刷新应用","载入部分APP预设"};
+                }else if(page == R.id.nav_cpuset_control){
+                    titles = new String[]{"备份设置","还原设置","清除所有"};
                 }
                 AlertUtil.showListAlert(MainActivity.this, "更多功能", titles, new AlertUtil.InputCallBack() {
                     @Override
                     public void backData(String txt, final int tag) {
-//                        if (page == 0&&tag==4){
-//                            Intent intent =new Intent(MainActivity.this,WakeLockActivity.class);
-//                            startActivity(intent);
-//                            return;
-//                        }
                         AlertUtil.showConfirmAlertMsg(MainActivity.this, "请确认操作,防止误触。", new AlertUtil.InputCallBack() {
                             @Override
                             public void backData(String txt, int tag1) {
@@ -850,93 +933,86 @@ public class MainActivity extends BaseActivity
                                         backupRestoreUtil.saveData(page);
                                     }else if(tag == 1){
                                         backupRestoreUtil.restoreData(page);
-//                                        loadAppSetting();
+                                        appLoaderUtil.setIsPrefsChange(true);
                                         appLoaderUtil.loadAppSetting();
-                                        if(page == 0){
-                                            controlFragment.fresh();
-                                        }else if(page == 1){
-//                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
-                                            forceStopFragment.fresh();
-                                        }else if(page == 2){
+                                        if(page == R.id.nav_ifw_control){
                                             ifwFragment.loadDisableCount();
-                                        }else if(page == 3){
-                                            iceRoomFragment.fresh();
-                                        }else if(page == 4){
+                                        }else if(page == R.id.nav_doze_control||
+                                                page == R.id.nav_setting_control||
+                                                page == R.id.nav_ui_control||
+                                                page == R.id.nav_cpuset_control){
                                             restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
-                                        }else if(page == 6){
-                                            restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
-                                        }else if(page == 8){
-//                                            loadAppSetting();
-                                            appLoaderUtil.loadAppSetting();
-                                        }else if(page == 9){
-                                            restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
-                                        }else if(page == 10){
-                                            adFragment.fresh();
-                                        }else if(page == 11){
-                                            recentFragment.fresh();
                                         }
                                         Intent intent = new Intent(MainActivity.this,WatchDogService.class);
                                         startService(intent);
                                     }else if(tag == 2){
-                                        if(page ==0||page == 1||page == 4||page == 6||page == 8||page == 9||page == 10||page == 11 ){
-                                            AlertUtil.showConfirmAlertMsg(MainActivity.this, "是否移除所有选中项?", new AlertUtil.InputCallBack() {
-                                                @Override
-                                                public void backData(String txt, int tag) {
-                                                    if(tag == 1){
-//                                                        loadAppSetting();
-                                                        appLoaderUtil.loadAppSetting();
-                                                        if(page == 0){
-//                                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
-                                                            sharedPrefs.modPrefs.edit().clear().commit();
-                                                            sharedPrefs.wakeLockPrefs.edit().clear().commit();
-                                                            sharedPrefs.alarmPrefs.edit().clear().commit();
-                                                            controlFragment.fresh();
-                                                        }else if(page == 1){
-                                                            sharedPrefs.forceStopPrefs.edit().clear().commit();
-                                                            forceStopFragment.fresh();
-                                                        }else if(page == 4){
-                                                            sharedPrefs.dozePrefs.edit().clear().commit();
-                                                            showT("清除成功,重新打开生效");
-                                                        }else if(page == 6){
-                                                            sharedPrefs.modPrefs.edit().clear().commit();
-                                                            sharedPrefs.forceStopPrefs.edit().clear().commit();
-                                                            sharedPrefs.autoStartNetPrefs.edit().clear().commit();
-                                                            sharedPrefs.recentPrefs.edit().clear().commit();
-                                                            sharedPrefs.dozePrefs.edit().clear().commit();
-                                                            sharedPrefs.uiBarPrefs.edit().clear().commit();
-//                                                            sharedPrefs.muBeiPrefs.edit().clear().commit();
-                                                            sharedPrefs.adPrefs.edit().clear().commit();
-                                                            sharedPrefs.skipDialogPrefs.edit().clear().commit();
-                                                            sharedPrefs.pmPrefs.edit().clear().commit();
-                                                            sharedPrefs.settings.edit().clear().commit();
-                                                            sharedPrefs.setTimeStopPrefs.edit().clear().commit();
-                                                            showT("清除成功,重启手机生效");
-                                                            restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
-                                                        }else if(page == 8){
-                                                            sharedPrefs.autoStartNetPrefs.edit().clear().commit();
-                                                            appStartFragment.fresh();
-                                                        }else if(page == 9){
-                                                            sharedPrefs.uiBarPrefs.edit().clear().commit();
-                                                            restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
-                                                        }else if(page == 10){
-                                                            sharedPrefs.adPrefs.edit().clear().commit();
-                                                            adFragment.fresh();
-                                                        }else if(page == 11){
-                                                            sharedPrefs.recentPrefs.edit().clear().commit();
-                                                            recentFragment.fresh();
-                                                        }
-                                                    }
+                                        if(page ==R.id.nav_service_broad_control||
+                                            page == R.id.nav_backstop_mubei_control||
+                                            page == R.id.nav_doze_control||
+                                            page == R.id.nav_setting_control||
+                                            page == R.id.nav_autostart_lock_control||
+                                            page == R.id.nav_ui_control||
+                                            page == R.id.nav_adskip_control||
+                                            page == R.id.nav_privacy_control||
+                                            page == R.id.nav_xpblacklist_control||
+                                            page == R.id.nav_cpuset_control||
+                                            page == R.id.nav_recentcard_control ){
+                                                if(page == R.id.nav_service_broad_control){
+                                                    sharedPrefs.modPrefs.edit().clear().commit();
+                                                    sharedPrefs.wakeLockPrefs.edit().clear().commit();
+                                                    sharedPrefs.alarmPrefs.edit().clear().commit();
+                                                }else if(page == R.id.nav_backstop_mubei_control){
+                                                    sharedPrefs.forceStopPrefs.edit().clear().commit();
+                                                }else if(page == R.id.nav_doze_control){
+                                                    sharedPrefs.dozePrefs.edit().clear().commit();
+                                                    showT("清除成功,重新打开生效");
+                                                }else if(page == R.id.nav_setting_control){
+                                                    sharedPrefs.modPrefs.edit().clear().commit();
+                                                    sharedPrefs.forceStopPrefs.edit().clear().commit();
+                                                    sharedPrefs.autoStartNetPrefs.edit().clear().commit();
+                                                    sharedPrefs.recentPrefs.edit().clear().commit();
+                                                    sharedPrefs.dozePrefs.edit().clear().commit();
+                                                    sharedPrefs.uiBarPrefs.edit().clear().commit();
+                                                    sharedPrefs.xpBlackListPrefs.edit().clear().commit();
+                                                    sharedPrefs.adPrefs.edit().clear().commit();
+                                                    sharedPrefs.skipDialogPrefs.edit().clear().commit();
+                                                    sharedPrefs.pmPrefs.edit().clear().commit();
+                                                    sharedPrefs.settings.edit().clear().commit();
+                                                    sharedPrefs.setTimeStopPrefs.edit().clear().commit();
+                                                    sharedPrefs.settings.edit().putInt(Common.PREFS_SETTING_SCREENWIDTH,0).commit();
+                                                    XposedUtil.reloadInfos(MainActivity.this,
+                                                            sharedPrefs.autoStartNetPrefs,
+                                                            sharedPrefs.modPrefs,
+                                                            sharedPrefs.settings,
+                                                            sharedPrefs.skipDialogPrefs,
+                                                            sharedPrefs.uiBarPrefs);
+
+                                                    showT("清除成功,重启手机生效");
+                                                    restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
+                                                }else if(page == R.id.nav_autostart_lock_control){
+                                                    sharedPrefs.autoStartNetPrefs.edit().clear().commit();
+                                                }else if(page == R.id.nav_ui_control){
+                                                    sharedPrefs.uiBarPrefs.edit().clear().commit();
+                                                    restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
+                                                }else if(page == R.id.nav_adskip_control){
+                                                    sharedPrefs.adPrefs.edit().clear().commit();
+                                                }else if(page == R.id.nav_recentcard_control){
+                                                    sharedPrefs.recentPrefs.edit().clear().commit();
+                                                }else if(page == R.id.nav_cpuset_control){
+                                                    sharedPrefs.cpuPrefs.edit().clear().commit();
+                                                    restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
+                                                }else if(page == R.id.nav_xpblacklist_control){
+                                                    sharedPrefs.xpBlackListPrefs.edit().clear().commit();
+                                                }else if(page == R.id.nav_privacy_control){
+                                                    sharedPrefs.privacyPrefs.edit().clear().commit();
                                                 }
-                                            });
-                                            appLoaderUtil.setIsPrefsChange(true);
-                                            appLoaderUtil.loadAppSetting();
-//                                            Intent intent = new Intent(MainActivity.this,WatchDogService.class);
-//                                            startService(intent);
-                                        }else if(page==2){
+                                                appLoaderUtil.setIsPrefsChange(true);
+                                                appLoaderUtil.loadAppSetting();
+                                        }else if(page== R.id.nav_ifw_control){
                                             ifwFragment.startDis();
                                         }
                                     }else if(tag == 3){
-                                        if (page == 2){
+                                        if (page ==  R.id.nav_ifw_control){
                                             ifwFragment.startBackDis();
                                         }else{
                                             pd = ProgressDialog.show(MainActivity.this,"","正在加载应用列表...",true,true);
@@ -944,9 +1020,9 @@ public class MainActivity extends BaseActivity
                                             appLoaderUtil.loadApp();
                                         }
                                     }else if(tag == 4){
-                                        if (page == 2){
+                                        if (page ==  R.id.nav_ifw_control){
                                             ifwFragment.startClear();
-                                        }else if (page == 10){
+                                        }else if (page == R.id.nav_adskip_control){
                                             TestDataInit.initAD(getApplicationContext());
                                             adFragment.fresh();
                                         }
@@ -960,76 +1036,113 @@ public class MainActivity extends BaseActivity
         });
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        isUIRun = false;
-//        h.removeCallbacks(st);
-        if (sharedPrefs.settings.getBoolean(Common.ALLSWITCH_THREE,true)) {
-            ifwFragment.destory();
-        }
-        if (updateReceiver!=null){
-            MainActivity.this.unregisterReceiver(updateReceiver);
-        }
-    }
-
-    long lastUpdateTime = 0;
-    boolean isShow = true;
     class MyUpdateListReceiver extends BroadcastReceiver{
-        public MyUpdateListReceiver(){
+        public void reg(){
             IntentFilter intentFilter = new IntentFilter();
-//            intentFilter.addAction("com.click369.control.updatelist");
             intentFilter.addAction("com.click369.control.recappidlestate");
             intentFilter.addAction("com.click369.control.backprocinfo");
+            intentFilter.addAction("com.click369.control.recpreventinfo");
+            intentFilter.addAction("com.click369.control.watchdogtellupdateui");
+            intentFilter.addAction("com.click369.control.hookok");
             MainActivity.this.registerReceiver(this,intentFilter);
+        }
+        public void unReg(){
+            MainActivity.this.unregisterReceiver(this);
         }
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-//            if ("com.click369.control.updatelist".equals(action)) {
-//                if (System.currentTimeMillis() - lastUpdateTime > 2000 && isShow) {
-//                    restartMethod();
-//                    lastUpdateTime = System.currentTimeMillis();
-//                }
-//            }else
-            if("com.click369.control.recappidlestate".equals(action)){
-                pkgIdleStates.clear();
-                HashSet<String> pkgs = ( HashSet<String>)intent.getSerializableExtra("pkgs");
-                if(intent.hasExtra("mbpkgs")){
-                    HashSet<String> mbpkgs = ( HashSet<String>)intent.getSerializableExtra("mbpkgs");
-                    for(String p:mbpkgs){
-                        if( appLoaderUtil.allHMAppInfos.containsKey(p)){
-                            appLoaderUtil.allHMAppInfos.get(p).isInMuBei = true;
+            try {
+                if("com.click369.control.recappidlestate".equals(action)){
+                    pkgIdleStates.clear();
+                    HashSet<String> pkgs = ( HashSet<String>)intent.getSerializableExtra("pkgs");
+                    if(intent.hasExtra("mbpkgs")){
+                        HashSet<String> mbpkgs = ( HashSet<String>)intent.getSerializableExtra("mbpkgs");
+                        for(String p:mbpkgs){
+                            if( appLoaderUtil.allHMAppInfos.containsKey(p)){
+                                appLoaderUtil.allHMAppInfos.get(p).isInMuBei = true;
+                            }
                         }
                     }
+                    pkgIdleStates.addAll(pkgs);
+                    if(chooseFragment!=null){
+                        chooseFragment.fresh();
+                    }
+                }else if("com.click369.control.backprocinfo".equals(action)){
+                    HashMap<String,Long> procTimeInfos = (HashMap<String,Long>)intent.getSerializableExtra("infos");
+                    setProcBgTimeInfos(procTimeInfos);
+                    if(intent.hasExtra("runtimes")){
+                        HashMap<String,Long> procRunTimes = (HashMap<String,Long>)intent.getSerializableExtra("runtimes");
+                        setProcStartTimeInfos(procRunTimes);
+                    }
+                    if(chooseFragment!=null){
+                        chooseFragment.fresh();
+                    }
+                }else if("com.click369.control.recpreventinfo".equals(action)){
+                    questionFragment.onReceive(intent);
+                }else if("com.click369.control.hookok".equals(action)){
+                    WatchDogService.ISHOOKOK = true;
+                    if(chooseFragment instanceof ControlFragment){
+                        ((ControlFragment)chooseFragment).initAlert();
+                    }
+                }else if("com.click369.control.watchdogtellupdateui".equals(action)){
+                    h.removeCallbacks(updateInfo);
+                    h.postDelayed(updateInfo,200);
                 }
-                pkgIdleStates.addAll(pkgs);
-                chooseFragment.fresh();
-            }else if("com.click369.control.backprocinfo".equals(action)){
-                HashMap<String,Long> procTimeInfos = (HashMap<String,Long>)intent.getSerializableExtra("infos");
-                setProcTimeInfos(procTimeInfos);
-                chooseFragment.fresh();
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-       File file = getPhoto.onActivityResult(requestCode,resultCode,data);
-        if (file!=null&&file.exists()) {
-            if(bgBlurFile.exists()){
-               bgBlurFile.delete();
+        if(resultCode==0x12){
+            if(data!=null&&data.hasExtra("color")){
+                THEME_COLOR = data.getStringExtra("color");
+                THEME_TEXT_COLOR = data.getStringExtra("textcolor");
+                initThemeColor();
+            }else if(data!=null&&data.hasExtra("bgcolor")){
+                THEME_BG_COLOR = data.getStringExtra("bgcolor");
+                setBgColor(Color.parseColor(THEME_BG_COLOR));
             }
-            int blur  = sharedPrefs.settings.getInt(Common.PREFS_SETTING_OTHER_BGBLUR,0);
-            int alpha = sharedPrefs.settings.getInt(Common.PREFS_SETTING_OTHER_BGBRIGHT,100);
-            otherFragment.changeBgBlur(this,blur,alpha);
-//            Drawable d = Drawable.createFromPath(file.getAbsolutePath());
-//            if (d!=null) {
-//                d.setAlpha(180);
-//                mainRL.setBackgroundColor(Color.BLACK);
-//                mainRL.setBackground(d);
-//            }
+            if(data!=null&&isNightMode){
+                AlertUtil.showAlertMsg(this,"目前是处于夜间模式，请在界面控制中退出夜间模式查看效果!");
+            }
+        }else if(resultCode==0x15){
+            if(data!=null&&data.hasExtra("key_fileName")){
+                String key_fileName = data.getStringExtra("key_fileName");
+                int blur = data.getIntExtra("blur",0);
+                int bright = data.getIntExtra("bright",100);
+                String key_blur = data.getStringExtra("key_blur");
+                String key_bright = data.getStringExtra("key_bright");
+                Log.i("CONTROL","blur "+blur+"  bright "+bright);
+                Log.i("CONTROL","key_blur "+key_blur+"  key_bright "+key_bright);
+                sharedPrefs.uiBarPrefs.edit().putInt(key_blur,blur).commit();
+                sharedPrefs.uiBarPrefs.edit().putInt(key_bright,bright).commit();
+                if(key_fileName.equals(bgFile.getAbsolutePath())){
+                    initFileBg(1);
+                }else if(key_fileName.equals(sideBgFile.getAbsolutePath())){
+                    initFileBg(2);
+                }
+            }
+        }else if(data!=null){
+            File file = getPhoto.onActivityResult(requestCode,resultCode,data);
+            if (file!=null&&file.exists()) {
+                if(file.getName().equals("bg")){
+                    if(bgBlurFile.exists()){
+                        bgBlurFile.delete();
+                    }
+                    sharedPrefs.uiBarPrefs.edit().remove(Common.PREFS_SETTING_UI_BGBLUR).remove(Common.PREFS_SETTING_UI_BGBRIGHT).commit();
+                    initFileBg(1);
+                }else if(file.getName().equals("side")){
+                    if(sideBgBlurFile.exists()){
+                        sideBgBlurFile.delete();
+                    }
+                    sharedPrefs.uiBarPrefs.edit().remove(Common.PREFS_SETTING_UI_SIDEBGBLUR).remove(Common.PREFS_SETTING_UI_SIDEBGBRIGHT).commit();
+                    initFileBg(2);
+                }
+            }
         }
     }
 
@@ -1069,46 +1182,111 @@ public class MainActivity extends BaseActivity
     class LoadAppCallBackImp implements AppLoaderUtil.LoadAppCallBack{
         @Override
         public void onLoadLocalAppFinish() {
-            if(appLoaderUtil.allAppInfos.size()>0&&!appLoaderUtil.isAppChange){
-//                chooseFragment.fresh();
-                appLoaderUtil.loadAppSetting();
+            if(AppLoaderUtil.allHMAppInfos.size()>0){
+                loadAppIcons();
+                if(!appLoaderUtil.isAppChange){
+                    appLoaderUtil.loadAppSetting();
+                }
             }
-//            if(pd!=null&&pd.isShowing()){
-//                pd.dismiss();
-//                pd = null;
-//            }
+
         }
         @Override
         public void onLoadAppFinish() {
-            chooseFragment.fresh();
-            //appLoaderUtil.loadAppSetting();
-            if(pd!=null&&pd.isShowing()){
-                pd.dismiss();
-            }
-            pd = null;
+            loadAppIcons();
         }
 
         @Override
         public void onRuningStateChange() {
-            chooseFragment.fresh();
+            if(chooseFragment!=null){
+                chooseFragment.fresh();
+            }
             h.removeCallbacks(updateInfo);
             h.postDelayed(updateInfo,2000);
-            Log.i("CONTROL","运行状态发生变化 MainActivity 更新");
+//            Log.i("CONTROL","运行状态发生变化 MainActivity 更新");
         }
 
         @Override
         public void onLoadAppSettingFinish() {
-            chooseFragment.fresh();
-            if(pd!=null&&pd.isShowing()){
-                pd.dismiss();
+            if(chooseFragment!=null){
+                chooseFragment.fresh();
             }
-            pd = null;
         }
+    }
+
+    public static void releaseAppIcons(){
+        try {
+//            final Set<String> pkgs = AppLoaderUtil.allHMAppIcons.keySet();
+//            for (String p : pkgs) {
+//                AppLoaderUtil.allHMAppIcons.get(p).recycle();
+//            }
+//            AppLoaderUtil.allHMAppIcons.clear();
+//            System.gc();
+        }catch (Exception e){
+
+        }
+    }
+
+    boolean isInLoadNewIcon = false;
+    private void loadAppIcons(){
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+//                    synchronized (MainActivity.this) {
+//                    Log.i("CONTROL","load icons");
+                        final Set<String> pkgs = new HashSet<>();
+                        pkgs.addAll(AppLoaderUtil.allHMAppInfos.keySet());
+                        pkgs.add(Common.PACKAGENAME);
+                    isInLoadNewIcon = false;
+                        for (String p : pkgs) {
+                            File f = new File(AppLoaderUtil.iconPath, p);
+                            if (f.exists() && !AppLoaderUtil.allHMAppIcons.containsKey(p)) {
+                                Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+                                AppLoaderUtil.allHMAppIcons.put(p, bitmap);
+                                isInLoadNewIcon = true;
+//                                Log.i("CONTROL","a==="+p);
+                            }else if(!f.exists()){
+                                PackageInfo packgeInfo = getPackageManager().getPackageInfo(p,PackageManager.GET_META_DATA);
+                                AppLoaderUtil.loadAppImage(packgeInfo,getPackageManager(),true);
+                                f = new File(AppLoaderUtil.iconPath, p);
+//                                Log.i("CONTROL","b==="+p);
+                                if (f.exists() && !AppLoaderUtil.allHMAppIcons.containsKey(p)) {
+                                    Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+                                    AppLoaderUtil.allHMAppIcons.put(p, bitmap);
+                                }
+                                isInLoadNewIcon = true;
+                            }
+                        }
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try{
+                                    if(chooseFragment!=null&&isInLoadNewIcon){
+                                        chooseFragment.fresh();
+                                    }
+                                    if(pd!=null&&pd.isShowing()){
+                                        pd.dismiss();
+                                    }
+                                    pd = null;
+                                }catch (Throwable e){
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+//                    }
+                }catch (Throwable e){
+                    e.printStackTrace();
+                }
+            }
+        }.start();
     }
 
     Runnable updateInfo = new Runnable() {
         @Override
         public void run() {
+//            if(TEST){
+//                return;
+//            }
 //            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
             HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
             appLoaderUtil.reloadRunList();
@@ -1124,11 +1302,17 @@ public class MainActivity extends BaseActivity
     Runnable updateTimeInfo = new Runnable() {
         @Override
         public void run() {
+//            if(TEST){
+//                return;
+//            }
 //            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
-            chooseFragment.fresh();
+            if(chooseFragment!=null){
+                chooseFragment.fresh();
+            }
             if(isUpdateAppTime) {
                 h.postDelayed(updateTimeInfo, 10000);
             }
         }
     };
+
 }

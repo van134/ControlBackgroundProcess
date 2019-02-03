@@ -59,7 +59,6 @@ public class AppStartFragment extends BaseFragment {
         return v;
     }
 
-    @SuppressLint("WorldReadableFiles")
     private void initView(View v){
         modPrefs =  SharedPrefsUtil.getInstance(getContext()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_AUTOSTARTNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
 
@@ -78,7 +77,7 @@ public class AppStartFragment extends BaseFragment {
             String msg = "1.加入应用锁的应用在打开时需要校验指纹（前提是手机支持指纹并已经设置指纹）\n2.加入禁止运行的程序点击应用图标无法开启程序（不要禁止系统应用）。\n3.加入禁止自启的应用无法开机启动并且无法关联启动除非手动开启应用。\n4.加入内存常驻的应用启动后系统或其他管理软件无法杀死该应用，只有应用控制器的强退功能能杀死，注意部分应用加入后可能会出现不可预料的异常，比如微信更新微X模块后无法重启微信。";
             topView.setAlertText(msg,0,false);
         }else{
-            String msg = "检测到xposed框架未生效，请勾选后重启,如果已勾选并重启过请反复勾选一次再重启即可。本功能需要框架支持，其他功能只需root即可。";
+            String msg = "检测到xposed框架未生效，请勾选后重启,如果已勾选并重启过请反复勾选一次再重启即可,本功能需要框架支持。";
             topView.setAlertText(msg,Color.RED,true);
             listView.setEnabled(false);
             topView.sysAppTv.setEnabled(false);
@@ -88,9 +87,6 @@ public class AppStartFragment extends BaseFragment {
             stopAppTv.setEnabled(false);
             autoStartTv.setEnabled(false);
         }
-//        mobileNetTv.setVisibility(View.INVISIBLE);
-//        stopAppTv.setVisibility(View.INVISIBLE);
-//        wifiNetTv.setAlpha(0.5f);
         lockAppTv.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -172,7 +168,34 @@ public class AppStartFragment extends BaseFragment {
         notStopTv.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                AlertUtil.showAlertMsg(getActivity(),"内存常驻不支持全选，因为保留的应用将常驻内存无法杀死，全选后可能导致手机内存不足，所以请单独选择。");
+                if(adapter.fliterName.toLowerCase().equals("s")||adapter.fliterName.length()==0){
+                    Toast.makeText(AppStartFragment.this.getActivity(),"为了安全起见只有切换到用户应用才可以全选",Toast.LENGTH_LONG).show();
+                    return true;
+                }
+                AlertUtil.showThreeButtonAlertMsg(AppStartFragment.this.getActivity(), "请选择内存常驻的操作(选择太多可能会出现异常，请慎重)", new AlertUtil.InputCallBack() {
+                    @Override
+                    public void backData(String txt, int tag) {
+                        if(tag==0){
+                            for(AppInfo ai:adapter.bjdatas){
+                                if (ai.isNotStop||ai.isStopApp) {
+                                    continue;
+                                }
+                                SharedPreferences.Editor ed = modPrefs.edit();
+                                ed.putBoolean(ai.getPackageName()+"/notstop",true);
+                                ed.commit();
+                                ai.isNotStop = true;
+                            }
+                            adapter.notifyDataSetChanged();
+                        }else if(tag==2){
+                            for(AppInfo ai:adapter.bjdatas){
+                                SharedPreferences.Editor ed = modPrefs.edit();
+                                ed.remove(ai.getPackageName()+"/notstop").commit();
+                                ai.isNotStop = false;
+                            }
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                });
                 return true;
             }
         });
@@ -215,7 +238,7 @@ public class AppStartFragment extends BaseFragment {
             for(TextView t:tvs){
                 t.setTextColor(curColor);
             }
-            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
             loadY(listView,AppStartFragment.this.getClass(),adapter.sortType);
         }
     }

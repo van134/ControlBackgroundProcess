@@ -12,6 +12,7 @@ import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.ColorNavBarService;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
+import com.click369.controlbp.service.XposedUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SELinuxUtil;
@@ -26,6 +27,8 @@ public class BootStartReceiver extends BroadcastReceiver {
         if (WatchDogService.isKillRun){
             return;
         }
+//        SharedPrefsUtil sp = SharedPrefsUtil.getInstance(context.getApplicationContext());
+//        XposedUtil.reloadInfos(context,sp.autoStartNetPrefs,sp.modPrefs,sp.settings,sp.skipDialogPrefs,sp.uiBarPrefs);
         String action = intent.getAction();
         if(Intent.ACTION_BOOT_COMPLETED.equals(action)||
                 "com.click369.control.test".equals(action)){

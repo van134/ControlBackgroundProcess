@@ -19,6 +19,7 @@ import android.util.Log;
 
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.receiver.AddAppReceiver;
+import com.click369.controlbp.service.WatchDogService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -198,41 +199,48 @@ public class PackageUtil {
     public static HashSet<String> getRunngingAppList(Context cxt){
         HashSet<String> runLists = new HashSet<String>();
 //        StringBuilder sb = new StringBuilder();
-        ActivityManager am = (ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> rps =  am.getRunningAppProcesses();
-        if (rps!=null){
-            for(ActivityManager.RunningAppProcessInfo ar:rps){
-                if(ar.pkgList!=null&&ar.pkgList.length>0){
-                    for(String s:ar.pkgList){
+//        if(WatchDogService.TEST){
+//            return new HashSet<String>();
+//        }
+        try {
+            ActivityManager am = (ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningAppProcessInfo> rps =  am.getRunningAppProcesses();
+            if (rps!=null){
+                for(ActivityManager.RunningAppProcessInfo ar:rps){
+                    if(ar.pkgList!=null&&ar.pkgList.length>0){
+                        for(String s:ar.pkgList){
 //                        if(sb.indexOf(s)==-1){
 //                            sb.append(s).append("\n");
                             runLists.add(s);
 //                        }
+                        }
                     }
                 }
-            }
 //        Log.i("CONTROL","running  "+sb.toString());
-        }
-        if(runLists.size()<5){
-            runLists.clear();
-            String info = ShellUtils.execCommand("ps",true,true).successMsg;
-            if(info.length()>0){
-                info = info.replaceAll(" +"," ");
-                String lines[] = info.split("\n");
-                if(lines.length>0){
-                    for(String line:lines){
-                        String words[] = line.split(" ");
-                        if(words.length>8){
-                            if(words[0].startsWith("u0")||
-                                    words[0].startsWith("sys")){
-                                runLists.add(words[8].trim());
+            }
+            if(runLists.size()<5&& WatchDogService.isRoot){
+                runLists.clear();
+                String info = ShellUtils.execCommand("ps",true,true).successMsg;
+                if(info.length()>0){
+                    info = info.replaceAll(" +"," ");
+                    String lines[] = info.split("\n");
+                    if(lines.length>0){
+                        for(String line:lines){
+                            String words[] = line.split(" ");
+                            if(words.length>8){
+                                if(words[0].startsWith("u0")||
+                                        words[0].startsWith("sys")){
+                                    runLists.add(words[8].trim());
 //                                Log.i("CONTROL","words[8].trim()  "+words[8].trim()+"  "+words[8].trim().length());
+                                }
                             }
                         }
                     }
                 }
-            }
 //            return new HashSet<String>();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return runLists;
     }
@@ -267,7 +275,7 @@ public class PackageUtil {
         } catch (Exception e) {
             Log.e("VersionInfo", "Exception", e);
         }
-        return null;
+        return pkg;
     }
 
     public static boolean isAppInstalled(Context context, String packageName) {

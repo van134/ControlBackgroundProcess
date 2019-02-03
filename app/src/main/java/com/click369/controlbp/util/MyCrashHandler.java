@@ -119,9 +119,13 @@ public class MyCrashHandler implements UncaughtExceptionHandler {
             @Override
             public void run()
             {
-                Looper.prepare();
-                Toast.makeText(context,"应用控制器出现异常,如果能打开主界面请到常见问题及日志中查看异常日志并反馈给开发者。",Toast.LENGTH_LONG).show();
-//                DebugService.getInstence().sendError(msg);
+                try {
+                    Looper.prepare();
+                    Toast.makeText(context,"应用控制器出现异常,如果能打开主界面请到常见问题及日志中查看异常日志并反馈给开发者。",Toast.LENGTH_LONG).show();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                //                DebugService.getInstence().sendError(msg);
 //                stopSelf();
 //                AlertUtil.showAlertMsgBack(context, "应用控制器出现异常", msg, new AlertUtil.InputCallBack() {
 //                    @Override

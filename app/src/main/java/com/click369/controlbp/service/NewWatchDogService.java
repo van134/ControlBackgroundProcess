@@ -94,7 +94,7 @@ public class NewWatchDogService extends AccessibilityService {
                             OpenCloseUtil.closeOpenAccessibilitySettingsOn(NewWatchDogService.this, false);
                         }
                     }
-                }, 2500);
+                }, 4500);
             }
         }
     }

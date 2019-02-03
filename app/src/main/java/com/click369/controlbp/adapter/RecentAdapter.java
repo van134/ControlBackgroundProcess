@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.fragment.ControlFragment;
@@ -29,6 +28,7 @@ import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -119,6 +119,7 @@ public class RecentAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
@@ -134,6 +135,10 @@ public class RecentAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -145,6 +150,7 @@ public class RecentAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 		this.bjdatas.add(0,myAi);
 		myAi.isRunning = true;
 		myAi.isRecentNotClean = modPrefs.getBoolean(myAi.packageName+"/notclean",false);
@@ -185,6 +191,7 @@ public class RecentAdapter extends BaseAdapter{
 			convertView= inflater.inflate(R.layout.item_recent, null);
 			viewHolder = new ViewHolder();
 			viewHolder.appNameTv = (TextView)convertView.findViewById(R.id.item_recent_appname);
+			viewHolder.appTimeTv = (TextView)convertView.findViewById(R.id.item_main_apptime);
 			viewHolder.notCleanIv = (ImageView) convertView.findViewById(R.id.item_recent_notclean);
 			viewHolder.forceCleanIv = (ImageView)convertView.findViewById(R.id.item_recent_forcestop);
 			viewHolder.blurImgIv = (ImageView)convertView.findViewById(R.id.item_recent_blur);
@@ -195,10 +202,19 @@ public class RecentAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
-		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		int color = data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor);
+		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appTimeTv.setText((data.isRunning?BaseActivity.getProcStartTimeStr(data.packageName)+"\n"+BaseActivity.getProcTimeStr(data.packageName):""));
+		viewHolder.appTimeTv.setVisibility(data.isRunning?View.VISIBLE:View.GONE);
+		viewHolder.appTimeTv.setTextColor(color);
+		viewHolder.appNameTv.setTextColor(color);
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		File file = null;
+//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
+//			BaseActivity.loadeds.add(data.packageName);
+//			file = data.iconFile;
+//		}
+//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.notCleanIv.setTag(position);
@@ -354,7 +370,7 @@ public class RecentAdapter extends BaseAdapter{
 	}
 	
 	static class ViewHolder{
-		public TextView appNameTv;//,serviceTv,wakelockTv,alarmTv;
+		public TextView appNameTv,appTimeTv;//,serviceTv,wakelockTv,alarmTv;
 		public ImageView appIcon,notCleanIv,forceCleanIv,blurImgIv,notshowIv,iceIv;
 	}
 

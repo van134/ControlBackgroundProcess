@@ -343,6 +343,22 @@ public class FileUtil {
         return lists;
     }
 
+    public static String getAssetsString(Context context,String fileName){
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(context.getAssets().open(fileName)));
+            StringBuilder sb = new StringBuilder();
+            String line = "";
+            while((line = br.readLine())!=null){
+                sb.append(line).append("\n");
+            }
+            br.close();
+            return sb.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     public static void copyAssets(Context context,String copyName,String writePath){
         try {
             InputStream in = context.getAssets().open(copyName);

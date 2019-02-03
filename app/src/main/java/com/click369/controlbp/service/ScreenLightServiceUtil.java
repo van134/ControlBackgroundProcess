@@ -8,13 +8,15 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -52,9 +54,11 @@ public class ScreenLightServiceUtil {
                     536, -3);
             wmParams.format = PixelFormat.RGBA_8888;
             wmParams.gravity = Gravity.BOTTOM;
+            wmParams.setTitle("控制器");
             wmParams.x = 0;
             wmParams.width = service.context.getResources().getDisplayMetrics().widthPixels;
             wmParams.height = getHasVirtualKey(windowManager);
+            wmParams.y = isNavigationBarShow()?-1*RoundedCornerService.getVirtualBarHeigh(service.context):0;
 //            wmParams.y = -1 * RoundedCornerService.getZhuangTaiHeight(service.context);//-1*RoundedCornerService.getZhuangTaiHeight(service)+WatchDogService.lightOffset;
             LayoutInflater inflater = LayoutInflater.from(service.context);
             //获取浮动窗口视图所在布局
@@ -82,9 +86,17 @@ public class ScreenLightServiceUtil {
     LightView lv =null;
     public void showLight(final int type){
         if(isInit&&(WatchDogService.isHasSysFloatVewPermission||WatchDogService.isHasXPFloatVewPermission)&&lv!=null){
-//            windowManager.addView(fl,wmParams);
-//            lv.checkFullScreen(service.pv);
-
+            int w = service.context.getResources().getDisplayMetrics().widthPixels;
+            int bar  =RoundedCornerService.getVirtualBarHeigh(service.context);
+            if(w!=wmParams.width){
+                wmParams.width = w;
+                wmParams.height = getHasVirtualKey(windowManager);
+                lv.setWidowManager(windowManager,wmParams,fl);
+            }
+//            if(bar*-1!=wmParams.y){
+                wmParams.y = isNavigationBarShow()?-1*RoundedCornerService.getVirtualBarHeigh(service.context):0;
+                lv.setWidowManager(windowManager,wmParams,fl);
+//            }
             lv.startBl(type);
         }
     }
@@ -153,5 +165,38 @@ public class ScreenLightServiceUtil {
     public static void sendReloadLight(Context context){
         Intent intent = new Intent("com.click369.control.light.changeposition");
         context.sendBroadcast(intent);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public boolean isNavigationBarShow(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            Display display = windowManager.getDefaultDisplay();
+            Point size = new Point();
+            Point realSize = new Point();
+            display.getSize(size);
+            display.getRealSize(realSize);
+            return realSize.y!=size.y;
+        }else {
+            boolean menu = ViewConfiguration.get(service.context).hasPermanentMenuKey();
+            boolean back = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+            if(menu || back) {
+                return false;
+            }else {
+                return true;
+            }
+        }
     }
 }

@@ -57,11 +57,18 @@ public class AppInfo implements Serializable {
     public boolean isRecentBlur;
     public boolean isRecentNotShow;
 
+    public boolean isblackAllXp;
+    public boolean isblackControlXp;
+    public boolean isNoCheckXp;
+    public boolean isSetCanHookXp;
+
     public boolean isBarLockList;
     public boolean isBarColorList;
     public boolean isADJump;
     public boolean isNotUnstall;
-//    public boolean isStopMoblieNet;
+    public boolean isPriSwitchOpen;
+    public boolean isPriWifiPrevent;
+    public boolean isPriMobilePrevent;
 //    public boolean isStopWifiNet;
     public boolean isRunning;
 
@@ -139,6 +146,48 @@ public class AppInfo implements Serializable {
 //            bits = null;
 //        }
 //    }
+    public void resetSetting(){
+        isServiceStop = false;
+        isSetTimeStopApp = false;//定时关闭
+        isSetTimeStopOneTime = false;//是否是一次性的定时关闭
+        isWakelockStop = false;
+        isBroadStop = false;
+        isAlarmStop = false;
+        isBackForceStop = false;
+        isBackMuBei = false;
+        isInMuBei = false;
+        isHomeMuBei = false;
+        isHomeIdle = false;
+        isOffscForceStop = false;
+        isOffscMuBei = false;
+        isNotifyNotExit = false;
+        isAutoStart = false;
+        isNotStop = false;
+        isLockApp = false;
+        isStopApp = false;
+        isDozeOffsc = false;
+        isDozeOnsc = false;
+        isDozeOpenStop = false;
+        isRecentNotClean = false;
+        isRecentForceClean = false;
+        isRecentBlur = false;
+        isRecentNotShow = false;
+
+        isblackAllXp = false;
+        isblackControlXp = false;
+        isNoCheckXp = false;
+        isSetCanHookXp = false;
+
+        isBarLockList = false;
+        isBarColorList = false;
+        isADJump = false;
+        isNotUnstall = false;
+        isRunning = false;
+        setTimeStopAppTime=0;
+        openCount = 0;
+        lastOpenTime=0;
+
+    }
 
     public static void writeArrays(ArrayList<AppInfo> infos, Context cxt){
         try {

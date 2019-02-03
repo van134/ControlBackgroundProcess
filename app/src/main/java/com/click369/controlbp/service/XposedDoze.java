@@ -40,7 +40,7 @@ public class XposedDoze {
             if(lpparam.packageName.equals("com.android.systemui")){
                 dozePrefs.reload();
                 if(dozePrefs.getBoolean(Common.PREFS_SETTING_DOZE_UPDATETIME,false)) {
-                    Class clockClass = XposedHelpers.findClass("com.android.systemui.statusbar.policy.Clock", lpparam.classLoader);
+                    Class clockClass = XposedUtil.findClass("com.android.systemui.statusbar.policy.Clock", lpparam.classLoader);
                     if (clockClass != null) {
                         XposedHelpers.findAndHookConstructor(clockClass, Context.class, AttributeSet.class, int.class, new XC_MethodHook() {
                             @Override
@@ -104,7 +104,7 @@ public class XposedDoze {
                     }
                 }
             }else if(lpparam.packageName.equals("android")){
-                Class deviceClass = XposedHelpers.findClass("com.android.server.DeviceIdleController",lpparam.classLoader);
+                Class deviceClass = XposedUtil.findClass("com.android.server.DeviceIdleController",lpparam.classLoader);
                 if(deviceClass!=null){
                     dozePrefs.reload();
                     try {
@@ -136,7 +136,7 @@ public class XposedDoze {
                                 }
                             });
                         }
-                    }catch (RuntimeException e){
+                    }catch (Throwable e){
                         e.printStackTrace();
                     }
                 }

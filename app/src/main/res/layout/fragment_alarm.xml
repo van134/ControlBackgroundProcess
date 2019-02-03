@@ -24,6 +24,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:text="重置统计数据"
+                android:textSize="13dp"
                 android:id="@+id/alarm_reset_tv"
                 android:layout_weight="2"
                 android:background="@drawable/et_backgroundshape"
@@ -34,6 +35,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"
+                android:textSize="13dp"
                 android:text="清除自定义规则"
                 android:id="@+id/alarm_cleanrole_tv"
                 android:layout_weight="2"
@@ -45,6 +47,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"
+                android:textSize="13dp"
                 android:text="清除所有设置"
                 android:id="@+id/alarm_cleanset_tv"
                 android:layout_weight="2"
@@ -56,6 +59,7 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"
+                android:textSize="13dp"
                 android:text="说明"
                 android:id="@+id/alarm_showalert_tv"
                 android:layout_weight="1"
@@ -77,6 +81,7 @@
                 android:layout_height="wrap_content"
                 android:text="1.点击未控制可以设置定时器间隔时长,输入0代表移除控制,关闭开关则所有设置失效。\n2.每个程序只能添加一个规则，规则的原理是阻止以设置的内容开头的定时器，主要用来处理随机定时器，没有随机定时器的应用不要乱加规则。例如有很多ALARM:ACTION(xxx)这样的唤醒锁，规则就可以设置为ALARM:，并设置间隔时间即可控制。\n3.该功能比较危险，小白用户不要看了之后随便禁用定时器，使用过AMP的基友们可以试试，如果禁用后到导致无法开机请在REC中删除data/data/com.click369.controlbp/shared_prefs/mAlarmSettings.xml即可。"
                 android:id="@+id/alarm_alert_tv"
+                android:textSize="13dp"
                 android:layout_gravity="left|top"
                 android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"

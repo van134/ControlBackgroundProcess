@@ -34,6 +34,7 @@
                     android:layout_height="match_parent"
                     android:id="@+id/textView5"
                     android:layout_weight="9"
+                    android:textSize="13dp"
                     android:textAlignment="gravity"
                     android:gravity="left|center"
                     android:text="长按标题全选" />
@@ -42,6 +43,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="返回时"
+                    android:textSize="13dp"
                     android:id="@+id/main_back_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -50,6 +52,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="后台时"
+                    android:textSize="13dp"
                     android:id="@+id/main_home_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -58,6 +61,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="熄屏时"
+                    android:textSize="13dp"
                     android:id="@+id/main_offsc_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -66,6 +70,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="通知排除"
+                    android:textSize="13dp"
                     android:id="@+id/main_notify_tv"
                     android:layout_weight="4"
                     android:gravity="center" />

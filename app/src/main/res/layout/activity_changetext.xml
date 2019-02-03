@@ -79,6 +79,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            style="@style/mtextSize"
             android:text="说明：该功能仅为尝鲜功能，至于以后是否改进优化还不确定。要注意的是如果要替换微信中的聊天内容只能一个字一个字替换，比如‘你好吗’要替换，必须分开三个字进行三次替换，目前没办法也别问我为什么。替换或清除后强制杀死进程或重启生效"
             android:id="@+id/changetext_alerttv" />
 

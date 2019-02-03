@@ -18,6 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
+            app:titleTextAppearance="@style/Toolbar.TitleText"
             app:popupTheme="@style/AppTheme.PopupOverlay" >
         <FrameLayout
             android:layout_gravity="right|center"

@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.bumptech.glide.Glide;
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.fragment.ControlFragment;
@@ -91,9 +90,11 @@ public class AdAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
+
 			if(sortType == 0&&modPrefs.getInt(ai.packageName+"/ad",0)==1){
 				this.bjdatas.add(ai);
 			}else if(sortType == 1&&modPrefs.getInt(ai.packageName+"/ad",0)==2){
@@ -104,6 +105,10 @@ public class AdAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -115,6 +120,7 @@ public class AdAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 		this.notifyDataSetChanged();
 	}
 	public int getCount() {
@@ -139,6 +145,7 @@ public class AdAdapter extends BaseAdapter{
 			convertView= inflater.inflate(R.layout.item_mainapp, null);
 			viewHolder = new ViewHolder();
 			viewHolder.appNameTv = (TextView)convertView.findViewById(R.id.item_main_appname);
+			viewHolder.appTimeTv = (TextView)convertView.findViewById(R.id.item_main_apptime);
 			viewHolder.serviceIv = (ImageView) convertView.findViewById(R.id.item_main_service);
 			viewHolder.wakelockIv = (ImageView)convertView.findViewById(R.id.item_main_wakelock);
 			viewHolder.alarmIv = (ImageView)convertView.findViewById(R.id.item_main_alarm);
@@ -148,10 +155,21 @@ public class AdAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
-		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		int color = data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor);
+		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appTimeTv.setText((data.isRunning?BaseActivity.getProcStartTimeStr(data.packageName)+"\n"+BaseActivity.getProcTimeStr(data.packageName):""));
+		viewHolder.appTimeTv.setVisibility(data.isRunning?View.VISIBLE:View.GONE);
+		viewHolder.appTimeTv.setTextColor(color);
+		viewHolder.appNameTv.setTextColor(color);
+
+
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		File file = null;
+//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
+//			BaseActivity.loadeds.add(data.packageName);
+//			file = data.iconFile;
+//		}
+//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.serviceIv.setTag(position);
@@ -255,7 +273,7 @@ public class AdAdapter extends BaseAdapter{
 	}
 	
 	static class ViewHolder{
-		public TextView appNameTv;//,serviceTv,wakelockTv,alarmTv;
+		public TextView appNameTv,appTimeTv;//,serviceTv,wakelockTv,alarmTv;
 		public ImageView appIcon,serviceIv,wakelockIv,alarmIv,iceIv;
 	}
 }

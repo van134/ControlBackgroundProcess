@@ -18,7 +18,7 @@ import com.click369.controlbp.common.Common;
 public class FunctionSwitchView {
     private SharedPreferences settingPrefs;
     public TextView titleTv;
-    public Switch oneSW,twoSW,threeSW,fourSW,fiveSW,sixSW,sevenSW,eightSW,nineSW,tenSw,elevenSw;
+    public Switch oneSW,twoSW,threeSW,fourSW,fiveSW,sixSW,sevenSW,eightSW,nineSW,tenSw,elevenSw,twleveSw,thirteenSw;
     private View v;
     private Context cxt;
     private int curColor = Color.BLACK;
@@ -31,17 +31,19 @@ public class FunctionSwitchView {
 //        View v = act.getLayoutInflater().inflate(R.layout.layout_topsearch,null);
         titleTv = (TextView) v.findViewById(R.id.setting_all_title);
         curColor = titleTv.getCurrentTextColor();
-        oneSW = (Switch) v.findViewById(R.id.setting_allsw_onesw);
-        twoSW = (Switch) v.findViewById(R.id.setting_allsw_twosw);
-        threeSW = (Switch) v.findViewById(R.id.setting_allsw_threesw);
-        fourSW = (Switch) v.findViewById(R.id.setting_allsw_foursw);
-        fiveSW = (Switch) v.findViewById(R.id.setting_allsw_fivesw);
-        sixSW = (Switch) v.findViewById(R.id.setting_allsw_sixsw);
-        sevenSW = (Switch) v.findViewById(R.id.setting_allsw_sevensw);
-        eightSW = (Switch) v.findViewById(R.id.setting_allsw_eightsw);
-        nineSW = (Switch) v.findViewById(R.id.setting_allsw_ninesw);
-        tenSw = (Switch) v.findViewById(R.id.setting_allsw_tensw);
-        elevenSw = (Switch) v.findViewById(R.id.setting_allsw_elevensw);
+        oneSW = (Switch) v.findViewById(R.id.setting_allsw_service_broad_control);
+        twoSW = (Switch) v.findViewById(R.id.setting_allsw_backstop_mubei_control);
+        threeSW = (Switch) v.findViewById(R.id.setting_allsw_ifw_control);
+        fourSW = (Switch) v.findViewById(R.id.setting_allsw_recentcard_control);
+        fiveSW = (Switch) v.findViewById(R.id.setting_allsw_autostart_lock_control);
+        sixSW = (Switch) v.findViewById(R.id.setting_allsw_uninstall_ice_control);
+        sevenSW = (Switch) v.findViewById(R.id.setting_allsw_xpblacklist_control);
+        eightSW = (Switch) v.findViewById(R.id.setting_allsw_privacy_control);
+        nineSW = (Switch) v.findViewById(R.id.setting_allsw_adskip_control);
+        tenSw = (Switch) v.findViewById(R.id.setting_allsw_doze_control);
+        elevenSw = (Switch) v.findViewById(R.id.setting_allsw_ui_control);
+        twleveSw = (Switch) v.findViewById(R.id.setting_allsw_cpuset_control);
+        thirteenSw = (Switch) v.findViewById(R.id.setting_allsw_others_control);
         oneSW.setTextColor(curColor);
         twoSW.setTextColor(curColor);
         threeSW.setTextColor(curColor);
@@ -53,6 +55,8 @@ public class FunctionSwitchView {
         nineSW.setTextColor(curColor);
         tenSw.setTextColor(curColor);
         elevenSw.setTextColor(curColor);
+        twleveSw.setTextColor(curColor);
+        thirteenSw.setTextColor(curColor);
         oneSW.setTag(0);
         twoSW.setTag(1);
         threeSW.setTag(2);
@@ -64,17 +68,22 @@ public class FunctionSwitchView {
         nineSW.setTag(8);
         tenSw.setTag(9);
         elevenSw.setTag(10);
-        oneSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_ONE,true));
-        twoSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true));
-        threeSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_THREE,true));
-        fourSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_FOUR,true));
-        fiveSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_FIVE,true));
-        sixSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_SIX,true));
-        sevenSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_SEVEN,true));
-        eightSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_EIGHT,true));
-        nineSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_NINE,true));
-        tenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_TEN,true));
-        elevenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_ELEVEN,true));
+        twleveSw.setTag(11);
+        thirteenSw.setTag(12);
+        oneSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_SERVICE_BROAD,true));
+        twoSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_BACKSTOP_MUBEI,true));
+        threeSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_IFW,true));
+        fourSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_RECNETCARD,true));
+        fiveSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true));
+        sixSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_UNINSTALL_ICE,true));
+        sevenSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_XPBLACKLIST,true));
+        eightSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_PRIVACY,true));
+        nineSW.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_ADSKIP,true));
+        tenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_DOZE,true));
+        elevenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_UI,true));
+        twleveSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_CPUSET,true));
+        thirteenSw.setChecked(settingPrefs.getBoolean(Common.ALLSWITCH_OTHERS,true));
+
         SwitchClick sc = new SwitchClick();
         oneSW.setOnCheckedChangeListener(sc);
         twoSW.setOnCheckedChangeListener(sc);
@@ -87,16 +96,19 @@ public class FunctionSwitchView {
         nineSW.setOnCheckedChangeListener(sc);
         tenSw.setOnCheckedChangeListener(sc);
         elevenSw.setOnCheckedChangeListener(sc);
+        twleveSw.setOnCheckedChangeListener(sc);
+        thirteenSw.setOnCheckedChangeListener(sc);
     }
 
     class SwitchClick implements CompoundButton.OnCheckedChangeListener{
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             int tag= (Integer) buttonView.getTag();
-            String names[] = {Common.ALLSWITCH_ONE,Common.ALLSWITCH_TWO,Common.ALLSWITCH_THREE,
-                    Common.ALLSWITCH_FOUR,Common.ALLSWITCH_FIVE,Common.ALLSWITCH_SIX,
-                    Common.ALLSWITCH_SEVEN,Common.ALLSWITCH_EIGHT,Common.ALLSWITCH_NINE,
-                    Common.ALLSWITCH_TEN,Common.ALLSWITCH_ELEVEN};
+            String names[] = {Common.ALLSWITCH_SERVICE_BROAD,Common.ALLSWITCH_BACKSTOP_MUBEI,
+                    Common.ALLSWITCH_IFW,Common.ALLSWITCH_RECNETCARD,Common.ALLSWITCH_AUTOSTART_LOCK,
+                    Common.ALLSWITCH_UNINSTALL_ICE,Common.ALLSWITCH_XPBLACKLIST,Common.ALLSWITCH_PRIVACY,
+                    Common.ALLSWITCH_ADSKIP,Common.ALLSWITCH_DOZE,Common.ALLSWITCH_UI,
+                    Common.ALLSWITCH_CPUSET,Common.ALLSWITCH_OTHERS};
             if(settingPrefs.getBoolean(names[tag],true)!=isChecked){
                 Toast.makeText(cxt,"重启生效",Toast.LENGTH_LONG).show();
             }

@@ -28,6 +28,7 @@
                 android:layout_height="match_parent">
 
                 <TextView
+                    android:textSize="13dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="你的支持是更新软件解决bug的动力,希望大家可以用各种方式来支持本软件的开发（捐赠、评分、评论区互相帮助、共建和谐氛围等都算）。"
@@ -48,6 +49,7 @@
                     android:layout_height="wrap_content"
                     android:text="支付宝账号：418560128@qq.com(点击复制)"
                     android:id="@+id/jz_zfb"
+                    android:textSize="13dp"
                     android:layout_marginLeft="4dp" />
 
                 <ImageView
@@ -63,6 +65,7 @@
                     android:text="微信账号:Van418(点击复制)"
                     android:layout_marginLeft="4dp"
                     android:id="@+id/jz_wx"
+                    android:textSize="13dp"
                     android:layout_marginTop="20dp" />
 
                 <ImageView

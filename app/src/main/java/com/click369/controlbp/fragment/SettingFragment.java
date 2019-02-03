@@ -28,9 +28,9 @@ import com.click369.controlbp.util.SharedPrefsUtil;
 
 
 public class SettingFragment extends BaseFragment {
-    private Switch iceRemoveSw,iceOffSw,iceStopSw,autoNightSw,nightModeSw,isShowSideBarSw,
+    private Switch iceRemoveSw,iceOffSw,iceStopSw,isShowSideBarSw,//autoNightSw,nightModeSw,
             isOpenConfigSw,isAlwaysKillOffSw,
-            updateTimeSw,
+            updateTimeSw,autoStartNotNofifySw,
             notExitAudioPlaySw,checkTimeOutSw,
             setTimeStopPwdModeSw,setTimeStopZWModeSw,setTimeStopNotShowDialogSw,
             stopAppModeSw,exitRemoveRecentSw,muBeiStopReceiverSw,
@@ -76,11 +76,11 @@ public class SettingFragment extends BaseFragment {
         checkTimeOutSw = (Switch) v.findViewById(R.id.setting_checktimeout_sw);
         iceRemoveSw = (Switch) v.findViewById(R.id.setting_ice_remove_sw);
         iceOffSw = (Switch) v.findViewById(R.id.setting_ice_off_sw);
-        autoNightSw = (Switch) v.findViewById(R.id.setting_auto_night_sw);
-        nightModeSw = (Switch) v.findViewById(R.id.setting_nightmode_sw);
+
         updateTimeSw = (Switch) v.findViewById(R.id.setting_updatetime_sw);
         isOpenConfigSw = (Switch) v.findViewById(R.id.setting_openconfig_sw);
         isAlwaysKillOffSw = (Switch) v.findViewById(R.id.setting_alwayskilloff_sw);
+        autoStartNotNofifySw = (Switch) v.findViewById(R.id.setting_autostartnotnotify_sw);
 
         stopAppModeSw = (Switch) v.findViewById(R.id.setting_stopmode_sw);
         muBeiStopReceiverSw = (Switch) v.findViewById(R.id.setting_mubestopreceiver_sw);
@@ -94,8 +94,8 @@ public class SettingFragment extends BaseFragment {
         isShowSideBarSw.setTextColor(curColor);
         iceRemoveSw.setTextColor(curColor);
         iceOffSw.setTextColor(curColor);
-        autoNightSw.setTextColor(curColor);
-        nightModeSw.setTextColor(curColor);
+//        autoNightSw.setTextColor(curColor);
+//        nightModeSw.setTextColor(curColor);
         iceStopSw.setTextColor(curColor);
         stopAppModeSw.setTextColor(curColor);
         notExitAudioPlaySw.setTextColor(curColor);
@@ -107,6 +107,7 @@ public class SettingFragment extends BaseFragment {
         updateTimeSw.setTextColor(curColor);
         isOpenConfigSw.setTextColor(curColor);
         isAlwaysKillOffSw.setTextColor(curColor);
+        autoStartNotNofifySw.setTextColor(curColor);
         penImg1 = (ImageView) v.findViewById(R.id.setting_pen1_iv);
         penImg2 = (ImageView) v.findViewById(R.id.setting_pen2_iv);
         penImg3 = (ImageView) v.findViewById(R.id.setting_pen3_iv);
@@ -129,8 +130,7 @@ public class SettingFragment extends BaseFragment {
         iceStopSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICESTOPICE,false));
         iceRemoveSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEBACKICE,true));
         iceOffSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEOFFICE,false));
-        autoNightSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,false));
-        nightModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_THEME_MODE,false));
+
         setTimeStopZWModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPMODE,false));
         setTimeStopPwdModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPPWDMODE,false));
         setTimeStopNotShowDialogSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,false));
@@ -143,8 +143,9 @@ public class SettingFragment extends BaseFragment {
         notneedAccessSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true));
         zhendongSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true));
         updateTimeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISUPDATEAPPTIME,false));
-        isOpenConfigSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,true));
+        isOpenConfigSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,false));
         isAlwaysKillOffSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISALWAYSKILLOFF,false));
+        autoStartNotNofifySw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY,false));
         backDelayTimeTv.setText("返回时强退、墓碑和冻结延迟:"+settings.getInt(Common.PREFS_SETTING_BACKDELAYTIME,0)+"秒");
         homeDelayTimeTv.setText("后台时墓碑、待机延迟:"+settings.getInt(Common.PREFS_SETTING_HOMEDELAYTIME,0)+"秒");
         offDelayTimeTv.setText("熄屏时强退、墓碑和冻结延迟:"+settings.getInt(Common.PREFS_SETTING_OFFDELAYTIME,0)+"秒");
@@ -155,8 +156,8 @@ public class SettingFragment extends BaseFragment {
         isShowSideBarSw.setTag(1);
         iceRemoveSw.setTag(2);
         iceOffSw.setTag(3);
-        autoNightSw.setTag(4);
-        nightModeSw.setTag(5);
+//        autoNightSw.setTag(4);
+//        nightModeSw.setTag(5);
         setTimeStopZWModeSw.setTag(6);
         iceStopSw.setTag(7);
         stopAppModeSw.setTag(8);
@@ -171,13 +172,13 @@ public class SettingFragment extends BaseFragment {
         isOpenConfigSw.setTag(17);
         isAlwaysKillOffSw.setTag(18);
         setTimeStopNotShowDialogSw.setTag(19);
+        autoStartNotNofifySw.setTag(20);
         SwitchClick sc = new SwitchClick();
         backSw.setOnCheckedChangeListener(sc);
         isShowSideBarSw.setOnCheckedChangeListener(sc);
         iceRemoveSw.setOnCheckedChangeListener(sc);
         iceOffSw.setOnCheckedChangeListener(sc);
-        autoNightSw.setOnCheckedChangeListener(sc);
-        nightModeSw.setOnCheckedChangeListener(sc);
+
         setTimeStopZWModeSw.setOnCheckedChangeListener(sc);
         setTimeStopPwdModeSw.setOnCheckedChangeListener(sc);
         setTimeStopNotShowDialogSw.setOnCheckedChangeListener(sc);
@@ -192,6 +193,7 @@ public class SettingFragment extends BaseFragment {
         zhendongSw.setOnCheckedChangeListener(sc);
         isAlwaysKillOffSw.setOnCheckedChangeListener(sc);
         isOpenConfigSw.setOnCheckedChangeListener(sc);
+        autoStartNotNofifySw.setOnCheckedChangeListener(sc);
         SeekBarListener sbl = new SeekBarListener();
         backSb.setTag(0);
         homeSb.setTag(1);
@@ -209,12 +211,12 @@ public class SettingFragment extends BaseFragment {
             BaseActivity.zhenDong(getContext());
             int tag= (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_SETTING_BACKLOGOPEN,Common.PREFS_SETTING_SHOWSIDEBAR,Common.PREFS_SETTING_ICEBACKICE,
-                    Common.PREFS_SETTING_ICEOFFICE,Common.PREFS_SETTING_THEME_AUTOCHANGEMODE,Common.PREFS_SETTING_THEME_MODE,
+                    Common.PREFS_SETTING_ICEOFFICE,"","",
                     Common.PREFS_SETTING_SETTIMESTOPMODE,Common.PREFS_SETTING_ICESTOPICE,Common.PREFS_SETTING_STOPAPPBYXP,
                     Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
                     Common.PREFS_SETTING_EXITREMOVERECENT,Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,Common.PREFS_SETTING_ISNOTNEEDACCESS,
                     Common.PREFS_SETTING_ZHENDONG,Common.PREFS_SETTING_ISUPDATEAPPTIME,Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,
-                    Common.PREFS_SETTING_ISALWAYSKILLOFF,Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG};
+                    Common.PREFS_SETTING_ISALWAYSKILLOFF,Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY};
             if (tag == 0){
                 WatchDogService.isSaveBackLog = isChecked;
             }else if (tag == 2){
@@ -222,17 +224,7 @@ public class SettingFragment extends BaseFragment {
             }else if(tag == 3){
                 WatchDogService.isAtuoOffScIce = isChecked;
             }else if(tag ==5 ){
-                AlertUtil.showConfirmAlertMsg(getActivity(), "重启应用生效，是否重启?", new AlertUtil.InputCallBack() {
-                    @Override
-                    public void backData(String txt, int tag) {
-                        if (tag==1){
-                            getActivity().finish();
-                            Intent intent = new Intent(getActivity(), MainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT| Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                            startActivity(intent);
-                        }
-                    }
-                });
+
             }else if((tag ==7)){
                 WatchDogService.isAtuoStopIce = isChecked;
             }else if((tag ==6)){

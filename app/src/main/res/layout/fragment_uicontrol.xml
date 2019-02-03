@@ -16,24 +16,113 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <FrameLayout
+            <!--<FrameLayout-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:background="@drawable/alert_backgroundshape"-->
+                <!--android:id="@+id/frameLayout" >-->
+
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="部分应用在染色下闪退，请加入黑名单，该功能需要XPOSED支持，个别软件的部分界面可能无法染色，支持安卓5.0以上。最近任务界面修改打开任何一个开关都会让最近任务圆角化。"-->
+                    <!--android:textSize="13dp"-->
+                    <!--android:id="@+id/textView4"-->
+                    <!--android:layout_gravity="left|top"-->
+                    <!--android:layout_marginBottom="8dp"-->
+                    <!--android:layout_marginLeft="8dp"-->
+                    <!--android:layout_marginTop="8dp"-->
+                    <!--android:layout_marginRight="8dp" />-->
+            <!--</FrameLayout>-->
+            <TextView
+                style="@style/mtextSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="应用控制器界面设置"
+                android:id="@+id/textView3" />
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/alert_backgroundshape"
-                android:id="@+id/frameLayout" >
+                android:visibility="visible">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="部分应用在染色下闪退，请加入黑名单，该功能需要XPOSED支持，个别软件的部分界面可能无法染色，支持安卓5.0以上。最近任务界面修改打开任何一个开关都会让最近任务圆角化。"
-                    android:id="@+id/textView4"
-                    android:layout_gravity="left|top"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginRight="8dp" />
-            </FrameLayout>
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="22:00-7:00自动切换为夜间模式"
+                        android:id="@+id/ui_auto_night_sw"
+                        android:checked="false" />
+                </FrameLayout>
 
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="夜间模式"
+                        android:id="@+id/ui_nightmode_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+                    <TextView
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="修改/恢复应用控制器主题色\n(非夜间模式且没有设置背景图片时生效)"
+                        android:id="@+id/ui_chang_theme_color_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="left|center_vertical" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <TextView
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="选择/处理/清除应用控制器背景图片"
+                        android:id="@+id/ui_changbg_tv"
+                        android:textAlignment="gravity"
+                        android:gravity="left|center_vertical" />
+                </FrameLayout>
+
+            </LinearLayout>
+            <TextView
+                style="@style/mtextSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="系统级别界面设置"
+                android:id="@+id/textView4" />
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
@@ -48,6 +137,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="色彩化最近任务标题栏"
@@ -65,6 +155,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="最近任务栏显示内存"
@@ -84,6 +175,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="隐藏最近任务标题栏"
@@ -100,6 +192,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="最近任务卡片标题显示控制信息\n(7.0+支持点击标题可以直接控制最近任务相关功能)"
@@ -124,6 +217,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="最近任务卡片圆角半径:0"
@@ -151,6 +245,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="最近任务卡片不透明度:0"
@@ -182,6 +277,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="色彩化消息通知"
@@ -199,6 +295,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="消息通知背景使用自定义图片(名为nb.png或nb.jpg的图片放在根目录progresscontrol文件夹下)"
@@ -215,6 +312,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="消息通知颜色随机显示"
@@ -232,6 +330,7 @@
                         android:layout_height="2px"
                         android:background="@drawable/line" />
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_marginLeft="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -254,6 +353,7 @@
                         android:layout_marginRight="4dp"
                         android:layout_gravity="center" >
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="消息通知背景不透明度:100%"
@@ -283,6 +383,7 @@
                 android:layout_marginLeft="4dp" >
 
                 <Switch
+                    style="@style/mtextSize"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:text="屏幕圆角和呼吸效果显示在锁屏之上(个别系统打开后无法正常显示甚至导致应用控制器无法打开，例如MIUI10)"
@@ -321,6 +422,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="通知栏有消息时显示边缘呼吸效果"
@@ -338,6 +440,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="有电话呼入时显示边缘呼吸效果"
@@ -356,6 +459,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="播放音乐时显示边缘呼吸效果"
@@ -373,6 +477,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="接入/断开电源时时显示边缘呼吸效果"
@@ -390,6 +495,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="唤醒屏幕时显示边缘呼吸效果"
@@ -405,6 +511,7 @@
                         android:layout_height="2px"
                         android:background="@drawable/line" />
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_marginLeft="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -423,6 +530,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="随机显示边缘呼吸颜色"
@@ -441,6 +549,7 @@
                         android:layout_height="2px"
                         android:background="@drawable/line" />
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_marginLeft="4dp"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -460,6 +569,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="边缘呼吸速度（点击切换）:中"
@@ -478,6 +588,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="边缘呼吸位置（点击切换）:两侧"
@@ -496,6 +607,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="边缘呼吸效果（点击切换）:弧度"
@@ -519,6 +631,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="边缘呼吸粗细:8%"
@@ -551,6 +664,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="边缘呼吸距离:100%"
@@ -585,6 +699,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="边缘呼吸纵向偏移:0"
@@ -616,9 +731,10 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="有通知时闪光灯闪动"
+                        android:text="有通知时闪光灯闪烁"
                         android:id="@+id/ui_flash_notify_sw"
                         android:checked="false" />
                 </FrameLayout>
@@ -633,10 +749,28 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="有电话呼入时闪光灯闪动"
+                        android:text="有电话呼入时闪光灯闪烁"
                         android:id="@+id/ui_flash_call_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="亮屏时不触发通知/电话闪光灯闪烁"
+                        android:id="@+id/ui_flash_offsc_sw"
                         android:checked="false" />
                 </FrameLayout>
             </LinearLayout>
@@ -655,6 +789,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="屏幕圆角"
@@ -672,6 +807,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="显示当前活动名称(重启后自动关闭)"
@@ -695,6 +831,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="顶部圆角偏移:0"
@@ -727,6 +864,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="底部圆角偏移:0"
@@ -760,6 +898,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="圆角半径:35"
@@ -783,6 +922,7 @@
                     android:visibility="gone">
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="圆角包含导航栏"
@@ -804,6 +944,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="全局染色状态栏\n(打开后需要在染色名单中设置)"
@@ -822,6 +963,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="全局染色导航栏\n(打开后需要在染色名单中设置)"
@@ -840,6 +982,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="未锁定染色的应用当界面改变时重新染色\n(如果出现卡顿则关掉,关掉默认为界面开启3秒内染色)"
@@ -857,6 +1000,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="导航栏颜色跟随状态栏"
@@ -876,6 +1020,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="虚拟键变色"
@@ -896,6 +1041,7 @@
                     android:visibility="visible">
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="更改虚拟键颜色(部分系统不支持)"
@@ -915,6 +1061,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="染色开启及锁定名单\n(打开染色后闪退的应用请关闭染色)"
@@ -934,13 +1081,13 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/alert_backgroundshape"
                 android:visibility="visible">
-
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="更改Toast(弹出提示)效果"
@@ -959,6 +1106,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="Toast位置（点击切换）:下"
@@ -978,6 +1126,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="Toast背景颜色"
@@ -997,6 +1146,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <TextView
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="Toast字体颜色"
@@ -1022,6 +1172,7 @@
                         android:layout_gravity="center" >
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Toast位置偏移:0"
@@ -1039,6 +1190,7 @@
                 </FrameLayout>
 
             </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

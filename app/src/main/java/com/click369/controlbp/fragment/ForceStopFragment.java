@@ -333,8 +333,8 @@ public class ForceStopFragment extends BaseFragment {
             fresh();
             loadY(listView,this.getClass(),adapter.sortType);
         }
-        Log.i("CONTROL","返回force");
-        ((MainActivity)getActivity()).startAccess();
+//        Log.i("CONTROL","返回force");
+//        ((MainActivity)getActivity()).startAccess();
     }
 
     @Override
@@ -343,8 +343,8 @@ public class ForceStopFragment extends BaseFragment {
             Intent intent = new Intent(this.getActivity(), WatchDogService.class);
             this.getActivity().startService(intent);
             ForceStopFragment.isClick = false;
-            Log.i("CONTROL","返回force");
-            ((MainActivity)getActivity()).startAccess();
+//            Log.i("CONTROL","返回force");
+//            ((MainActivity)getActivity()).startAccess();
         }
         super.onStop();
     }
@@ -427,7 +427,7 @@ public class ForceStopFragment extends BaseFragment {
             for(TextView t:tvs){
                 t.setTextColor(curColor);
             }
-            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
             loadY(listView,ForceStopFragment.this.getClass(),adapter.sortType);
         }
     }

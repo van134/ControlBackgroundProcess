@@ -30,6 +30,8 @@ import android.widget.Toast;
 
 import com.click369.controlbp.BuildConfig;
 import com.click369.controlbp.R;
+import com.click369.controlbp.adapter.AppStartAdapter;
+import com.click369.controlbp.adapter.XpBlackListAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.common.Common;
@@ -45,12 +47,16 @@ import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 import com.click369.controlbp.util.ShellUtilNoBackData;
 
+import java.util.HashMap;
+
 public class AppConfigActivity extends BaseActivity {
     ImageView serviceImg,broadImg,wakeLockImg,alarmImg;
     ImageView backImg,homeImg,offScImg,notifyImg;
     ImageView keepImg,killImg,blurImg,hideImg;
     ImageView lockImg,notRunImg,notAutoStartImg,notStopImg;
-    ImageView dongJieImg,notUninstallImg,unInstallImg;
+    ImageView xpAllImg,xpControlImg,xpNoCheckImg,xpSetCanHookImg;
+    ImageView dongJieImg,notUninstallImg,clearDataImg,clearCacheImg,unInstallImg;
+    ImageView priWifiImg,priMobileImg,priLogImg,priControlImg,priSwitchImg;
     ImageView mode1Img,mode2Img,mode3Img;
     ImageView dozeQianTaiImg,dozeOffScImg,dozeOnScImg;
     ImageView ifwServceImg,ifwBroadImg,ifwActivityImg;
@@ -81,8 +87,8 @@ public class AppConfigActivity extends BaseActivity {
             ll.setBackgroundColor(Color.BLACK);
             fl.setBackgroundColor(Color.DKGRAY);
         }else{
-            ll.setBackgroundColor(Color.WHITE);
-            fl.setBackgroundColor(Color.parseColor("#1a9dac"));
+            ll.setBackgroundColor(Color.parseColor(MainActivity.THEME_BG_COLOR));
+            fl.setBackgroundColor(Color.parseColor(MainActivity.THEME_COLOR));
         }
         ai = new AppInfo();
         final Intent intent = this.getIntent();
@@ -285,9 +291,22 @@ public class AppConfigActivity extends BaseActivity {
         notAutoStartImg = (ImageView) this.findViewById(R.id.item_autostart);
         notStopImg = (ImageView) this.findViewById(R.id.item_notstop);
 
+        xpAllImg = (ImageView) this.findViewById(R.id.item_xpblack_all);
+        xpControlImg = (ImageView) this.findViewById(R.id.item_xpblack_control);
+        xpNoCheckImg = (ImageView) this.findViewById(R.id.item_xpblack_nocheck);
+        xpSetCanHookImg = (ImageView) this.findViewById(R.id.item_xpblack_setcanhook);
+
         dongJieImg = (ImageView) this.findViewById(R.id.item_dongjie);
         notUninstallImg = (ImageView) this.findViewById(R.id.item_notuninstall);
+        clearDataImg = (ImageView) this.findViewById(R.id.item_cleardata);
+        clearCacheImg = (ImageView) this.findViewById(R.id.item_clearcache);
         unInstallImg = (ImageView) this.findViewById(R.id.item_uninstall);
+
+        priWifiImg = (ImageView) this.findViewById(R.id.item_pri_wifi);
+        priMobileImg = (ImageView) this.findViewById(R.id.item_pri_mobile);
+        priLogImg = (ImageView) this.findViewById(R.id.item_pri_log);
+        priControlImg = (ImageView) this.findViewById(R.id.item_pri_control);
+        priSwitchImg = (ImageView) this.findViewById(R.id.item_pri_switch);
 
         mode1Img = (ImageView) this.findViewById(R.id.item_ad_one);
         mode2Img = (ImageView) this.findViewById(R.id.item_ad_two);
@@ -329,10 +348,26 @@ public class AppConfigActivity extends BaseActivity {
         notAutoStartImg.setImageResource(ai.isAutoStart?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         notStopImg.setImageResource(ai.isNotStop?R.mipmap.icon_add:R.mipmap.icon_notdisable);
 
+        xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+        xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+        xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+        xpSetCanHookImg.setImageResource(ai.isSetCanHookXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+
         dongJieImg.setImageResource(ai.isDisable?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         notUninstallImg.setImageResource(ai.isNotUnstall?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-        unInstallImg.setImageResource(R.mipmap.icon_notdisable);
+        clearDataImg.setImageResource(R.mipmap.icon_enter);
+        clearCacheImg.setImageResource(R.mipmap.icon_enter);
+        unInstallImg.setImageResource(R.mipmap.icon_enter);
 
+        priWifiImg.setImageResource((ai.isPriWifiPrevent?R.mipmap.icon_disable:R.mipmap.icon_notdisable));
+        priMobileImg.setImageResource((ai.isPriMobilePrevent?R.mipmap.icon_disable:R.mipmap.icon_notdisable));
+        priSwitchImg.setImageResource((ai.isPriSwitchOpen?R.mipmap.icon_add:R.mipmap.icon_notdisable));
+        if(!ai.isPriSwitchOpen){
+            priLogImg.setAlpha(0.5f);
+            priControlImg.setAlpha(0.5f);
+            priControlImg.setEnabled(false);
+            priLogImg.setEnabled(false);
+        }
         mode1Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         mode2Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==2)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         mode3Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
@@ -345,7 +380,7 @@ public class AppConfigActivity extends BaseActivity {
         barLockImg.setImageResource(ai.isBarLockList?R.mipmap.icon_add:R.mipmap.icon_notdisable);
 
         barLockImg.setEnabled(ai.isBarColorList);
-        barLockImg.setAlpha(ai.isBarColorList?1.0f:0.6f);
+        barLockImg.setAlpha(ai.isBarColorList?1.0f:0.5f);
 
         String serStr = ai.serviceDisableCount+"/"+ai.serviceCount;
         ForegroundColorSpan redSpan = new ForegroundColorSpan(Color.RED);
@@ -730,10 +765,73 @@ public class AppConfigActivity extends BaseActivity {
                             }
                         });
                         break;
+                    case R.id.item_cleardata:
+                        AlertUtil.showConfirmAlertMsg(AppConfigActivity.this, "该功能需要谨慎操作，选择是否清除（清除后该应用的设置账户信息等数据将被删除）？", new AlertUtil.InputCallBack() {
+                            @Override
+                            public void backData(String txt, int tag) {
+                                if (tag == 1){
+                                    Intent intent1 = new Intent("com.click369.control.pms.cleardata");
+                                    intent1.putExtra("pkg",ai.packageName);
+                                    sendBroadcast(intent1);
+                                }
+                            }
+                        });
+                        break;
+                    case R.id.item_clearcache:
+                        Intent intent1 = new Intent("com.click369.control.pms.clearcache");
+                        intent1.putExtra("pkg",ai.packageName);
+                        sendBroadcast(intent1);
+                        break;
                     case R.id.item_notuninstall:
                         ai.isNotUnstall = !ai.isNotUnstall;
                         sharedPrefs.pmPrefs.edit().putBoolean(ai.getPackageName() + "/notunstall",ai.isNotUnstall).commit();
                         notUninstallImg.setImageResource(ai.isNotUnstall?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_pri_switch:
+                        ai.isPriSwitchOpen = !ai.isPriSwitchOpen;
+                        sharedPrefs.privacyPrefs.edit().putBoolean(ai.getPackageName() + "/priswitch",ai.isPriSwitchOpen).commit();
+                        if(!ai.isPriSwitchOpen){
+                            priLogImg.setAlpha(0.5f);
+                            priControlImg.setAlpha(0.5f);
+                            priControlImg.setEnabled(false);
+                            priLogImg.setEnabled(false);
+                        }else{
+                            priLogImg.setAlpha(1.0f);
+                            priControlImg.setAlpha(1.0f);
+                            priControlImg.setEnabled(true);
+                            priLogImg.setEnabled(true);
+                        }
+                        priSwitchImg.setImageResource(ai.isPriSwitchOpen?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_pri_control:
+                        Intent intent = new Intent(AppConfigActivity.this, PrivacyControlActivity.class);
+                        intent.putExtra("pkg",ai.packageName);
+                        intent.putExtra("name",ai.appName);
+                        AppConfigActivity.this.startActivity(intent);
+                        break;
+                    case R.id.item_pri_log:
+                        Intent intent2 = new Intent(AppConfigActivity.this, PrivacyLogActivity.class);
+                        intent2.putExtra("pkg",ai.packageName);
+                        intent2.putExtra("name",ai.appName);
+                        AppConfigActivity.this.startActivity(intent2);
+                        break;
+                    case R.id.item_pri_wifi:
+                        ai.isPriWifiPrevent = !ai.isPriWifiPrevent;
+                        sharedPrefs.privacyPrefs.edit().putBoolean(ai.getPackageName() + "/priwifi",ai.isPriWifiPrevent).commit();
+                        priWifiImg.setImageResource(ai.isPriWifiPrevent?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+                        Intent intent3 = new Intent(ai.isPriWifiPrevent?"com.click369.control.ams.net.add":"com.click369.control.ams.net.remove");
+                        intent3.putExtra("uid",ai.uid);
+                        intent3.putExtra("type","wifi");
+                        AppConfigActivity.this.sendBroadcast(intent3);
+                        break;
+                    case R.id.item_pri_mobile:
+                        ai.isPriMobilePrevent = !ai.isPriMobilePrevent;
+                        sharedPrefs.privacyPrefs.edit().putBoolean(ai.getPackageName() + "/primobile",ai.isPriMobilePrevent).commit();
+                        priMobileImg.setImageResource(ai.isPriMobilePrevent?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+                        Intent intent4 = new Intent(ai.isPriMobilePrevent?"com.click369.control.ams.net.add":"com.click369.control.ams.net.remove");
+                        intent4.putExtra("uid",ai.uid);
+                        intent4.putExtra("type","mobile");
+                        AppConfigActivity.this.sendBroadcast(intent4);
                         break;
                     case R.id.item_ad_one:
                     case R.id.item_ad_two:
@@ -752,6 +850,37 @@ public class AppConfigActivity extends BaseActivity {
                         mode1Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
                         mode2Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==2)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
                         mode3Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_xpblack_all:
+                    case R.id.item_xpblack_control:
+                    case R.id.item_xpblack_nocheck:
+                    case R.id.item_xpblack_setcanhook:
+                        HashMap<Integer,String> hms = new HashMap<Integer,String>();
+                        hms.put(R.id.item_xpblack_all,"allxpblack");
+                        hms.put(R.id.item_xpblack_control,"contorlxpblack");
+                        hms.put(R.id.item_xpblack_nocheck,"nocheckxp");
+                        hms.put(R.id.item_xpblack_setcanhook,"setcanhook");
+//                        int idds[] = {R.id.item_xpblack_all,R.id.item_xpblack_control,R.id.item_xpblack_nocheck,R.id.item_xpblack_setcanhook};
+//                        String keyNames[] = {"allxpblack","contorlxpblack","nocheckxp","setcanhook"};
+//                        int index = idds[view.getId()];
+                        boolean isblackAllXp = ai.isblackAllXp;
+                        boolean isblackControlXp = ai.isblackControlXp;
+                        boolean isNoCheckXp = ai.isNoCheckXp;
+                        boolean isSetCanHookXp = ai.isSetCanHookXp;
+                        XpBlackListAdapter.reset(ai,sharedPrefs.xpBlackListPrefs,AppConfigActivity.this);
+                        boolean isIn = false;
+                        String s = hms.get(view.getId());
+                        if (s.equals("allxpblack")&&!isblackAllXp){ai.isblackAllXp = true;isIn = true;}
+                        else if (s.equals("contorlxpblack")&&!isblackControlXp){ai.isblackControlXp = true;isIn = true;}
+                        else if (s.equals("nocheckxp")&&!isNoCheckXp){ai.isNoCheckXp = true;isIn = true;}
+                        else if (s.equals("setcanhook")&&!isSetCanHookXp){ai.isSetCanHookXp = true;isIn = true;}
+                        if(isIn){
+                            sharedPrefs.xpBlackListPrefs.edit().putBoolean(ai.packageName+"/"+s,true).commit();
+                        }
+                        xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpSetCanHookImg.setImageResource(ai.isSetCanHookXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         break;
                     case R.id.item_doze_qiantai:
                         ai.isDozeOpenStop = !ai.isDozeOpenStop;
@@ -821,6 +950,7 @@ public class AppConfigActivity extends BaseActivity {
                         ai.isNotStop = !ai.isNotStop;
                         sharedPrefs.autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/notstop",ai.isNotStop).commit();
                         sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName() + "/stopapp").commit();
+                        AppStartAdapter.sendBroadChangePersistent(AppConfigActivity.this,ai.packageName,ai.isNotStop);
                         ai.isStopApp = false;
                         notStopImg.setImageResource(ai.isNotStop?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         notRunImg.setImageResource(ai.isStopApp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
@@ -854,6 +984,11 @@ public class AppConfigActivity extends BaseActivity {
         blurImg.setOnClickListener(listener);
         hideImg.setOnClickListener(listener);
 
+        xpAllImg.setOnClickListener(listener);
+        xpControlImg.setOnClickListener(listener);
+        xpNoCheckImg.setOnClickListener(listener);
+        xpSetCanHookImg.setOnClickListener(listener);
+
         lockImg.setOnClickListener(listener);
         notRunImg.setOnClickListener(listener);
         notAutoStartImg.setOnClickListener(listener);
@@ -861,7 +996,15 @@ public class AppConfigActivity extends BaseActivity {
 
         dongJieImg.setOnClickListener(listener);
         notUninstallImg.setOnClickListener(listener);
+        clearDataImg.setOnClickListener(listener);
+        clearCacheImg.setOnClickListener(listener);
         unInstallImg.setOnClickListener(listener);
+
+        priLogImg.setOnClickListener(listener);
+        priControlImg.setOnClickListener(listener);
+        priSwitchImg.setOnClickListener(listener);
+        priWifiImg.setOnClickListener(listener);
+        priMobileImg.setOnClickListener(listener);
 
         mode1Img.setOnClickListener(listener);
         mode2Img.setOnClickListener(listener);

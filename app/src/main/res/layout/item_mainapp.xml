@@ -37,17 +37,36 @@
                 android:id="@+id/item_main_iceicon"
                 android:src="@mipmap/ice" />
         </FrameLayout>
-
-        <TextView
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New Text"
-            android:id="@+id/item_main_appname"
-            android:textStyle="bold"
-            android:maxLines="3"
-            android:textSize="13dp"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="5dp" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/item_main_appname"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:lineSpacingExtra="0dp"
+                android:lineSpacingMultiplier="0.8"
+                android:textSize="12dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="3dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/item_main_apptime"
+                android:maxLines="2"
+                android:textSize="9dp"
+                android:layout_marginTop="-3dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="3dp" />
+        </LinearLayout>
+
     </LinearLayout>
 
     <ImageView

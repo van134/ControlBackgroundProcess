@@ -40,6 +40,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/skipdialog_alert"
                     android:layout_weight="12"
+                    android:textSize="13dp"
                     android:textAlignment="gravity"
                     android:gravity="left|center"
                     android:layout_marginTop="6dp"
@@ -80,7 +81,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/skipdialog_listview"
                 android:layout_marginRight="8dp"
-                android:divider="@null"
+                android:dividerHeight="2px"
+                android:divider="@color/lightgray"
                 android:layout_marginLeft="4dp" />
         </LinearLayout>
     </LinearLayout>

@@ -20,6 +20,8 @@ import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
+import com.githang.statusbar.StatusBarCompat;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;

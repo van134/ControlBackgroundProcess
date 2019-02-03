@@ -67,14 +67,6 @@ public class NewAppSwitchView {
         colorBarSw.setTag(9);
         homeIdleSw.setTag(10);
         newAppAutoOpenControlSw.setTag(11);
-        if(settings.getBoolean(Common.PREFS_SETTING_NEWAPPHOMEMUBEI,false)){
-            settings.edit().remove(Common.PREFS_SETTING_NEWAPPBACKMUBEI).commit();
-            settings.edit().remove(Common.PREFS_SETTING_NEWAPPOFFMUBEI).commit();
-            settings.edit().remove(Common.PREFS_SETTING_NEWAPPHOMEIDLE).commit();
-            backmubeSw.setEnabled(false);
-            offmubeSw.setEnabled(false);
-            homeIdleSw.setEnabled(false);
-        }
         backmubeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPBACKMUBEI,false));
         homemubeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPHOMEMUBEI,false));
         homeIdleSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NEWAPPHOMEIDLE,false));
@@ -129,7 +121,9 @@ public class NewAppSwitchView {
             }else if(tag == 4){
                 if(isChecked){
                     backSw.setChecked(false);
+                    homemubeSw.setChecked(false);
                     settings.edit().remove(Common.PREFS_SETTING_BACKAPPAUTOADD).commit();
+                    settings.edit().remove(Common.PREFS_SETTING_NEWAPPHOMEMUBEI).commit();
                 }
             }else if(tag == 1){
                 if(isChecked){
@@ -141,8 +135,7 @@ public class NewAppSwitchView {
                     offSw.setChecked(false);
                     settings.edit().remove(Common.PREFS_SETTING_OFFAPPAUTOADD).commit();
                 }
-            }
-            if (tag == 5){
+            }else if (tag == 5){
                 if (isChecked){
                     settings.edit().remove(Common.PREFS_SETTING_NEWAPPBACKMUBEI).commit();
                     settings.edit().remove(Common.PREFS_SETTING_NEWAPPOFFMUBEI).commit();
@@ -150,10 +143,11 @@ public class NewAppSwitchView {
                     backmubeSw.setChecked(false);
                     offmubeSw.setChecked(false);
                     homeIdleSw.setChecked(false);
-                }else{
-                    backmubeSw.setEnabled(true);
-                    offmubeSw.setEnabled(true);
-                    homeIdleSw.setEnabled(true);
+                }
+            }else if (tag == 10){
+                if (isChecked){
+                    settings.edit().remove(Common.PREFS_SETTING_NEWAPPHOMEMUBEI).commit();
+                    homemubeSw.setChecked(false);
                 }
             }
         }

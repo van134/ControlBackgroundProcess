@@ -120,8 +120,8 @@ public class IFWCompServiceAdapter extends BaseAdapter{
 		}
 		String dataName = data.name;//.replaceAll("\\$","/\\$");
 		boolean isDiable = c.ifwString.contains(dataName)||!PackageUtil.isEnable(data.packageName, dataName, pm);//!PackageUtil.isEnable(data.packageName,dataName,pm)||
-		viewHolder.stopTv.setText(isDiable?"已禁用": isContains(runs)?"正在运行":(ContainsKeyWord.isContainsWord(runs)?"建议禁用":"未禁用"));
-		viewHolder.stopTv.setTextColor(isDiable?Color.RED: isContains(runs)?Color.GREEN:(ContainsKeyWord.isContainsWord(runs)?Color.BLUE:IFWCompActivity.curColor));
+		viewHolder.stopTv.setText(isDiable?"已禁用": isContains(runs)?"正在运行":(ContainsKeyWord.isContainsWord(dataName)?"建议禁用":"未禁用"));
+		viewHolder.stopTv.setTextColor(isDiable?Color.RED: isContains(runs)?Color.GREEN:(ContainsKeyWord.isContainsWord(dataName)?Color.BLUE:IFWCompActivity.curColor));
 //		viewHolder.stopTv.setTextColor(isDiable? Color.RED:isContains(runs)? Color.GREEN:IFWCompActivity.curColor);
 		return convertView;
 	}

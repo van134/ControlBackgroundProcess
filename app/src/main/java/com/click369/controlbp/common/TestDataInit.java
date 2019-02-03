@@ -92,6 +92,8 @@ public class TestDataInit {
         SharedPreferences.Editor autostart = autoStartPrefs.edit();
         autostart.putBoolean("com.tencent.android.qqdownloader/checkautostart",true);
         autostart.putString("com.tencent.android.qqdownloader/jumpactivity","com.tencent.pangu.link.LinkProxyActivity");
+        autostart.putBoolean("com.tencent.mtt/checkautostart",true);
+        autostart.putString("com.tencent.mtt/jumpactivity","com.tencent.mtt.external.reader.thirdcall.ThirdCallDispatchActivity");
         autostart.putBoolean("com.taobao.trip/checkautostart",true);
         autostart.putString("com.taobao.trip/homeactivity","com.alipay.mobile.quinox.LauncherActivity");
         autostart.commit();

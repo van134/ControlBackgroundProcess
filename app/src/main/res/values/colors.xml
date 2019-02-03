@@ -5,11 +5,13 @@
     <color name="colorPrimaryDark">#1a9dac</color>
     <color name="colorAccent">#1a9dac</color>
     <color name="checked_color">#ffffff</color>
+    <color name="checked_color_dark">#ffffff</color>
     <color name="text_color_primary">#1a9dac</color>
-    <color name="uncheck_color">#bddddd</color>
-    <color name="uncheck_colordark">#b4b4b4</color>
+    <color name="uncheck_color">#eeeeee</color>
+    <color name="uncheck_colordark">#b1b1b1</color>
     <color name="trans">#00000000</color>
     <color name="transhalf">#88000000</color>
+    <color name="transhalfwhite">#77ffffff</color>
     <color name="transhalf33">#33000000</color>
     <color name="black">#000000</color>
     <color name="white">#ffffffff</color>
@@ -19,6 +21,18 @@
     <color name="lightgray">#cccccc</color>
     <color name="lightgraytrans">#88cccccc</color>
     <color name="darkblack">#000000</color>
+    <color name="transhalf_nav">#22000000</color>
+    <color name="transhalfwhite_nav">#22ffffff</color>
+
+    <!--<color name="theme_color_main">#1a9dac</color>-->
+    <!--<color name="theme_color_blue">#1a9dac</color>-->
+    <!--<color name="theme_color_green">#1a9dac</color>-->
+    <!--<color name="theme_color_red">#1a9dac</color>-->
+    <!--<color name="theme_color_yellow">#1a9dac</color>-->
+    <!--<color name="theme_color_orange">#1a9dac</color>-->
+    <!--<color name="theme_color_pink">#1a9dac</color>-->
+    <!--<color name="theme_color_gray">#1a9dac</color>-->
+    <!--<color name="theme_color_zise">#1a9dac</color>-->
     <!--<color name="darkblack">#333333</color>-->
     <!--<color name="darkblacktrans">#bb333333</color>-->
 </resources>

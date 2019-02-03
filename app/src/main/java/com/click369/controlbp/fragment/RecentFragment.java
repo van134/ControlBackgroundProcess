@@ -74,7 +74,7 @@ public class RecentFragment extends BaseFragment {
             String msg = "1.保留为强制保留程序不从最近任务中移除,即使被杀掉卡片也不会丢失。\n2.杀死为从最近任务中移除便结束进程,添加杀死的时同时会添加到禁止自启列表中\n3.模糊为最近任务中的列表为模糊状态看不到app中的内容\n4.隐藏为不在最近任务中显示应用的预览,部分软件在设置后需要重启手机才能生效。";//移动网络、无线网络、
             topView.setAlertText(msg,0,false);
         }else{
-            String msg = "检测到xposed框架未生效，请勾选后重启,如果已勾选并重启过请反复勾选一次再重启即可。本功能需要框架支持，其他功能只需root即可。";
+            String msg = "检测到xposed框架未生效，请勾选后重启,如果已勾选并重启过请反复勾选一次再重启即可,本功能需要框架支持。";
             topView.setAlertText(msg,Color.RED,true);
             listView.setEnabled(false);
             topView.sysAppTv.setEnabled(false);
@@ -275,7 +275,7 @@ public class RecentFragment extends BaseFragment {
             for(TextView t:tvs){
                 t.setTextColor(curColor);
             }
-            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
             loadY(listView,RecentFragment.this.getClass(),adapter.sortType);
         }
     }

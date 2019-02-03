@@ -26,16 +26,19 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:weightSum="16"
+                android:layout_height="wrap_content"
+                android:weightSum="23"
+                android:gravity="center"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp" >
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:id="@+id/textView5"
-                    android:layout_weight="7"
+                    android:layout_weight="8"
                     android:textAlignment="gravity"
                     android:gravity="left|center" />
 
@@ -43,34 +46,46 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="冻结"
+                    android:textSize="13dp"
                     android:id="@+id/main_service_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="阻止卸载"
+                    android:layout_height="wrap_content"
+                    android:text="禁卸载"
+                    android:textSize="13dp"
                     android:id="@+id/main_wakelock_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
-
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:text="卸载"
-                    android:id="@+id/main_alarm_tv"
+                    android:layout_height="wrap_content"
+                    android:text="清数据"
+                    android:textSize="13dp"
+                    android:id="@+id/main_prov_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="开机自启"
-                    android:id="@+id/textView2"
-                    android:layout_weight="2"
-                    android:gravity="center"
-                    android:visibility="gone" />
+                    android:text="清缓存"
+                    android:textSize="13dp"
+                    android:id="@+id/main_broad_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="卸载"
+                    android:textSize="13dp"
+                    android:id="@+id/main_alarm_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+
             </LinearLayout>
 
             <ListView

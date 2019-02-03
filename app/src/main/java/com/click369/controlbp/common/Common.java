@@ -18,11 +18,17 @@ public class Common {
     public static String PREFS_SETTIMESTOP = "settimestop";
     public static String PREFS_SETCPU = "setcpu";
     public static String PREFS_SKIPDIALOG = "skipdialog";
+    public static String PREFS_XPBLACKLIST = "xpblacklist";
+    public static String PREFS_PRIVACY = "privacy";
     public static String PACKAGENAME ="com.click369.controlbp";
     public static String SHOWDIALOGCLS ="com.click369.controlbp.activity.ShowDialogActivity";
+
+
+
+
     public static String ISCOLORBAROPEN ="navcolorbaropen";
 
-    public static String IPREFS_MUBEILIST ="mUbeilist";
+//    public static String IPREFS_MUBEILIST ="mUbeilist";
     public static String IPREFS_PMLIST ="packageManagerlist";
     public static String IPREFS_TVLIST ="TVlist";
     public static String IPREFS_ADLIST ="ADlist";
@@ -64,6 +70,7 @@ public class Common {
     public static String PREFS_SETCPU_OFFSCREENDELAY ="offscreendelay";
     public static String PREFS_SETCPU_BATTERYBELOWOPEN ="batterybelowopen";
     public static String PREFS_SETCPU_BATTERYBELOWCOUNT ="batterybelowcount";
+    public static String PREFS_SETCPU_CHARGINGNOTSTOP ="chargingnotstop";
 //    public static String PREFS_SETCPU_CPU0 ="setcpu0";
 //    public static String PREFS_SETCPU_CPU1 ="setcpu1";
 //    public static String PREFS_SETCPU_CPU2 ="setcpu2";
@@ -73,8 +80,9 @@ public class Common {
 //    public static String PREFS_SETCPU_CPU6 ="setcpu6";
 //    public static String PREFS_SETCPU_CPU7 ="setcpu7";
 
-    public static String PREFS_SETTING_THEME_MODE ="isNight";
-    public static String PREFS_SETTING_THEME_AUTOCHANGEMODE ="isautochangetheme";
+    public static String PREFS_SETTING_UI_THEME_MODE ="isNight";
+//    public static String PREFS_SETTING_THEME_COLOR ="theme_color";
+    public static String PREFS_SETTING_UI_THEME_AUTOCHANGEMODE ="isautochangetheme";
 
 
     public static String PREFS_NAME_APPCHANGE ="isappchange";
@@ -100,6 +108,7 @@ public class Common {
     public static String PREFS_SETTING_ISMUBEISTOPOTHERPROC ="isstopotherproc";
     public static String PREFS_SETTING_ISLONGCLICKOPENCONFIG ="islongclickopenconfig";
     public static String PREFS_SETTING_ISALWAYSKILLOFF ="isalwayskilloff";
+    public static String PREFS_SETTING_ISAUTOSTARTNOTNOTIFY ="isautostartnotnotify";
     public static String PREFS_SETTING_SCREENWIDTH ="SCREENWIDTH";
     public static String PREFS_SETTING_SCREENHEIGHT="SCREENHEIGHT";
 
@@ -114,9 +123,15 @@ public class Common {
     public static String PREFS_SETTING_OTHER_ISCLEAN ="otherisclean";
     public static String PREFS_SETTING_OTHER_HOMEERROR ="homeerror";
     public static String PREFS_SETTING_OTHER_CLEANDELAYTIME ="othercleandelaytime";
-    public static String PREFS_SETTING_OTHER_BGBLUR ="otherbgblur";
-    public static String PREFS_SETTING_OTHER_BGBRIGHT ="otherbgbright";
+
     public static String PREFS_SETTING_OTHER_STOPSCANMEDIA ="stopscanmedia";
+    public static String PREFS_SETTING_OTHER_ISCHANGELOCK ="otherischangeloc";
+    public static String PREFS_SETTING_OTHER_LOC_LAT ="otherloclat";
+    public static String PREFS_SETTING_OTHER_LOC_LON ="otherloclon";
+
+    public static String PREFS_SETTING_OTHER_MMS_ISGETCODE ="mmsisgetcode";
+    public static String PREFS_SETTING_OTHER_MMS_ISGETCODETOEDIT ="mmsisgetcodetoedit";
+    public static String PREFS_SETTING_OTHER_MMS_ISCONTROLMSG ="mmsiscontolmsg";
 
     public static String PREFS_SETTING_DOZE_ALLSWITCH ="dozeswitch";
     public static String PREFS_SETTING_DOZE_NIGHTNOTSTOP ="nightnotstop";
@@ -175,6 +190,7 @@ public class Common {
 
     public static String PREFS_SETTING_UI_FLASHNOTIFY="flashnotify";
     public static String PREFS_SETTING_UI_FLASHCALL="flashcall";
+    public static String PREFS_SETTING_UI_FLASHSHOWINOFFSC="flashshowinoff";
 
 
     public static String PREFS_SETTING_UI_NOTIFY_COLOROPEN="notifycoloropen";
@@ -182,6 +198,14 @@ public class Common {
     public static String PREFS_SETTING_UI_NOTIFY_RANDOMCOLOR="notifyrandomcolor";
     public static String PREFS_SETTING_UI_NOTIFY_SETCOLOR="notifysetcolor";
     public static String PREFS_SETTING_UI_NOTIFY_ALPHA="notifyalpha";
+
+    public static String PREFS_SETTING_UI_BGBLUR ="uibgblur";
+    public static String PREFS_SETTING_UI_SIDEBGBLUR ="uisidebgblur";
+    public static String PREFS_SETTING_UI_BGBRIGHT ="uibgbright";
+    public static String PREFS_SETTING_UI_SIDEBGBRIGHT ="uisidebgbright";
+    public static String PREFS_SETTING_UI_THEME_COLOR ="uithemecolor";
+    public static String PREFS_SETTING_UI_THEME_BG_COLOR ="uithemebgcolor";
+    public static String PREFS_SETTING_UI_THEME_TEXT_COLOR ="uithemetextcolor";
 
     public static String PREFS_SETTING_APPPWD ="apppwd";
 
@@ -194,15 +218,63 @@ public class Common {
 //    public static String EX_PREVENTSERVICE = "preventService";
 //    public static String EX_PREVENTALARM = "preventAlarm";
 //    public static String EX_PREVENTALARM = "preventAlarm";
-    public static String ALLSWITCH_ONE = "allswitch_one";
-    public static String ALLSWITCH_TWO = "allswitch_two";
-    public static String ALLSWITCH_THREE = "allswitch_three";
-    public static String ALLSWITCH_FOUR = "allswitch_four";
-    public static String ALLSWITCH_FIVE = "allswitch_five";
-    public static String ALLSWITCH_SIX = "allswitch_six";
-    public static String ALLSWITCH_SEVEN = "allswitch_seven";
-    public static String ALLSWITCH_EIGHT = "allswitch_eight";
-    public static String ALLSWITCH_NINE = "allswitch_nine";
-    public static String ALLSWITCH_TEN = "allswitch_ten";
-    public static String ALLSWITCH_ELEVEN = "allswitch_eleven";
+    public static String ALLSWITCH_SERVICE_BROAD = "allswitch_service_broad_control";
+    public static String ALLSWITCH_BACKSTOP_MUBEI = "allswitch_backstop_mubei_control";
+    public static String ALLSWITCH_IFW = "allswitch_ifw_control";
+    public static String ALLSWITCH_RECNETCARD = "allswitch_recentcard_control";
+    public static String ALLSWITCH_AUTOSTART_LOCK = "allswitch_autostart_lock_control";
+    public static String ALLSWITCH_UNINSTALL_ICE = "allswitch_uninstall_ice_control";
+    public static String ALLSWITCH_XPBLACKLIST = "allswitch_xpblacklist_control";
+    public static String ALLSWITCH_PRIVACY = "allswitch_privacy_control";
+    public static String ALLSWITCH_ADSKIP = "allswitch_adskip_control";
+    public static String ALLSWITCH_DOZE = "allswitch_doze_control";
+    public static String ALLSWITCH_UI = "allswitch_ui_control";
+    public static String ALLSWITCH_CPUSET = "allswitch_cpuset_control";
+    public static String ALLSWITCH_OTHERS= "allswitch_others_control";
+
+
+
+    public static int PRI_TYPE_CHANGELOC = 0;
+    public static int PRI_TYPE_CHANGETIME = 1;
+    public static int PRI_TYPE_GPSINFO = 2;
+    public static int PRI_TYPE_BASESTATION = 3;
+    public static int PRI_TYPE_WIFIINFO = 4;
+    public static int PRI_TYPE_RUNLIST = 5;
+    public static int PRI_TYPE_APPLIST = 6;
+    public static int PRI_TYPE_DEVICEINFO = 7;
+    //public static int PRI_TYPE_CONTACTINFO = 8;
+    public static String PRIVACY_TITLES[] = {
+            "为该APP手动选择位置",
+            "为该APP手动设置时间",
+            "获取GPS地理位置信息",
+            "获取运营商基站信息",
+            "获取手机WIFI或MAC地址信息",
+            "获取正在运行程序列表",
+            "获取已安装应用程序信息",
+            "获取手机设备信息"//,
+            //"获取手机通讯录信息"
+    };
+    public static String PRIVACY_KEYS[] = {
+            "CHANGELOC",
+            "GETPHONETIME",
+            "GETLOCTIONINFO",
+            "APPBASESTATIONINFOS",
+            "GETWIFIINFO",
+            "RUNNINGLIST",
+            "APPLICATIONINFOS",
+            "GETIMEIINFO"//,
+           // "GETCONTACT"
+    };
+    public static String PRIVACY_ALERT[] = {
+            "(设置后会自动阻止部分权限，防止被检测到)",
+            "",
+            "(GPS和AGPS定位信息)",
+            "(基站的位置信息等)",
+            "(WIFI相关可帮助APP定位)",
+            "(正在运行的服务应用等信息)",
+            "(防止读取应用列表)",
+            "(IMEI、ICCID、IMSI、MEID阻止后随机化)"//,
+           // "(防止读取通讯录列表)"
+    };
+
 }

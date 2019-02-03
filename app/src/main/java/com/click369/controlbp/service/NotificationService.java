@@ -103,13 +103,18 @@ public class NotificationService extends NotificationListenerService {
             notifyLights.add(pkg);
             ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MSG,cxt);
         }
+
+
         if(WatchDogService.isFlashNofity&&
                 !WatchDogService.notLightPkgs.contains(pkg)&&
                 isclearAble&&
                 System.currentTimeMillis()-lastFlashTime>5000){
-            Intent intent = new Intent("com.click369.control.sysui.msgflash");
-            cxt.sendBroadcast(intent);
-            lastFlashTime = System.currentTimeMillis();
+            if(!WatchDogService.isFlashInOffSc||(WatchDogService.isFlashInOffSc&&
+                    (System.currentTimeMillis()-WatchDogService.lastScreenOnTime<500||WatchDogService.isScreenOff))){
+                Intent intent = new Intent("com.click369.control.sysui.msgflash");
+                cxt.sendBroadcast(intent);
+                lastFlashTime = System.currentTimeMillis();
+            }
         }
         if(asi.isHasNotify){//System.currentTimeMillis()-WatchDogService.lastNotifyTime<100||
             return;

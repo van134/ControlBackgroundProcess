@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,6 +25,7 @@ import com.click369.controlbp.R;
 import com.click369.controlbp.adapter.IceRoomAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.AppStateInfo;
+import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
@@ -29,7 +33,10 @@ import com.click369.controlbp.util.ShellUtilNoBackData;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.ShortCutUtil;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by asus on 2017/5/27.
@@ -150,6 +157,7 @@ public class IceRoomView{
                         }
                     });
                 }
+
                 return true;
             }
         });
@@ -176,6 +184,9 @@ public class IceRoomView{
         if(act.appLoaderUtil.allAppInfos.size()==0){
             ArrayList<AppInfo> apps = AppInfo.readArrays(cxt);
             act.appLoaderUtil.allAppInfos.addAll(apps);
+        }
+        if(AppLoaderUtil.allHMAppIcons.size()<10){
+            loadAppIcons();
         }
         h.postDelayed(new Runnable() {
             @Override
@@ -240,4 +251,48 @@ public class IceRoomView{
             }
         }
     };
+
+    private void loadAppIcons(){
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+//                    synchronized (MainActivity.this) {
+                    final Set<String> pkgs = new HashSet<>();
+                    pkgs.addAll(AppLoaderUtil.allHMAppInfos.keySet());
+                    pkgs.add(Common.PACKAGENAME);
+                    for (String p : pkgs) {
+                        File f = new File(AppLoaderUtil.iconPath, p);
+                        if (f.exists() && !AppLoaderUtil.allHMAppIcons.containsKey(p)) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+                            AppLoaderUtil.allHMAppIcons.put(p, bitmap);
+                        }if(!f.exists()){
+                            PackageInfo packgeInfo = act.getPackageManager().getPackageInfo(p,PackageManager.GET_META_DATA);
+                            AppLoaderUtil.loadAppImage(packgeInfo,act.getPackageManager(),true);
+                            f = new File(AppLoaderUtil.iconPath, p);
+                            if (f.exists() && !AppLoaderUtil.allHMAppIcons.containsKey(p)) {
+                                Bitmap bitmap = BitmapFactory.decodeFile(f.getAbsolutePath());
+                                AppLoaderUtil.allHMAppIcons.put(p, bitmap);
+                            }
+                        }
+                    }
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try{
+                                if(adapter!=null){
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }catch (Throwable e){
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+//                    }
+                }catch (Throwable e){
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
 }

@@ -36,13 +36,16 @@ import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.service.notification.StatusBarNotification;
-import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.InputEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.ViewStub;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -80,7 +83,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  */
 public class XposedRencent {
 
-    private static final int TAG_COLOR_ID = 100;
     private static final String colors[] = {"#ff0000","#00ff00","#ffff00","#00ffff","#ff00ff","#23e2fe","#aa46ff","#7bff11",
             "#e011ff","#fa0093","#f7fa00","#fac200","#3af1bb","#9a74f2","#fd00ad","#90014f"};
     private static boolean isOpenNotifyColor = false;
@@ -88,9 +90,10 @@ public class XposedRencent {
     private static boolean isRandomNotifyColor = false;
     private static String notifyColor = "#FFFFFF";
     private static int notifyAlpha = 100;
-    private static HashMap<String,Integer> colorHMs = new HashMap<String,Integer>();
-//    private static Drawable mDrawable;
     private static long lastFlashTime = 0;
+    private static boolean flashEnable = false;
+    private static boolean flashEnableException = false;
+    private static Context recentContext;
     public static  String getPkgByTask(Class cls,String taskName,Object obj){
         try {
             Field mTaskField = cls.getDeclaredField(taskName);
@@ -113,6 +116,22 @@ public class XposedRencent {
             Intent intentm = (Intent) (baseIntentField.get(key));
             String pkg = intentm.getComponent().getPackageName();
             return pkg;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static  String getClsByTask(Object task){
+        try {
+            Object mTask = task;
+            Field keyField = mTask.getClass().getDeclaredField("key");
+            keyField.setAccessible(true);
+            Object key = keyField.get(mTask);
+            Field baseIntentField = key.getClass().getDeclaredField("baseIntent");
+            baseIntentField.setAccessible(true);
+            Intent intentm = (Intent) (baseIntentField.get(key));
+            String cls = intentm.getComponent().getClassName();
+            return cls;
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -151,10 +170,54 @@ public class XposedRencent {
                                    final boolean isRecentOpen,final boolean isUIChangeOpen){
         try {
             if(lpparam.packageName.equals("com.android.systemui")&&isRecentOpen&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){//&&Build.VERSION.SDK_INT < Build.VERSION_CODES.M
-                final Class tvtCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
-                final Class recentActCls = XposedHelpers.findClass("com.android.systemui.recents.RecentsActivity", lpparam.classLoader);
+                final Class tvtCls = XposedUtil.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
+                final Class recentActCls = XposedUtil.findClass("com.android.systemui.recents.RecentsActivity", lpparam.classLoader);
+                final Class deleTaskCls = XposedUtil.findClass("com.android.systemui.recents.events.ui.DeleteTaskDataEvent", lpparam.classLoader);
+                //尝试适配部分机型的最近任务保留功能  如果没有作用可以删除
+                if(deleTaskCls!=null){
+                    XposedUtil.hookMethod(recentActCls, new Class[]{deleTaskCls}, "onBusEvent", new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                            try {
+                                Object object =  param.args[0];
+                                Field field = object.getClass().getDeclaredField("task");
+                                field.setAccessible(true);
+                                Object task = field.get(object);
+                                String pkg = getPkgByTask(task);
+                                recentPrefs.reload();
+                                if (pkg != null && recentPrefs.getBoolean(pkg + "/notclean", false)) {
+                                    String cls = getClsByTask(task);
+                                    if("com.tencent.mm".equals(pkg)&&!"com.tencent.mm.ui.LauncherUI".equals(cls)){
+                                    }else {
+                                        param.setResult(false);
+                                        return;
+                                    }
+                                }else if (recentPrefs.getBoolean(pkg + "/forceclean", false)) {
+                                    if("com.tencent.mm".equals(pkg)){
+                                        String cls = getClsByTask(task);
+                                        if(!"com.tencent.mm.ui.LauncherUI".equals(cls)){
+                                        }else{
+                                            Activity activity = (Activity)param.thisObject;
+                                            Intent intent = new Intent("com.click369.control.removerecent");
+                                            intent.putExtra("pkg", pkg);
+                                            activity.sendBroadcast(intent);
+                                        }
+                                    }else{
+                                        Activity activity = (Activity)param.thisObject;
+                                        Intent intent = new Intent("com.click369.control.removerecent");
+                                        intent.putExtra("pkg", pkg);
+                                        activity.sendBroadcast(intent);
+                                    }
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }
+
+
                 if (tvtCls != null) {
-//                    final int roundNumber = barPrefs.getInt(Common.PREFS_SETTING_UI_RECENTBARROUNDNUM, 10);
                     Class clss[] = XposedUtil.getParmsByName(tvtCls, "setThumbnail");
                     XC_MethodHook hook = new XC_MethodHook() {
                         @Override
@@ -175,7 +238,6 @@ public class XposedRencent {
                                             if (thumbnailData instanceof Bitmap) {
                                                 methodHookParam.args[0] = fastblur((Bitmap) thumbnailData, 8);
                                             } else {
-
                                                 Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
                                                 Field scaleField = thumbnailData.getClass().getDeclaredField("scale");
                                                 thumbnailField.setAccessible(true);
@@ -263,7 +325,6 @@ public class XposedRencent {
                                     if (recentPrefs.getBoolean(pkg + "/blur", false)) {
                                         Bitmap bm = (Bitmap) methodHookParam.args[0];
                                         methodHookParam.args[0] = fastblur(bm, 8);//blurBitmap((Context) mContextObject,bm);
-                                        // XposedBridge.log("^^^^^^^^^^^^^^最近任务强制模糊" +pkg+ " ^^^^^^^^^^^^^^^^^");
                                     }
                                 }
                             } catch (Throwable e) {
@@ -276,19 +337,20 @@ public class XposedRencent {
             }
             if("com.android.systemui".equals(lpparam.packageName)){//
                 try {
-                    final Class flashCls = XposedHelpers.findClass("com.android.systemui.statusbar.policy.FlashlightControllerImpl", lpparam.classLoader);
+                    Class flashCls = XposedUtil.findClass("com.android.systemui.statusbar.policy.FlashlightControllerImpl", lpparam.classLoader);
+                    if(flashCls == null){
+                        flashCls = XposedUtil.findClass("com.android.systemui.statusbar.policy.FlashlightController", lpparam.classLoader);
+                    }
                     if(flashCls!=null){
+                        final Class mFlashCls = flashCls;
                         XC_MethodHook hook = new XC_MethodHook() {
                             @Override
                             protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
-                                Field field = flashCls.getDeclaredField("mContext");
-                                field.setAccessible(true);
-                                Context context = (Context)(field.get(param.thisObject));
-
-                                final Method setFlashlightMethod = flashCls.getDeclaredMethod("setFlashlight",boolean.class);
-                                final Method isEnabledMethod = flashCls.getDeclaredMethod("isEnabled");
+//                                Field field = mFlashCls.getDeclaredField("mContext");
+//                                field.setAccessible(true);
+                                Context context = (Context)(param.args[0]);
+                                final Method setFlashlightMethod = mFlashCls.getDeclaredMethod("setFlashlight",boolean.class);
                                 setFlashlightMethod.setAccessible(true);
-                                isEnabledMethod.setAccessible(true);
                                 BroadcastReceiver br = new BroadcastReceiver() {
                                     @Override
                                     public void onReceive(Context context, Intent intent) {
@@ -298,18 +360,36 @@ public class XposedRencent {
                                                 if(System.currentTimeMillis()-lastFlashTime<200){
                                                     return;
                                                 }
-                                                boolean isEnable = (Boolean)(isEnabledMethod.invoke(param.thisObject));
-                                                setFlashlightMethod.invoke(param.thisObject,!isEnable);
+                                                try {
+                                                    final Field isEnabledField = mFlashCls.getDeclaredField("mFlashlightEnabled");
+                                                    isEnabledField.setAccessible(true);
+                                                    flashEnable = (Boolean)(isEnabledField.get(param.thisObject));
+                                                }catch (Exception e){
+                                                    flashEnable = false;
+                                                }
+
+                                                setFlashlightMethod.invoke(param.thisObject,!flashEnable);
+                                                flashEnable = !flashEnable;
                                                 lastFlashTime = System.currentTimeMillis();
                                             }else if("com.click369.control.sysui.msgflash".equals(action)){
                                                 new Thread(){
                                                     @Override
                                                     public void run() {
                                                         try {
+                                                            try {
+                                                                final Field isEnabledField = mFlashCls.getDeclaredField("mFlashlightEnabled");
+                                                                isEnabledField.setAccessible(true);
+                                                                flashEnable = (Boolean)(isEnabledField.get(param.thisObject));
+                                                            }catch (Exception e){
+                                                                if(!flashEnableException){
+                                                                    flashEnable = false;
+                                                                }
+                                                                flashEnableException = true;
+                                                            }
                                                             for(int i = 0;i<6;i++){
                                                                 Thread.sleep(i%2==0?150:50);
-                                                                boolean isEnable = (Boolean)(isEnabledMethod.invoke(param.thisObject));
-                                                                setFlashlightMethod.invoke(param.thisObject,!isEnable);
+                                                                setFlashlightMethod.invoke(param.thisObject,!flashEnable);
+                                                                flashEnable = !flashEnable;
                                                             }
                                                         }catch (Throwable e){
 
@@ -326,10 +406,10 @@ public class XposedRencent {
                                 intentFilter.addAction("com.click369.control.sysui.changeflash");
                                 intentFilter.addAction("com.click369.control.sysui.msgflash");
                                 context.registerReceiver(br,intentFilter);
-                                XposedBridge.log("FlashlightControllerImpl  注册完成 ...");
+//                                XposedBridge.log("FlashlightControllerImpl  注册完成 ...");
                             }
                         };
-                        XposedUtil.hookConstructorMethod(flashCls,new Class[]{Context.class},hook);
+                        XposedUtil.hookConstructorMethod(mFlashCls,new Class[]{Context.class},hook);
                     }
                 }catch (Throwable e){
                     XposedBridge.log("FlashlightControllerImpl  hook出错 ..."+e);
@@ -343,11 +423,11 @@ public class XposedRencent {
                 final boolean isShowInfo = barPrefs.getBoolean(Common.PREFS_SETTING_UI_RECENTIFNO, false);
                 final int roundNumber = barPrefs.getInt(Common.PREFS_SETTING_UI_RECENTBARROUNDNUM, 10);
                 final float alphaNumber = barPrefs.getInt(Common.PREFS_SETTING_UI_RECENTBARALPHANUM, 100) / 100.0f;
-                final Class recentViewCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskView", lpparam.classLoader);
-                final Class recentHeaderCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskViewHeader", lpparam.classLoader);
+                final Class recentViewCls = XposedUtil.findClass("com.android.systemui.recents.views.TaskView", lpparam.classLoader);
+                final Class recentHeaderCls = XposedUtil.findClass("com.android.systemui.recents.views.TaskViewHeader", lpparam.classLoader);
                 try {
                     if(isShowInfo&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        final Class taskCls = XposedHelpers.findClass("com.android.systemui.recents.model.Task", lpparam.classLoader);
+                        final Class taskCls = XposedUtil.findClass("com.android.systemui.recents.model.Task", lpparam.classLoader);
                         if (taskCls != null) {
                             Constructor cons[] = taskCls.getDeclaredConstructors();
                             Class clss[] = null;
@@ -372,14 +452,13 @@ public class XposedRencent {
                                                 }
                                                 field.set(methodHookParam.thisObject, oldTitle + title);
                                             }
-                                        } catch (RuntimeException e) {
+                                        } catch (Throwable e) {
                                             e.printStackTrace();
                                         }
                                     }
                                 };
                                 XposedUtil.hookConstructorMethod(taskCls,clss,hook);
-                                Class clss1[] = XposedUtil.getParmsByName(taskCls,"notifyTaskDataLoaded");
-                                XposedUtil.hookMethod(taskCls,clss1,"notifyTaskDataLoaded",hook);
+                                XposedUtil.hookMethod(taskCls,XposedUtil.getParmsByName(taskCls,"notifyTaskDataLoaded"),"notifyTaskDataLoaded",hook);
                             } else {
                                 XposedBridge.log("^^^^^^^^^^^^^^Task 构造函数未找到 ^^^^^^^^^^^^^^^^^");
                             }
@@ -389,103 +468,108 @@ public class XposedRencent {
                             XC_MethodHook hook = new XC_MethodHook() {
                                 @Override
                                 protected void afterHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
-                                    Field field = recentHeaderCls.getDeclaredField(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? "mTitleView" : "mActivityDescription");
-                                    field.setAccessible(true);
-                                    final TextView tv = (TextView) field.get(methodHookParam.thisObject);
-//                                    ((View)(tv.getParent())).setBackgroundColor(Color.TRANSPARENT);
-//                                            LinearLayout
-                                    tv.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View view) {
-                                            try {
-                                                final String pkg = getPkgByTask(recentHeaderCls,"mTask",methodHookParam.thisObject);
-                                                if (pkg == null||pkg.length()==0){
-                                                    Toast.makeText(tv.getContext(),"无法获取被点击的应用，证明系统代码改动较大没有适配",Toast.LENGTH_LONG).show();
-                                                    return;
-                                                }
-//                                                muBeiPrefs.reload();
-                                                recentPrefs.reload();
-                                                appStartiPrefs.reload();
-                                                final boolean isNotClean = recentPrefs.getBoolean(pkg + "/notclean", false);
-                                                final boolean isForceClean = recentPrefs.getBoolean(pkg+"/forceclean",false);
-                                                final boolean isBlur = recentPrefs.getBoolean(pkg+"/blur",false);
-                                                final boolean isNotShow = recentPrefs.getBoolean(pkg+"/notshow",false);
-                                                final boolean isNotStop = appStartiPrefs.getBoolean(pkg + "/notstop", false);
-                                                String titles[] = new String[]{
-                                                        isNotClean?"取消卡片保留":"添加卡片保留",
-                                                        isForceClean?"取消移除杀死":"添加移除杀死",
-                                                        isBlur?"取消卡片模糊":"添加卡片模糊",
-                                                        isNotShow?"取消卡片隐藏":"添加卡片隐藏",
-                                                        isNotStop?"取消内存常驻(慎重)":"添加内存常驻(慎重)"
-                                                };
-                                                final String names[] = {pkg + "/notclean",pkg+"/forceclean",pkg+"/blur",pkg+"/notshow",pkg + "/notstop"};
-                                                AlertDialog.Builder builder = new AlertDialog.Builder(tv.getContext());
-                                                builder.setTitle("请选择(应用控制器后台如果被杀则不生效)");
-//                                            builder.setMessage("设置后重新打开最近任务生效，如果不生效则证明应用控制器后台被杀。");
-                                                builder.setItems(titles,new DialogInterface.OnClickListener(){
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which){
-                                                        Intent intent = new Intent("com.click369.control.changerencetbysystemui");
-                                                        intent.putExtra("data",which);
-                                                        intent.putExtra("pkg",pkg);
-                                                        intent.putExtra("name",names[which]);
-                                                        tv.getContext().sendBroadcast(intent);
-                                                        tv.postDelayed(new Runnable() {
+                                    try {
+                                        if(recentContext!=null){
+                                            Field field = recentHeaderCls.getDeclaredField(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? "mTitleView" : "mActivityDescription");
+                                            field.setAccessible(true);
+                                            final TextView tv = (TextView) field.get(methodHookParam.thisObject);
+                                            final AlertDialog.Builder builder = new AlertDialog.Builder(recentContext);
+                                            builder.setTitle("请选择(应用控制器后台如果被杀则不生效)");
+                                            tv.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    try {
+                                                        final String pkg = getPkgByTask(recentHeaderCls, "mTask", methodHookParam.thisObject);
+                                                        if (pkg == null || pkg.length() == 0) {
+                                                            Toast.makeText(tv.getContext(), "无法获取被点击的应用，证明系统代码改动较大没有适配", Toast.LENGTH_LONG).show();
+                                                            return;
+                                                        }
+                                                        recentPrefs.reload();
+                                                        appStartiPrefs.reload();
+                                                        final boolean isNotClean = recentPrefs.getBoolean(pkg + "/notclean", false);
+                                                        final boolean isForceClean = recentPrefs.getBoolean(pkg + "/forceclean", false);
+                                                        final boolean isBlur = recentPrefs.getBoolean(pkg + "/blur", false);
+                                                        final boolean isNotShow = recentPrefs.getBoolean(pkg + "/notshow", false);
+                                                        final boolean isNotStop = appStartiPrefs.getBoolean(pkg + "/notstop", false);
+                                                        String titles[] = new String[]{
+                                                                isNotClean ? "取消卡片保留" : "添加卡片保留",
+                                                                isForceClean ? "取消移除杀死" : "添加移除杀死",
+                                                                isBlur ? "取消卡片模糊" : "添加卡片模糊",
+                                                                isNotShow ? "取消卡片隐藏" : "添加卡片隐藏",
+                                                                isNotStop ? "取消内存常驻(慎重)" : "添加内存常驻(慎重)"
+                                                        };
+                                                        final String names[] = {pkg + "/notclean", pkg + "/forceclean", pkg + "/blur", pkg + "/notshow", pkg + "/notstop"};
+
+                                                        builder.setItems(titles, new DialogInterface.OnClickListener() {
                                                             @Override
-                                                            public void run() {
-                                                                try {
-                                                                    String title = getInfoByPkg(recentPrefs,appStartiPrefs,pkg);
-                                                                    String oldTitle = tv.getText().toString();
-                                                                    if (oldTitle.indexOf("(")!=-1){
-                                                                        oldTitle = oldTitle.substring(0,oldTitle.indexOf("("));
+                                                            public void onClick(DialogInterface dialog, int which) {
+                                                                Intent intent = new Intent("com.click369.control.changerencetbysystemui");
+                                                                intent.putExtra("data", which);
+                                                                intent.putExtra("pkg", pkg);
+                                                                intent.putExtra("name", names[which]);
+                                                                tv.getContext().sendBroadcast(intent);
+                                                                tv.postDelayed(new Runnable() {
+                                                                    @Override
+                                                                    public void run() {
+                                                                        try {
+                                                                            String title = getInfoByPkg(recentPrefs, appStartiPrefs, pkg);
+                                                                            String oldTitle = tv.getText().toString();
+                                                                            if (oldTitle.indexOf("(") != -1) {
+                                                                                oldTitle = oldTitle.substring(0, oldTitle.indexOf("("));
+                                                                            }
+                                                                            tv.setText(oldTitle + title);
+                                                                        } catch (Exception e) {
+                                                                            e.printStackTrace();
+                                                                        }
                                                                     }
-                                                                    tv.setText(oldTitle+title);
-                                                                }catch (Exception e){
-                                                                    e.printStackTrace();
-                                                                }
+                                                                }, 500);
                                                             }
-                                                        },500);
+                                                        });
+                                                        AlertDialog ad =  builder.create();
+                                                        ad.show();
+                                                    } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                        Toast.makeText(recentContext, "出错了，请把XP日志提交给开发者", Toast.LENGTH_LONG).show();
+                                                        XposedBridge.log("^^^^^^^^^^^^^^点击最近任务标题出错" + e + "^^^^^^^^^^^^^^^^^");
                                                     }
-                                                });
-                                                builder.create().show();
-                                            }catch (Exception e){
-                                                e.printStackTrace();
-                                                Toast.makeText(tv.getContext(),"出错了，请把XP日志提交给开发者",Toast.LENGTH_LONG).show();
-                                                XposedBridge.log("^^^^^^^^^^^^^^点击标最近任务题出错"+e+"^^^^^^^^^^^^^^^^^");
-                                            }
+                                                }
+                                            });
                                         }
-                                    });
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                        XposedBridge.log("^^^^^^^^^^^^^^最近任务标题出错1 " + e + "^^^^^^^^^^^^^^^^^");
+                                    }
                                 }
                             };
-                            XposedHelpers.findAndHookMethod(recentHeaderCls,"onFinishInflate",hook);
+                            XposedUtil.hookMethod(recentHeaderCls,clss,"onFinishInflate",hook);
                         }
                     }
-                }catch (XposedHelpers.ClassNotFoundError e){
-                    e.printStackTrace();
-                }catch (NoSuchMethodError e){
+                }catch (Throwable e){
                     e.printStackTrace();
                 }
                 try {
-                    if (isShowMem) {
-                        final Class recentActCls = XposedHelpers.findClass("com.android.systemui.recents.RecentsActivity", lpparam.classLoader);
-                        if (recentActCls != null) {
-                            XC_MethodHook hook = new XC_MethodHook() {
-                                @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-                                @Override
-                                protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                    try {
-                                        final Activity act = (Activity) methodHookParam.thisObject;
-                                        View rootView = act.getWindow().getDecorView();
+//                    final Class recentActCls = XposedHelpers.findClass("android.app.Activity", lpparam.classLoader);
+                    final Class recentActCls = XposedUtil.findClass("com.android.systemui.recents.RecentsActivity", lpparam.classLoader);
+                    if (recentActCls != null) {
+                        XC_MethodHook hook = new XC_MethodHook() {
+//                            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+                            @Override
+                            protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                                try {
+                                    final Activity recentAct = (Activity) methodHookParam.thisObject;
+                                    if (isShowMem) {
+                                        View rootView = recentAct.getWindow().getDecorView();
                                         ViewGroup fl = null;
-                                        if (rootView instanceof  FrameLayout){
-                                            fl = (FrameLayout)rootView;
-                                        }else if (rootView instanceof RelativeLayout){
-                                            fl = (RelativeLayout)rootView;
-                                        }else if (rootView instanceof LinearLayout){
-                                            fl = (LinearLayout)rootView;
+                                        if (rootView instanceof FrameLayout) {
+                                            fl = (FrameLayout) rootView;
+                                        } else if (rootView instanceof RelativeLayout) {
+                                            fl = (RelativeLayout) rootView;
+                                        } else if (rootView instanceof LinearLayout) {
+                                            fl = (LinearLayout) rootView;
                                         }
+                                        recentContext = fl.getContext();
                                         final ActivityManager.MemoryInfo memoryInfo1 = new ActivityManager.MemoryInfo();
-                                        final ActivityManager activityManager = (ActivityManager) act.getSystemService(Context.ACTIVITY_SERVICE);
+                                        final ActivityManager activityManager = (ActivityManager) recentAct.getSystemService(Context.ACTIVITY_SERVICE);
                                         activityManager.getMemoryInfo(memoryInfo1);
                                         final long mmm = memoryInfo1.availMem;
                                         String m = "可用" + (memoryInfo1.availMem / (1024 * 1024)) + "M,共" + (memoryInfo1.totalMem / (1024 * 1024)) + "M";
@@ -493,7 +577,7 @@ public class XposedRencent {
                                             TextView tv = (TextView) fl.findViewWithTag("mem");
                                             tv.setText(m);
                                         } else {
-                                            final TextView memeTv = new TextView(fl.getContext());
+                                            final TextView memeTv = new TextView(recentContext);
                                             memeTv.setText(m);
                                             memeTv.setPadding(58, 80, 10, 10);
                                             memeTv.setTextColor(Color.WHITE);
@@ -503,68 +587,64 @@ public class XposedRencent {
                                             ViewGroup.LayoutParams flp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
                                             fl.addView(memeTv, flp);
+
+                                            final AlertDialog.Builder builder = new AlertDialog.Builder(recentContext);
+                                            builder.setTitle("请选择");
+                                            builder.setItems(new CharSequence[]{"释放系统缓存", "释放缓存并杀死缓存进程", "查看正在运行的服务"}, new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    if (which == 2) {
+                                                        Intent intent = new Intent("com.click369.control.startruuning");
+                                                        recentContext.sendBroadcast(intent);
+                                                    } else {
+                                                        Intent intent = new Intent("com.click369.control.offcleancache");
+                                                        if (which == 1) {
+                                                            intent.putExtra("data", "all");
+                                                        }
+                                                        recentContext.sendBroadcast(intent);
+                                                        Toast.makeText(recentContext, "开始清理...", Toast.LENGTH_SHORT).show();
+                                                        memeTv.postDelayed(new Runnable() {
+                                                            @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+                                                            @Override
+                                                            public void run() {
+                                                                try{
+                                                                    if (!recentAct.isDestroyed()) {
+                                                                        ActivityManager activityManager = (ActivityManager) recentAct.getSystemService(Context.ACTIVITY_SERVICE);
+                                                                        activityManager.getMemoryInfo(memoryInfo1);
+                                                                        String m = "可用" + (memoryInfo1.availMem / (1024 * 1024)) + "M,共" + (memoryInfo1.totalMem / (1024 * 1024)) + "M";
+                                                                        memeTv.setText(m);
+                                                                        Toast.makeText(recentAct, "清理完成，共清理" + (Math.abs(memoryInfo1.availMem - mmm) / (1024 * 1024)) + "M内存", Toast.LENGTH_SHORT).show();
+                                                                    }
+                                                                }catch (Exception e){
+                                                                    e.printStackTrace();
+                                                                }
+                                                            }
+                                                        }, 2000);
+                                                    }
+                                                }
+                                            });
+                                            final AlertDialog ad =  builder.create();
                                             memeTv.setOnClickListener(new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View view) {
-                                                    AlertDialog.Builder builder = new AlertDialog.Builder(view.getContext());
-                                                    builder.setTitle("请选择");
-                                                    builder.setItems(new String[]{"释放系统缓存","释放缓存并杀死缓存进程","查看正在运行的服务"}, new DialogInterface.OnClickListener(){
-                                                        @Override
-                                                        public void onClick(DialogInterface dialog, int which){
-                                                            if(which == 2){
-                                                                Intent intent = new Intent("com.click369.control.startruuning");
-                                                                act.sendBroadcast(intent);
-                                                            }else{
-                                                                Intent intent = new Intent("com.click369.control.offcleancache");
-                                                                if (which == 1){
-                                                                    intent.putExtra("data","all");
-                                                                }
-                                                                act.sendBroadcast(intent);
-                                                                Toast.makeText(act,"开始清理...",Toast.LENGTH_SHORT).show();
-                                                                memeTv.postDelayed(new Runnable() {
-                                                                    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-                                                                    @Override
-                                                                    public void run() {
-                                                                        if (!act.isDestroyed()) {
-                                                                            ActivityManager activityManager = (ActivityManager) act.getSystemService(Context.ACTIVITY_SERVICE);
-                                                                            activityManager.getMemoryInfo(memoryInfo1);
-                                                                            String m = "可用" + (memoryInfo1.availMem / (1024 * 1024)) + "M,共" + (memoryInfo1.totalMem / (1024 * 1024)) + "M";
-                                                                            memeTv.setText(m);
-                                                                            Toast.makeText(act,"清理完成，共清理"+(Math.abs(memoryInfo1.availMem-mmm) / (1024 * 1024))+"M内存",Toast.LENGTH_SHORT).show();
-                                                                        }
-                                                                    }
-                                                                },2000);
-                                                            }
-                                                        }
-                                                    });
-                                                    builder.show();
+                                                    try {
+                                                        ad.show();
+                                                    }catch (Exception e){
+                                                        e.printStackTrace();
+                                                    }
                                                 }
                                             });
                                         }
-                                    }catch (RuntimeException e){
-                                        e.printStackTrace();
                                     }
+                                }catch (Throwable e){
+                                    e.printStackTrace();
                                 }
-                            };
-                            Class clss1[] = XposedUtil.getParmsByName(recentActCls, "onCreate");
-                            if (clss1 != null) {
-                                if (clss1.length == 1) {
-                                    XposedHelpers.findAndHookMethod(recentActCls, "onCreate", clss1[0], hook);
-                                } else {
-                                    XposedBridge.log("^^^^^^^^^^^^^^onCreate else " + clss1.length + " ^^^^^^^^^^^^^^^^^");
-                                }
-                            } else {
-                                XposedBridge.log("^^^^^^^^^^^^^^onCreate null ^^^^^^^^^^^^^^^^^");
                             }
-                            Class clss2[] = XposedUtil.getParmsByName(recentActCls, "onStart");
-                            if (clss2 != null) {
-                                XposedHelpers.findAndHookMethod(recentActCls, "onStart", hook);
-                            } else {
-                                XposedBridge.log("^^^^^^^^^^^^^^onStart null ^^^^^^^^^^^^^^^^^");
-                            }
-                        }
+                        };
+                        XposedUtil.hookMethod(recentActCls,XposedUtil.getParmsByName(recentActCls, "onCreate"), "onCreate",  hook);
+                        XposedUtil.hookMethod(recentActCls,XposedUtil.getParmsByName(recentActCls, "onStart"), "onStart",  hook);
                     }
-                }catch (XposedHelpers.ClassNotFoundError e){
+                }catch (Throwable e){
                     e.printStackTrace();
                 }
 //                if (!isColorBar && !isHideBar && roundNumber == 10 && alphaNumber == 1.0f) {
@@ -605,18 +685,16 @@ public class XposedRencent {
                                         }
                                     }
                                 }
-
-
-
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                     try {
                                         Field field1 = recentHeaderCls.getDeclaredField("mCornerRadius");
                                         field1.setAccessible(true);
                                         field1.set(v, roundNumber);
-                                    }catch (NoSuchFieldException e){
+                                    }catch (Throwable e){
+                                        e.printStackTrace();
                                     }
                                 }
-                            } catch (RuntimeException e) {
+                            } catch (Throwable e) {
                                 e.printStackTrace();
                             }
                             }
@@ -627,69 +705,13 @@ public class XposedRencent {
                     }
                 }
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                    final Class thumbViewCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
-                    if (thumbViewCls != null) {
-                        Constructor ms[] = thumbViewCls.getDeclaredConstructors();
-                        Class clss[] = null;
-                        for (Constructor m : ms) {
-                            if (m.getParameterTypes().length > 3) {
-                                clss = m.getParameterTypes();
-                                break;
-                            }
-                        }
-                        if (clss != null) {
-                            XC_MethodHook hook = new XC_MethodHook() {
-                                @Override
-                                protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                try {
-                                    if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
-                                        Field field = thumbViewCls.getDeclaredField("mConfig");
-                                        field.setAccessible(true);
-                                        Object mConfig = field.get(methodHookParam.thisObject);
-                                        Field rcField = mConfig.getClass().getDeclaredField("taskViewRoundedCornerRadiusPx");
-                                        rcField.setAccessible(true);
-                                        rcField.set(mConfig,roundNumber);
-                                    }else{
-                                        Field field = thumbViewCls.getDeclaredField("mCornerRadius");
-                                        field.setAccessible(true);
-                                        field.set(methodHookParam.thisObject, roundNumber);
-                                    }
-                                } catch (RuntimeException e) {
-                                    e.printStackTrace();
-                                }
-                                }
-                            };
-                            XposedUtil.hookConstructorMethod(thumbViewCls,clss,hook);
-                        } else {
-                            XposedBridge.log("^^^^^^^^^^^^^^yhumbnail  构造函数未找到 ^^^^^^^^^^^^^^^^^");
-                        }
-                        Class clsss[] = XposedUtil.getParmsByName(thumbViewCls,"updateClipToTaskBar");
-                        if (clsss != null) {
-                            XC_MethodHook hook = new XC_MethodHook() {
-                                @Override
-                                protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                    try{
-                                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-//                                            methodHookParam.args[0] = null;
-                                        }
-                                    } catch (RuntimeException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            };
-                            XposedUtil.hookMethod(thumbViewCls,clsss,"updateClipToTaskBar",hook);
-                        } else {
-                            XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar  函数未找到 ^^^^^^^^^^^^^^^^^");
-                        }
-                    }
-
-                    if (roundNumber != 10&&roundNumber != 0) {
-                        final Class avbCls = XposedHelpers.findClass("com.android.systemui.recents.views.AnimateableViewBounds", lpparam.classLoader);
-                        if (avbCls != null) {
-                            Constructor ms[] = avbCls.getDeclaredConstructors();
+                    try {
+                        final Class thumbViewCls = XposedHelpers.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
+                        if (thumbViewCls != null) {
+                            Constructor ms[] = thumbViewCls.getDeclaredConstructors();
                             Class clss[] = null;
                             for (Constructor m : ms) {
-                                if (m.getParameterTypes().length > 1) {
+                                if (m.getParameterTypes().length > 3) {
                                     clss = m.getParameterTypes();
                                     break;
                                 }
@@ -699,18 +721,82 @@ public class XposedRencent {
                                     @Override
                                     protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                         try {
-                                            Field field = avbCls.getDeclaredField("mCornerRadius");
-                                            field.setAccessible(true);
-                                            field.set(methodHookParam.thisObject, roundNumber);
+                                            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
+                                                Field field = thumbViewCls.getDeclaredField("mConfig");
+                                                field.setAccessible(true);
+                                                Object mConfig = field.get(methodHookParam.thisObject);
+                                                Field rcField = mConfig.getClass().getDeclaredField("taskViewRoundedCornerRadiusPx");
+                                                rcField.setAccessible(true);
+                                                rcField.set(mConfig,roundNumber);
+                                            }else{
+                                                Field field = thumbViewCls.getDeclaredField("mCornerRadius");
+                                                field.setAccessible(true);
+                                                field.set(methodHookParam.thisObject, roundNumber);
+                                            }
                                         } catch (RuntimeException e) {
                                             e.printStackTrace();
                                         }
                                     }
                                 };
-                                XposedUtil.hookConstructorMethod(avbCls,clss,hook);
+                                XposedUtil.hookConstructorMethod(thumbViewCls,clss,hook);
                             } else {
-                                XposedBridge.log("^^^^^^^^^^^^^^avbCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
+                                XposedBridge.log("^^^^^^^^^^^^^^yhumbnail  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                             }
+//                        Class clsss[] = XposedUtil.getParmsByName(thumbViewCls,"updateClipToTaskBar");
+//                        if (clsss != null) {
+//                            XC_MethodHook hook = new XC_MethodHook() {
+//                                @Override
+//                                protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+//                                    try{
+//                                        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+////                                            methodHookParam.args[0] = null;
+//                                        }
+//                                    } catch (RuntimeException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            };
+//                            XposedUtil.hookMethod(thumbViewCls,clsss,"updateClipToTaskBar",hook);
+//                        } else {
+//                            XposedBridge.log("^^^^^^^^^^^^^^updateClipToTaskBar  函数未找到 ^^^^^^^^^^^^^^^^^");
+//                        }
+                        }
+                    }catch (Throwable e){
+                        e.printStackTrace();
+                    }
+
+                    if (roundNumber != 10&&roundNumber != 0) {
+                        try {
+                            final Class avbCls = XposedHelpers.findClass("com.android.systemui.recents.views.AnimateableViewBounds", lpparam.classLoader);
+                            if (avbCls != null) {
+                                Constructor ms[] = avbCls.getDeclaredConstructors();
+                                Class clss[] = null;
+                                for (Constructor m : ms) {
+                                    if (m.getParameterTypes().length > 1) {
+                                        clss = m.getParameterTypes();
+                                        break;
+                                    }
+                                }
+                                if (clss != null) {
+                                    XC_MethodHook hook = new XC_MethodHook() {
+                                        @Override
+                                        protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                                            try {
+                                                Field field = avbCls.getDeclaredField("mCornerRadius");
+                                                field.setAccessible(true);
+                                                field.set(methodHookParam.thisObject, roundNumber);
+                                            } catch (RuntimeException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    };
+                                    XposedUtil.hookConstructorMethod(avbCls,clss,hook);
+                                } else {
+                                    XposedBridge.log("^^^^^^^^^^^^^^avbCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
+                                }
+                            }
+                        }catch (Throwable e){
+                            e.printStackTrace();
                         }
                         try {
                             final Class fsdCls = XposedHelpers.findClass("com.android.systemui.recents.views.FakeShadowDrawable", lpparam.classLoader);
@@ -736,22 +822,12 @@ public class XposedRencent {
                                             }
                                         }
                                     };
-                                    if (clss.length == 2) {
-                                        XposedHelpers.findAndHookConstructor(fsdCls, clss[0], clss[1], hook);
-                                    } else if (clss.length == 3) {
-                                        XposedHelpers.findAndHookConstructor(fsdCls, clss[0], clss[1], clss[2], hook);
-                                    } else {
-                                        XposedBridge.log("^^^^^^^^^^^^^^fsdCls else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-                                    }
+                                    XposedUtil.hookConstructorMethod(fsdCls,clss,hook);
                                 } else {
                                     XposedBridge.log("^^^^^^^^^^^^^^fsdCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                                 }
                             }
-                        }catch (RuntimeException e){
-                            XposedBridge.log("^^^^^^^^^^^^^FakeShadowDrawable 未找到 ^^^^^^^^^^^^^^^^^");
-                        }catch (NoSuchMethodError e){
-                            XposedBridge.log("^^^^^^^^^^^^^FakeShadowDrawable 未找到 ^^^^^^^^^^^^^^^^^");
-                        }catch (XposedHelpers.ClassNotFoundError e){
+                        }catch (Throwable e){
                             XposedBridge.log("^^^^^^^^^^^^^FakeShadowDrawable1 未找到 ^^^^^^^^^^^^^^^^^");
                         }
                         try {
@@ -782,18 +858,12 @@ public class XposedRencent {
                                                     field.setAccessible(true);
                                                     field.set(methodHookParam.thisObject, roundNumber);
                                                 }
-                                            } catch (NoSuchFieldException e) {
+                                            } catch (Throwable e) {
                                                 XposedBridge.log("^^^^^^^^^^^^^^mTaskCornerRadiusPx 未找到 ^^^^^^^^^^^^^^^^^");
                                             }
                                         }
                                     };
-                                    if (clss.length == 1) {
-                                        XposedHelpers.findAndHookConstructor(tsvCls, clss[0], hook);
-                                    } else if (clss.length == 2) {
-                                        XposedHelpers.findAndHookConstructor(tsvCls, clss[0], clss[1], hook);
-                                    } else {
-                                        XposedBridge.log("^^^^^^^^^^^^^^tsvCls else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-                                    }
+                                    XposedUtil.hookConstructorMethod(tsvCls,clss,hook);
                                 } else {
                                     XposedBridge.log("^^^^^^^^^^^^^^tsvCls  构造函数未找到 ^^^^^^^^^^^^^^^^^");
                                 }
@@ -807,20 +877,17 @@ public class XposedRencent {
 
             if (lpparam.packageName.equals("com.android.systemui")) {
                 try {
+                    barPrefs.reload();
                     isOpenNotifyColor = barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_COLOROPEN,false);
                     isNotifyUseImgFile = barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_ISUSEIMGFILE,false);
                     isRandomNotifyColor = barPrefs.getBoolean(Common.PREFS_SETTING_UI_NOTIFY_RANDOMCOLOR,false);
                     notifyColor = barPrefs.getString(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR,"#FFFFFF");
                     notifyAlpha = barPrefs.getInt(Common.PREFS_SETTING_UI_NOTIFY_ALPHA,100);
+                    final Class eovClass = XposedHelpers.findClass("com.android.systemui.statusbar.ExpandableOutlineView", lpparam.classLoader);
                     final Class anvClass = XposedHelpers.findClass("com.android.systemui.statusbar.ActivatableNotificationView", lpparam.classLoader);
-                    final Class enrClass = XposedHelpers.findClass("com.android.systemui.statusbar.ExpandableNotificationRow", lpparam.classLoader);
+//                    final Class enrClass = XposedHelpers.findClass("com.android.systemui.statusbar.ExpandableNotificationRow", lpparam.classLoader);
                     final Class nbvClass = XposedHelpers.findClass("com.android.systemui.statusbar.NotificationBackgroundView", lpparam.classLoader);
                     final Class nsslClass = XposedHelpers.findClass("com.android.systemui.statusbar.stack.NotificationStackScrollLayout", lpparam.classLoader);
-//                    Class clss[] = XposedUtil.getParmsByName(nsslClass,"onDraw");
-                    Class clss1[] = XposedUtil.getParmsByName(anvClass,"updateOutlineAlpha");
-//                    Class clss5[] = XposedUtil.getParmsByName(nbvClass,"setDrawableAlpha");
-                    Class clss3[] = XposedUtil.getParmsByName(nbvClass,"setTint");
-                    Class clss4[] = XposedUtil.getParmsByName(nbvClass,"onDraw");
                     //通知滑动后背景修改
                     XC_MethodHook hook = new XC_MethodHook() {
                         @Override
@@ -836,31 +903,14 @@ public class XposedRencent {
                                     Paint p = (Paint)mBackgroundPaintField.get(param.thisObject);
 //                                    Canvas canvas = (Canvas)param.args[0];
                                     p.setColor(Color.argb(255-((int)((notifyAlpha*1.0f/100)*255)),255,255,255));
-
                                 }
                             }catch (Throwable e){
                                 e.printStackTrace();
                             }
                         }
                     };
-//                    XC_MethodHook hookinitView = new XC_MethodHook() {
-//                        @Override
-//                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//                            try {
-//                                if(isOpenNotifyColor){
-//
-////                                    Field mIncreasedPaddingBetweenElementsField = enrClass.getDeclaredField("mIncreasedPaddingBetweenElements");
-////                                    mIncreasedPaddingBetweenElementsField.setAccessible(true);
-////                                    mIncreasedPaddingBetweenElementsField.set(param.thisObject,100);
-//                                }
-//                            }catch (Throwable e){
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    };
                     //通知背景修改
                     XposedUtil.hookMethod(nsslClass,XposedUtil.getParmsByName(nsslClass,"onDraw"),"onDraw",hook);
-//                    XposedUtil.hookMethod(nsslClass,XposedUtil.getParmsByName(nsslClass,"setOwnScrollY"),"setOwnScrollY",hookinitView);
                     XC_MethodHook hook1 = new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -869,8 +919,8 @@ public class XposedRencent {
                                     Field mShadowAlphaField = anvClass.getDeclaredField("mShadowAlpha");
                                     mShadowAlphaField.setAccessible(true);
                                     mShadowAlphaField.set(param.thisObject,0f);
-                                    Class cls = Class.forName("com.android.systemui.statusbar.ExpandableOutlineView");
-                                    Method m = cls.getDeclaredMethod("setOutlineAlpha",float.class);
+//                                    Class cls = Class.forName("com.android.systemui.statusbar.ExpandableOutlineView");
+                                    Method m = eovClass.getDeclaredMethod("setOutlineAlpha",float.class);
                                     m.setAccessible(true);
                                     m.invoke(param.thisObject,0f);
                                     param.setResult(null);
@@ -881,7 +931,7 @@ public class XposedRencent {
                             }
                         }
                     };
-                    XposedUtil.hookMethod(anvClass,clss1,"updateOutlineAlpha",hook1);
+                    XposedUtil.hookMethod(anvClass,XposedUtil.getParmsByName(anvClass,"updateOutlineAlpha"),"updateOutlineAlpha",hook1);
                     //通知背景透明度修改
                     XC_MethodHook hook3 = new XC_MethodHook() {
                         @Override
@@ -904,7 +954,6 @@ public class XposedRencent {
                                                 Field field = nbvClass.getDeclaredField("mBackground");
                                                 field.setAccessible(true);
                                                 Drawable mDrawable = Drawable.createFromPath(f.getAbsolutePath());
-
 //                                                mDrawable.setAlpha((int)((notifyAlpha*1.0f/100)*255));
                                                 field.set(param.thisObject,mDrawable);
                                                 v.setTag("OK");
@@ -933,71 +982,77 @@ public class XposedRencent {
                             }
                         }
                     };
-                    XposedUtil.hookMethod(nbvClass,clss3,"setTint",hook3);
+                    String name = "setTint";
+                    Class clss1[] = XposedUtil.getParmsByName(nbvClass,name);
+                    if(clss1 ==null){
+                        name = "setBackgroundColor";
+                        clss1 = XposedUtil.getParmsByName(nbvClass,name);
+                    }
+                    XposedUtil.hookMethod(nbvClass,clss1,name,hook3);
                     XC_MethodHook hook4 = new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                            if(isOpenNotifyColor) {
-                                View v = (View) (param.thisObject);
-                                v.setAlpha(notifyAlpha*1.0f/100);
+                            try {
+                                if(isOpenNotifyColor) {
+                                    View v = (View) (param.thisObject);
+                                    v.setAlpha(notifyAlpha*1.0f/100);
+                                }
+                            }catch (Throwable e){
+                                e.printStackTrace();
                             }
                         }
                     };
-                    XposedUtil.hookMethod(nbvClass,clss4,"onDraw",hook4);
+                    XposedUtil.hookMethod(nbvClass,XposedUtil.getParmsByName(nbvClass,"onDraw"),"onDraw",hook4);
                 }catch (Throwable e){
                     e.printStackTrace();
                 }
                 try {
-                    final Class appSysuiCls = XposedHelpers.findClass("com.android.systemui.SystemUIApplication", lpparam.classLoader);
-                    Class clss[] = XposedUtil.getParmsByName(appSysuiCls, "onCreate");
-                    if (clss != null) {
-                        XC_MethodHook hook = new XC_MethodHook() {
-                            @Override
-                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                                try {
-                                    BroadcastReceiver br = new BroadcastReceiver() {
-                                        @Override
-                                        public void onReceive(Context context, Intent intent) {
-                                            String action = intent.getAction();
-                                            if(action.equals("com.click369.control.rebootsystemui")){
-                                                System.exit(0);
-                                            }else if(action.equals("com.click369.control.sysui.loadconfig")){
-                                                if(intent.hasExtra("notifyalpha")){
-                                                    notifyAlpha = intent.getIntExtra("notifyalpha",100);
-                                                }
-                                                if(intent.hasExtra("israndomnotifycolor")){
-                                                    isRandomNotifyColor = intent.getBooleanExtra("israndomnotifycolor",false);
-                                                }
-                                                if(intent.hasExtra("isnotifycoloropen")){
-                                                    isOpenNotifyColor = intent.getBooleanExtra("isnotifycoloropen",false);
-                                                }
-                                                if(intent.hasExtra("notifycolor")){
-                                                    notifyColor = intent.getStringExtra("notifycolor");
-                                                }
-                                                if(intent.hasExtra("notifyuseimgfile")){
-                                                    isNotifyUseImgFile = intent.getBooleanExtra("notifyuseimgfile",false);
-                                                }
-//                                                XposedBridge.log("sysui isOpenNotifyColor "+isOpenNotifyColor+" isRandomNotifyColor "+isRandomNotifyColor+" notifyColor "+notifyColor);
+//                    final Class appSysuiCls = XposedHelpers.findClass("com.android.systemui.SystemUIApplication", lpparam.classLoader);
+                    final Class appSysuiCls = XposedHelpers.findClass("android.app.Application", lpparam.classLoader);
+                    XC_MethodHook hook = new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            try {
+
+                                BroadcastReceiver br = new BroadcastReceiver() {
+                                    @Override
+                                    public void onReceive(Context context, Intent intent) {
+                                        barPrefs.reload();
+                                        String action = intent.getAction();
+                                        if(action.equals("com.click369.control.rebootsystemui")){
+                                            System.exit(0);
+                                        }else if(action.equals("com.click369.control.sysui.loadconfig")){
+                                            if(intent.hasExtra("notifyalpha")){
+                                                notifyAlpha = intent.getIntExtra("notifyalpha",100);
+                                            }
+                                            if(intent.hasExtra("israndomnotifycolor")){
+                                                isRandomNotifyColor = intent.getBooleanExtra("israndomnotifycolor",false);
+                                            }
+                                            if(intent.hasExtra("isnotifycoloropen")){
+                                                isOpenNotifyColor = intent.getBooleanExtra("isnotifycoloropen",false);
+                                            }
+                                            if(intent.hasExtra("notifycolor")){
+                                                notifyColor = intent.getStringExtra("notifycolor");
+                                            }
+                                            if(intent.hasExtra("notifyuseimgfile")){
+                                                isNotifyUseImgFile = intent.getBooleanExtra("notifyuseimgfile",false);
                                             }
                                         }
-                                    };
-                                    IntentFilter intentFilter = new IntentFilter();
-                                    intentFilter.addAction("com.click369.control.rebootsystemui");
-                                    intentFilter.addAction("com.click369.control.sysui.loadconfig");
-                                    if (methodHookParam.thisObject != null && methodHookParam.thisObject instanceof Application) {
-                                        Application app = ((Application) methodHookParam.thisObject);
-                                        app.registerReceiver(br, intentFilter);
                                     }
-                                } catch (RuntimeException e) {
-                                    XposedBridge.log("^^^^^^^^^^^^^^SystemUIApplication " + e + "^^^^^^^^^^^^^^^^^");
+                                };
+                                IntentFilter intentFilter = new IntentFilter();
+                                intentFilter.addAction("com.click369.control.rebootsystemui");
+                                intentFilter.addAction("com.click369.control.sysui.loadconfig");
+                                if (methodHookParam.thisObject != null && methodHookParam.thisObject instanceof Application) {
+                                    Application app = ((Application) methodHookParam.thisObject);
+                                    app.registerReceiver(br, intentFilter);
                                 }
+                            } catch (RuntimeException e) {
+                                XposedBridge.log("^^^^^^^^^^^^^^SystemUIApplication " + e + "^^^^^^^^^^^^^^^^^");
                             }
-                        };
-                        Class clss2[] = XposedUtil.getParmsByName(appSysuiCls,"onCreate");
-                        XposedUtil.hookMethod(appSysuiCls,clss2,"onCreate",hook);
-                    } else {
-                        XposedBridge.log("^^^^^^^^^^^^^^appNotResponding null 函数未找到 ^^^^^^^^^^^^^^^^^");
-                    }
+                        }
+                    };
+                    XposedUtil.hookMethod(appSysuiCls,XposedUtil.getParmsByName(appSysuiCls,"onCreate"),"onCreate",hook);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }

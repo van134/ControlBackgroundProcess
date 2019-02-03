@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.fragment.ControlFragment;
@@ -21,9 +20,11 @@ import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.WhiteApp;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtilBackStop;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -97,6 +98,7 @@ public class ControlAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
@@ -112,6 +114,10 @@ public class ControlAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -123,6 +129,7 @@ public class ControlAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 		this.notifyDataSetChanged();
 	}
 	public void chooseAll(){
@@ -158,6 +165,7 @@ public class ControlAdapter extends BaseAdapter{
 			convertView= inflater.inflate(R.layout.item_controlapp, null);
 			viewHolder = new ViewHolder();
 			viewHolder.appNameTv = (TextView)convertView.findViewById(R.id.item_main_appname);
+			viewHolder.appTimeTv = (TextView)convertView.findViewById(R.id.item_main_apptime);
 			viewHolder.serviceIv = (ImageView) convertView.findViewById(R.id.item_main_service);
 			viewHolder.broadIv = (ImageView) convertView.findViewById(R.id.item_main_broad);
 			viewHolder.wakelockIv = (ImageView)convertView.findViewById(R.id.item_main_wakelock);
@@ -168,12 +176,20 @@ public class ControlAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
-		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
-//		viewHolder.appIcon.setImageBitmap();
-//		viewHolder.appIcon.setImageDrawable(PackageUtil.getBitmap(c,data.packageName));
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		int color = data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor);
+		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appTimeTv.setText((data.isRunning?BaseActivity.getProcStartTimeStr(data.packageName)+"\n"+BaseActivity.getProcTimeStr(data.packageName):""));
+		viewHolder.appTimeTv.setVisibility(data.isRunning?View.VISIBLE:View.GONE);
+		viewHolder.appTimeTv.setTextColor(color);
+		viewHolder.appNameTv.setTextColor(color);
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		if(BaseActivity.listNotScroll) {
+//		File file = null;
+//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
+//			BaseActivity.loadeds.add(data.packageName);
+//			file = data.iconFile;
+//		}
+//		Glide.with(c).load(file).into(viewHolder.appIcon);
 //		viewHolder.iceIv.setVisibility(data.isDisable?View.VISIBLE:View.GONE);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
@@ -229,7 +245,7 @@ public class ControlAdapter extends BaseAdapter{
 								if(tag == 1){
 									ai.isServiceStop = true;
 									modPrefs.edit().putBoolean(ai.getPackageName()+"/service",true).commit();
-									XposedStopApp.stopApk(ai.getPackageName(),c);
+//									XposedStopApp.stopApk(ai.getPackageName(),c);
 									buttonView.setImageResource(ai.isServiceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 								}
 							}
@@ -242,9 +258,9 @@ public class ControlAdapter extends BaseAdapter{
 					modPrefs.edit().remove(ai.getPackageName()+"/service").commit();
 					ai.isServiceStop = false;
 				}
-				XposedStopApp.stopApk(ai.getPackageName(),c);
-				notifyDataSetChanged();
-//				buttonView.setImageResource(ai.isServiceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//				XposedStopApp.onlyStopApk(ai.getPackageName(),c);
+//				notifyDataSetChanged();
+				buttonView.setImageResource(ai.isServiceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 ////				buttonView.setTextColor(ai.isServiceStop? Color.RED:Color.BLACK);
 			}
 		});
@@ -274,9 +290,9 @@ public class ControlAdapter extends BaseAdapter{
 								ai.isBroadStop = !isStop;
 								modPrefs.edit().putBoolean(ai.getPackageName()+"/broad",!isStop).commit();
 //								ShellUtilBackStop.kill(ai.getPackageName());
-								XposedStopApp.stopApk(ai.getPackageName(),c);
-//								buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-								notifyDataSetChanged();
+//								XposedStopApp.stopApk(ai.getPackageName(),c);
+								buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//								notifyDataSetChanged();
 							}
 						}
 					});
@@ -289,9 +305,9 @@ public class ControlAdapter extends BaseAdapter{
 					}
 					ed.commit();
 					ai.isBroadStop = !isStop;
-					XposedStopApp.stopApk(ai.getPackageName(),c);
-//					buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-					notifyDataSetChanged();
+//					XposedStopApp.onlyStopApk(ai.getPackageName(),c);
+					buttonView.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//					notifyDataSetChanged();
 				}
 			}
 		});
@@ -316,10 +332,10 @@ public class ControlAdapter extends BaseAdapter{
 							if(tag == 1){
 								ai.isWakelockStop = !isStop;
 								modPrefs.edit().putBoolean(ai.getPackageName()+"/wakelock",!isStop).commit();
-								XposedStopApp.stopApk(ai.getPackageName(),c);
-								notifyDataSetChanged();
+//								XposedStopApp.stopApk(ai.getPackageName(),c);
+//								notifyDataSetChanged();
 //								ShellUtilBackStop.kill(ai.getPackageName());
-//								buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+								buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 							}
 						}
 					});
@@ -332,9 +348,9 @@ public class ControlAdapter extends BaseAdapter{
 					}
 					ed.commit();
 					ai.isWakelockStop = !isStop;
-					XposedStopApp.stopApk(ai.getPackageName(),c);
-//					buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-					notifyDataSetChanged();
+//					XposedStopApp.onlyStopApk(ai.getPackageName(),c);
+					buttonView.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+//					notifyDataSetChanged();
 				}
 			}
 		});
@@ -359,10 +375,10 @@ public class ControlAdapter extends BaseAdapter{
 							if(tag == 1){
 								ai.isAlarmStop = !isStop;
 								modPrefs.edit().putBoolean(ai.getPackageName()+"/alarm",!isStop).commit();
-								XposedStopApp.stopApk(ai.getPackageName(),c);
-								notifyDataSetChanged();
+//								XposedStopApp.stopApk(ai.getPackageName(),c);
+//								notifyDataSetChanged();
 //								ShellUtilBackStop.kill(ai.getPackageName());
-//								buttonView.setImageResource(ai.isAlarmStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+								buttonView.setImageResource(ai.isAlarmStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 							}
 						}
 					});
@@ -375,9 +391,9 @@ public class ControlAdapter extends BaseAdapter{
 					}
 					ed.commit();
 					ai.isAlarmStop = !isStop;
-					XposedStopApp.stopApk(ai.getPackageName(),c);
-//					buttonView.setImageResource(ai.isAlarmStop ? R.mipmap.icon_disable : R.mipmap.icon_notdisable);
-					notifyDataSetChanged();
+//					XposedStopApp.onlyStopApk(ai.getPackageName(),c);
+					buttonView.setImageResource(ai.isAlarmStop ? R.mipmap.icon_disable : R.mipmap.icon_notdisable);
+//					notifyDataSetChanged();
 				}
 			}
 		});
@@ -385,7 +401,7 @@ public class ControlAdapter extends BaseAdapter{
 	}
 	
 	static class ViewHolder{
-		public TextView appNameTv;//,serviceTv,wakelockTv,alarmTv;
+		public TextView appNameTv,appTimeTv;//,serviceTv,wakelockTv,alarmTv;
 		public ImageView appIcon,serviceIv,broadIv,wakelockIv,alarmIv,iceIv;
 	}
 }

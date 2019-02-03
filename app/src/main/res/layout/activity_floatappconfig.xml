@@ -88,7 +88,8 @@
                         android:layout_weight="3"
                         android:background="@color/lightgraytrans"
                         android:gravity="center"
-                        android:text="部分功能修改后，结束APP进程生效\n服务、广播、唤醒锁、定时器" />
+                        style="@style/mtextSize"
+                        android:text="部分功能修改后，结束APP进程生效\n服务/广播/唤醒锁/定时器" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -98,6 +99,7 @@
                         android:weightSum="12">
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -105,20 +107,21 @@
                             android:text="服务" />
 
                         <TextView
+                            style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="广播" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="唤醒锁" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -182,13 +185,13 @@
                     android:orientation="vertical"
                     android:visibility="visible">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
                         android:background="@color/lightgraytrans"
                         android:gravity="center"
-                        android:text="强退设置、墓碑、待机模式" />
+                        android:text="返回强退/后台墓碑/待机" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -197,28 +200,28 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="返回时" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="后台时" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="息屏时" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -282,13 +285,13 @@
                     android:orientation="vertical"
                     android:visibility="visible">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
                         android:background="@color/lightgraytrans"
                         android:gravity="center"
-                        android:text="最近任务卡片设置" />
+                        android:text="最近任务保留/杀死/模糊/隐藏" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -297,28 +300,28 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="保留" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="杀死" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="模糊" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -382,13 +385,13 @@
                     android:orientation="vertical"
                     android:visibility="visible">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
                         android:background="@color/lightgraytrans"
                         android:gravity="center"
-                        android:text="应用锁、启动控制、常驻内存" />
+                        android:text="应用锁/启动控制/常驻内存" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -397,28 +400,28 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="应用锁" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="禁止运行" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="禁止自启" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -481,43 +484,54 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
                         android:background="@color/lightgraytrans"
                         android:gravity="center"
-                        android:text="冻结、阻止卸载、卸载" />
+                        android:text="冻结/卸载控制/数据清除" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
 
                         android:orientation="horizontal"
-                        android:weightSum="12">
+                        android:weightSum="15">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="冻结" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="阻止卸载" />
-
-                        <TextView
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="清除数据" />
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="清除缓存" />
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="卸载" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -529,7 +543,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginTop="4dp"
-                        android:weightSum="12">
+                        android:weightSum="15">
 
                         <ImageView
                             android:id="@+id/item_dongjie"
@@ -548,21 +562,27 @@
                             android:src="@mipmap/icon_notdisable" />
 
                         <ImageView
+                            android:id="@+id/item_cleardata"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_enter" />
+
+                        <ImageView
+                            android:id="@+id/item_clearcache"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_enter"/>
+                        <ImageView
                             android:id="@+id/item_uninstall"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_weight="3"
-                            android:src="@mipmap/icon_notdisable" />
-
-                        <ImageView
-
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="3"
-                            android:src="@mipmap/icon_notdisable"
-                            android:visibility="invisible" />
+                            android:src="@mipmap/icon_enter"/>
 
                     </LinearLayout>
 
@@ -581,13 +601,235 @@
                     android:orientation="vertical"
                     android:visibility="visible">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
                         android:background="@color/lightgraytrans"
                         android:gravity="center"
-                        android:text="广告跳过" />
+                        android:text="网络/位置/权限" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+
+                        android:orientation="horizontal"
+                        android:weightSum="15">
+
+
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="WIFI数据" />
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="移动数据" />
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="权限记录" />
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="权限控制" />
+
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="权限开关" />
+
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:weightSum="15">
+
+
+                        <ImageView
+                            android:id="@+id/item_pri_wifi"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+                        <ImageView
+                            android:id="@+id/item_pri_mobile"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+                        <ImageView
+                            android:id="@+id/item_pri_log"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_enter" />
+
+                        <ImageView
+                            android:id="@+id/item_pri_control"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_enter" />
+
+                        <ImageView
+                            android:id="@+id/item_pri_switch"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable"
+                            android:visibility="invisible" />
+
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/lightgraytrans"
+                        android:visibility="invisible"></FrameLayout>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="3"
+                        android:background="@color/lightgraytrans"
+                        android:gravity="center"
+                        android:text="框架禁用/反检测" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:weightSum="12">
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="所有模块失效" />
+
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="控制器失效" />
+
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="尝试反检测" />
+
+                        <TextView style="@style/mtextSize"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="3"
+                            android:gravity="center"
+                            android:text="防止反Xposed" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="4dp"
+                        android:weightSum="12">
+
+                        <ImageView
+                            android:id="@+id/item_xpblack_all"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+
+                        <ImageView
+                            android:id="@+id/item_xpblack_control"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+
+                        <ImageView
+                            android:id="@+id/item_xpblack_nocheck"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+
+                        <ImageView
+                            android:id="@+id/item_xpblack_setcanhook"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="3"
+                            android:src="@mipmap/icon_notdisable" />
+
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="1px"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/lightgraytrans"
+                        android:visibility="invisible"></FrameLayout>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="3"
+                        android:background="@color/lightgraytrans"
+                        android:gravity="center"
+                        android:text="广告/通知/对话框" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -596,28 +838,28 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="模式一" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="模式二" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="模式三" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -679,7 +921,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
@@ -694,28 +936,28 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="前台运行时" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="熄屏时" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="亮屏时" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -776,7 +1018,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="3"
@@ -791,7 +1033,7 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:id="@+id/item_ifw_service_title"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
@@ -799,7 +1041,7 @@
                             android:gravity="center"
                             android:text="服务" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:id="@+id/item_ifw_broad_title"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
@@ -807,7 +1049,7 @@
                             android:gravity="center"
                             android:text="广播" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:id="@+id/item_ifw_activity_title"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
@@ -815,7 +1057,7 @@
                             android:gravity="center"
                             android:text="活动" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
@@ -876,7 +1118,7 @@
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
-                    <TextView
+                    <TextView style="@style/mtextSize"
                         android:id="@+id/textView15"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
@@ -892,27 +1134,27 @@
                         android:orientation="horizontal"
                         android:weightSum="12">
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="开启染色" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
                             android:text="锁定染色" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center" />
 
-                        <TextView
+                        <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"

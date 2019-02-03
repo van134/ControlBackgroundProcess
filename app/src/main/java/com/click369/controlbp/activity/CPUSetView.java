@@ -21,6 +21,7 @@ import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.CpuUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 import com.click369.controlbp.util.ShellUtilNoBackData;
@@ -30,7 +31,7 @@ import java.io.File;
 import java.io.FileFilter;
 
 public class CPUSetView{
-    private Switch cpulockSw,cameraSw,autoStartSw,offScSw,batterySw;//,cpu0,cpu1,cpu2,cpu3,cpu4,cpu5,cpu6,cpu7;
+    private Switch cpulockSw,cameraSw,autoStartSw,offScSw,batterySw,cpuCharingSw;//,cpu0,cpu1,cpu2,cpu3,cpu4,cpu5,cpu6,cpu7;
     private SeekBar delaySb,batterySb;
     private SharedPreferences cpuPrefs;
     private int curColor = Color.BLACK;
@@ -45,10 +46,10 @@ public class CPUSetView{
     }
     private void initView(View v) {
         cpuPrefs =  SharedPrefsUtil.getInstance(context).cpuPrefs;//SharedPrefsUtil.getPreferences(context, Common.PREFS_SETCPU);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-        if (!MainActivity.isRoot){
-            MainActivity.isRoot = ShellUtils.checkRootPermission();
+        if (!WatchDogService.isRoot){
+            WatchDogService.isRoot = ShellUtils.checkRootPermission();
         }
-        if(!MainActivity.isRoot){
+        if(!WatchDogService.isRoot){
             cpuPrefs.edit().putBoolean(Common.PREFS_SETCPU_LOCKUNLOCK, false);
             WatchDogService.isLockUnlockCPU = false;
             AlertUtil.showAlertMsgBack(context, "提示", "检测到没有root权限，无法使用CPU相关设置", new AlertUtil.InputCallBack() {
@@ -75,6 +76,7 @@ public class CPUSetView{
         autoStartSw = (Switch) v.findViewById(R.id.cpu_autostart_sw);
         offScSw = (Switch) v.findViewById(R.id.cpu_offsc_sw);
         batterySw = (Switch) v.findViewById(R.id.cpu_batterysc_sw);
+        cpuCharingSw = (Switch) v.findViewById(R.id.cpu_charing_sw);
         offScSw.setText("熄屏"+delaySb.getProgress()+"分钟后关闭核心(充电时不关闭)");
         batterySw.setText("电量低于"+batterySb.getProgress()+"%时关闭核心(充电时不关闭)");
         curColor = topTitle.getCurrentTextColor();
@@ -83,16 +85,18 @@ public class CPUSetView{
         cameraSw.setTextColor(curColor);
         offScSw.setTextColor(curColor);
         batterySw.setTextColor(curColor);
+        cpuCharingSw.setTextColor(curColor);
         cpulockSw.setTag(0);
         autoStartSw.setTag(1);
         cameraSw.setTag(2);
         offScSw.setTag(3);
         batterySw.setTag(4);
+        cpuCharingSw.setTag(5);
         cpulockSw.setChecked(cpuPrefs.getBoolean(Common.PREFS_SETCPU_LOCKUNLOCK, false));
         if(coreNum==0){
             cpulockSw.setChecked(false);
             Toast.makeText(context,"未检测到您的cpu核心数",Toast.LENGTH_LONG).show();
-        }else if(!MainActivity.isRoot){
+        }else if(!WatchDogService.isRoot){
             cpulockSw.setChecked(false);
             Toast.makeText(context,"未检测到有ROOT权限，请赋予ROOT权限后再使用",Toast.LENGTH_LONG).show();
         }
@@ -100,6 +104,7 @@ public class CPUSetView{
         cameraSw.setChecked(cpuPrefs.getBoolean(Common.PREFS_SETCPU_CAMERAMODE, false));
         offScSw.setChecked(cpuPrefs.getBoolean(Common.PREFS_SETCPU_OFFSCREENOPEN, false));
         batterySw.setChecked(cpuPrefs.getBoolean(Common.PREFS_SETCPU_BATTERYBELOWOPEN, false));
+        cpuCharingSw.setChecked(cpuPrefs.getBoolean(Common.PREFS_SETCPU_CHARGINGNOTSTOP, false));
         switchCpuSet();
         CPUSetView.ChangeListener changeListener = new CPUSetView.ChangeListener();
         cpulockSw.setOnCheckedChangeListener(changeListener);
@@ -107,6 +112,7 @@ public class CPUSetView{
         cameraSw.setOnCheckedChangeListener(changeListener);
         offScSw.setOnCheckedChangeListener(changeListener);
         batterySw.setOnCheckedChangeListener(changeListener);
+        cpuCharingSw.setOnCheckedChangeListener(changeListener);
 
         cpuPrefs.edit().putInt(Common.PREFS_SETCPU_NUMBER,coreNum).commit();
         new Thread(){
@@ -143,6 +149,7 @@ public class CPUSetView{
         cpuDefaultFl.setVisibility(cpulockSw.isChecked()?View.VISIBLE:View.GONE);
         cpuOffDelayFl.setVisibility(offScSw.isChecked()?View.VISIBLE:View.GONE);
         cpuBatteryFl.setVisibility(batterySw.isChecked()?View.VISIBLE:View.GONE);
+        cpuBatteryChangeFl.setVisibility(batterySw.isChecked()?View.VISIBLE:View.GONE);
         initItem(cpuDefaultFl,Common.PREFS_SETCPU_DEFAULTCORECOUNT);
         initItem(cpuOffScFl,Common.PREFS_SETCPU_OFFSCREENCORECOUNT);
         initItem(cpuBatteryFl,Common.PREFS_SETCPU_BATTERYLOWCORECOUNT);
@@ -163,15 +170,15 @@ public class CPUSetView{
         batterySb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                batterySw.setText("电量低于"+seekBar.getProgress()+"%时关闭核心(充电时不关闭)");
+                batterySw.setText("电量低于"+(seekBar.getProgress()>99?99:seekBar.getProgress())+"%时关闭核心(充电时不关闭)");
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                cpuPrefs.edit().putInt(Common.PREFS_SETCPU_BATTERYBELOWCOUNT,seekBar.getProgress()).commit();
-                WatchDogService.cpuBatteryBelow = seekBar.getProgress();
+                cpuPrefs.edit().putInt(Common.PREFS_SETCPU_BATTERYBELOWCOUNT,(seekBar.getProgress()>99?99:seekBar.getProgress())).commit();
+                WatchDogService.cpuBatteryBelow = (seekBar.getProgress()>99?99:seekBar.getProgress());
                 Intent intent = new Intent("com.click369.control.cpubatterychange");
                 context.sendBroadcast(intent);
             }
@@ -179,12 +186,12 @@ public class CPUSetView{
     }
     private void initItem(final FrameLayout flview, final String key){
         int layoutids[] = {R.id.cpu_item0_ll,R.id.cpu_item1_ll,R.id.cpu_item2_ll,R.id.cpu_item3_ll,R.id.cpu_item4_ll,
-                R.id.cpu_item5_ll,R.id.cpu_item6_ll,R.id.cpu_item7_ll};
-        LinearLayout layouts[] = new LinearLayout[8];
+                R.id.cpu_item5_ll,R.id.cpu_item6_ll,R.id.cpu_item7_ll,R.id.cpu_item8_ll,R.id.cpu_item9_ll};
+        LinearLayout layouts[] = new LinearLayout[10];
         int ivids[] = {R.id.cpu_item0_iv,R.id.cpu_item1_iv,R.id.cpu_item2_iv,R.id.cpu_item3_iv,R.id.cpu_item4_iv,
-                R.id.cpu_item5_iv,R.id.cpu_item6_iv,R.id.cpu_item7_iv};
+                R.id.cpu_item5_iv,R.id.cpu_item6_iv,R.id.cpu_item7_iv,R.id.cpu_item8_iv,R.id.cpu_item9_iv};
         final int chooses[] = getCpuCoreInfo(cpuPrefs,key);
-        final ImageView imgs[] = new ImageView[8];
+        final ImageView imgs[] = new ImageView[10];
         class CpuItemClickListener implements View.OnClickListener{
             @Override
             public void onClick(View view) {
@@ -228,7 +235,8 @@ public class CPUSetView{
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             int tag = (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_SETCPU_LOCKUNLOCK,Common.PREFS_SETCPU_AUTOSTART,
-                    Common.PREFS_SETCPU_CAMERAMODE,Common.PREFS_SETCPU_OFFSCREENOPEN,Common.PREFS_SETCPU_BATTERYBELOWOPEN};
+                    Common.PREFS_SETCPU_CAMERAMODE,Common.PREFS_SETCPU_OFFSCREENOPEN,
+                    Common.PREFS_SETCPU_BATTERYBELOWOPEN,Common.PREFS_SETCPU_CHARGINGNOTSTOP};
             cpuPrefs.edit().putBoolean(names[tag],isChecked).commit();
             if(tag == 0){
                 //sh system/etc/init.d/lock_lowbatter_core
@@ -248,8 +256,6 @@ public class CPUSetView{
                 cpuDefaultFl.setVisibility(isChecked?View.VISIBLE:View.GONE);
                 WatchDogService.defaultCpuChooses = getCpuCoreInfo(cpuPrefs,Common.PREFS_SETCPU_DEFAULTCORECOUNT);
                 resetCpuLock();
-            }else if(tag == 2){
-                WatchDogService.isCameraMode = isChecked;
             }else if(tag == 3){
                 WatchDogService.isOffScreenLockCpu = isChecked;
                 cpuOffScFl.setVisibility(isChecked?View.VISIBLE:View.GONE);
@@ -262,8 +268,12 @@ public class CPUSetView{
                 WatchDogService.batteryLowCpuChooses = getCpuCoreInfo(cpuPrefs,Common.PREFS_SETCPU_BATTERYLOWCORECOUNT);
                 Intent intent = new Intent("com.click369.control.cpubatterychange");
                 context.sendBroadcast(intent);
+            }else if(tag == 5){
+                WatchDogService.isChargingNotLockCPU = isChecked;
+                CpuUtil.changeCpu();
             }
         }
+
     }
 
     public static int getNumberOfCPUCores() {
@@ -282,8 +292,8 @@ public class CPUSetView{
         } catch (NullPointerException e) {
             cores = 0;
         }
-        if (cores>8){
-            cores = 8;
+        if (cores>10){
+            cores = 10;
         }
         return cores;
     }

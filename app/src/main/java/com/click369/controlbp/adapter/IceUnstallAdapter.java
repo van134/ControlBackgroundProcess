@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.fragment.AppStartFragment;
 import com.click369.controlbp.activity.BaseActivity;
@@ -37,6 +36,7 @@ import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtilNoBackData;
 import com.click369.controlbp.util.ShortCutUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -124,6 +124,7 @@ public class IceUnstallAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
@@ -135,6 +136,10 @@ public class IceUnstallAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -146,6 +151,7 @@ public class IceUnstallAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 		this.bjdatas.add(0,myAi);
 		myAi.isRunning = true;
 		myAi.isNotUnstall = modPrefs.getBoolean(myAi.packageName+"/notunstall",false);
@@ -181,34 +187,52 @@ public class IceUnstallAdapter extends BaseAdapter{
 		ViewHolder viewHolder;
 		AppInfo data = bjdatas.get(position);
 		if(convertView == null){
-			convertView= inflater.inflate(R.layout.item_mainapp, null);
+			convertView= inflater.inflate(R.layout.item_iceuninstallapp, null);
 			viewHolder = new ViewHolder();
 
 			viewHolder.appNameTv = (TextView)convertView.findViewById(R.id.item_main_appname);
+			viewHolder.appTimeTv = (TextView)convertView.findViewById(R.id.item_main_apptime);
 			viewHolder.iceAppIv = (ImageView) convertView.findViewById(R.id.item_main_service);
 			viewHolder.notUnstallAppIv = (ImageView)convertView.findViewById(R.id.item_main_wakelock);
-			viewHolder.unstallIv = (ImageView)convertView.findViewById(R.id.item_main_alarm);
+
+			viewHolder.clearDataIv = (ImageView)convertView.findViewById(R.id.item_main_alarm);
+			viewHolder.clearCacheIv = (ImageView)convertView.findViewById(R.id.item_provd_broad);
+			viewHolder.unstallIv = (ImageView)convertView.findViewById(R.id.item_main_broad);
+
 			viewHolder.appIcon= (ImageView) convertView.findViewById(R.id.item_main_appicon);
 			viewHolder.iceIv= (ImageView) convertView.findViewById(R.id.item_main_iceicon);
 			convertView.setTag(viewHolder);
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
-		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		int color = data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor);
+		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appTimeTv.setText((data.isRunning?BaseActivity.getProcStartTimeStr(data.packageName)+"\n"+BaseActivity.getProcTimeStr(data.packageName):""));
+		viewHolder.appTimeTv.setVisibility(data.isRunning?View.VISIBLE:View.GONE);
+		viewHolder.appTimeTv.setTextColor(color);
+		viewHolder.appNameTv.setTextColor(color);
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		File file = null;
+//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
+//			BaseActivity.loadeds.add(data.packageName);
+//			file = data.iconFile;
+//		}
+//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.iceAppIv.setTag(position);
 		viewHolder.notUnstallAppIv.setTag(position);
 		viewHolder.unstallIv.setTag(position);
+		viewHolder.clearCacheIv.setTag(position);
+		viewHolder.clearDataIv.setTag(position);
 
 		viewHolder.iceAppIv.setImageResource(data.isDisable?R.mipmap.icon_add:R.mipmap.icon_notdisable);
 //		viewHolder.serviceTv.setTextColor(data.isServiceStop? Color.RED:Color.BLACK);
 		viewHolder.notUnstallAppIv.setImageResource(data.isNotUnstall?R.mipmap.icon_add:R.mipmap.icon_notdisable);
 //		viewHolder.wakelockTv.setTextColor(data.isWakelockStop? Color.RED:Color.BLACK);
-		viewHolder.unstallIv.setImageResource(R.mipmap.icon_notdisable);
+		viewHolder.unstallIv.setImageResource(R.mipmap.icon_enter);
+		viewHolder.clearCacheIv.setImageResource(R.mipmap.icon_enter);
+		viewHolder.clearDataIv.setImageResource(R.mipmap.icon_enter);
 
 //		viewHolder.alarmTv.setTextColor(data.isAlarmStop? Color.RED:Color.BLACK);
 //		convertView.setOnClickListener(new View.OnClickListener() {
@@ -323,22 +347,62 @@ public class IceUnstallAdapter extends BaseAdapter{
 				ImageView buttonView = (ImageView)(v);
 				int g = (Integer)buttonView.getTag();
 				final AppInfo ai = bjdatas.get(g);
-				AlertUtil.showConfirmAlertMsg(c, "该功能需要谨慎操作，选择是否卸载？", new AlertUtil.InputCallBack() {
+				if(ai.isNotUnstall){
+					Toast.makeText(c,"请先取消禁止卸载功能",Toast.LENGTH_LONG).show();
+					return;
+				}
+				AlertUtil.showConfirmAlertMsg(c, "该功能需要谨慎操作(尤其系统应用，卸载后可能会导致无法开机等问题)，选择是否卸载？", new AlertUtil.InputCallBack() {
 					@Override
 					public void backData(String txt, int tag) {
 						if (tag == 1){
-							RemoveApp(ai.packageName);
+//							RemoveApp(ai.packageName);
+							Intent intent = new Intent("com.click369.control.pms.deletepkg");
+							intent.putExtra("pkg",ai.packageName);
+							intent.putExtra("isuser",ai.isUser);
+							intent.putExtra("ver",(int)ai.versionCode);
+							c.sendBroadcast(intent);
 						}
 					}
 				});
+			}
+		});
+		viewHolder.clearDataIv.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				BaseActivity.zhenDong(c);
+				ImageView buttonView = (ImageView)(v);
+				int g = (Integer)buttonView.getTag();
+				final AppInfo ai = bjdatas.get(g);
+				AlertUtil.showConfirmAlertMsg(c, "该功能需要谨慎操作，选择是否清除（清除后该应用的设置账户信息等数据将被删除）？", new AlertUtil.InputCallBack() {
+					@Override
+					public void backData(String txt, int tag) {
+						if (tag == 1){
+							Intent intent1 = new Intent("com.click369.control.pms.cleardata");
+							intent1.putExtra("pkg",ai.packageName);
+							c.sendBroadcast(intent1);
+						}
+					}
+				});
+			}
+		});
+		viewHolder.clearCacheIv.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				BaseActivity.zhenDong(c);
+				ImageView buttonView = (ImageView)(v);
+				int g = (Integer)buttonView.getTag();
+				final AppInfo ai = bjdatas.get(g);
+    			Intent intent1 = new Intent("com.click369.control.pms.clearcache");
+            	intent1.putExtra("pkg",ai.packageName);
+				c.sendBroadcast(intent1);
 			}
 		});
 		return convertView;
 	}
 	
 	static class ViewHolder{
-		public TextView appNameTv;//,serviceTv,wakelockTv,alarmTv;
-		public ImageView appIcon,iceAppIv,notUnstallAppIv,unstallIv,iceIv;
+		public TextView appNameTv,appTimeTv;//,serviceTv,wakelockTv,alarmTv;
+		public ImageView appIcon,iceAppIv,notUnstallAppIv,unstallIv,iceIv,clearCacheIv,clearDataIv;
 
 	}
 

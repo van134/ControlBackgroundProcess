@@ -15,6 +15,7 @@
             android:layout_height="match_parent"
             android:layout_margin="4dp" >
             <TextView
+                style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="全局相关、服务、强退、冷藏等相关设置"
@@ -33,6 +34,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="记录应用开启及关闭日志\n(可在常见问题及日志中查看)"
@@ -51,6 +53,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="打开控制器时默认显示侧栏"
@@ -68,6 +71,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="任何界面长按屏幕顶部中间弹出控制面板\n(重启生效)"
@@ -85,6 +89,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="应用列表实时更新后台时间(10秒一次)"
@@ -102,6 +107,24 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="禁止自启的应用未运行时禁止系统代推消息"
+                        android:id="@+id/setting_autostartnotnotify_sw"
+                        android:checked="true" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="被强退的应用从最近任务移除"
@@ -118,6 +141,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="正在播放音频的应用不执行‘强退/墓碑/待机/冻结’"
@@ -134,6 +158,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="返回/熄屏强退的应用后台超时12小时后杀死"
@@ -150,6 +175,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="熄屏时的动作时间未到再次亮屏时不取消执行"
@@ -167,6 +193,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="Xposed模式监听应用\n(关闭为无障碍模式,如果XP模式可用建议使用XP模式)"
@@ -186,6 +213,7 @@
                     android:layout_marginLeft="4dp" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="Xposed模式杀进程\n(关闭为root模式,如果XP模式可用建议使用XP模式)"
@@ -205,6 +233,7 @@
                     android:visibility="visible">
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="墓碑时只保留主进程(大多保留1-2个)\n(试验功能，打开后若有异常请反馈并关闭该功能)"
@@ -226,6 +255,7 @@
                     android:visibility="visible">
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="冷藏室应用启动后从最近任务划掉重新冷藏\n(该选项需要最近任务和启动控制功能开启)"
@@ -246,6 +276,7 @@
                     android:visibility="visible" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="冷藏室应用启动后熄屏重新冷藏\n(延迟时长与熄屏强退延迟同步)"
@@ -265,6 +296,7 @@
                     android:visibility="visible" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="冷藏室应用启动后返回退出重新冷藏\n(延迟时长与返回强退延迟同步)"
@@ -284,6 +316,7 @@
                     android:visibility="visible" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="定时强退的应用取消时必须用密码验证\n(密码与应用锁密码相同，选择密码验证指纹失效)"
@@ -302,6 +335,7 @@
                     android:visibility="visible" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="定时强退的应用取消时必须用指纹验证\n(选择后指纹验证密码验证失效)"
@@ -320,6 +354,7 @@
                     android:visibility="visible" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="定时强退的应用强退前不显示提示框"
@@ -338,6 +373,7 @@
                     android:visibility="visible" >
 
                     <Switch
+                        style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:text="点按震动"
@@ -369,6 +405,7 @@
                             android:layout_weight="8.5">
 
                             <TextView
+                                style="@style/mtextSize"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="返回键强退、墓碑和冻结延迟:0秒"
@@ -421,6 +458,7 @@
                             android:layout_weight="8.5" >
 
                             <TextView
+                                style="@style/mtextSize"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="后台时墓碑、待机延迟:0秒"
@@ -472,6 +510,7 @@
                             android:layout_weight="8.5" >
 
                             <TextView
+                                style="@style/mtextSize"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="熄屏时强退、墓碑和冻结延迟:0秒"
@@ -524,52 +563,6 @@
                 android:layout_height="wrap_content"
                 layout="@layout/layout_linkswitch"
                 android:layout_marginBottom="15dp" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="主题设置"
-                android:id="@+id/textView3" />
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/alert_backgroundshape"
-                android:layout_marginBottom="15dp">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
-
-                    <Switch
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="22:00-7:00自动切换为夜间模式"
-                        android:id="@+id/setting_auto_night_sw"
-                        android:checked="false" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
-
-                    <Switch
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="夜间模式"
-                        android:id="@+id/setting_nightmode_sw"
-                        android:checked="false" />
-                </FrameLayout>
-
-            </LinearLayout>
 
             <include
                 android:layout_width="match_parent"

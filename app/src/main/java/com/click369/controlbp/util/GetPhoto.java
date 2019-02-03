@@ -39,9 +39,18 @@ public class GetPhoto {
 //			photofile.delete();
 //		}
 	}
-	public void setScale(){
-		x = 9;
-		y = 14;
+	public void setScale(int type){
+		if(type == 0){
+			x = 9;
+			y = 14;
+		}else if(type ==1){
+			x = 6;
+			y = 17;
+		}else if(type ==2){
+			x = 5;
+			y = 1;
+		}
+
 	}
 	//是否需要裁剪
 	public void setIsNeedCrop(boolean isNeedCrop){

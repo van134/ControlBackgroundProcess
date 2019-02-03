@@ -14,6 +14,7 @@ import android.os.Message;
 import android.os.UserHandle;
 import android.util.Log;
 
+import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.common.Common;
@@ -41,8 +42,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedStopApp {
-//    public static  int tag = -1;
-
     public static void stopApk(String pkg,Context cxt){
         try {
             if(ContainsKeyWord.isContainsPkg(pkg)
@@ -51,9 +50,6 @@ public class XposedStopApp {
             {
                 return;
             }
-//            if(tag == -1){
-//                tag = 0;
-//            }
             if (WatchDogService.isSaveBackLog) {
                 FileUtil.writeLog(FileUtil.getLog("杀死 " + PackageUtil.getAppNameByPkg(cxt, pkg)));
             }
@@ -70,11 +66,12 @@ public class XposedStopApp {
             if(ai.getPackageName().equals(WatchDogService.musicPlayPkg)){
                 WatchDogService.musicPlayPkg = "";
             }
-            if(ai.isNotStop){
+            if(ai.isNotStop&& MainActivity.isModuleActive()){
                 Log.i("CONTROL","changepersistent  "+pkg);
                 Intent intent1 = new Intent("com.click369.control.ams.changepersistent");
                 intent1.putExtra("persistent",false);
                 intent1.putExtra("pkg",pkg);
+                intent1.putExtra("iskill",true);
                 cxt.sendBroadcast(intent1);
                 AppLoaderUtil.getInstance(cxt).notifyRuningStateChange();
                 return;
@@ -96,6 +93,50 @@ public class XposedStopApp {
             Log.i("CONTROL","AMS 杀死进程出错 改为root方式");
             ShellUtilNoBackData.kill(pkg);
         }
-//        return false;
+    }
+
+    public static void onlyStopApk(String pkg,Context cxt){
+        try {
+            if(ContainsKeyWord.isContainsPkg(pkg)
+                    ||pkg.toLowerCase().contains("clock")
+                    ||pkg.toLowerCase().contains("stk"))
+            {
+                return;
+            }
+            final AppInfo ai = AppLoaderUtil.allHMAppInfos.containsKey(pkg)?AppLoaderUtil.allHMAppInfos.get(pkg):new AppInfo();
+            ai.isRunning = false;
+            AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(pkg)?AppLoaderUtil.allAppStateInfos.get(pkg):new AppStateInfo();
+            AppStateInfo newAsi = new AppStateInfo();
+            newAsi.isOpenFromIceRome = asi.isOpenFromIceRome;
+            AppLoaderUtil.allAppStateInfos.put(pkg,newAsi);
+            AppLoaderUtil.runLists.remove(pkg);
+            if(ai.isLockApp){
+                SharedPrefsUtil.getInstance(cxt).autoStartNetPrefs.edit().remove(pkg+"/lockok").commit();
+            }
+            if(ai.getPackageName().equals(WatchDogService.musicPlayPkg)){
+                WatchDogService.musicPlayPkg = "";
+            }
+            if(ai.isNotStop&& MainActivity.isModuleActive()){
+                Intent intent1 = new Intent("com.click369.control.ams.changepersistent");
+                intent1.putExtra("persistent",false);
+                intent1.putExtra("pkg",pkg);
+                intent1.putExtra("iskill",true);
+                cxt.sendBroadcast(intent1);
+                AppLoaderUtil.getInstance(cxt).notifyRuningStateChange();
+                return;
+            }
+            if (!WatchDogService.isXPstop){
+                ShellUtilNoBackData.kill(pkg);
+            }else{
+                //部分系统无法使用
+                ActivityManager am =(ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
+                Method m = am.getClass().getDeclaredMethod("forceStopPackage",String.class);
+                m.setAccessible(true);
+                m.invoke(am,pkg);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ShellUtilNoBackData.kill(pkg);
+        }
     }
 }

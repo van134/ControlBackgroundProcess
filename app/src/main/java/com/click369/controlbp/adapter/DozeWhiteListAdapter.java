@@ -12,12 +12,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.activity.DozeWhiteListActivity;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
 import com.click369.controlbp.util.ShellUtilBackStop;
 
@@ -86,6 +86,7 @@ public class DozeWhiteListAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
@@ -99,6 +100,10 @@ public class DozeWhiteListAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -110,6 +115,7 @@ public class DozeWhiteListAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 
 		this.notifyDataSetChanged();
 	}
@@ -147,8 +153,8 @@ public class DozeWhiteListAdapter extends BaseAdapter{
 		}
 		viewHolder.appNameTv.setText(data.appName);
 		viewHolder.appNameTv.setTextColor(data.isRunning?data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):Color.parseColor(MainActivity.COLOR_RUN):(data.isDisable?Color.LTGRAY:DozeWhiteListActivity.curColor));
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
 		viewHolder.iceIv.setVisibility(data.isDisable?View.VISIBLE:View.GONE);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.openStopIv.setTag(position);

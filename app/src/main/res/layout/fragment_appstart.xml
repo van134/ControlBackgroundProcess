@@ -38,12 +38,14 @@
                     android:layout_weight="9"
                     android:textAlignment="gravity"
                     android:gravity="left|center"
+                    android:textSize="13dp"
                     android:text="长按标题全选" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="应用锁"
+                    android:textSize="13dp"
                     android:id="@+id/main_service_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -52,6 +54,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="禁运行"
+                    android:textSize="13dp"
                     android:id="@+id/main_wakelock_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -60,6 +63,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="禁自启"
+                    android:textSize="13dp"
                     android:id="@+id/main_alarm_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -68,6 +72,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="内存常驻"
+                    android:textSize="13dp"
                     android:id="@+id/main_notstop_tv"
                     android:layout_weight="4"
                     android:gravity="center" />

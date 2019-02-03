@@ -53,6 +53,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class XposedToast {
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences barPrefs){
         try {
+            barPrefs.reload();
             if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_TOASTCHANGE,false)&&
                     !lpparam.packageName.equals("com.cyberlink.photodirector")&&
                     !lpparam.packageName.equals("com.android.phone")){
@@ -70,8 +71,7 @@ public class XposedToast {
                             int textclor = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTTEXTCOLOR,Color.WHITE);
                             int postion = barPrefs.getInt(Common.PREFS_SETTING_UI_TOASTPOSTION,0);
                             makeToast(result,context,"",dur,grivity,bgcolor,textclor,postion);
-                            return;
-                        }catch (RuntimeException e){
+                        }catch (Throwable e){
                            XposedBridge.log("修改Toast失败1 "+e);
                         }
 
@@ -85,11 +85,6 @@ public class XposedToast {
                             CharSequence text = (CharSequence)methodHookParam.args[1];
                             int dur = (Integer) methodHookParam.args[2];
                             Toast t = new Toast(context);
-    //                        int grivity = settings.getInt(Common.PREFS_SETTING_UI_TOASTGRIVITY,Gravity.BOTTOM);
-    //                        int bgcolor = settings.getInt(Common.PREFS_SETTING_UI_TOASTBGCOLOR,Color.BLACK);
-    //                        int textclor = settings.getInt(Common.PREFS_SETTING_UI_TOASTTEXTCOLOR,Color.WHITE);
-    //                        methodHookParam.setResult(makeToast(result,context,text,dur,grivity,bgcolor,textclor));
-    //                        Toast t  = (Toast)methodHookParam.thisObject;
                             View v = t.getView();
                             if(v!=null){
                                 View textView =  v.findViewWithTag(10);
@@ -100,7 +95,7 @@ public class XposedToast {
                                 methodHookParam.setResult(t);
                                 return;
                             }
-                        }catch (RuntimeException e){
+                        }catch (Throwable e){
                             XposedBridge.log("修改Toast失败2 "+e);
                         }
                     }
@@ -119,7 +114,7 @@ public class XposedToast {
                                 methodHookParam.setResult(null);
                                 return;
                             }
-                        }catch (RuntimeException e){
+                        }catch (Throwable e){
                             XposedBridge.log("修改Toast失败3 "+e);
                         }
                     }

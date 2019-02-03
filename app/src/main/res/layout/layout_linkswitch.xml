@@ -8,6 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="选择关联设置"
+        style="@style/mtextSize"
         android:id="@+id/setting_link_title" />
 
     <LinearLayout
@@ -25,6 +26,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="强退选中时关联禁止自启"
                 android:id="@+id/setting_linkstopandautostart_sw"
                 android:checked="false" />
@@ -41,6 +43,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="强退选中时关联移除杀死"
                 android:id="@+id/setting_linkstopandremovestop_sw"
                 android:checked="false" />
@@ -59,6 +62,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="最近任务卡片选中保留时关联常驻内存"
                 android:id="@+id/setting_linkrecentnotcleanandnotstop_sw"
                 android:checked="false" />
@@ -77,6 +81,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="最近任务卡片选中移除杀死时关联禁止自启"
                 android:id="@+id/setting_linkrecentremoveandautostart_sw"
                 android:checked="false" />

@@ -166,7 +166,7 @@ public class AdFragment extends BaseFragment {
             for(TextView t:tvs){
                 t.setTextColor(curColor);
             }
-            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.COLOR));
+            tv.setTextColor(adapter.sortType==-1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
             loadY(listView,AdFragment.this.getClass(),adapter.sortType);
         }
     }

@@ -100,26 +100,30 @@ public class RoundedCornerService{
         }
     };
 
-
+    Runnable initRun = new Runnable() {
+        @Override
+        public void run() {
+            Log.i("CONTROL","start float view");
+            isAllReadyInit = true;
+            screenLightServiceUtil.init();
+            if(WatchDogService.isRoundCorOpen){
+                Configuration config = context.getResources().getConfiguration();
+                // 如果当前是横屏
+                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
+                    createFloatView(1);
+                }else if (config.orientation == Configuration.ORIENTATION_PORTRAIT){
+                    createFloatView(0);
+                }
+            }
+        }
+    };
     boolean isAllReadyInit = false;
     private void init(){
         if(isAllReadyInit){
             return;
         }
-        Log.i("CONTROL","start float view");
-        isAllReadyInit = true;
-        screenLightServiceUtil.init();
-//        pv = new PixelView(context);
-//        pv.setWidowManager(mWindowManager,context);
-        if(WatchDogService.isRoundCorOpen){
-            Configuration config = context.getResources().getConfiguration();
-            // 如果当前是横屏
-            if (config.orientation == Configuration.ORIENTATION_LANDSCAPE){
-                createFloatView(1);
-            }else if (config.orientation == Configuration.ORIENTATION_PORTRAIT){
-                createFloatView(0);
-            }
-        }
+        hander.removeCallbacks(initRun);
+        hander.post(initRun);
     }
     int dhheight = 0,statusheight = 0;
     int offset = 0;
@@ -149,6 +153,10 @@ public class RoundedCornerService{
             wmParamsInfo = new WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
                     WindowManager.LayoutParams.WRAP_CONTENT);
+            wmParamsInfo.setTitle("控制器");
+            wmParamsTop1.setTitle("控制器");
+            wmParamsTop.setTitle("控制器");
+            wmParamsBottom.setTitle("控制器");
             //设置window type
             wmParamsInfo.type = 2003;
             //设置图片格式，效果为背景透明
@@ -417,31 +425,16 @@ public class RoundedCornerService{
                 }
                 if(intent.getAction().equals("com.click369.control.openinstall")){
                     addOrRemoveCor(false);
-//                    if(isShow){
-//                        mWindowManager.removeView(mFloatLayoutBottom);
-//                        mWindowManager.removeView(mFloatLayoutTop);
-//                        mWindowManager.removeView(mFloatLayoutTop1);
-//                        isShow = false;
-//                    }
                 }else if(intent.getAction().equals("com.click369.control.closeinstall")){
                     addOrRemoveCor(true);
-//                    if(!isShow){
-//                        mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
-//                        mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
-//                        mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
-//                        isShow = true;
-//                    }
                 }else if(intent.getAction().equals("com.click369.control.restartcor")){
                     addOrRemoveCor(false);
-                    addOrRemoveCor(true);
-//                    if(isShow){
-//                        mWindowManager.removeView(mFloatLayoutTop);
-//                        mWindowManager.removeView(mFloatLayoutTop1);
-//                        mWindowManager.removeView(mFloatLayoutBottom);
-//                        mWindowManager.addView(mFloatLayoutBottom, wmParamsBottom);
-//                        mWindowManager.addView(mFloatLayoutTop, wmParamsTop);
-//                        mWindowManager.addView(mFloatLayoutTop1, wmParamsTop1);
-//                    }
+                    hander.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            addOrRemoveCor(true);
+                        }
+                    },300);
                 }else if(intent.getAction().equals("com.click369.control.imeopen")){
                     Log.i("CONTROL","imeopen");
                     if(WatchDogService.isRoundCorOpen&&isAllReadyInit){
@@ -490,8 +483,6 @@ public class RoundedCornerService{
                     }
                     if(intent.getAction().equals(Intent.ACTION_CONFIGURATION_CHANGED)){
                         screenLightServiceUtil.changDir();
-//                        screenLightServiceUtil.init();
-//                        screenLightServiceUtil.showLight(LightView.LIGHT_TYPE_TEST);
                     }
                 }else if(intent.getAction().equals("com.click369.control.float.infouishow")){
                     boolean isShowInfo = intent.getBooleanExtra("isShow",false);
@@ -562,7 +553,7 @@ public class RoundedCornerService{
                        WatchDogService.isNeedGetFloatPremission = true;
                        Toast.makeText(context,"圆角或边缘呼吸效果需要浮动权限，请重启手机或打开界面控制进行设置",Toast.LENGTH_LONG).show();
                    }
-                    Log.i("CONTROL","checkxp float view  isHasXPFloat "+WatchDogService.isHasXPFloatVewPermission+" isHasSysFloat "+WatchDogService.isHasSysFloatVewPermission);
+//                    Log.i("CONTROL","checkxp float view  isHasXPFloat "+WatchDogService.isHasXPFloatVewPermission+" isHasSysFloat "+WatchDogService.isHasSysFloatVewPermission);
                    if(WatchDogService.isHasSysFloatVewPermission||
                            WatchDogService.isHasXPFloatVewPermission){
                        if (!isAllReadyInit){

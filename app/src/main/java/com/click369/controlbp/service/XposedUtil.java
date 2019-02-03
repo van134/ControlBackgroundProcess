@@ -21,6 +21,7 @@ import com.click369.controlbp.common.Common;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -56,6 +57,7 @@ public class XposedUtil {
         intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
         intentb.putExtra("skipDialogPrefs", (Serializable) skipDialogPrefs.getAll());
         c.sendBroadcast(intentb);
+        WatchDogService.isNeedAMSReadLoad= false;
     }
     public  static HashMap<String,Method> getAMSParmas(Class amsCls){
         HashMap<String,Method> hms = new HashMap<String,Method>();
@@ -64,6 +66,16 @@ public class XposedUtil {
         for(Method m:ms){
             if ("removeTask".equals(m.getName())&&!hms.containsKey("removeTask")){
                 hms.put("removeTask",m);
+                i++;
+            }else if ("removeTaskByIdLocked".equals(m.getName())){
+                if(hms.containsKey("removeTaskByIdLocked")&&m.getParameterTypes().length>hms.get("removeTaskByIdLocked").getParameterTypes().length){
+                    hms.put("removeTaskByIdLocked",m);
+                }else if(!hms.containsKey("removeTaskByIdLocked")){
+                    hms.put("removeTaskByIdLocked",m);
+                }
+                i++;
+            }else if ("cleanUpRemovedTaskLocked".equals(m.getName())&&!hms.containsKey("cleanUpRemovedTaskLocked")){
+                hms.put("cleanUpRemovedTaskLocked",m);
                 i++;
             }else if ("createRecentTaskInfoFromTaskRecord".equals(m.getName())&&!hms.containsKey("createRecentTaskInfoFromTaskRecord")){
                 hms.put("createRecentTaskInfoFromTaskRecord",m);
@@ -79,6 +91,12 @@ public class XposedUtil {
                 i++;
             }else if ("forceStopPackage".equals(m.getName())&&!hms.containsKey("forceStopPackage")){
                 hms.put("forceStopPackage",m);
+                i++;
+            }else if ("killApplication".equals(m.getName())&&!hms.containsKey("killApplication")){
+                hms.put("killApplication",m);
+                i++;
+            }else if ("killApplicationProcess".equals(m.getName())&&!hms.containsKey("killApplicationProcess")){
+                hms.put("killApplicationProcess",m);
                 i++;
             }else if ("startActivity".equals(m.getName())&&!hms.containsKey("startActivity")){
                 hms.put("startActivity",m);
@@ -100,6 +118,13 @@ public class XposedUtil {
                     hms.put("startService",m);
                 }else if(!hms.containsKey("startService")){
                     hms.put("startService",m);
+                }
+                i++;
+            }else if ("bindService".equals(m.getName())){
+                if(hms.containsKey("bindService")&&m.getParameterTypes().length>hms.get("bindService").getParameterTypes().length){
+                    hms.put("bindService",m);
+                }else if(!hms.containsKey("bindService")){
+                    hms.put("bindService",m);
                 }
                 i++;
             }else if ("startProcessLocked".equals(m.getName())){
@@ -129,7 +154,25 @@ public class XposedUtil {
         }
         return null;
     }
-
+    public static Class[] getMaxLenParmsByName(Class cls,String methodName){
+        if(cls!=null){
+            Method ms[] = cls.getDeclaredMethods();
+            int n = 0;
+            Method mt = null;
+            for(Method m:ms){
+                if (m.getName().equals(methodName)){
+                    if(m.getParameterTypes().length>=n){
+                        mt = m;
+                    }
+                }
+            }
+            if(mt!=null){
+                return mt.getParameterTypes();
+            }
+            return null;
+        }
+        return null;
+    }
     public static void showParmsByName(Class cls,String methodName){
         if(cls!=null){
             Method ms[] = cls.getDeclaredMethods();
@@ -188,76 +231,104 @@ public class XposedUtil {
         }
     }
 
-    public static void changePersistent(Class amsCls,Object ams,String pkg,boolean persistent){
-        try{
-            Field procsField = amsCls.getDeclaredField("mLruProcesses");
-            procsField.setAccessible(true);
-            ArrayList<Object> procs = (ArrayList<Object>)procsField.get(ams);
-            if(procs!=null&&procs.size()>0){
-                for(Object proc:procs){
-                    Field infoField = proc.getClass().getDeclaredField("info");
-                    infoField.setAccessible(true);
-                    ApplicationInfo info = (ApplicationInfo)infoField.get(proc);
-                    if(pkg.equals(info.packageName)){
-                        Field persistentField = proc.getClass().getDeclaredField("persistent");
-                        persistentField.setAccessible(true);
-                        persistentField.set(proc,persistent);
-                    }
-                }
+    public static void showMethods(Class cls){
+        if(cls!=null){
+            Method fs[] = cls.getDeclaredMethods();
+            XposedBridge.log("^^^^^^^^^^^^^^" + cls.getName() + "的属性^^^^^^^^^^^^^^^^^");
+            for(Method f:fs){
+                XposedBridge.log("^^^^^^^^^^^^^^" + f.getName() +" 参数个数： "+f.getParameterTypes().length +"^^^^^^^^^^^^^^^^^");
             }
-        }catch (Throwable e){
-            e.printStackTrace();
-            XposedBridge.log("^^^^^^^^^^^^^^changePersistent err1 "+ e + "^^^^^^^^^^^^^^^^^");
         }
     }
 
-    public static void stopProcess(Class amsCls,Class processRecordCls,Object ams,String pkg,boolean isStop){
+//    public static void changePersistent(Class amsCls,Object ams,String pkg,boolean persistent){
+//        try{
+//            Field procsField = amsCls.getDeclaredField("mLruProcesses");
+//            procsField.setAccessible(true);
+//            ArrayList<Object> procs = (ArrayList<Object>)procsField.get(ams);
+//            if(procs!=null&&procs.size()>0){
+//                for(Object proc:procs){
+//                    Field infoField = proc.getClass().getDeclaredField("info");
+//                    infoField.setAccessible(true);
+//                    ApplicationInfo info = (ApplicationInfo)infoField.get(proc);
+//                    if(pkg.equals(info.packageName)){
+//                        Field persistentField = proc.getClass().getDeclaredField("persistent");
+//                        persistentField.setAccessible(true);
+//                        persistentField.set(proc,persistent);
+//                    }
+//                }
+//            }
+//        }catch (Throwable e){
+//            e.printStackTrace();
+//            XposedBridge.log("^^^^^^^^^^^^^^changePersistent err1 "+ e + "^^^^^^^^^^^^^^^^^");
+//        }
+//    }
+
+    public static void stopProcess(Class amsCls,Object ams,String pkg){
         try{
             Field procsField = amsCls.getDeclaredField("mLruProcesses");
 //            Field mProcessStatsField = amsCls.getDeclaredField("mProcessStats");
             procsField.setAccessible(true);
 //            mProcessStatsField.setAccessible(true);
-            ArrayList<Object> procs = (ArrayList<Object>)procsField.get(ams);
+            ArrayList<Object> procs = new ArrayList<Object>((ArrayList<Object>)procsField.get(ams));
 //          Object mProcessStats =  mProcessStatsField.get(ams);
             if(procs!=null&&procs.size()>0){
-                Method method = processRecordCls.getDeclaredMethod("kill",String.class,boolean.class);
-                method.setAccessible(true);
+//                Method method = amsCls.getDeclaredMethod("killApplicationProcess",String.class,int.class);
+//                method.setAccessible(true);
+
                 for(Object proc:procs){
                     Field infoField = proc.getClass().getDeclaredField("info");
                     infoField.setAccessible(true);
-                    ApplicationInfo info = (ApplicationInfo)infoField.get(proc);
-                    if(pkg.equals(info.packageName)){
-                        Field baseField = proc.getClass().getDeclaredField("baseProcessTracker");
-                        baseField.setAccessible(true);
-                        Object processStateObj = baseField.get(proc);
-                        if (isStop) {
-                            Field hasShownUiField = proc.getClass().getDeclaredField("hasShownUi");
-                            hasShownUiField.setAccessible(true);
-                            boolean hasShowUI = (boolean) hasShownUiField.get(proc);
-                            if (!hasShowUI) {
-                                Field persistentField = proc.getClass().getDeclaredField("persistent");
-                                persistentField.setAccessible(true);
-                                persistentField.set(proc,false);
-                                method.invoke(proc, "killbyself", false);
-                            } else {
-    //                          Field cachedField = proc.getClass().getDeclaredField("cached");
-    //                          cachedField.setAccessible(true);
-    //                          cachedField.set(proc,true);
-                                if (processStateObj != null) {
-                                    Method inActMethod = processStateObj.getClass().getDeclaredMethod("makeInactive");
-                                    inActMethod.setAccessible(true);
-                                    inActMethod.invoke(processStateObj);
-//                                  XposedBridge.log("^^^^^^^^^^^^^^^^^暂停进程 "+pkg+" ^^^^^^^^^^^^^^^");
-                                }
-                            }
-                        }else{
 
-                            if (processStateObj!=null) {
-                                Method actMethod = processStateObj.getClass().getDeclaredMethod("makeActive");
-                                actMethod.setAccessible(true);
-                                actMethod.invoke(processStateObj);
-                            }
+                    ApplicationInfo info = (ApplicationInfo)infoField.get(proc);
+//                    if(pkg.equals(info.packageName)){
+//                        XposedBridge.log("^^^^^^^^^^^^^^^^^methodKill00  "+info.+" ^^^^^^^^^^^^^^^");
+//                    }
+
+                    if(pkg.equals(info.packageName)){
+                        Field hasShownUiField = proc.getClass().getDeclaredField("hasShownUi");
+                        hasShownUiField.setAccessible(true);
+                        boolean hasShowUI = (boolean) hasShownUiField.get(proc);
+//                        XposedBridge.log("^^^^^^^^^^^^^^^^^methodKill "+pkg+" hasShowUI "+hasShowUI+" ^^^^^^^^^^^^^^^");
+                        if(!hasShowUI){
+                            Method methodKill = proc.getClass().getDeclaredMethod("kill",String.class,boolean.class);
+                            methodKill.setAccessible(true);
+                            methodKill.invoke(proc,"stop "+info.packageName,false);
                         }
+
+//                        method.invoke(ams,info.processName,info.uid);
+                            //killApplicationProcess
+//                        Field baseField = proc.getClass().getDeclaredField("baseProcessTracker");
+//                        baseField.setAccessible(true);
+//                        Object processStateObj = baseField.get(proc);
+//                        if (isStop) {
+//                            Field hasShownUiField = proc.getClass().getDeclaredField("hasShownUi");
+//                            hasShownUiField.setAccessible(true);
+//                            boolean hasShowUI = (boolean) hasShownUiField.get(proc);
+//                            if (!hasShowUI) {
+//                                Field persistentField = proc.getClass().getDeclaredField("persistent");
+//                                persistentField.setAccessible(true);
+//                                persistentField.set(proc,false);
+//                                method.invoke(proc, "killbyself", false);
+//                            } else {
+//    //                          Field cachedField = proc.getClass().getDeclaredField("cached");
+//    //                          cachedField.setAccessible(true);
+//    //                          cachedField.set(proc,true);
+//                                if (processStateObj != null) {
+//                                    Method inActMethod = processStateObj.getClass().getDeclaredMethod("makeInactive");
+//                                    inActMethod.setAccessible(true);
+//                                    inActMethod.invoke(processStateObj);
+////                                  XposedBridge.log("^^^^^^^^^^^^^^^^^暂停进程 "+pkg+" ^^^^^^^^^^^^^^^");
+//                                }
+//                            }
+//                        }else{
+//
+//                            if (processStateObj!=null) {
+//                                Method actMethod = processStateObj.getClass().getDeclaredMethod("makeActive");
+//                                actMethod.setAccessible(true);
+//                                actMethod.invoke(processStateObj);
+//                            }
+//                        }
                     }
                 }
             }
@@ -410,12 +481,18 @@ public class XposedUtil {
         }
     }
 
+    public static void hookMethod(ClassLoader classLoader,String cls,String methodName,XC_MethodHook hook){
+        Class clsss = XposedUtil.findClass(cls,classLoader);
+        if(clsss!=null){
+            hookMethod(clsss,XposedUtil.getParmsByName(clsss,methodName),methodName,hook);
+        }else{
+            XposedBridge.log("^^^^^^^^^^^^^^"+ cls+"#"+methodName+ "未找到^^^^^^^^^^^^^^^^^");
+        }
+    }
     public static void hookMethod(Class cls,Class clss[],String methodName,XC_MethodHook hook){
         try {
             int len = clss!=null?clss.length:0;
             switch (len){
-
-
                 case 0:
                     XposedHelpers.findAndHookMethod(cls, methodName,hook);
                     break;
@@ -581,5 +658,53 @@ public class XposedUtil {
             XposedBridge.log("^^^^^^^^^^^^^^构造函数未找到  "+cls.getName()+"  "+e+"^^^^^^^^^^^^^^^^^");
         }
 
+    }
+
+    //带参数的方法拦截
+    public static void hook_methods(Class clzz, String methodName, XC_MethodHook xmh)
+    {
+        try {
+            for (Method method : clzz.getDeclaredMethods())
+                if (method.getName().equals(methodName)
+                        && !Modifier.isAbstract(method.getModifiers())) {
+                    XposedBridge.hookMethod(method, xmh);
+                }
+        } catch (Throwable e) {
+            XposedBridge.log(e);
+        }
+    }
+    public static int hook_methodLen(Class clzz, String methodName)
+    {
+        try {
+            int len = 0;
+            for (Method method : clzz.getDeclaredMethods())
+                if (method.getName().equals(methodName)
+                        && !Modifier.isAbstract(method.getModifiers())) {
+                    Class cc[] = method.getParameterTypes();
+                    boolean cod1 = cc.length>5&&(cc[1].getSimpleName().equals(ApplicationInfo.class.getSimpleName()))&&
+                            (cc[4].getSimpleName().equals(String.class.getSimpleName()));
+                    if(cod1){
+                        if(cc!=null&&len<cc.length){
+                            len = cc.length;
+                        }
+                    }
+                }
+            return len;
+        } catch (Throwable e) {
+            XposedBridge.log(e);
+        }
+        return 0;
+    }
+
+
+    public static Class findClass(String name,ClassLoader loader){
+        try {
+            Class cls = XposedHelpers.findClass(name,loader);
+            return cls;
+        }catch (Throwable e){
+            e.printStackTrace();
+            XposedBridge.log("^^^^^^^^^^^^^^类未找到  "+name+"  "+e+"^^^^^^^^^^^^^^^^^");
+        }
+        return null;
     }
 }

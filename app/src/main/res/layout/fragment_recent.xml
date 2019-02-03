@@ -36,6 +36,7 @@
                     android:layout_height="match_parent"
                     android:id="@+id/textView5"
                     android:layout_weight="8"
+                    android:textSize="13dp"
                     android:textAlignment="gravity"
                     android:gravity="left|center"
                     android:text="长按全选" />
@@ -46,6 +47,7 @@
                     android:text="保留"
                     android:id="@+id/recent_notclean_tv"
                     android:layout_weight="3"
+                    android:textSize="13dp"
                     android:gravity="center" />
 
                 <TextView
@@ -54,6 +56,7 @@
                     android:text="杀死"
                     android:id="@+id/recent_forceclean_tv"
                     android:layout_weight="3"
+                    android:textSize="13dp"
                     android:gravity="center" />
 
                 <TextView
@@ -62,21 +65,14 @@
                     android:text="模糊"
                     android:id="@+id/recent_blur_tv"
                     android:layout_weight="3"
+                    android:textSize="13dp"
                     android:gravity="center" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="开机自启"
-                    android:id="@+id/textView2"
-                    android:layout_weight="2"
-                    android:gravity="center"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:text="隐藏"
+                    android:textSize="13dp"
                     android:id="@+id/rrecent_notshow_tv"
                     android:layout_weight="3"
                     android:gravity="center"

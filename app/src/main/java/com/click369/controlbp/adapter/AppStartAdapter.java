@@ -1,6 +1,7 @@
 package com.click369.controlbp.adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -17,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.fragment.AppStartFragment;
 import com.click369.controlbp.activity.BaseActivity;
@@ -30,6 +30,7 @@ import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -117,6 +118,7 @@ public class AppStartAdapter extends BaseAdapter{
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempRun = new ArrayList<AppInfo>();
+		ArrayList<AppInfo> tempDisableApp = new ArrayList<AppInfo>();
 		temp.addAll(this.bjdatas);
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
@@ -132,6 +134,10 @@ public class AppStartAdapter extends BaseAdapter{
 				if(ai.isRunning){
 					tempRun.add(ai);
 				}else{
+					if(ai.isDisable){
+						tempDisableApp.add(ai);
+						continue;
+					}
 					if (System.currentTimeMillis() - ai.instanllTime<1000*60*60*12&&System.currentTimeMillis() - ai.instanllTime>1000){
 						tempNewApp.add(ai);
 					}else{
@@ -143,6 +149,7 @@ public class AppStartAdapter extends BaseAdapter{
 		this.bjdatas.addAll(tempNewApp);
 		this.bjdatas.addAll(tempRun);
 		this.bjdatas.addAll(tempNoChoose);
+		this.bjdatas.addAll(tempDisableApp);
 		this.bjdatas.add(0,myAi);
 		myAi.isRunning = true;
 		myAi.isLockApp = modPrefs.getBoolean(myAi.packageName+"/lockapp",false);
@@ -182,6 +189,7 @@ public class AppStartAdapter extends BaseAdapter{
 			convertView= inflater.inflate(R.layout.item_appstart, null);
 			viewHolder = new ViewHolder();
 			viewHolder.appNameTv = (TextView) convertView.findViewById(R.id.item_appstart_appname);
+			viewHolder.appTimeTv = (TextView) convertView.findViewById(R.id.item_main_apptime);
 			viewHolder.lockAppIv = (ImageView) convertView.findViewById(R.id.item_appstart_lock);
 			viewHolder.stopAppIv = (ImageView)convertView.findViewById(R.id.item_appstart_notstart);
 			viewHolder.autoStartIv = (ImageView)convertView.findViewById(R.id.item_appstart_autostart);
@@ -192,10 +200,20 @@ public class AppStartAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		viewHolder.appNameTv.setText(data.appName+(data.isRunning?BaseActivity.getProcTimeStr(data.packageName):""));
-		viewHolder.appNameTv.setTextColor(data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor));
-//		viewHolder.appIcon.setImageBitmap(data.getBitmap());
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.appIcon );
+		int color = data.isRunning?(data.isInMuBei?Color.parseColor(MainActivity.COLOR_MUBEI):(MainActivity.pkgIdleStates.contains(data.packageName)?Color.parseColor(MainActivity.COLOR_IDLE):Color.parseColor(MainActivity.COLOR_RUN))):(data.isDisable?Color.LTGRAY: ControlFragment.curColor);
+		viewHolder.appNameTv.setText(data.appName);
+		viewHolder.appTimeTv.setText((data.isRunning?BaseActivity.getProcStartTimeStr(data.packageName)+"\n"+BaseActivity.getProcTimeStr(data.packageName):""));
+		viewHolder.appTimeTv.setVisibility(data.isRunning?View.VISIBLE:View.GONE);
+		viewHolder.appTimeTv.setTextColor(color);
+		viewHolder.appNameTv.setTextColor(color);
+
+		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
+//		File file = null;
+//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
+//			BaseActivity.loadeds.add(data.packageName);
+//			file = data.iconFile;
+//		}
+//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.lockAppIv.setTag(position);
@@ -362,7 +380,7 @@ public class AppStartAdapter extends BaseAdapter{
 				SharedPreferences.Editor ed = modPrefs.edit();
 				if(isStop){
 					ed.remove(ai.getPackageName()+"/notstop").commit();
-					sendBroadChangePersistent(ai.getPackageName(),false);
+					sendBroadChangePersistent(c,ai.getPackageName(),false);
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/notstop",true).commit();
 					if (ai.isStopApp){
@@ -370,12 +388,13 @@ public class AppStartAdapter extends BaseAdapter{
 						ai.isStopApp = false;
 						notifyDataSetChanged();
 					}
-					sendBroadChangePersistent(ai.getPackageName(),true);
+					sendBroadChangePersistent(c,ai.getPackageName(),true);
 					if(ai.isBackForceStop||ai.isOffscForceStop){
 						AlertUtil.showAlertMsg(c,"检测到你已把该应用加入到强退功能中，应用控制器的强退功能还会将其杀死，但系统或其他管理类应用将不会杀死该应用。");
 					}
 				}
-				XposedStopApp.stopApk(ai.getPackageName(),c);
+
+//				XposedStopApp.onlyStopApk(ai.getPackageName(),c);
 				buttonView.setImageResource(ai.isNotStop?R.mipmap.icon_add:R.mipmap.icon_notdisable);
 //				buttonView.setText(ai.isAlarmStop?"已禁用":"未禁用");
 //				buttonView.setTextColor(ai.isAlarmStop? Color.RED:Color.BLACK);
@@ -385,12 +404,12 @@ public class AppStartAdapter extends BaseAdapter{
 	}
 	
 	static class ViewHolder{
-		public TextView appNameTv;
+		public TextView appNameTv,appTimeTv;
 		public ImageView appIcon,lockAppIv,stopAppIv,autoStartIv,notStoptIv,iceIv;
 
 	}
 
-	public void sendBroadChangePersistent(String pkg,boolean persistent){
+	public static void sendBroadChangePersistent(Context c,String pkg, boolean persistent){
 		Intent intent1 = new Intent("com.click369.control.ams.changepersistent");
 		intent1.putExtra("persistent",persistent);
 		intent1.putExtra("pkg",pkg);

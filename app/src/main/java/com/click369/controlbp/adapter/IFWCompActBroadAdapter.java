@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.IFWCompActivity;
+import com.click369.controlbp.common.ContainsKeyWord;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PinyinCompareDisable;
 import com.click369.controlbp.util.PinyinCompareDisableReceiver;
@@ -110,10 +111,17 @@ public class IFWCompActBroadAdapter extends BaseAdapter{
 		}else{
 			viewHolder.nameTv.setText(data.name);
 		}
+//		String runs = "";
+//		if(data.name.indexOf(".")>-1){
+//			runs=  data.name.substring(data.name.lastIndexOf(".")+1).trim();
+//		}else{
+//			runs=data.name;
+//		}
+
 		String dataName = data.name.trim();//.replaceAll("\\$","/\\$");
 		boolean isDiable = c.ifwString.contains(dataName)||!PackageUtil.isEnable(data.packageName,dataName,pm);
-		viewHolder.stopTv.setText(isDiable?"已禁用": "未禁用");
-		viewHolder.stopTv.setTextColor(isDiable? Color.RED:IFWCompActivity.curColor);
+		viewHolder.stopTv.setText(isDiable?"已禁用": (ContainsKeyWord.isContainsWord(dataName)?"建议禁用":"未禁用"));
+		viewHolder.stopTv.setTextColor(isDiable? Color.RED:(ContainsKeyWord.isContainsWord(dataName)?Color.BLUE:IFWCompActivity.curColor));
 		return convertView;
 	}
 	

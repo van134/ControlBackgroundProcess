@@ -8,6 +8,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="应用锁设置"
+        style="@style/mtextSize"
         android:id="@+id/setting_lockapp_title" />
 
     <LinearLayout
@@ -25,6 +26,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="隐藏指纹验证界面和提示\n(隐藏后点击锁定的应用看上去没有反应)"
                 android:id="@+id/setting_showui_sw"
                 android:checked="false" />
@@ -43,6 +45,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="指纹验证熄屏后重新锁定\n(关闭为退出应用立刻锁定)"
                 android:id="@+id/setting_offsclock_sw"
                 android:checked="false" />
@@ -62,6 +65,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="指纹验证时可以使用密码验证"
                 android:id="@+id/setting_showunlocknumber_sw"
                 android:checked="false" />
@@ -81,6 +85,7 @@
             <Switch
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="密码验证使用自定义密码\n(关闭为时间密码，当前时间减1分钟，例:1745)"
                 android:id="@+id/setting_usepwd_sw"
                 android:checked="false" />
@@ -102,6 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:text="设置解锁密码"
+                style="@style/mtextSize"
                 android:id="@+id/setting_lock_setpwd_tv"
                 android:textAlignment="gravity"
                 android:gravity="left|center_vertical" />

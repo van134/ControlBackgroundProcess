@@ -57,6 +57,7 @@ public class ContainsKeyWord {
         words.add("ixintui");
         words.add("agoo");
         words.add(".ads.");
+        words.add(".pushbootreceiver");
 
         notStopApp.add("com.fkzhang.wechatxposed");
         notStopApp.add("com.cyanogenmod.lockclock");
@@ -111,6 +112,7 @@ public class ContainsKeyWord {
         fullCpuCoreApp.put("com.ss.android.ugc.aweme",full3);
         ArrayList<String> full4 = new ArrayList<String>();
         full4.add("com.tencent.mobileqq.richmedia.capture.activity.CameraCaptureActivity");
+        full4.add("dov.com.qq.im.QIMCameraCaptureActivity");
         fullCpuCoreApp.put("com.tencent.mobileqq",full4);
 
 

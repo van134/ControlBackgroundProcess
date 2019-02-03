@@ -38,7 +38,7 @@ public class MyTileService extends TileService{
         super.onClick();
         SharedPreferences sp =  SharedPrefsUtil.getInstance(this).dozePrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_DOZELIST);
         SharedPreferences setting =  SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
-        if(!setting.getBoolean(Common.ALLSWITCH_SEVEN,true)){
+        if(!setting.getBoolean(Common.ALLSWITCH_DOZE,true)){
             return;
         }
         if(sp.getBoolean(Common.PREFS_SETTING_DOZE_ALLSWITCH,false)){
@@ -70,7 +70,7 @@ public class MyTileService extends TileService{
     private void updateTile(){
         SharedPreferences sp =  SharedPrefsUtil.getPreferences(this, Common.PREFS_DOZELIST);
         SharedPreferences setting =  SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
-        if(sp.getBoolean(Common.PREFS_SETTING_DOZE_ALLSWITCH,false)&&setting.getBoolean(Common.ALLSWITCH_SEVEN,true)){
+        if(sp.getBoolean(Common.PREFS_SETTING_DOZE_ALLSWITCH,false)&&setting.getBoolean(Common.ALLSWITCH_DOZE,true)){
             this.getQsTile().setState(Tile.STATE_ACTIVE);
             this.getQsTile().setLabel("打盹打开");
         }else{

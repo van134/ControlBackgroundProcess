@@ -73,7 +73,7 @@ public class XposedAccessKeyListener {
                     }
                 }
             });
-        }catch (RuntimeException e){
+        }catch (Throwable e){
             e.printStackTrace();
         }
     }

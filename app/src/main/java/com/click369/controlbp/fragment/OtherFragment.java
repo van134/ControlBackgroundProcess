@@ -2,6 +2,7 @@ package com.click369.controlbp.fragment;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -28,6 +29,7 @@ import com.click369.controlbp.R;
 import com.click369.controlbp.activity.ADBTestActivity;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.activity.CPUSetActivity;
+import com.click369.controlbp.activity.ChangeLocActivity;
 import com.click369.controlbp.activity.ChangeTextActivity;
 import com.click369.controlbp.activity.EmptyActivity;
 import com.click369.controlbp.activity.IceRoomActivity;
@@ -60,14 +62,16 @@ import java.util.List;
 
 
 public class OtherFragment extends BaseFragment {
-    private TextView jxCleanTv,cleanSysTv,cleanProcessTv,kjRunTv,kjIceTv,kjCleanTv,kjjxCleanTv,kjRestartTv,adbTv,wifiTv,killSelfTv,changeTextTv,cleanTv,changeBgTv,bgBlurTv,bgBrightTv,kjCPUTv;
-    private Switch selSw,homeErrorSw,cleanSw,stopScanMeidaSw;//toastSw;
-    private SeekBar cleanSb,bgBlurSb,bgBrightSb;
+    private TextView jxCleanTv,cleanSysTv,cleanProcessTv,kjRunTv,kjIceTv,kjCleanTv,
+            kjjxCleanTv,kjRestartTv,adbTv,wifiTv,killSelfTv,changeTextTv,cleanTv,
+            kjCPUTv,changeLocTv;//changeBgTv,bgBlurTv,bgBrightTv,
+    private Switch selSw,cleanSw,stopScanMeidaSw,getMsgCodeSw,getMsgCodeToETSw;//toastSw;
+    private SeekBar cleanSb;//,bgBlurSb,bgBrightSb;
     private ActivityManager activityManager;
     private MainActivity mainActivity;
     private int curColor = Color.BLACK;
     private SharedPreferences settings;
-    private int alpha = 100,blur = 0;
+    //private int alpha = 100,blur = 0;
     private TextView tvs[] = null;
     private SeekBar sbs[] = null;
     public OtherFragment() {
@@ -84,18 +88,20 @@ public class OtherFragment extends BaseFragment {
         settings = SharedPrefsUtil.getInstance(getActivity()).settings;//SharedPrefsUtil.getPreferences(getActivity(),Common.PREFS_APPSETTINGS);
         selSw = (Switch) v.findViewById(R.id.other_sel_sw);
         stopScanMeidaSw = (Switch) v.findViewById(R.id.other_scanmedia_sw);
-        homeErrorSw = (Switch) v.findViewById(R.id.other_homeerr_sw);
+        getMsgCodeSw = (Switch) v.findViewById(R.id.other_getmsgcode_sw);
+        getMsgCodeToETSw = (Switch) v.findViewById(R.id.other_getmsgcodetoed_sw);
         cleanSw = (Switch) v.findViewById(R.id.other_clean_sw);
         cleanSb = (SeekBar) v.findViewById(R.id.other_clean_sb);
-        bgBlurSb = (SeekBar) v.findViewById(R.id.other_bg_blursb);
-        bgBrightSb = (SeekBar) v.findViewById(R.id.other_bg_brightsb);
+//        bgBlurSb = (SeekBar) v.findViewById(R.id.other_bg_blursb);
+//        bgBrightSb = (SeekBar) v.findViewById(R.id.other_bg_brightsb);
         cleanTv = (TextView) v.findViewById(R.id.other_clean_title);
         adbTv = (TextView) v.findViewById(R.id.other_adb_tv);
         curColor = adbTv.getCurrentTextColor();
         selSw.setTextColor(curColor);
         stopScanMeidaSw.setTextColor(curColor);
-        homeErrorSw.setTextColor(curColor);
         cleanSw.setTextColor(curColor);
+        getMsgCodeSw.setTextColor(curColor);
+        getMsgCodeToETSw.setTextColor(curColor);
 //        colorBarTv = (TextView) v.findViewById(R.id.other_colorbar_tv);
         kjCPUTv = (TextView) v.findViewById(R.id.other_kj_cpu_tv);
         jxCleanTv = (TextView) v.findViewById(R.id.other_jixian_tv);
@@ -109,19 +115,20 @@ public class OtherFragment extends BaseFragment {
         wifiTv = (TextView) v.findViewById(R.id.other_wifipwd_tv);
         killSelfTv = (TextView) v.findViewById(R.id.other_killself_tv);
         changeTextTv = (TextView) v.findViewById(R.id.other_changetext_tv);
-        changeBgTv = (TextView) v.findViewById(R.id.other_changbg_tv);
-        bgBlurTv = (TextView) v.findViewById(R.id.other_bg_blurvalue);
-        bgBrightTv = (TextView) v.findViewById(R.id.other_bg_brightvalue);
+//        changeBgTv = (TextView) v.findViewById(R.id.other_changbg_tv);
+//        bgBlurTv = (TextView) v.findViewById(R.id.other_bg_blurvalue);
+//        bgBrightTv = (TextView) v.findViewById(R.id.other_bg_brightvalue);
+        changeLocTv = (TextView) v.findViewById(R.id.other_changloc_tv);
         ImageView pen = (ImageView) v.findViewById(R.id.other_pen1_iv);
-        ImageView pen2 = (ImageView) v.findViewById(R.id.other_pen2_iv);
-        ImageView pen3 = (ImageView) v.findViewById(R.id.other_pen3_iv);
+//        ImageView pen2 = (ImageView) v.findViewById(R.id.other_pen2_iv);
+//        ImageView pen3 = (ImageView) v.findViewById(R.id.other_pen3_iv);
         pen.setTag(3);
-        pen2.setTag(7);
-        pen3.setTag(8);
+//        pen2.setTag(7);
+//        pen3.setTag(8);
         PenClickListener penClickListener = new PenClickListener();
         pen.setOnClickListener(penClickListener);
-        pen2.setOnClickListener(penClickListener);
-        pen3.setOnClickListener(penClickListener);
+//        pen2.setOnClickListener(penClickListener);
+//        pen3.setOnClickListener(penClickListener);
         ItemClick itemClick = new ItemClick();
 //        colorBarTv.setOnClickListener(itemClick);
         jxCleanTv.setOnClickListener(itemClick);
@@ -136,8 +143,9 @@ public class OtherFragment extends BaseFragment {
         wifiTv.setOnClickListener(itemClick);
         killSelfTv.setOnClickListener(itemClick);
         changeTextTv.setOnClickListener(itemClick);
-        changeBgTv.setOnClickListener(itemClick);
+//        changeBgTv.setOnClickListener(itemClick);
         kjCPUTv.setOnClickListener(itemClick);
+        changeLocTv.setOnClickListener(itemClick);
         SwCheckListener swLis = new SwCheckListener();
 
 //        toastSw.setOnCheckedChangeListener(swLis);
@@ -163,42 +171,45 @@ public class OtherFragment extends BaseFragment {
 //        adSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ADJUMP,false));
         int time = settings.getInt(Common.PREFS_SETTING_OTHER_CLEANDELAYTIME,0);
         cleanSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_ISCLEAN,false));
-        homeErrorSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_HOMEERROR,false));
+        getMsgCodeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_MMS_ISGETCODE,false));
+        getMsgCodeToETSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_MMS_ISGETCODETOEDIT,false));
         stopScanMeidaSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,false));
         cleanSb.setProgress(time);
 
         selSw.setTag(0);
         cleanSw.setTag(1);
-        homeErrorSw.setTag(2);
+        getMsgCodeSw.setTag(2);
         stopScanMeidaSw.setTag(3);
+        getMsgCodeToETSw.setTag(4);
         selSw.setOnCheckedChangeListener(swLis);
         cleanSw.setOnCheckedChangeListener(swLis);
-        homeErrorSw.setOnCheckedChangeListener(swLis);
+        getMsgCodeSw.setOnCheckedChangeListener(swLis);
         stopScanMeidaSw.setOnCheckedChangeListener(swLis);
+        getMsgCodeToETSw.setOnCheckedChangeListener(swLis);
 
 
-        blur  = settings.getInt(Common.PREFS_SETTING_OTHER_BGBLUR,0);
-        alpha = settings.getInt(Common.PREFS_SETTING_OTHER_BGBRIGHT,100);
-        bgBlurSb.setProgress(blur);
-        bgBrightSb.setProgress(alpha);
-        bgBlurTv.setText("应用控制器背景图片模糊度:"+blur);
-        bgBrightTv.setText("应用控制器背景图片透明度:"+alpha);
+//        blur  = settings.getInt(Common.PREFS_SETTING_OTHER_BGBLUR,0);
+//        alpha = settings.getInt(Common.PREFS_SETTING_OTHER_BGBRIGHT,100);
+//        bgBlurSb.setProgress(blur);
+//        bgBrightSb.setProgress(alpha);
+//        bgBlurTv.setText("应用控制器背景图片模糊度:"+blur);
+//        bgBrightTv.setText("应用控制器背景图片透明度:"+alpha);
 
         cleanTv.setText("熄屏清理内存冗余数据延迟:"+time+"秒");
         SeekBarListener sbl = new SeekBarListener();
         cleanSb.setTag(0);
-        bgBlurSb.setTag(1);
-        bgBrightSb.setTag(2);
+//        bgBlurSb.setTag(1);
+//        bgBrightSb.setTag(2);
         cleanSb.setOnSeekBarChangeListener(sbl);
-        bgBlurSb.setOnSeekBarChangeListener(sbl);
-        bgBrightSb.setOnSeekBarChangeListener(sbl);
+//        bgBlurSb.setOnSeekBarChangeListener(sbl);
+//        bgBrightSb.setOnSeekBarChangeListener(sbl);
         if (!cleanSw.isChecked()){
             cleanTv.setAlpha(0.7f);
             cleanSb.setAlpha(0.7f);
             cleanSb.setEnabled(false);
         }
-        tvs = new TextView[]{cleanTv,bgBlurTv,bgBrightTv};
-        sbs = new SeekBar[]{cleanSb,bgBlurSb,bgBrightSb};
+        tvs = new TextView[]{cleanTv};
+        sbs = new SeekBar[]{cleanSb};
         return v;
     }
     class SwCheckListener implements CompoundButton.OnCheckedChangeListener{
@@ -224,8 +235,16 @@ public class OtherFragment extends BaseFragment {
                     cleanSb.setAlpha(0.7f);
                     cleanSb.setEnabled(false);
                 }
-            }else if(buttonView.equals(homeErrorSw)){
-                settings.edit().putBoolean(Common.PREFS_SETTING_OTHER_HOMEERROR,isChecked).commit();
+            }else if(buttonView.equals(getMsgCodeSw)){
+                settings.edit().putBoolean(Common.PREFS_SETTING_OTHER_MMS_ISGETCODE,isChecked).commit();
+                Intent intent = new Intent("com.click369.control.mms.changeconfig");
+                intent.putExtra("isGetCode",isChecked);
+                getActivity().sendBroadcast(intent);
+            }else if(buttonView.equals(getMsgCodeToETSw)){
+                settings.edit().putBoolean(Common.PREFS_SETTING_OTHER_MMS_ISGETCODETOEDIT,isChecked).commit();
+                Intent intent = new Intent("com.click369.control.mms.changeconfig");
+                intent.putExtra("isGetCodetoEdit",isChecked);
+                getActivity().sendBroadcast(intent);
             }else if(buttonView.equals(stopScanMeidaSw)){
                 settings.edit().putBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,isChecked).commit();
             }
@@ -286,62 +305,81 @@ public class OtherFragment extends BaseFragment {
                 Toast.makeText(getActivity(),"重启选项 快捷方式创建成功",Toast.LENGTH_LONG).show();
             }else if(v.equals(killSelfTv)){
                 //System.exit(0);
-                String titles[] = {"重启系统界面","重启到RECOVER","重启手机","关机","自杀(仅前台界面)"};
-                AlertUtil.showListAlert(getActivity(), "重启菜单", titles, new AlertUtil.InputCallBack() {
-                    @Override
-                    public void backData(String txt, int tag) {
-                        if (tag ==0){
-                            Intent intent1 = new Intent("com.click369.control.rebootsystemui");
-                            getActivity().sendBroadcast(intent1);
-                        }else if (tag ==1){
-                            ShellUtils.execCommand("reboot recovery",true);
-                        }else if (tag ==2){
-                            ShellUtils.execCommand("reboot",true);
-                        }else if (tag ==3){
-                            ShellUtils.execCommand("reboot -p",true);
-                        }else if (tag == 4){
-                            Intent intent1 = new Intent("com.click369.control.ams.killself");
-                            getActivity().sendBroadcast(intent1);
-                        }
-                    }
-                });
+                showRestartAlert(getActivity());
             }else if(v.equals(changeTextTv)){
                 Intent itent = new Intent(getActivity(),ChangeTextActivity.class);
                 startActivity(itent);
-            }else if(v.equals(changeBgTv)){
-                mainActivity.getPhoto.setIsNeedCrop(true);
-                mainActivity.getPhoto.setPhotofile(mainActivity.bgFile);
-                boolean isOk = true;
-                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
-                    String[] permissions= {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
-                    if(!PermissionUtils.checkPermissionAllGranted(mainActivity,permissions)){
-                        isOk = false;
-                    }
-                }
-                if(isOk){
-                    AlertUtil.showListAlert(mainActivity, "请选择", new String[]{"选择背景图片","清除背景图片"}, new AlertUtil.InputCallBack() {
+            }else if(v.equals(changeLocTv)){
+                Intent itent = new Intent(getActivity(),ChangeLocActivity.class);
+                startActivity(itent);
+            }
+//            else if(v.equals(changeBgTv)){
+//                mainActivity.getPhoto.setIsNeedCrop(true);
+//                mainActivity.getPhoto.setPhotofile(mainActivity.bgFile);
+//                boolean isOk = true;
+//                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+//                    String[] permissions= {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+//                    if(!PermissionUtils.checkPermissionAllGranted(mainActivity,permissions)){
+//                        isOk = false;
+//                    }
+//                }
+//                if(isOk){
+//                    AlertUtil.showListAlert(mainActivity, "请选择", new String[]{"选择背景图片","清除背景图片"}, new AlertUtil.InputCallBack() {
+//                        @Override
+//                        public void backData(String txt, int tag) {
+//                            if (tag == 0){
+//                                mainActivity.getPhoto.setScale();
+//                                mainActivity.getPhoto.photoWithGrelly();
+//                            }else if(tag == 1){
+//                                if(mainActivity.bgFile.exists()){
+//                                    mainActivity.bgFile.delete();
+//                                }
+//                                if(mainActivity.bgBlurFile.exists()){
+//                                    mainActivity.bgBlurFile.delete();
+//                                }
+//                                mainActivity.mainRL.setBackground(null);
+//                                mainActivity.mainRL.setBackgroundColor(MainActivity.isNightMode?Color.BLACK:Color.WHITE);
+//                            }
+//                        }
+//                    });
+//                }else{
+//                    Toast.makeText(mainActivity,"没有文件读写权限",Toast.LENGTH_LONG).show();
+//                }
+//            }
+        }
+    }
+
+    public static void showRestartAlert(final Activity activity){
+        final String titles[] = {"重启系统界面","重启到RECOVER","重启手机","关机","自杀(仅前台界面)"};
+        AlertUtil.showListAlert(activity, "重启菜单", titles, new AlertUtil.InputCallBack() {
+            @Override
+            public void backData(String txt, int tag) {
+                if (tag ==0){
+                    Intent intent1 = new Intent("com.click369.control.rebootsystemui");
+                    activity.sendBroadcast(intent1);
+                }else if (tag == 4){
+                    Intent intent1 = new Intent("com.click369.control.ams.killself");
+                    activity.sendBroadcast(intent1);
+                }else{
+                    final int myTag = tag;
+                    AlertUtil.showConfirmAlertMsg(activity, "是否" + titles[tag]+ "?", new AlertUtil.InputCallBack() {
                         @Override
                         public void backData(String txt, int tag) {
-                            if (tag == 0){
-                                mainActivity.getPhoto.setScale();
-                                mainActivity.getPhoto.photoWithGrelly();
-                            }else if(tag == 1){
-                                if(mainActivity.bgFile.exists()){
-                                    mainActivity.bgFile.delete();
-                                }
-                                if(mainActivity.bgBlurFile.exists()){
-                                    mainActivity.bgBlurFile.delete();
-                                }
-                                mainActivity.mainRL.setBackground(null);
-                                mainActivity.mainRL.setBackgroundColor(MainActivity.isNightMode?Color.BLACK:Color.WHITE);
+                            if(tag!=1){
+                                return;
+                            }
+                            if (myTag ==1){
+                                ShellUtils.execCommand("reboot recovery",true);
+                            }else if (myTag ==2){
+                                ShellUtils.execCommand("reboot",true);
+                            }else if (myTag ==3){
+                                ShellUtils.execCommand("reboot -p",true);
                             }
                         }
                     });
-                }else{
-                    Toast.makeText(mainActivity,"没有文件读写权限",Toast.LENGTH_LONG).show();
                 }
             }
-        }
+        });
     }
     String s = null;
     private void showWifiPwd(){
@@ -534,7 +572,7 @@ public class OtherFragment extends BaseFragment {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             int tag= (Integer) seekBar.getTag();
-            String names[] = {"熄屏清理内存冗余数据延迟:","应用控制器背景图片模糊度:","应用控制器背景图片亮度:"};
+            String names[] = {"熄屏清理内存冗余数据延迟:"};
             tvs[tag].setText(names[tag]+seekBar.getProgress()+(tag==0?"秒":""));
 
         }
@@ -550,16 +588,10 @@ public class OtherFragment extends BaseFragment {
             if(tag ==0){
                 seekBar.setProgress(seekBar.getProgress()+(offset==0?0:(offset>5?(10-offset):-1*offset)));
             }
-            String names[] = {Common.PREFS_SETTING_OTHER_CLEANDELAYTIME,Common.PREFS_SETTING_OTHER_BGBLUR,Common.PREFS_SETTING_OTHER_BGBRIGHT};
+            String names[] = {Common.PREFS_SETTING_OTHER_CLEANDELAYTIME};
             settings.edit().putInt(names[tag],seekBar.getProgress()).commit();
             if(tag == 0){
                 WatchDogService.delayCleanTime = seekBar.getProgress();
-            }else if(tag == 1){
-                blur = seekBar.getProgress();
-                changeBgBlur(mainActivity,seekBar.getProgress(),alpha);
-            }else if(tag == 2){
-                alpha = seekBar.getProgress();
-                changeBgBlur(mainActivity,blur,alpha);
             }
         }
     }
@@ -577,18 +609,10 @@ public class OtherFragment extends BaseFragment {
                         if(tag == 3){
                             WatchDogService.delayCleanTime = value;
                             tag = 0;
-                        }else{
-                            tag = tag- 6;
-                            if(tag == 1){
-                                blur = value;
-                            }else{
-                                alpha = value;
-                            }
-                            changeBgBlur(mainActivity,blur,alpha);
                         }
-                        String names[] = {Common.PREFS_SETTING_OTHER_CLEANDELAYTIME,Common.PREFS_SETTING_OTHER_BGBLUR,Common.PREFS_SETTING_OTHER_BGBRIGHT};
+                        String names[] = {Common.PREFS_SETTING_OTHER_CLEANDELAYTIME};
                         settings.edit().putInt(names[tag],value).commit();
-                        String names1[] = {"熄屏清理内存冗余数据延迟:","应用控制器背景图片模糊度:","应用控制器背景图片透明度:"};
+                        String names1[] = {"熄屏清理内存冗余数据延迟:"};
                         tvs[tag].setText(names1[tag]+value+(tag==0?"秒":""));
                         sbs[tag].setProgress(value);
                     }
@@ -596,27 +620,27 @@ public class OtherFragment extends BaseFragment {
             });
         }
     }
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public void changeBgBlur(MainActivity mainActivity,final int blur,final int alpha){
-        if(mainActivity.bgFile.exists()){
-            try {
-                Drawable d = null;
-                if(blur>0){
-                    Bitmap bitmap = StackBlur.blurNativelyPixels(BitmapFactory.decodeFile(mainActivity.bgFile.getAbsolutePath()),blur, false);
-                    FileOutputStream fos = new FileOutputStream(mainActivity.bgBlurFile);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG,95,fos);
-                    d = Drawable.createFromPath(mainActivity.bgBlurFile.getAbsolutePath());
-                }else{
-                    d = Drawable.createFromPath(mainActivity.bgFile.getAbsolutePath());
-                }
-                d.setAlpha((int)(alpha*2.55));
-                mainActivity.mainRL.setBackgroundColor(Color.BLACK);
-                mainActivity.mainRL.setBackground(d);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }else{
-            Toast.makeText(mainActivity,"还未选择图片",Toast.LENGTH_SHORT).show();
-        }
-    }
+//    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+//    public void changeBgBlur(MainActivity mainActivity,final int blur,final int alpha){
+//        if(mainActivity.bgFile.exists()){
+//            try {
+//                Drawable d = null;
+//                if(blur>0){
+//                    Bitmap bitmap = StackBlur.blurNativelyPixels(BitmapFactory.decodeFile(mainActivity.bgFile.getAbsolutePath()),blur, false);
+//                    FileOutputStream fos = new FileOutputStream(mainActivity.bgBlurFile);
+//                    bitmap.compress(Bitmap.CompressFormat.JPEG,95,fos);
+//                    d = Drawable.createFromPath(mainActivity.bgBlurFile.getAbsolutePath());
+//                }else{
+//                    d = Drawable.createFromPath(mainActivity.bgFile.getAbsolutePath());
+//                }
+//                d.setAlpha((int)(alpha*2.55));
+//                mainActivity.mainRL.setBackgroundColor(Color.BLACK);
+//                mainActivity.mainRL.setBackground(d);
+//            }catch (Exception e){
+//                e.printStackTrace();
+//            }
+//        }else{
+//            Toast.makeText(mainActivity,"还未选择图片",Toast.LENGTH_SHORT).show();
+//        }
+//    }
 }

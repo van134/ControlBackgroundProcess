@@ -66,8 +66,8 @@ public class TopSearchView {
             }
         });
 
-        userAppTv.setTextColor(appType==1?curColor:Color.parseColor("#40d0b7"));
-        sysAppTv.setTextColor(appType==0?curColor:Color.parseColor("#40d0b7"));
+        userAppTv.setTextColor(appType==1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
+        sysAppTv.setTextColor(appType==0?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
 
         sysAppTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +79,7 @@ public class TopSearchView {
                             public void backData(String txt, int tag) {
                                 if (tag == 1) {
                                     appType = 2;
-                                    sysAppTv.setTextColor(Color.parseColor("#40d0b7"));
+                                    sysAppTv.setTextColor(Color.parseColor(MainActivity.THEME_TEXT_COLOR));
                                     if(cb!=null){
                                         searchText = editText.getText().toString().trim().length()>0?editText.getText().toString().trim():(appType==0?"u":(appType==1?"s":""));
                                         cb.backAppType(searchText);
@@ -89,7 +89,7 @@ public class TopSearchView {
                         });
                     }else{
                         appType = 2;
-                        sysAppTv.setTextColor(Color.parseColor("#40d0b7"));
+                        sysAppTv.setTextColor(Color.parseColor(MainActivity.THEME_TEXT_COLOR));
                     }
                 }else if(appType == 2){
                     appType = 0;
@@ -106,7 +106,7 @@ public class TopSearchView {
             public void onClick(View v) {
                 if(appType == 1){
                     appType = 2;
-                    userAppTv.setTextColor(Color.parseColor("#40d0b7"));
+                    userAppTv.setTextColor(Color.parseColor(MainActivity.THEME_TEXT_COLOR));
                 }else if(appType == 2){
                     appType = 1;
                     userAppTv.setTextColor(curColor);
@@ -153,8 +153,8 @@ public class TopSearchView {
         }
         editText.setText(searchText);
         editText.setSelection(editText.getText().length());
-        userAppTv.setTextColor(appType==1?curColor:Color.parseColor("#40d0b7"));
-        sysAppTv.setTextColor(appType==0?curColor:Color.parseColor("#40d0b7"));
+        userAppTv.setTextColor(appType==1?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
+        sysAppTv.setTextColor(appType==0?curColor:Color.parseColor(MainActivity.THEME_TEXT_COLOR));
     }
 
     public interface CallBack{

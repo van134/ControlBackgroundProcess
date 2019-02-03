@@ -27,6 +27,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:text="增强唤醒锁"
+                android:textSize="14dp"
                 android:id="@+id/main_control_waklock_tv"
                 android:background="@drawable/et_backgroundshape"
                 android:gravity="center"
@@ -38,6 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:text="增强定时器"
+                android:textSize="14dp"
                 android:id="@+id/main_control_alarm_tv"
                 android:background="@drawable/et_backgroundshape"
                 android:gravity="center"
@@ -65,6 +67,7 @@
                     android:layout_height="match_parent"
                     android:id="@+id/textView5"
                     android:layout_weight="10"
+                    android:textSize="13dp"
                     android:textAlignment="gravity"
                     android:gravity="left|center"
                     android:text="长按标题全选" />
@@ -73,6 +76,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="服务"
+                    android:textSize="13dp"
                     android:id="@+id/main_service_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -81,6 +85,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="广播"
+                    android:textSize="13dp"
                     android:id="@+id/main_broad_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -89,6 +94,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="唤醒锁"
+                    android:textSize="13dp"
                     android:id="@+id/main_wakelock_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -97,6 +103,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="定时器"
+                    android:textSize="13dp"
                     android:id="@+id/main_alarm_tv"
                     android:layout_weight="3"
                     android:gravity="center" />

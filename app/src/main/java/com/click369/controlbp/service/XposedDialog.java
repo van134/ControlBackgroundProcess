@@ -60,6 +60,20 @@ public class XposedDialog {
                                     }
                                 }
                                 if(isContains){
+                                    ArrayList<View> views = new ArrayList<View>();
+                                    mDecor.findViewsWithText(views,"wxposed",View.FIND_VIEWS_WITH_TEXT);
+                                    if( views.size()>0){
+                                        isContains = false;
+                                    }
+                                    if(isContains) {
+                                        mDecor.findViewsWithText(views, "qxposed", View.FIND_VIEWS_WITH_TEXT);
+                                        if( views.size()>0){
+                                            isContains = false;
+                                        }
+                                    }
+                                }
+
+                                if(isContains){
                                     dialog.setOnCancelListener(null);
                                     dialog.setOnDismissListener(null);
                                     dialog.setCanceledOnTouchOutside(true);
@@ -77,7 +91,7 @@ public class XposedDialog {
                     }
                     }
                 });
-            }catch (RuntimeException e){
+            }catch (Throwable e){
                 e.printStackTrace();
             }
         } catch (Throwable e){

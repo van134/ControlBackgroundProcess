@@ -14,56 +14,7 @@ public class ShellUtilDoze {
     private static OutputStream out;
     private static InputStream in;
     private static int count = 0;
-    /**
-     * 结束进程,执行操作调用即可
-     */
-//    public static void kill(String packageName) {
-//        initProcess();
-//        killProcess(packageName);
-////        close();
-//    }
-
     public static void execCommand(final List<String> lists){
-//        new Thread(){
-//            @Override
-//            public void run() {
-                initProcess();
-                try {
-                    synchronized (out) {
-                        for (String s : lists) {
-                            out.write((s + "\n").getBytes());
-                        }
-                        out.flush();
-//                        while (true) {
-//                            byte datas1[] = new byte[1024];
-//                            int len1 = in.read(datas1);
-//                            if (datas1 == null || len1 == -1) {
-//                                break;
-//                            }
-////                    String s1 = new String(datas1,0,len1).trim();
-////                    Log.e("CONTROL", " len1" + len1+" s1  " + s1);
-////                    successMsg.append(s1);
-//                            if (len1 < 1024) {
-//                                break;
-//                            }
-//                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-//            }
-//        }.start();
-//        count++;
-//        if(count>=30){
-//            count = 0;
-//            close();
-//        }
-    }
-
-    public static void execCommand(final String[] lists){
-//        new Thread(){
-//            @Override
-//            public void run() {
         initProcess();
         try {
             synchronized (out) {
@@ -71,19 +22,20 @@ public class ShellUtilDoze {
                     out.write((s + "\n").getBytes());
                 }
                 out.flush();
-//                while(true){
-//                    byte datas1[] = new byte[1024];
-//                    int len1 = in.read(datas1);
-//                    if(datas1==null||len1==-1){
-//                        break;
-//                    }
-////                    String s1 = new String(datas1,0,len1).trim();
-////                    Log.e("CONTROL", " len1" + len1+" s1  " + s1);
-////                    successMsg.append(s1);
-//                    if(len1<1024){
-//                        break;
-//                    }
-//                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void execCommand(final String[] lists){
+        initProcess();
+        try {
+            synchronized (out) {
+                for (String s : lists) {
+                    out.write((s + "\n").getBytes());
+                }
+                out.flush();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -91,13 +43,6 @@ public class ShellUtilDoze {
             out = null;
             in = null;
         }
-//            }
-//        }.start();
-//        count++;
-//        if(count>=30){
-//            count = 0;
-//            close();
-//        }
     }
 
     public static void execCommand(final String cmd){
@@ -108,21 +53,7 @@ public class ShellUtilDoze {
                 try {
                     synchronized (out) {
                         out.write((cmd + "\n").getBytes());
-//            out.write(("exit\n").getBytes());
                         out.flush();
-//                        while(true){
-//                            byte datas1[] = new byte[1024];
-//                            int len1 = in.read(datas1);
-//                            if(datas1==null||len1==-1){
-//                                break;
-//                            }
-////                    String s1 = new String(datas1,0,len1).trim();
-////                    Log.e("CONTROL", " len1" + len1+" s1  " + s1);
-////                    successMsg.append(s1);
-//                            if(len1<1024){
-//                                break;
-//                            }
-//                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -132,12 +63,6 @@ public class ShellUtilDoze {
                 }
             }
         }.start();
-
-//        count++;
-//        if(count>=30){
-//            count = 0;
-//            close();
-//        }
     }
 
     /**

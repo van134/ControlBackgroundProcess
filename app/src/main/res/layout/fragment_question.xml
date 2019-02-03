@@ -22,18 +22,30 @@
                 android:id="@+id/question_et"
                 android:layout_below="@+id/disable_tv"
                 android:hint="搜索"
+                android:textSize="14dp"
                 android:background="@drawable/et_backgroundshape"
-
                 android:gravity="center"
-                android:layout_weight="9"
+                android:layout_weight="8"
                 android:layout_marginTop="3dp"
                 android:layout_marginBottom="3dp" />
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:text="应用运行日志"
+                android:text="动作\n日志"
                 android:id="@+id/question_showappstartlogalert"
-                android:layout_weight="4"
+                android:layout_weight="2"
+                android:background="@drawable/et_backgroundshape"
+                android:gravity="center"
+                android:textSize="10dp"
+                android:textAlignment="gravity"
+                android:layout_gravity="center_vertical" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:text="系统\n日志"
+                android:id="@+id/question_showamslogalert"
+                android:layout_weight="2"
+                android:textSize="10dp"
                 android:background="@drawable/et_backgroundshape"
                 android:gravity="center"
                 android:textAlignment="gravity"
@@ -41,9 +53,10 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:text="异常日志"
+                android:text="出错\n日志"
+                android:textSize="10dp"
                 android:id="@+id/question_showlogalert"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:background="@drawable/et_backgroundshape"
                 android:gravity="center"
                 android:textAlignment="gravity"
@@ -53,8 +66,9 @@
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"
-                android:text="提示"
-                android:id="@+id/question_showalert"
+                android:text="更新\n日志"
+                android:textSize="10dp"
+                android:id="@+id/question_showupdatelogalert"
                 android:layout_weight="2"
                 android:background="@drawable/et_backgroundshape"
                 android:gravity="center"
@@ -76,15 +90,16 @@
                 android:fillViewport="false">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="目前还不完善，这是个长期的工作，如果你有异常和解决办法请到酷安评论区发表并@我，可行的话我可以在更新时加入到问题记录中"
+                    android:text="这是个长期的工作，如果你有异常和解决办法请到酷安评论区发表并@我，可行的话我可以在更新时加入到问题记录中"
+                    android:textSize="13dp"
                     android:id="@+id/question_alert_tv"
                     android:layout_gravity="left|top"
                     android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
+                    android:layout_marginLeft="4dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginRight="8dp" />
+                    android:layout_marginRight="4dp" />
             </ScrollView>
 
         </FrameLayout>

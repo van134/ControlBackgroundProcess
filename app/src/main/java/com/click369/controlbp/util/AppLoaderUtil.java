@@ -57,8 +57,10 @@ public class AppLoaderUtil {
     public boolean isAppChange = true;
     public boolean isSettingChange = true;
     private long lastUpdateTime = 0;
+    private PackageManager pm = null;
     public static final HashMap<String,AppStateInfo> allAppStateInfos = new HashMap<String,AppStateInfo>();
     public static final HashMap<String,AppInfo> allHMAppInfos = new HashMap<String,AppInfo>();
+    public static final HashMap<String,Bitmap> allHMAppIcons = new HashMap<String,Bitmap>();
     public static final ArrayList<AppInfo> allAppInfos = new ArrayList<AppInfo>();
     public static final HashSet<String> runLists = new HashSet<String>();
     public static AppLoaderUtil getInstance(Context context){
@@ -74,8 +76,10 @@ public class AppLoaderUtil {
         sharedPrefs.isPrefsChange = isPrefsChange;
     }
     private AppLoaderUtil(Context context) {
+        pm = context.getApplicationContext().getPackageManager();
         this.context = context;
         sharedPrefs = SharedPrefsUtil.getInstance(context);
+
         try {
             iconPath = new File(context.getFilesDir(),"icon");
             iconPath.mkdirs();
@@ -86,6 +90,7 @@ public class AppLoaderUtil {
     }
 
     public void reloadRunList(){
+
         runLists.clear();
         runLists.addAll(PackageUtil.getRunngingAppList(context));
 //        if(runLists.size()==0){
@@ -153,7 +158,7 @@ public class AppLoaderUtil {
     }
 
     public void checkAppChange(){
-        PackageManager pm = context.getPackageManager();
+//        PackageManager pm = context.getPackageManager();
         List<PackageInfo> packgeInfos = pm.getInstalledPackages(0);
         long firTime = 0;
         for(PackageInfo packgeInfo : packgeInfos){
@@ -162,11 +167,14 @@ public class AppLoaderUtil {
             }
         }
         long lastTime = sharedPrefs.settings.getLong("LASTAPPINSTALLTIME",0);
+        int allappcount = sharedPrefs.settings.getInt("ALLAPPCOUNT",0);
         File fs[] = iconPath.listFiles();
-        isAppChange = firTime != lastTime||allAppInfos.size()==0||fs==null||fs.length<10;
+        isAppChange = firTime != lastTime||(allappcount!=0&&allappcount!=packgeInfos.size())||allAppInfos.size()==0||fs==null||fs.length<10;
         if(isAppChange){
             Log.i("CONTROL","app发生变化  start loadApp");
             loadApp();
+        }else{
+            Log.i("CONTROL","app没有发生变化");
         }
     }
 
@@ -180,14 +188,11 @@ public class AppLoaderUtil {
                 }
                 isLoadAppThreadRun = true;
                 synchronized (instance) {
-                    Log.i("CONTROL","-----------start loadApp");
-                    PackageManager pm = context.getPackageManager();
+                    Log.i("CONTROL","-----------start loadApp "+allHMAppInfos.size());
                     List<PackageInfo> packgeInfos = pm.getInstalledPackages(0);
                     ArrayList<AppInfo> tempallAppInfos = new ArrayList<AppInfo>();
                     HashMap<String, AppInfo> tempallHMAppInfos = new HashMap<String, AppInfo>();
                     reloadRunList();
-
-//                    HashSet<String> runs = PackageUtil.getRunngingAppList(context);
                     long firTime = 0;
                     for (PackageInfo packgeInfo : packgeInfos) {
                         String packageName = packgeInfo.packageName;
@@ -227,11 +232,11 @@ public class AppLoaderUtil {
                         }
                     }
                     sharedPrefs.settings.edit().putLong("LASTAPPINSTALLTIME",firTime).commit();
+                    sharedPrefs.settings.edit().putInt("ALLAPPCOUNT",packgeInfos.size()).commit();
                     PinyinCompare comparent = new PinyinCompare();
                     Collections.sort(tempallAppInfos, comparent);
                     lastUpdateTime = System.currentTimeMillis();
                     AppInfo.writeArrays(tempallAppInfos, context);
-//                    isLocalChange = true;
                     allAppInfos.clear();
                     allAppInfos.addAll(tempallAppInfos);
                     allHMAppInfos.clear();
@@ -250,22 +255,19 @@ public class AppLoaderUtil {
                             }
                         });
                     }
-
-
-
                 }
                 isLoadAppThreadRun = false;
-                Log.i("CONTROL","-----------stop loadApp");
+                Log.i("CONTROL","-----------stop loadApp "+allHMAppInfos.size());
             }
         }.start();
     }
 
-    public void loadAppImage(PackageInfo packageInfo,PackageManager pm,boolean isReload){
+    public static void loadAppImage(PackageInfo packageInfo,PackageManager pm,boolean isReload){
         File f = new File(iconPath,packageInfo.packageName);
         try {
             if(!f.exists()||isReload){
                 Drawable d = packageInfo.applicationInfo.loadIcon(pm);
-                Bitmap bm = zoomDrawable(d, 120, 120);
+                Bitmap bm = zoomDrawable(d, 100, 100);
                 bm.compress(Bitmap.CompressFormat.PNG,90,new FileOutputStream(f));
             }
         }catch (Exception e){
@@ -279,14 +281,12 @@ public class AppLoaderUtil {
         try {
             appName = packgeInfo.applicationInfo.loadLabel(pm).toString();
         } catch (Throwable e) {
-            pm = context.getPackageManager();
             try {
                 appName = packgeInfo.applicationInfo.loadLabel(pm).toString();
             } catch (Throwable e1) {
                 e1.printStackTrace();
             }
         }
-
         try {
             loadAppImage(packgeInfo,pm,false);
             // zoomDrawable(d, 90, 90)
@@ -335,15 +335,19 @@ public class AppLoaderUtil {
             appInfo.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwactivity", 0);
             appInfo.isADJump = sharedPrefs.adPrefs.getInt(appInfo.getPackageName() + "/ad", 0) != 0;
 
+            appInfo.isblackAllXp = sharedPrefs.xpBlackListPrefs.getBoolean(appInfo.getPackageName() + "/allxpblack", false);
+            appInfo.isblackControlXp = sharedPrefs.xpBlackListPrefs.getBoolean(appInfo.getPackageName() + "/contorlxpblack", false);
+            appInfo.isNoCheckXp = sharedPrefs.xpBlackListPrefs.getBoolean(appInfo.getPackageName() + "/nocheckxp", false);
+            appInfo.isSetCanHookXp = sharedPrefs.xpBlackListPrefs.getBoolean(appInfo.getPackageName() + "/setcanhook",false);
+
+            appInfo.isPriWifiPrevent = sharedPrefs.privacyPrefs.getBoolean(appInfo.getPackageName() + "/priwifi",false);
+            appInfo.isPriMobilePrevent = sharedPrefs.privacyPrefs.getBoolean(appInfo.getPackageName() + "/primobile",false);
+            appInfo.isPriSwitchOpen = sharedPrefs.privacyPrefs.getBoolean(appInfo.getPackageName() + "/priswitch",false);
+
             appInfo.isSetTimeStopApp = sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0) != 0||sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0) != 0;
             appInfo.isSetTimeStopOneTime = sharedPrefs.setTimeStopPrefs.contains(appInfo.getPackageName()+"/one");
             appInfo.setTimeStopAppTime = appInfo.isSetTimeStopOneTime?sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/one", 0):sharedPrefs.setTimeStopPrefs.getInt(appInfo.getPackageName()+"/long", 0);
             appInfo.isRunning = runLists.contains(appInfo.getPackageName());
-//            try {
-//                appInfo.isDisable = !pm.getPackageInfo(appInfo.getPackageName(), PackageManager.GET_ACTIVITIES).applicationInfo.enabled;
-//            } catch (Throwable e) {
-//                pm = context.getPackageManager();
-//            }
             PackageInfo piS = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_SERVICES | PackageManager.GET_DISABLED_COMPONENTS);
             appInfo.serviceCount = piS.services != null ? piS.services.length : 0;
             PackageInfo piB = pm.getPackageInfo(packgeInfo.packageName, PackageManager.GET_RECEIVERS | PackageManager.GET_DISABLED_COMPONENTS);
@@ -377,9 +381,7 @@ public class AppLoaderUtil {
                 isLoadAppSettingThreadRun = true;
                 synchronized (instance) {
                     Log.i("CONTROL","loadAppSetting start");
-                    final PackageManager pm = context.getPackageManager();
                     try {
-//                        HashSet<String> runs = PackageUtil.getRunngingAppList(context);
                         for (int i = 0; i < allAppInfos.size(); i++) {
                             AppInfo ai = allAppInfos.get(i);
                             ai.isServiceStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/service", false);
@@ -420,6 +422,15 @@ public class AppLoaderUtil {
                             ai.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwactivity", 0);
                             ai.isADJump = sharedPrefs.adPrefs.getInt(ai.getPackageName() + "/ad", 0) != 0;
 
+                            ai.isblackAllXp = sharedPrefs.xpBlackListPrefs.getBoolean(ai.getPackageName() + "/allxpblack", false);
+                            ai.isblackControlXp = sharedPrefs.xpBlackListPrefs.getBoolean(ai.getPackageName() + "/contorlxpblack", false);
+                            ai.isNoCheckXp = sharedPrefs.xpBlackListPrefs.getBoolean(ai.getPackageName() + "/nocheckxp", false);
+                            ai.isSetCanHookXp = sharedPrefs.xpBlackListPrefs.getBoolean(ai.getPackageName() + "/setcanhook",false);
+
+                            ai.isPriWifiPrevent = sharedPrefs.privacyPrefs.getBoolean(ai.getPackageName() + "/priwifi",false);
+                            ai.isPriMobilePrevent = sharedPrefs.privacyPrefs.getBoolean(ai.getPackageName() + "/primobile",false);
+                            ai.isPriSwitchOpen = sharedPrefs.privacyPrefs.getBoolean(ai.getPackageName() + "/priswitch",false);
+
                             ai.isSetTimeStopApp = sharedPrefs.setTimeStopPrefs.getInt(ai.getPackageName()+"/one", 0) != 0||sharedPrefs.setTimeStopPrefs.getInt(ai.getPackageName()+"/long", 0) != 0;
                             ai.isSetTimeStopOneTime = sharedPrefs.setTimeStopPrefs.contains(ai.getPackageName()+"/one");
                             ai.setTimeStopAppTime = ai.isSetTimeStopOneTime?sharedPrefs.setTimeStopPrefs.getInt(ai.getPackageName()+"/one", 0):sharedPrefs.setTimeStopPrefs.getInt(ai.getPackageName()+"/long", 0);
@@ -435,7 +446,6 @@ public class AppLoaderUtil {
                             }
                         }
                         AppInfo.writeArrays(allAppInfos, context);
-//                        isLocalChange = true;
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                     }
@@ -455,7 +465,6 @@ public class AppLoaderUtil {
                     }
                     isLoadAppSettingThreadRun = false;
                     Log.i("CONTROL","loadAppSetting end");
-
                 }
             }
         }.start();

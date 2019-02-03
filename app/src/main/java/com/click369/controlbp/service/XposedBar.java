@@ -117,18 +117,12 @@ public class XposedBar {
     public static  void setColor(final XC_LoadPackage.LoadPackageParam lpparam,final Activity act,final XSharedPreferences barPrefs,final XSharedPreferences colorTestPrefs,final Window window,final int colortop,final int colorbottom){
         if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_TOPBAR, false)
                 &&!colorTestPrefs.getBoolean(lpparam.packageName +"/nottopbar",false)) {
-//            final int red = (colortop & 0xff0000) >> 16;
-//            final int green = (colortop & 0x00ff00) >> 8;
-//            final int blue = (colortop & 0x0000ff);
             act.runOnUiThread(new Runnable() {
                 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 @Override
                 public void run() {
                     try {
-//                        setDarkStatusIcon(window,true);
                         window.setStatusBarColor(colortop);
-
-//                        setDarkStatusIcon(window, isQianRGB(red,green,blue) || colorTestPrefs.contains(lpparam.packageName + "/dark"));
                     } catch (RuntimeException e) {
                         e.printStackTrace();
                     }
@@ -141,18 +135,11 @@ public class XposedBar {
                 @Override
                 public void run() {
                 try {
-//                    int bottom = 0;
                     if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOM_DENG_TOP, false)) {
                         window.setNavigationBarColor(colortop);
-//                        bottom = colortop;
                     } else {
                         window.setNavigationBarColor(colorbottom);
-//                        bottom = colorbottom;
                     }
-//                    final int red = (bottom & 0xff0000) >> 16;
-//                    final int green = (bottom & 0x00ff00) >> 8;
-//                    final int blue = (bottom & 0x0000ff);
-//                    setDarkNavIcon(window,isQianRGB(red,green,blue));
                 } catch (RuntimeException e) {
                     e.printStackTrace();
                 }
@@ -172,8 +159,6 @@ public class XposedBar {
                                 try {
                                     Constructor ms[] = barBackClass.getDeclaredConstructors();
                                     Class clss[] = null;
-//                                    XposedBridge.log("++++++++++++++HOOK  ms " + ms);
-//                                    XposedBridge.log("++++++++++++++HOOK  ms.length" + ms.length);
                                     for (Constructor m : ms) {
                                         if (m.getParameterTypes()!=null) {
                                             clss = m.getParameterTypes();
@@ -204,37 +189,14 @@ public class XposedBar {
                                             }
                                         }
                                     };
-                                    if (clss.length == 2) {
-                                        XposedHelpers.findAndHookConstructor(barBackClass, clss[0], clss[1], hook);
-                                    } else if (clss.length == 1) {
-                                        XposedHelpers.findAndHookConstructor(barBackClass, clss[0], hook);
-                                    } else if (clss.length == 3) {
-                                        XposedHelpers.findAndHookConstructor(barBackClass, clss[0],clss[1],clss[2], hook);
-                                    } else if (clss.length == 6) {
-                                        XposedHelpers.findAndHookConstructor(barBackClass, clss[0],clss[1],clss[2],clss[3],clss[4],clss[5], hook);
-                                    }else if (clss.length == 0) {
-                                        XposedHelpers.findAndHookConstructor(barBackClass, hook);
-                                    }else if (clss.length == 4) {
-                                        XposedHelpers.findAndHookConstructor(barBackClass, clss[0],clss[1],clss[2],clss[3], hook);
-                                    } else {
-                                        XposedBridge.log("^^^^^^^^^^^^^^barBackClass else " + clss.length + "构造函数未找到 ^^^^^^^^^^^^^^^^^");
-                                    }
-                                } catch (RuntimeException e) {
+                                    XposedUtil.hookConstructorMethod(barBackClass,clss,hook);
+                                } catch (Throwable e) {
                                     XposedBridge.log("++++++++++++++HOOK  11barBackClass err " + e);
                                 }
                             }
                         }
                         if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_KEYCOLOROPEN, false)) {
-//                            final Class nbvClass = XposedHelpers.findClass("com.android.systemui.statusbar.phone.NavigationBarView", lpparam.classLoader);
                             Class keyDrawClass = XposedHelpers.findClass("com.android.systemui.statusbar.policy.KeyButtonDrawable", lpparam.classLoader);
-//                            if (nbvClass != null) {
-//                                XposedHelpers.findAndHookMethod(nbvClass, "onFinishInflate", new XC_MethodHook() {
-//                                    @Override
-//                                    protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-//                                        XposedBridge.log("++++++++++++++HOOK  onFinishInflate");
-//                                    }
-//                                });
-//                            }
                             if (keyDrawClass != null) {
                                 XposedHelpers.findAndHookConstructor(keyDrawClass, Drawable[].class, new XC_MethodHook() {
                                     @Override
@@ -258,17 +220,11 @@ public class XposedBar {
                                 });
                             }
                         }
-                    }catch (XposedHelpers.ClassNotFoundError e){
-                        XposedBridge.log("^^^^^^^^^^^^^^HOOK barBackClass err "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
-                    } catch (Exception e) {
+                    }catch (Throwable e) {
                         XposedBridge.log("++++++++++++++HOOK barBackClass err" + e);
                     }
                 }
-            }catch (XposedHelpers.ClassNotFoundError e){
-                XposedBridge.log("^^^^^^^^^^^^^^HOOK error "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
-            }catch (NoSuchMethodError e){
-                XposedBridge.log("^^^^^^^^^^^^^^HOOK error "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
-            }catch (Exception e){
+            }catch (Throwable e){
                 XposedBridge.log("^^^^^^^^^^^^^^HOOK error "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
             }
 
@@ -288,13 +244,13 @@ public class XposedBar {
             }
             final boolean isBottomBarDengTop = barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOM_DENG_TOP,false);
             colorTestPrefs.reload();
+//            XposedBridge.log("colorbar  "+lpparam.packageName+" "+barPrefs.getBoolean(lpparam.packageName+"/colorlist",false));
             if (lpparam.packageName.toLowerCase().contains("camera")||
                     lpparam.packageName.toLowerCase().contains(".snap")||
                     colorTestPrefs.getBoolean(lpparam.packageName+"/blacklist",false)||
                     !barPrefs.getBoolean(lpparam.packageName+"/colorlist",false)){
                 return;
             }
-
             if(colorTestPrefs.contains(lpparam.packageName+"/ime")){
                 Class inputCls = XposedHelpers.findClass("android.inputmethodservice.InputMethodService",lpparam.classLoader);
                 XposedHelpers.findAndHookMethod(inputCls, "onWindowShown", new XC_MethodHook() {
@@ -346,7 +302,7 @@ public class XposedBar {
 
             final Class actCls = XposedHelpers.findClass("android.app.Activity",lpparam.classLoader);
             XposedHelpers.findAndHookMethod(actCls, "onCreate",Bundle.class, new XC_MethodHook() {
-                @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+//                @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
                 @Override
                 protected void beforeHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
                 try {
@@ -367,10 +323,7 @@ public class XposedBar {
                                 @Override
                                 public void run() {
                                 try {
-                                    synchronized (actCls) {
-//                                                        if(System.currentTimeMillis()-(Long)XposedHelpers.getAdditionalStaticField(actCls,"lasttime")<400){
-//                                                            return;
-//                                                        }
+                                    synchronized (act) {
                                         final View v = (View) act.getWindow().getDecorView();
                                         if (v != null && v.isShown() && v.getWidth() > 100 && v.getHeight() > 100) {
                                             Bitmap bitmap = Bitmap.createBitmap(v.getWidth(), v.getHeight(), Bitmap.Config.ARGB_8888);
@@ -401,21 +354,6 @@ public class XposedBar {
                                                 final int colortop = bitmap.getPixel(bitmap.getWidth() - 1, zt + 1);
                                                 final int colorbottom = bitmap.getPixel(bitmap.getWidth()-1, bitmap.getHeight() - RoundedCornerService.getVirtualBarHeigh(act) - 2);
                                                 bitmap.recycle();
-//                                                                if ((Integer)XposedHelpers.getAdditionalStaticField(actCls,"lasttop") == colortop &&
-//                                                                        (Integer)XposedHelpers.getAdditionalStaticField(actCls,"lastbottom") == colorbottom) {
-//                                                                    if ((isTopBarOpen&&window.getStatusBarColor() == colortop)&&
-//                                                                            ((isBottomBarOpen&&!isBottomBarDengTop&&window.getNavigationBarColor() == colorbottom)||
-//                                                                                    (isBottomBarOpen&&isBottomBarDengTop&&window.getNavigationBarColor() == colortop))){
-//                                                                        return;
-//                                                                    }else if (isTopBarOpen&&window.getStatusBarColor() == colortop&&!isBottomBarOpen){
-//                                                                        return;
-//                                                                    }else if (isBottomBarOpen&&!isBottomBarDengTop&&window.getNavigationBarColor() == colorbottom&&!isTopBarOpen){
-//                                                                        return;
-//                                                                    }else if (isBottomBarOpen&&isBottomBarDengTop&&window.getNavigationBarColor() == colortop&&!isTopBarOpen){
-//                                                                        return;
-//                                                                    }
-//                                                                }
-//                                                                XposedBridge.log("+++++++++++++changecolor...  "+lpparam.packageName+" ^^^^^^^^^^^^^^^^^");
                                                 if (colortop!=0) {
                                                     bar.edit().putInt(act.getClass().getName() + "/top", colortop).commit();
                                                     XposedHelpers.setAdditionalStaticField(actCls, "lasttop", colortop);
@@ -447,21 +385,11 @@ public class XposedBar {
                     final ViewTreeObserver.OnGlobalLayoutListener lis = new ViewTreeObserver.OnGlobalLayoutListener() {
                         @Override
                         public void onGlobalLayout() {
-                            if(System.currentTimeMillis()-(Long)XposedHelpers.getAdditionalStaticField(actCls,"lasttime")<200){
-                                return;
-                            }
-                            XposedHelpers.setAdditionalStaticField(actCls,"lasttime",System.currentTimeMillis());
-                            h.post(r);
-//                                    XposedHelpers.setAdditionalStaticField(actCls,"changetime369",System.currentTimeMillis());
-//                                    new Thread(r).start();
-//                                    }
-//                                    if (deyTime1 > 0) {
-//                                        if(System.currentTimeMillis()-nTime>deyTime1){
-//                                            h.removeCallbacks(r);
-//                                        }
-//                                        h.postDelayed(r, deyTime1);
-//                                    }
-
+                        if(System.currentTimeMillis()-(Long)XposedHelpers.getAdditionalStaticField(actCls,"lasttime")<200){
+                            return;
+                        }
+                        XposedHelpers.setAdditionalStaticField(actCls,"lasttime",System.currentTimeMillis());
+                        h.post(r);
                         }
                     };
                     if (((bar.contains(act.getClass().getName() + "/top") &&
@@ -478,14 +406,10 @@ public class XposedBar {
                     } else if (!act.getWindow().isFloating()) {
                         ViewTreeObserver vto = act.getWindow().getDecorView().getViewTreeObserver();
                         if (vto.isAlive()) {
-//                                    bar.edit().remove(act.getClass().getName() + "/top").commit();
-//                                    bar.edit().remove(act.getClass().getName() + "/bottom").commit();
                             XposedHelpers.setAdditionalStaticField(actCls,"lasttop",0);
                             XposedHelpers.setAdditionalStaticField(actCls,"lastbottom",0);
-//                                    XposedHelpers.setAdditionalStaticField(actCls,"changetime369",0L);
                             XposedHelpers.setAdditionalStaticField(actCls,"lasttime",0L);
                             vto.addOnGlobalLayoutListener(lis);//.addOnLayoutChangeListener(lis);
-
                         }
                         if (!barPrefs.getBoolean(Common.PREFS_SETTING_UI_ALWAYSCOLORBAR,false)) {
                             h.postDelayed(new Runnable() {
@@ -506,81 +430,11 @@ public class XposedBar {
                             }, deyTime2);
                         }
                     }
-
                 }catch (RuntimeException e){
                     e.printStackTrace();
                 }
                 }
             });
-//            XposedHelpers.findAndHookMethod(actCls, "onResume",new XC_MethodHook() {
-//                @Override
-//                protected void beforeHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
-//                        new Thread() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-//                                        final Activity act = (Activity) (methodHookParam.thisObject);
-//                                        final Window window = act.getWindow();
-//                                        final SharedPreferences bar = act.getSharedPreferences(lpparam.packageName + "_bar", Context.MODE_PRIVATE);
-//                                        if ((bar.contains(act.getClass().getName() + "/top") &&
-//                                                bar.contains(act.getClass().getName() + "/bottom")) &&
-//                                                !act.getWindow().isFloating()) {
-//                                            int colortop = bar.getInt(act.getClass().getName() + "/top", 0);
-//                                            int colorbottom = 0;
-//                                            if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOM_DENG_TOP, false)) {
-//                                                colorbottom = colortop;
-//                                            } else {
-//                                                colorbottom = bar.getInt(act.getClass().getName() + "/bottom", 0);
-//                                            }
-//                                            setColor(lpparam,act,barPrefs,colorTestPrefs,window,colortop,colorbottom);
-                                            //                                final  Handler h = new Handler();
-//                                            if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_TOPBAR, false)
-//                                                    &&!colorTestPrefs.getBoolean(lpparam.packageName +"/nottopbar",false)) {
-//                                                final int colortop = bar.getInt(act.getClass().getName() + "/top", 0);
-//                                                int red = (colortop & 0xff0000) >> 16;
-//                                                int green = (colortop & 0x00ff00) >> 8;
-//                                                int blue = (colortop & 0x0000ff);
-//                                                final boolean isDark = (red > 175 && green > 175 && blue > 175) || colorTestPrefs.contains(lpparam.packageName + "/dark");
-//                                                act.runOnUiThread(new Runnable() {
-//                                                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//                                                    @Override
-//                                                    public void run() {
-//                                                        try {
-//                                                            setDarkStatusIcon(act, isDark);
-//                                                            window.setStatusBarColor(colortop);
-//                                                        } catch (RuntimeException e) {
-//                                                            XposedBridge.log("^^^^^^^^^^^^^^start error " + lpparam.packageName + "  " + e + "^^^^^^^^^^^^^^^^^");
-//                                                        }
-//                                                    }
-//                                                });
-//                                            }
-//                                            if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR, false)) {
-//                                                act.runOnUiThread(new Runnable() {
-//                                                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-//                                                    @Override
-//                                                    public void run() {
-//                                                        try {
-//                                                            if (barPrefs.getBoolean(Common.PREFS_SETTING_UI_BOTTOM_DENG_TOP, false)) {
-//                                                                window.setNavigationBarColor(bar.getInt(act.getClass().getName() + "/top", 0));
-//                                                            } else {
-//                                                                window.setNavigationBarColor(bar.getInt(act.getClass().getName() + "/bottom", 0));
-//                                                            }
-//                                                        } catch (RuntimeException e) {
-//                                                            e.printStackTrace();
-//                                                        }
-//                                                    }
-//                                                });
-//                                            }
-//                                        }
-//                                    }
-//                                } catch (RuntimeException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                        }.start();
-//                }
-//            });
 
             try {
                 final Class windowCls = XposedHelpers.findClass("com.android.internal.policy.PhoneWindow",lpparam.classLoader);
@@ -631,48 +485,15 @@ public class XposedBar {
                             methodHookParam.setResult(null);
                             return;
                         }
-//                        if (!colorTestPrefs.contains(lpparam.packageName+"/notchangeicon")) {
-
-//                        }
                     }catch (Exception e){
                         e.printStackTrace();
                     }
                     }
                 });
-//                final Class viewCls = XposedHelpers.findClass("android.view.View",lpparam.classLoader);
-//                XposedHelpers.findAndHookMethod(viewCls, "setSystemUiVisibility", int.class, new XC_MethodHook() {
-//                    @Override
-//                    protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-//                        try {
-//                            View docView = (View) methodHookParam.thisObject;
-////                            final SharedPreferences bar = context.getSharedPreferences(lpparam.packageName + "_bar", Context.MODE_PRIVATE);
-////                            int bottom = bar.getInt(context.getClass().getName() + "/bottom", 0);
-////                            if (isBottomBarDengTop) {
-////                                bottom = bar.getInt(context.getClass().getName() + "/top", 0);
-////                            }
-//                            methodHookParam.args[0] = docView.getSystemUiVisibility()|View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-//                            Field mvField = methodHookParam.thisObject.getClass().getDeclaredField("mSystemUiVisibility");
-//                            mvField.setAccessible(true);
-//                            mvField.set(methodHookParam.thisObject,methodHookParam.args[0]);
-//                            Field field = methodHookParam.thisObject.getClass().getDeclaredField("mParent");
-//                            field.setAccessible(true);
-//                            Object parent = field.get(methodHookParam.thisObject);
-//                            Method method = parent.getClass().getDeclaredMethod("recomputeViewAttributes",View.class);
-//                            method.setAccessible(true);
-//                            method.invoke(parent,methodHookParam.thisObject);
-//                            methodHookParam.setResult(null);
-//                            return;
-//                        }catch (Exception e){
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                });
-            }catch (XposedHelpers.ClassNotFoundError e){
-                e.printStackTrace();
-            }catch (NoSuchMethodError e){
+            }catch (Throwable e){
                 e.printStackTrace();
             }
-        }catch (RuntimeException e){
+        }catch (Throwable e){
             e.printStackTrace();
         }
     }

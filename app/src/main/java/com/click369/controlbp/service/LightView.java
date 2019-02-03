@@ -21,6 +21,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -62,7 +63,7 @@ public class LightView extends View {
     int type = 0;//0 消息  1 电话
     int count = 0;
 //    int pics[] = {R.drawable.light_6,R.drawable.light_1,R.drawable.light_2,R.drawable.light_3,R.drawable.light_4,R.drawable.light_5};
-    String colors[] = {"#ff0000","#00ff00","#0000ff","#ffff00","#00ffff","#ff00ff","#23e2fe","#aa46ff","#7bff11",
+    static final String colors[] = {"#ff0000","#00ff00","#0000ff","#ffff00","#00ffff","#ff00ff","#23e2fe","#aa46ff","#7bff11",
         "#e011ff","#fa0093","#f7fa00","#fac200","#3af1bb","#9a74f2","#fd00ad","#9001ff"};
     Bitmap bm,topBm,rightBm,bottomBm;
     Rect mSrcRect,mDestRect;
@@ -86,6 +87,8 @@ public class LightView extends View {
         this.widowManager = widowManager;
         this.wmParams = wmParams;
         this.fl = fl;
+        gcBitmap();
+        initBm();
     }
 
     private float[] getRandomColor(){
@@ -119,6 +122,7 @@ public class LightView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         setVisibility(View.INVISIBLE);
         //获取View的宽高
 //        int width = getWidth()/2;
@@ -227,7 +231,6 @@ public class LightView extends View {
                 setVisibility(View.VISIBLE);
                 setAlpha(1.0f);
                 count++;
-                Log.i("CONTROL","start anima   "+animation);
             }
 
             @Override
@@ -248,7 +251,6 @@ public class LightView extends View {
                     }
                     return;
                 }
-                Log.i("CONTROL","restart anima   "+animation);
                 if (isStart) {
                     if (WatchDogService.isLightRandomMode || lastXiaoGuo != WatchDogService.lightXiaoGuo) {
                         invalidate();
@@ -272,16 +274,13 @@ public class LightView extends View {
             }
 //            Log.i("CONTROL ", "stop bl  type "+type+"  亮屏  "+!WatchDogService.isScreenOff);
             if(WatchDogService.isLightMusic&&type==LIGHT_TYPE_MUSIC&&!WatchDogService.isScreenOff){
-                Log.i("CONTROL ", "stop remove bl   11111");
                 final AudioManager audioManager = (AudioManager)this.getContext().getSystemService(Context.AUDIO_SERVICE);
                 if(audioManager.isMusicActive()){
-                    Log.i("CONTROL ", "stop remove bl   111112");
                     Handler h = new Handler();
                     h.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             if(audioManager.isMusicActive()) {
-                                Log.i("CONTROL ", "stop remove bl   111113");
                                 startBl(LIGHT_TYPE_MUSIC);
                             }
                         }
@@ -293,24 +292,10 @@ public class LightView extends View {
             setAlpha(0.0f);
             unInitAnimation();
             setVisibility(View.GONE);
-            if (bm != null) {
-                bm.recycle();
-            }
-            if (rightBm != null) {
-                rightBm.recycle();
-            }
-            if (topBm != null) {
-                topBm.recycle();
-            }
-            if (bottomBm != null) {
-                bottomBm.recycle();
-            }
-            bm = null;
-            rightBm = null;
-            topBm = null;
-            bottomBm = null;
+
             destroyDrawingCache();
-            System.gc();
+            gcBitmap();
+
 
             post(new Runnable() {
                 @Override
@@ -327,6 +312,26 @@ public class LightView extends View {
         }catch (Throwable e){
             e.printStackTrace();
         }
+    }
+
+    public void gcBitmap(){
+        if (bm != null) {
+            bm.recycle();
+        }
+        if (rightBm != null) {
+            rightBm.recycle();
+        }
+        if (topBm != null) {
+            topBm.recycle();
+        }
+        if (bottomBm != null) {
+            bottomBm.recycle();
+        }
+        bm = null;
+        rightBm = null;
+        topBm = null;
+        bottomBm = null;
+        System.gc();
     }
 
     boolean isNeedTest = false;
@@ -359,8 +364,7 @@ public class LightView extends View {
                             return;
                         }
                         wmParams.type = RoundedCornerService.floatLeve;
-//                        wmParams.width = getContext().getResources().getDisplayMetrics().widthPixels;
-//                        wmParams.height = ScreenLightServiceUtil.getHasVirtualKey(widowManager);
+                        gcBitmap();
                         initBm();
                         widowManager.addView(fl, wmParams);
                         setAlpha(0.0f);
@@ -375,21 +379,11 @@ public class LightView extends View {
                             e1.printStackTrace();
                         }
                     }
-
                 }
             };
             h.removeCallbacks(r);
             h.postDelayed(r,dur);
         }catch (Throwable e){
-            e.printStackTrace();
-        }
-    }
-    public void checkFullScreen(View v){
-        try {
-            int[] location = new int[2];
-            v.getLocationOnScreen(location);
-//            wmParams.y = location[1]*-1;
-        }catch (Exception e){
             e.printStackTrace();
         }
     }

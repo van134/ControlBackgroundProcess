@@ -29,6 +29,7 @@
                 android:layout_height="40dp"
                 android:text="跳过指定对话框"
                 android:layout_weight="1"
+                android:textSize="13dp"
                 android:id="@+id/main_skipdialog_tv"
                 android:background="@drawable/et_backgroundshape"
                 android:gravity="center"
@@ -38,6 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:text="屏蔽指定通知"
+                android:textSize="13dp"
                 android:layout_weight="1"
                 android:id="@+id/main_skipnotify_tv"
                 android:background="@drawable/et_backgroundshape"
@@ -67,7 +69,8 @@
                     android:layout_height="match_parent"
                     android:id="@+id/textView5"
                     android:layout_weight="7"
-                    android:text="优请先使用模式三"
+                    android:textSize="13dp"
+                    android:text="请优先使用模式三"
                     android:textAlignment="gravity"
                     android:gravity="left|center" />
 
@@ -75,6 +78,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="模式一"
+                    android:textSize="13dp"
                     android:id="@+id/main_service_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -83,6 +87,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="模式二"
+                    android:textSize="13dp"
                     android:id="@+id/main_wakelock_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -91,6 +96,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="模式三"
+                    android:textSize="13dp"
                     android:id="@+id/main_alarm_tv"
                     android:layout_weight="3"
                     android:gravity="center" />

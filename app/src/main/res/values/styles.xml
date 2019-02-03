@@ -4,15 +4,31 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryDark">@color/white</item>
         <item name="colorAccent">@color/colorAccent</item>
-
+        <item name="actionBarStyle">@style/ClubActionbar</item>
+        <!--<item name="toolbarNavigationButtonStyle">@style/myToolbarNavigationButtonStyle</item>-->
+<!--<item name="colorPrimary">@color/colorPrimary</item>-->
+        <!--<item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+        <!--<item name="colorAccent">@color/colorAccent</item>-->
     </style>
+    <!--<style name="myToolbarNavigationButtonStyle" parent="@style/Widget.AppCompat.Toolbar.Button.Navigation">-->
+        <!--<item name="android:layout_marginLeft">20dp</item>-->
+        <!--<item name="android:layout_width">20dp</item>-->
+        <!--<item name="android:width">20dp</item>-->
+        <!--<item name="android:padding">0dp</item>-->
+        <!--<item name="android:scaleType">centerInside</item>-->
+    <!--</style>-->
 
+    <style name="ClubActionbar" parent="Widget.AppCompat.ActionBar">
+        <item name="contentInsetStart">0dp</item><!-- 设置该属性解决左侧空白部分-->
+        <item name="contentInsetEnd">0dp</item><!-- 设置该属性解决右侧空白部分-->
+    </style>
     <style name="AppTheme.NoActionBar" parent="AppTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
     </style>
     <style name="AppTheme.NoActionBarDark" parent="AppTheme">
         <item name="windowActionBar">false</item>
@@ -46,8 +62,30 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
     </style>
+    <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@color/colorPrimary</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">2</item>
+    </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="myNavigationDrawerStyle">
+        <item name="android:textSize">13sp</item>
+        <item name="android:shadowColor">@color/colorPrimary</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">2</item>
+        <item name="listPreferredItemHeightSmall">42dp</item>
+    </style>
+    <style name="mtextSize">
+        <item name="android:textSize">13dp</item>
+    </style>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" >
+
+    </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="elevation">0dp</item>

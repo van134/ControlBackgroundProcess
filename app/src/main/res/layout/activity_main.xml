@@ -21,7 +21,15 @@
         android:fitsSystemWindows="true"
         android:background="#d7dfd7"
         app:headerLayout="@layout/nav_header_main"
+        app:theme="@style/myNavigationDrawerStyle"
+        app:itemBackground="@drawable/side_nav_bar"
         app:menu="@menu/activity_main_drawer" >
+        <LinearLayout
+            android:id="@+id/nav_info_bg_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/black">
         <LinearLayout
             android:id="@+id/nav_info_ll"
             android:layout_width="match_parent"
@@ -35,7 +43,7 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:text="应用控制详情"
                 android:id="@+id/nav_info_title"
-                android:textColor="@color/white"
+                android:textColor="@color/uncheck_color"
                 android:layout_marginTop="40dp"
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="4dp"
@@ -49,7 +57,7 @@
                 android:gravity="center"
                 android:id="@+id/nav_info_smalltitle"
                 android:layout_gravity="center_horizontal"
-                android:textColor="@color/white" />
+                android:textColor="@color/uncheck_color" />
 
             <ListView
                 android:layout_width="match_parent"
@@ -61,6 +69,7 @@
                 android:layout_marginTop="10dp" />
 
 
+        </LinearLayout>
         </LinearLayout>
     </android.support.design.widget.NavigationView>
 

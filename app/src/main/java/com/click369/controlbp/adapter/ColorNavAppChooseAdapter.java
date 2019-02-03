@@ -10,7 +10,6 @@ import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.ColorNavBarActivity;
 import com.click369.controlbp.bean.AppInfo;
@@ -138,7 +137,7 @@ public class ColorNavAppChooseAdapter extends BaseAdapter {
 //		Util.isEnable()
 		viewHolder.titleTv.setText(data.appName);
 		viewHolder.run.setVisibility(View.VISIBLE);
-		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.iv );
+//		Glide.with( c ).load( Uri.fromFile(data.iconFile ) ).into(viewHolder.iv );
 //		viewHolder.iv.setImageBitmap(data.getBitmap());
 		viewHolder.run.setImageBitmap(null);
 		if(ColorNavBarService.appColors.containsKey(data.getPackageName())&&ColorNavBarService.appColors.get(data.getPackageName())!=null){

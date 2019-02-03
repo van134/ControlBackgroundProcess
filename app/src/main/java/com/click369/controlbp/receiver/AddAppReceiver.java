@@ -94,7 +94,7 @@ public class AddAppReceiver extends BroadcastReceiver {
                     recentSet.edit().putBoolean(addPkg+"/blur",true).commit();
                 }
 //                Log.i("CONTROL","AddApp BAR1  "+settings.getBoolean(Common.ALLSWITCH_EIGHT,true)+addPkg);
-                if(settings.getBoolean(Common.ALLSWITCH_EIGHT,true)){
+                if(settings.getBoolean(Common.ALLSWITCH_UI,true)){
                     SharedPreferences barSet =SharedPrefsUtil.getInstance(context).uiBarPrefs;//SharedPrefsUtil.getPreferences(context,Common.PREFS_UIBARLIST);// context.getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
 //                    Log.i("CONTROL","AddApp BAR2  "+(settings.getBoolean(Common.PREFS_SETTING_NEWAPPADDCOLORBAR,false)&&(barSet.getBoolean(Common.PREFS_SETTING_UI_TOPBAR,false)||barSet.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR,false))));
                     if (settings.getBoolean(Common.PREFS_SETTING_NEWAPPADDCOLORBAR,false)&&(barSet.getBoolean(Common.PREFS_SETTING_UI_TOPBAR,false)||barSet.getBoolean(Common.PREFS_SETTING_UI_BOTTOMBAR,false))){

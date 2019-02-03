@@ -42,12 +42,14 @@
                     android:layout_weight="6"
                     android:textAlignment="gravity"
                     android:gravity="left|center"
+                    android:textSize="13dp"
                     android:text="选择加入不打盹名单" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="前台运行"
+                    android:textSize="13dp"
                     android:id="@+id/doze_title_openstop_tv"
                     android:layout_weight="4"
                     android:gravity="center" />
@@ -56,6 +58,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="熄屏"
+                    android:textSize="13dp"
                     android:id="@+id/doze_title_off_tv"
                     android:layout_weight="3"
                     android:gravity="center" />
@@ -64,6 +67,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:text="亮屏"
+                    android:textSize="13dp"
                     android:id="@+id/doze_title_on_tv"
                     android:layout_weight="3"
                     android:gravity="center" />

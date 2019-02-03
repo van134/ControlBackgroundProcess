@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.click369.controlbp">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -11,11 +13,13 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- 添加快捷方式 -->
     <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
     <!-- 移除快捷方式 -->
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
+    <meta-data android:name="android.max_aspect" android:value="2.1" />
     <application
         android:allowBackup="true"
         android:name=".activity.MyApp"
@@ -41,6 +45,7 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
+            android:resizeableActivity = "true"
             android:taskAffinity=""
             android:windowSoftInputMode="stateHidden|stateUnchanged">
             <intent-filter>
@@ -111,6 +116,7 @@
         <activity
             android:name=".activity.IceRoomActivity"
             android:exported="true"
+            android:resizeableActivity = "true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateUnchanged"
             android:theme="@style/AppTheme.translucent" >
@@ -135,27 +141,41 @@
         <activity
             android:name=".activity.CPUSetActivity"
             android:exported="true"
+            android:resizeableActivity = "true"
             android:screenOrientation="portrait"
             android:excludeFromRecents="true"
             android:windowSoftInputMode="stateHidden|stateUnchanged">
             <intent-filter>
                 <category android:name="controlbp" />
             </intent-filter>
+            <!--<intent-filter>-->
+                <!--<action android:name="android.intent.action.MAIN" />-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity android:name=".activity.IFWCompActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.DozeWhiteListActivity" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.ColorNavBarActivity" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.ADBTestActivity"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.ColorSetActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.UIBarBlackListActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.WakeLockActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.AlarmActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.ChangeTextActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.DozeWhiteListActivity" android:resizeableActivity = "true" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ColorNavBarActivity" android:resizeableActivity = "true" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ADBTestActivity" android:resizeableActivity = "true"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ChangePhotoActivity" android:process=":com.click369.process.changephoto"  android:resizeableActivity = "true"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ColorSetActivity" android:resizeableActivity = "true"
+            android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.UIBarBlackListActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.WakeLockActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.AlarmActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ChangeTextActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.PrivacyControlActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.PrivacyLogActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ChangeLocActivity"
+            android:resizeableActivity = "true"
+            android:process=":com.click369.process.loc"
+            android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.SkipDialogActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.UnLockActivity"
             android:exported="true"
+            android:resizeableActivity = "true"
             android:excludeFromRecents="true"
             android:theme="@style/translucent" >
             <intent-filter>
@@ -165,6 +185,7 @@
         </activity>
         <activity android:name=".activity.SetPWDActivity"
             android:exported="true"
+            android:resizeableActivity = "true"
             android:excludeFromRecents="true"
             android:theme="@style/translucent" >
         </activity>
@@ -194,16 +215,6 @@
             <intent-filter>
                 <action android:name="com.click369.service"/>
             </intent-filter>
-        </service>
-        <service
-            android:name=".service.DebugService"
-            android:exported="true">
-        </service>
-        <service
-            android:name=".service.ColorNavBarService"
-            android:exported="true"></service>
-        <service
-            android:name="com.click369.controlbp.service.RoundedCornerService" >
         </service>
         <service
             android:name=".service.MyTileService"

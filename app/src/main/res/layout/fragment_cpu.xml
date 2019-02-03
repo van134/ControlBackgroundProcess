@@ -18,7 +18,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/cpu_top_title"
-                android:text="设置开机自动启动默认延迟30S，该功能需要ROOT，只在部分高通机型上测试成功，其他芯片可能会出异常，第一个核心无法控制开关。尽量不要同时使用其他控制核心开关的应用,核心关闭后可能会导致手机卡顿请适量关闭核心。有风险请慎用。" />
+                android:textSize="13dp"
+                android:text="设置开机自动启动默认延迟60S，该功能需要ROOT，只在部分高通机型上测试成功，其他芯片可能会出异常，第一个核心无法控制开关。尽量不要同时使用其他控制核心开关的应用,核心关闭后可能会导致手机卡顿请适量关闭核心。有风险请慎用。" />
 
             <LinearLayout
                 android:orientation="vertical"
@@ -59,10 +60,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="2px"
                     android:background="@drawable/line" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="充电时不关闭核心"
+                        android:id="@+id/cpu_charing_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:textSize="13dp"
                     android:layout_marginBottom="6dp"
                     android:layout_marginLeft="5dp"
                     android:text="CPU默认设置(选中的核心即为要关闭的核心)"/>
@@ -116,7 +134,7 @@
                     <Switch
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="熄屏60分钟后关闭核心(充电时不关闭)"
+                        android:text="熄屏60分钟后关闭核心"
                         android:id="@+id/cpu_offsc_sw"
                         android:checked="false" />
                 </FrameLayout>

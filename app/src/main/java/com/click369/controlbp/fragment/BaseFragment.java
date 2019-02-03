@@ -7,11 +7,13 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.util.AppLoaderUtil;
+import com.click369.controlbp.util.GCUtil;
 
 /**
  * Created by 41856 on 2018/12/3.
@@ -78,4 +80,14 @@ public class BaseFragment  extends Fragment {
             }
         },300);
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+//        View view = getView();
+//        GCUtil.startGC(view,true);
+//        GCUtil.unbindDrawables(view);
+    }
+
+
 }

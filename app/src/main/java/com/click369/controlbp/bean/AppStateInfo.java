@@ -41,10 +41,11 @@ public class AppStateInfo implements Serializable {
     public boolean isOpenFromIceRome;
     public boolean isReadyOffStop;
     public boolean isReadyOffMuBei;
+    public boolean isReadyOffIce;
     public boolean isSetTimeStopAlreadStart;
     public boolean isInMuBei;
     public boolean isInIdle;
     public long backStartTime;
     public long homeStartTime;
-//    public int setTimeStopTime;
+    public long offScTime;
 }
