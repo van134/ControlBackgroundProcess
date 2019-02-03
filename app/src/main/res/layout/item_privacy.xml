@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:weightSum="23">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="8">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <!--<ImageView-->
+            <!--android:layout_width="40dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:background="@drawable/round"-->
+            <!--android:id="@+id/item_main_appicon"-->
+            <!--android:layout_marginTop="8dp"-->
+            <!--android:layout_marginBottom="8dp" />-->
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/item_main_appicon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                app:civ_border_width="2px"
+                app:civ_border_color="@color/colorPrimary"
+                app:civ_border_overlay="true"/>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/item_main_iceicon"
+                android:src="@mipmap/ice" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/item_main_appname"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:lineSpacingExtra="0dp"
+                android:lineSpacingMultiplier="0.8"
+                android:textSize="12dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="3dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Text"
+                android:id="@+id/item_main_apptime"
+                android:maxLines="2"
+                android:textSize="9dp"
+                android:layout_marginTop="-3dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="3dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_main_wifi"
+        android:layout_weight="3"
+        android:src="@mipmap/icon_notdisable"
+        android:layout_gravity="center_vertical" />
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_main_mobile"
+        android:layout_weight="3"
+        android:src="@mipmap/icon_notdisable"
+        android:layout_gravity="center_vertical" />
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_main_alarm"
+        android:layout_weight="3"
+        android:src="@mipmap/icon_enter"
+        android:layout_gravity="center_vertical" />
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_provd_broad"
+        android:layout_weight="3"
+        android:src="@mipmap/icon_enter"
+        android:layout_gravity="center_vertical" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_main_service"
+        android:layout_weight="3"
+        android:src="@mipmap/icon_notdisable"
+        android:layout_gravity="center_vertical" />
+</LinearLayout>

@@ -1,0 +1,99 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.click369.controlbp.fragment.ControlFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/layout_topsearch" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/alert_backgroundshape" >
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:weightSum="23"
+                android:gravity="center"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp" >
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView5"
+                    android:layout_weight="8"
+                    android:text="点击标题优先排列"
+                    android:textSize="13dp"
+                    android:textAlignment="gravity"
+                    android:gravity="left|center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="WIFI\n网络"
+                    android:textSize="13dp"
+                    android:id="@+id/main_wifi_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="移动\n网络"
+                    android:textSize="13dp"
+                    android:id="@+id/main_mobile_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="权限\n记录"
+                    android:textSize="13dp"
+                    android:id="@+id/main_service_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="权限\n控制"
+                    android:textSize="13dp"
+                    android:id="@+id/main_wakelock_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="权限\n开关"
+                    android:textSize="13dp"
+                    android:id="@+id/main_prov_tv"
+                    android:layout_weight="3"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/main_listview"
+                android:divider="@null"
+                android:layout_marginRight="8dp"
+                android:layout_marginLeft="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

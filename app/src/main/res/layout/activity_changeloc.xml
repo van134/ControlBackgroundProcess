@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin" >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:id="@+id/skip_dialog_fl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/alert_backgroundshape">
+            <Switch
+                style="@style/mtextSize"
+                android:layout_marginLeft="4dp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="定位纠偏(部分软件需要纠偏例如钉钉、滴滴等)"
+                android:id="@+id/changeloc_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_marginTop="4dp"
+           android:background="@drawable/alert_backgroundshape"
+           android:weightSum="10"
+           android:orientation="horizontal">
+           <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_weight="4"
+               android:paddingLeft="4dp"
+               android:paddingRight="4dp"
+               android:orientation="horizontal">
+               <TextView
+                   style="@style/mtextSize"
+                   android:gravity="center"
+                   android:textAlignment="gravity"
+                   android:layout_gravity="center_vertical"
+                   android:layout_height="40dp"
+                   android:layout_width="wrap_content"
+                   android:text="经度:"/>
+               <EditText
+                   android:id="@+id/changeloc_jing_et"
+                   android:layout_width="match_parent"
+                   android:layout_height="40dp"
+                   android:layout_below="@+id/disable_tv"
+                   android:layout_marginBottom="3dp"
+                   android:layout_marginTop="3dp"
+                   android:background="@null"
+                   android:hint="输入经度" />
+           </LinearLayout>
+           <LinearLayout
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_weight="4"
+               android:paddingLeft="4dp"
+               android:paddingRight="4dp"
+               android:orientation="horizontal">
+               <TextView
+                   style="@style/mtextSize"
+                   android:gravity="center"
+                   android:textAlignment="gravity"
+                   android:layout_gravity="center_vertical"
+                   android:layout_height="40dp"
+                   android:layout_width="wrap_content"
+                   android:text="纬度:"/>
+               <EditText
+                   android:id="@+id/changeloc_wei_et"
+                   android:layout_width="match_parent"
+                   android:layout_height="40dp"
+                   android:layout_below="@+id/disable_tv"
+                   android:layout_marginBottom="3dp"
+                   android:layout_marginTop="3dp"
+                   android:background="@null"
+                   android:hint="输入纬度" />
+           </LinearLayout>
+           <TextView
+               android:layout_weight="2"
+               style="@style/mtextSize"
+
+               android:gravity="center"
+               android:textAlignment="gravity"
+               android:layout_gravity="center_vertical"
+               android:layout_height="40dp"
+               android:layout_width="wrap_content"
+               android:onClick="changeMapClick"
+               android:id="@+id/changeloc_btn"
+               android:layout_marginRight="4dp"
+               android:background="#07000000"
+               android:text="地图一"/>
+       </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="4">
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/mtextSize"
+            android:text="说明：有两种地图模式可选，放大地图并选点,点击复制按钮后（地图一）或长按选择复制后（地图二）坐标将自动设置成功。也可以自己手动设置"
+            android:id="@+id/changeloc_alerttv" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/changeloc_web"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+</RelativeLayout>
