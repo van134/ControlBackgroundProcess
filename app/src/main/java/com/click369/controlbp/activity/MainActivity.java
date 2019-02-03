@@ -1228,16 +1228,23 @@ public class MainActivity extends BaseActivity
 
     boolean isInLoadNewIcon = false;
     private void loadAppIcons(){
-        new Thread(){
-            @Override
-            public void run() {
-                try {
+        h.removeCallbacks(loadIcons);
+        h.postDelayed(loadIcons,200);
+    }
+
+    Runnable loadIcons = new Runnable() {
+        @Override
+        public void run() {
+            new Thread(){
+                @Override
+                public void run() {
+                    try {
 //                    synchronized (MainActivity.this) {
 //                    Log.i("CONTROL","load icons");
                         final Set<String> pkgs = new HashSet<>();
                         pkgs.addAll(AppLoaderUtil.allHMAppInfos.keySet());
                         pkgs.add(Common.PACKAGENAME);
-                    isInLoadNewIcon = false;
+                        isInLoadNewIcon = false;
                         for (String p : pkgs) {
                             File f = new File(AppLoaderUtil.iconPath, p);
                             if (f.exists() && !AppLoaderUtil.allHMAppIcons.containsKey(p)) {
@@ -1274,12 +1281,13 @@ public class MainActivity extends BaseActivity
                             }
                         });
 //                    }
-                }catch (Throwable e){
-                    e.printStackTrace();
+                    }catch (Throwable e){
+                        e.printStackTrace();
+                    }
                 }
-            }
-        }.start();
-    }
+            }.start();
+        }
+    };
 
     Runnable updateInfo = new Runnable() {
         @Override

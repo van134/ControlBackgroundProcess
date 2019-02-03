@@ -13,6 +13,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.location.LocationManager;
 import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -216,6 +217,7 @@ public class WatchDogService extends Service {
                     key.endsWith("notstop")||
                     key.endsWith(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY)||
                     key.endsWith(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)||
+                    key.endsWith(Common.PREFS_SETTING_EXITREMOVERECENT)||
                     key.endsWith("autostart")){
                 isNeedAMSReadLoad = true;
                 Log.i("CONTROL","isNeedAMSReadLoad  变化了");
@@ -328,6 +330,7 @@ public class WatchDogService extends Service {
         ifliter.addAction("com.click369.control.cpubatterychange");
         ifliter.addAction("com.click369.control.audiofocus");
         ifliter.addAction("com.click369.control.amsstoppkg");
+        ifliter.addAction("com.click369.control.amsremoverecent");
         ifliter.addAction("com.click369.controlbp.zhendong");
         ifliter.addAction("com.click369.control.callflash.start");
         ifliter.addAction("com.click369.control.callflash.stop");
@@ -775,7 +778,6 @@ public class WatchDogService extends Service {
                     if(asi.isPressKeyBack) {
                         isInBack = true;
                         XposedStopApp.stopApk(key, WatchDogService.this);
-                        WatchDogService.sendRemoveRecent(key,WatchDogService.this);
                         if(isAlreadyOpenCamera&&ai.packageName.toLowerCase().contains("camera")){
                             isAlreadyOpenCamera = false;
                             cleanCache(false);
@@ -810,7 +812,6 @@ public class WatchDogService extends Service {
                     }else if(ai.isOffscForceStop){
                         asi.isReadyOffStop = false;
                         XposedStopApp.stopApk(key, WatchDogService.this);
-                        WatchDogService.sendRemoveRecent(key,WatchDogService.this);
                         Log.i("CONTROL","OFF STOPA "+ai.packageName);
                     }else if(!asi.isInMuBei&&ai.isOffscMuBei){
                         asi.isReadyOffMuBei = false;
@@ -1267,6 +1268,9 @@ public class WatchDogService extends Service {
                 Intent intent1 = new Intent("com.click369.control.ams.heart");
                 sendBroadcast(intent1);
                 Log.i("CONTROL","heart  "+action);
+            }else if("com.click369.control.amsremoverecent".equals(action)){
+                Log.i("CONTROL","removerecent  "+intent);
+                removeRecent(intent.getStringExtra("pkg"),context);
             }else if("com.click369.control.amsstoppkg".equals(action)){//从AMS杀死的应用 返回确认
                 HashSet<String> stopPkgs = (HashSet<String>)intent.getSerializableExtra("pkgs");
                 for(String pkg:stopPkgs){
@@ -1277,7 +1281,6 @@ public class WatchDogService extends Service {
                     AppLoaderUtil.runLists.remove(pkg);
                     AppLoaderUtil.allAppStateInfos.put(pkg,new AppStateInfo());
                     ai.isRunning = false;
-                    sendRemoveRecent(pkg,WatchDogService.this);
                     if(ai.isLockApp){
                         SharedPrefsUtil.getInstance(WatchDogService.this).autoStartNetPrefs.edit().remove(pkg+"/lockok").commit();
                     }
@@ -1683,7 +1686,7 @@ public class WatchDogService extends Service {
         return packageNames;
     }
 
-    public static void sendRemoveRecent(String pkg,Context cxt){
+    public static void removeRecent(String pkg,Context cxt){
         if (isExitRemoveRecent) {
             if(openPkgName.equals("com.android.systemui")){
                 return;
@@ -1701,7 +1704,6 @@ public class WatchDogService extends Service {
 
     public void startMuBei(final String muBeiApk){
         try {
-//            muBeiPrefs.edit().putInt(muBeiApk,0).commit();
             AppStateInfo asi = AppLoaderUtil.allAppStateInfos.get(muBeiApk);
             AppInfo ai = AppLoaderUtil.allHMAppInfos.get(muBeiApk);
             asi.isInMuBei = true;
@@ -1710,14 +1712,10 @@ public class WatchDogService extends Service {
             Intent intent = new Intent("com.click369.control.ams.forcestopservice");
             intent.putExtra("pkg", muBeiApk);
             sendBroadcast(intent);
-//            if("com.tencent.mm".equals(muBeiApk)){
-//                return;
-//            }
             Intent intent1 = new Intent("com.click369.control.uss.setappidle");
             intent1.putExtra("pkg", muBeiApk);
             intent1.putExtra("idle", true);
             sendBroadcast(intent1);
-
             updateUI();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1728,42 +1726,15 @@ public class WatchDogService extends Service {
         try {
             AppStateInfo asi = AppLoaderUtil.allAppStateInfos.get(idleApk);
             asi.isInIdle = true;
-//            Log.i("CONTROL","startIdle "+idleApk);
             Intent intent1 = new Intent("com.click369.control.uss.setappidle");
             intent1.putExtra("pkg", idleApk);
             intent1.putExtra("idle", true);
             sendBroadcast(intent1);
-
             updateUI();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    public void setAlarm(String action,int time){
-        Intent intent1 = new Intent(action);
-        PendingIntent pi = PendingIntent.getBroadcast(WatchDogService.this,0,intent1,0);
-        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
-        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+time*1000,pi);
-    }
-
-    public void setAlarmWithCode(String action,String pkg,int time,int code){
-        Intent intent1 = new Intent(action);
-        intent1.putExtra("pkg",pkg);
-        PendingIntent pi = PendingIntent.getBroadcast(this,code,intent1,0);
-        AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+time*1000,pi);
-    }
-
-    public void cleanAlarm(String action){
-        Intent intent1 = new Intent(action);
-        PendingIntent sender = PendingIntent.getBroadcast(WatchDogService.this, 0, intent1, 0);
-        if (sender != null) {
-            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-            am.cancel(sender);
-        }
-    }
-
     public void cleanCache(boolean isAll){
         isAlreadyOpenCamera = false;
         List<String> lists = new ArrayList<String>();
@@ -1863,4 +1834,31 @@ public class WatchDogService extends Service {
             sendBroadcast(intent);
         }
     };
+
+
+
+
+    public void setAlarm(String action,int time){
+        Intent intent1 = new Intent(action);
+        PendingIntent pi = PendingIntent.getBroadcast(WatchDogService.this,0,intent1,0);
+        AlarmManager am = (AlarmManager)getSystemService(ALARM_SERVICE);
+        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+time*1000,pi);
+    }
+
+    public void setAlarmWithCode(String action,String pkg,int time,int code){
+        Intent intent1 = new Intent(action);
+        intent1.putExtra("pkg",pkg);
+        PendingIntent pi = PendingIntent.getBroadcast(this,code,intent1,0);
+        AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()+time*1000,pi);
+    }
+
+    public void cleanAlarm(String action){
+        Intent intent1 = new Intent(action);
+        PendingIntent sender = PendingIntent.getBroadcast(WatchDogService.this, 0, intent1, 0);
+        if (sender != null) {
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            am.cancel(sender);
+        }
+    }
 }

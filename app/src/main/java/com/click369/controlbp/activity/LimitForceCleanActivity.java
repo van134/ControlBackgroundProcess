@@ -80,9 +80,7 @@ public class LimitForceCleanActivity extends BaseActivity {
                                     ai.getPackageName().contains("navbarapps")){
                                 continue;
                             }
-
                             lists.add("am force-stop "+ai.getPackageName());
-                            WatchDogService.sendRemoveRecent(ai.getPackageName(),LimitForceCleanActivity.this);
                             if(ai.isNotStop){
                                 XposedStopApp.stopApk(ai.getPackageName(),LimitForceCleanActivity.this);
                             }

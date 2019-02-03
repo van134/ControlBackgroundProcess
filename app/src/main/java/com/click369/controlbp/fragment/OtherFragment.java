@@ -485,7 +485,6 @@ public class OtherFragment extends BaseFragment {
                                 continue;
                             }
                             lists.add("am force-stop "+ai.getPackageName());
-                            WatchDogService.sendRemoveRecent(ai.getPackageName(),getActivity());
                             if(ai.isNotStop){
                                 XposedStopApp.stopApk(ai.getPackageName(),getContext());
                             }

@@ -74,6 +74,7 @@ public class XposedAMS {
     static boolean isFloatOk = false;
     static boolean isNeedFloadOnSys = false;
     static boolean isAutoStartNotNotify = false;
+    static boolean isStopRemveRecent = false;
     static int MUID = 0;
     final static HashMap<String,Object> appStartPrefHMs = new HashMap<String,Object>();
 //    static boolean test = false;
@@ -98,6 +99,7 @@ public class XposedAMS {
     private static String startPkg = "";
     private static String startProc = "";
     private static Object amsObject;
+    private static Context amsContext;
     private static int sysadj = -900;
 
     private static void initData(Intent intent){
@@ -146,6 +148,7 @@ public class XposedAMS {
                 isStopScanMedia = settingMap.containsKey(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA)?(boolean)settingMap.get(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA):false;//settingPrefs.getBoolean(Common.PREFS_SETTING_OTHER_STOPSCANMEDIA,false);
                 isMubeiStopOther = settingMap.containsKey(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)?(boolean)settingMap.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC):false;;
                 isAutoStartNotNotify = settingMap.containsKey(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY)?(boolean)settingMap.get(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY):false;;
+                isStopRemveRecent = settingMap.containsKey(Common.PREFS_SETTING_EXITREMOVERECENT)?(boolean)settingMap.get(Common.PREFS_SETTING_EXITREMOVERECENT):true;;
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -263,23 +266,23 @@ public class XposedAMS {
                 @Override
                 protected void afterHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
                 try {
-                    final Object ams = methodHookParam.thisObject;
                     if (sysCxtField != null) {
                         sysCxtField.setAccessible(true);
-                        final Context sysCxt = (Context) sysCxtField.get(ams);//(Context)methodHookParam.args[0];
+                        amsObject = methodHookParam.thisObject;
+                        amsContext = (Context) sysCxtField.get(amsObject);//(Context)methodHookParam.args[0];
                         Object o = XposedHelpers.getAdditionalStaticField(amsCls, "click369res");
                         boolean isContinue = false;
-                        if (o!=null&&sysCxt!=null&&o.hashCode()==sysCxt.hashCode()){
+                        if (o!=null&&amsContext!=null&&o.hashCode()==amsContext.hashCode()){
                             isContinue = true;
                         }
-                        if (sysCxt != null&&!isContinue) {
+                        if (amsContext != null&&!isContinue) {
                             final Runnable startService = new Runnable() {
                                 @Override
                                 public void run() {
                                 try {
                                     Intent intent = new Intent("com.click369.control.startservice");
                                     intent.putExtra("delay",300);
-                                    sysCxt.sendBroadcast(intent);
+                                    amsContext.sendBroadcast(intent);
                                 }catch (Throwable e){
                                     e.printStackTrace();
                                 }
@@ -291,13 +294,13 @@ public class XposedAMS {
                                     try {
                                         String pkg = (String) msg.obj;
                                         Method m = amsCls.getDeclaredMethod("forceStopPackage", String.class, int.class);
-                                        m.invoke(ams, pkg, 0);
+                                        m.invoke(amsObject, pkg, 0);
                                     } catch (Throwable e) {
                                         e.printStackTrace();
                                     }
                                 }
                             };
-                            if (sysCxt != null) {
+                            if (amsContext != null) {
                                 BroadcastReceiver br = new BroadcastReceiver() {
                                     @Override
                                     public void onReceive(Context context, Intent intent) {
@@ -385,18 +388,18 @@ public class XposedAMS {
                                                 }
                                                 if (mServicesField!=null){
                                                     mServicesField.setAccessible(true);
-                                                    Object mServicesObject = mServicesField.get(ams);
+                                                    Object mServicesObject = mServicesField.get(amsObject);
                                                     if (pkg!=null&&pkg.length()>0){
                                                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                                             Method killMethod = mServicesObject.getClass().getDeclaredMethod("bringDownDisabledPackageServicesLocked", String.class, Set.class, int.class, boolean.class, boolean.class, boolean.class);
                                                             killMethod.setAccessible(true);
                                                             killMethod.invoke(mServicesObject, pkg, null, 0, true, false, true);//第二个布尔值 是停止进程
                                                         }else{
-                                                            XposedUtil.stopServicesAndroidL(amsCls,processRecordCls,mServicesObject,ams,pkg);
+                                                            XposedUtil.stopServicesAndroidL(amsCls,processRecordCls,mServicesObject,amsObject,pkg);
                                                         }
                                                         muBeiHSs.add(pkg);
                                                         if(isMubeiStopOther){
-                                                            XposedUtil.stopProcess(amsCls,ams,pkg);
+                                                            XposedUtil.stopProcess(amsCls,amsObject,pkg);
                                                         }
                                                     }
                                                 }
@@ -418,7 +421,7 @@ public class XposedAMS {
                                                 HashSet<String> pkgs = (HashSet<String>)intent.getSerializableExtra("pkgs");
                                                 Field procListField = amsCls.getDeclaredField("mLruProcesses");
                                                 procListField.setAccessible(true);
-                                                ArrayList procsTemp = (ArrayList)procListField.get(ams);
+                                                ArrayList procsTemp = (ArrayList)procListField.get(amsObject);
                                                 if(procsTemp!=null&&procsTemp.size()>0){
                                                     HashSet<String> stopPkgs = new HashSet<String>();
                                                     HashSet<String> notstopPkgs = new HashSet<String>();
@@ -461,7 +464,7 @@ public class XposedAMS {
                                                         }
                                                         Intent intent1 = new Intent("com.click369.control.amsstoppkg");
                                                         intent1.putExtra("pkgs",stopPkgs);
-                                                        sysCxt.sendBroadcast(intent1);
+                                                        amsContext.sendBroadcast(intent1);
                                                     }
                                                 }
                                             }catch (Throwable e){
@@ -473,7 +476,7 @@ public class XposedAMS {
                                                 Field procListField = amsCls.getDeclaredField("mLruProcesses");
                                                 procListField.setAccessible(true);
                                                 ArrayList procs = new ArrayList();
-                                                ArrayList procsTemp = (ArrayList)procListField.get(ams);
+                                                ArrayList procsTemp = (ArrayList)procListField.get(amsObject);
                                                 if(procsTemp!=null&&procsTemp.size()>0){
                                                     procs.addAll(procsTemp);
                                                     for (Object proc:procs){
@@ -507,7 +510,7 @@ public class XposedAMS {
                                                     Intent intent1 = new Intent("com.click369.control.backprocinfo");
                                                     intent1.putExtra("infos",procTimeInfos);
                                                     intent1.putExtra("runtimes",runingTimes);
-                                                    sysCxt.sendBroadcast(intent1);
+                                                    amsContext.sendBroadcast(intent1);
                                                 }
                                             }catch (Throwable e){
                                                 e.printStackTrace();
@@ -540,7 +543,7 @@ public class XposedAMS {
                                         }else if(Intent.ACTION_SCREEN_ON.equals(action)){
                                             if(startRuningPkgs.contains(Common.PACKAGENAME)&&Math.random()>0.8) {
                                                 Intent intent1 = new Intent("com.click369.control.heart");
-                                                sysCxt.sendBroadcast(intent1);
+                                                amsContext.sendBroadcast(intent1);
                                                 h.postDelayed(startService, 1500);
                                             }else if(!startRuningPkgs.contains(Common.PACKAGENAME)){
                                                 h.post(startService);
@@ -553,7 +556,7 @@ public class XposedAMS {
                                             }
                                             Intent check = new Intent("com.click369.control.float.checkxp");
                                             check.putExtra("isfloatok",isFloatOk&&isNeedFloadOnSys);
-                                            sysCxt.sendBroadcast(check);
+                                            amsContext.sendBroadcast(check);
                                         }else if("com.click369.control.ams.getpreventinfo".equals(action)){
                                             if(intent.hasExtra("isclear")){
                                                 preventPkgs.clear();
@@ -564,7 +567,7 @@ public class XposedAMS {
                                                 check.putExtra("preventPkgs",preventPkgs);
                                                 check.putExtra("killPkgs",killPkgs);
                                                 check.putExtra("startPkgs",startPkgs);
-                                                sysCxt.sendBroadcast(check);
+                                                amsContext.sendBroadcast(check);
                                             }
                                         }else if("com.click369.control.ams.reloadskipnotify".equals(action)){
                                             notifySkipKeyWords.clear();
@@ -611,7 +614,7 @@ public class XposedAMS {
                                     }
                                     }
                                 };
-                                amsObject = methodHookParam.thisObject;
+
                                 IntentFilter filter = new IntentFilter();
                                 filter.addAction("com.click369.control.ams.forcestopapp");
                                 filter.addAction("com.click369.control.ams.changerecent");
@@ -633,9 +636,9 @@ public class XposedAMS {
                                 filter.addAction("com.click369.control.ams.getprivacyinfo");
                                 filter.addAction("com.click369.control.ams.clearprivacyinfo");
                                 filter.addAction(Intent.ACTION_SCREEN_ON);
-                                sysCxt.registerReceiver(br, filter);
+                                amsContext.registerReceiver(br, filter);
                                 ISAMSHOOK = true;
-                                XposedHelpers.setAdditionalStaticField(amsCls, "click369res", sysCxt.hashCode());
+                                XposedHelpers.setAdditionalStaticField(amsCls, "click369res", amsContext.hashCode());
                                 XposedBridge.log("CONTROL_BOOTCOMPLETE");
                                 initData(null);
                             }
@@ -765,7 +768,7 @@ public class XposedAMS {
                         infoField.setAccessible(true);
                         Field emptyField = processRecordCls.getDeclaredField("empty");
                         emptyField.setAccessible(true);
-                        boolean isEmpty = (boolean)emptyField.get(methodHookParam.thisObject);
+//                        boolean isEmpty = (boolean)emptyField.get(methodHookParam.thisObject);
                         ApplicationInfo info = (ApplicationInfo) infoField.get(methodHookParam.thisObject);
                         String pkg = info.packageName;
 //                        XposedBridge.log("CONTROL_KILL_"+pkg+" "+info.processName+" "+isEmpty);
@@ -780,6 +783,11 @@ public class XposedAMS {
                                 runingTimes.remove(pkg);
                                 startPkg = "";
                                 startProc = "";
+                                if(isStopRemveRecent){
+                                    Intent intent = new Intent("com.click369.control.amsremoverecent");
+                                    intent.putExtra("pkg",pkg);
+                                    amsContext.sendBroadcast(intent);
+                                }
                             }
 //                        }
                         if(Common.PACKAGENAME.equals(pkg)){
