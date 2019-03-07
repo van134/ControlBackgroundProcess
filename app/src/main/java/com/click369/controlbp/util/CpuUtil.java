@@ -1,8 +1,14 @@
 package com.click369.controlbp.util;
 
+import android.os.PowerManager;
 import android.util.Log;
 
 import com.click369.controlbp.service.WatchDogService;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Created by 41856 on 2019/2/3.
@@ -36,9 +42,9 @@ public class CpuUtil {
         }
     }
     private static void openAllCpuCore(){
-        new Thread(){
-            @Override
-            public void run() {
+//        new Thread(){
+//            @Override
+//            public void run() {
                 try {
                     StringBuilder sb = new StringBuilder();
                     for(int i = 1;i<WatchDogService.cpuNum;i++){
@@ -48,17 +54,17 @@ public class CpuUtil {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-            }
-        }.start();
+//            }
+//        }.start();
     }
 
     private static void lockCpu(final int cpuChooses[]){
         if(WatchDogService.isChargingNotLockCPU&&WatchDogService.isCharging){
             return;
         }
-        new Thread(){
-            @Override
-            public void run() {
+//        new Thread(){
+//            @Override
+//            public void run() {
                 try {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 1; i < WatchDogService.cpuNum; i++) {
@@ -68,7 +74,29 @@ public class CpuUtil {
                 }catch (Exception e){
                     e.printStackTrace();
                 }
-            }
-        }.start();
+//            }
+//        }.start();
+    }
+
+    public static boolean isQualcommCpu() {
+        String str1 = "/proc/cpuinfo";
+        try {
+            FileReader fr = new FileReader(str1);
+            BufferedReader localBufferedReader = new BufferedReader(fr, 8192);
+            String s = null;
+            boolean is =false;
+            boolean isHasHardWare =false;
+            while((s=localBufferedReader.readLine())!=null){
+               if(s!=null&&s.toLowerCase().contains("qualcomm")){
+                   is = true;
+               }else if(s!=null&&s.toLowerCase().contains("hardware")){
+                   isHasHardWare = true;
+               }
+           }
+            localBufferedReader.close();
+            return is||!isHasHardWare||!new File(str1).exists()||new File(str1).length()==0;
+        } catch (IOException e) {
+        }
+        return false;
     }
 }

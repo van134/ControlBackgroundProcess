@@ -20,10 +20,12 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
@@ -34,7 +36,6 @@ import java.util.Collections;
 
 public class RecentAdapter extends BaseAdapter{
 	public ArrayList<AppInfo> bjdatas = new ArrayList<AppInfo>();
-//	public ArrayList<String> choosedatas = new ArrayList<String>();
 	private LayoutInflater inflater;
 	public int sortType = -1;
 	private Activity c;
@@ -42,7 +43,6 @@ public class RecentAdapter extends BaseAdapter{
 	public String fliterName = "u";
 	private AppInfo myAi =null;
 
-//	public ArrayList<StudentInfo> chooseInfo = new ArrayList<StudentInfo>();
 	public RecentAdapter(Activity context, SharedPreferences modPrefs, SharedPreferences appStartPrefs) {
 		c = context;
 		inflater = LayoutInflater.from(context);
@@ -61,12 +61,10 @@ public class RecentAdapter extends BaseAdapter{
 	public void setData(ArrayList<AppInfo> datas){
 		bjdatas.clear();
 		bjdatas.addAll(datas);
-//		this.notifyDataSetChanged();
 		freshList();
 	}
 
 	public void fliterList(String name,ArrayList<AppInfo> apps){
-		Log.i("CONTROL","name   "+name);
 		fliterName =name;
 		if(name.length()>0){
 			bjdatas.clear();
@@ -86,7 +84,9 @@ public class RecentAdapter extends BaseAdapter{
 				for(AppInfo ai :apps){
 					if(ai.getAppName().toLowerCase().contains(name.trim().toLowerCase())
 							||ai.getPackageName().toLowerCase().contains(name.trim().toLowerCase())){
-						bjdatas.add(ai);
+						if (TopSearchView.appType==2||(TopSearchView.appType==0&&ai.isUser)||(TopSearchView.appType==1&&!ai.isUser)) {
+							bjdatas.add(ai);
+						}
 					}
 				}
 			}
@@ -109,12 +109,6 @@ public class RecentAdapter extends BaseAdapter{
 
 		PinyinCompare comparent = new PinyinCompare();
 		Collections.sort(this.bjdatas, comparent);
-//		if (sortType == -1){
-//			this.notifyDataSetChanged();
-//			return;
-//		}
-//		String exs[] = {"/service","/wakelock","/alarm"};
-////		Collections.sort(this.choosedatas, comparent);
 		ArrayList<AppInfo> temp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
@@ -159,13 +153,9 @@ public class RecentAdapter extends BaseAdapter{
 		this.notifyDataSetChanged();
 	}
 	public void chooseAll(){
-//		choosedatas.clear();
-//		choosedatas.addAll(this.bjdatas);
 		this.notifyDataSetChanged();
 	}
 	public void cancelchooseAll(){
-//		choosedatas.clear();
-//		ActivityTZZF.chooseInfo.addAll(studatas);
 		this.notifyDataSetChanged();
 	}
 
@@ -209,12 +199,6 @@ public class RecentAdapter extends BaseAdapter{
 		viewHolder.appTimeTv.setTextColor(color);
 		viewHolder.appNameTv.setTextColor(color);
 		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
-//		File file = null;
-//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
-//			BaseActivity.loadeds.add(data.packageName);
-//			file = data.iconFile;
-//		}
-//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.notCleanIv.setTag(position);
@@ -251,7 +235,7 @@ public class RecentAdapter extends BaseAdapter{
 				if(isStop){
 					ai.isRecentNotClean = false;
 					ed.remove(ai.getPackageName()+"/notclean");
-					if (MainActivity.isLinkRecentAndNotStop&&ai.isNotStop){
+					if (WatchDogService.isLinkRecentAndNotStop&&ai.isNotStop){
 						SharedPreferences.Editor ed1 = appStartPrefs.edit();
 						ed1.remove(ai.getPackageName() + "/notstop").commit();
 						ai.isNotStop = false;
@@ -259,7 +243,7 @@ public class RecentAdapter extends BaseAdapter{
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/notclean",!isStop);
 					ai.isRecentNotClean = true;
-					if (MainActivity.isLinkRecentAndNotStop&&!ai.isNotStop){
+					if (WatchDogService.isLinkRecentAndNotStop&&!ai.isNotStop){
 						SharedPreferences.Editor ed1 = appStartPrefs.edit();
 						ed1.putBoolean(ai.getPackageName() + "/notstop", true).commit();
 						ai.isNotStop = true;
@@ -290,7 +274,7 @@ public class RecentAdapter extends BaseAdapter{
 				if(isStop){
 					ai.isRecentForceClean = false;
 					ed.remove(ai.getPackageName()+"/forceclean");
-					if(MainActivity.isLinkRecentAndAuto&&!ai.isBackForceStop&&!ai.isOffscForceStop){
+					if(WatchDogService.isLinkRecentAndAuto&&!ai.isBackForceStop&&!ai.isOffscForceStop){
 						SharedPreferences.Editor ed1 = appStartPrefs.edit();
 						ed1.remove(ai.getPackageName()+"/autostart").commit();
 						ai.isAutoStart = false;
@@ -303,7 +287,7 @@ public class RecentAdapter extends BaseAdapter{
 						ed.remove(ai.getPackageName()+"/notclean");
 						notifyDataSetChanged();
 					}
-					if(MainActivity.isLinkRecentAndAuto&&!ai.isAutoStart) {
+					if(WatchDogService.isLinkRecentAndAuto&&!ai.isAutoStart) {
 						SharedPreferences.Editor ed1 = appStartPrefs.edit();
 						ed1.putBoolean(ai.getPackageName() + "/autostart", true).commit();
 						ai.isAutoStart = true;
@@ -351,18 +335,16 @@ public class RecentAdapter extends BaseAdapter{
 				SharedPreferences.Editor ed = modPrefs.edit();
 				if(isStop){
 					ed.putBoolean(ai.getPackageName()+"/notshow",false);
-					if (ai.getPackageName().equals(Common.PACKAGENAME)) {
-						Intent intent = new Intent("com.click369.control.ams.changerecent");
-						intent.putExtra("pkg",ai.getPackageName());
-						c.sendBroadcast(intent);
-					}else{
-						XposedStopApp.stopApk(ai.getPackageName(),c);
-					}
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/notshow",!isStop);
 				}
-				ai.isRecentNotShow = !isStop;
 				ed.commit();
+				ai.isRecentNotShow = !isStop;
+				Intent intent = new Intent("com.click369.control.ams.changerecent");
+				intent.putExtra("pkg",ai.getPackageName());
+				intent.putExtra("isshow",!ai.isRecentNotShow);
+				c.sendBroadcast(intent);
+
 				buttonView.setImageResource(!isStop?R.mipmap.icon_add:R.mipmap.icon_notdisable);
 			}
 		});

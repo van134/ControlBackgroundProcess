@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.click369.controlbp.R;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.fragment.AppStartFragment;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.fragment.ControlFragment;
@@ -86,7 +87,9 @@ public class AppStartAdapter extends BaseAdapter{
 				for(AppInfo ai :apps){
 					if(ai.getAppName().toLowerCase().contains(name.trim().toLowerCase())
 							||ai.getPackageName().toLowerCase().contains(name.trim().toLowerCase())){
-						bjdatas.add(ai);
+						if (TopSearchView.appType==2||(TopSearchView.appType==0&&ai.isUser)||(TopSearchView.appType==1&&!ai.isUser)) {
+							bjdatas.add(ai);
+						}
 					}
 				}
 			}

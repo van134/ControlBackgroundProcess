@@ -27,6 +27,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedWakeLock {
+    public static boolean isReg = false;
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
                                    final XSharedPreferences controlPrefs,
                                    final XSharedPreferences wakeLockPrefs,
@@ -37,86 +38,168 @@ public class XposedWakeLock {
         }
         final Class powerMangerClass = XposedUtil.findClass("android.os.PowerManager", lpparam.classLoader);
         try {
-            Constructor cs[] = powerMangerClass.getDeclaredConstructors();
-            if (cs!=null&&cs.length>0){
-                final Class clss[] = cs[0].getParameterTypes();
-                XC_MethodHook hook = new XC_MethodHook() {
+            if(Build.VERSION.SDK_INT>Build.VERSION_CODES.O_MR1 ){
+                XposedUtil.hookMethod(powerMangerClass, XposedUtil.getParmsByName(powerMangerClass, "newWakeLock"), "newWakeLock", new XC_MethodHook() {
                     @Override
-                    protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                        try {
-                            Context cxt = (Context) methodHookParam.args[0];
-                            if (cxt!=null&&cxt instanceof Application) {
-                                //该唤醒锁是否允许
-                                final HashMap<String, Long> wakeLockStartAllowTimes = new HashMap<String, Long>();
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockStartAllowTimes", wakeLockStartAllowTimes);
-                                final HashMap<String, Long> wakeLockStartNotAllowTimes = new HashMap<String, Long>();
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockStartNotAllowTimes", wakeLockStartNotAllowTimes);
-                                //规则时长
-                                final HashMap<String, Long> wakeLockRoleTimes = new HashMap<String, Long>();
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockRoleTimes", wakeLockRoleTimes);
-                                //允许次数
-                                final HashMap<String, Integer> wakeLockAllowCounts = new HashMap<String, Integer>();
-                                //允许时长
-                                final HashMap<String, Long> wakeLockAllowTimes = new HashMap<String, Long>();
-                                //不允许次数
-                                final HashMap<String, Integer> wakeLockNotAllowCounts = new HashMap<String, Integer>();
-                                //不允许时长
-                                final HashMap<String, Long> wakeLockNotAllowTimes = new HashMap<String, Long>();
-                                //每次允许的唤醒时间
-                                final HashMap<String, ArrayList<Long>> wakeLockAllTimes = new HashMap<String, ArrayList<Long>>();
-                                //每次不允许的唤醒时间
-                                final HashMap<String, ArrayList<Long>> wakeLockNotAllowAllTimes = new HashMap<String, ArrayList<Long>>();
-                                //唤醒锁名称
-                                final HashMap<String, ArrayList<String>> wakeLocks = new HashMap<String, ArrayList<String>>();
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllowTimes", wakeLockAllowTimes);
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowTimes", wakeLockNotAllowTimes);
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllowCounts", wakeLockAllowCounts);
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowCounts", wakeLockNotAllowCounts);
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        if(!isReg){
+                            isReg = true;
+                            try {
+                                Field field = powerMangerClass.getDeclaredField("mContext");
+                                field.setAccessible(true);
+                                Context cxt = (Context) field.get(param.thisObject);
+                                if (cxt != null && cxt instanceof Application) {
+                                    //该唤醒锁是否允许
+                                    final HashMap<String, Long> wakeLockStartAllowTimes = new HashMap<String, Long>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockStartAllowTimes", wakeLockStartAllowTimes);
+                                    final HashMap<String, Long> wakeLockStartNotAllowTimes = new HashMap<String, Long>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockStartNotAllowTimes", wakeLockStartNotAllowTimes);
+                                    //规则时长
+                                    final HashMap<String, Long> wakeLockRoleTimes = new HashMap<String, Long>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockRoleTimes", wakeLockRoleTimes);
+                                    //允许次数
+                                    final HashMap<String, Integer> wakeLockAllowCounts = new HashMap<String, Integer>();
+                                    //允许时长
+                                    final HashMap<String, Long> wakeLockAllowTimes = new HashMap<String, Long>();
+                                    //不允许次数
+                                    final HashMap<String, Integer> wakeLockNotAllowCounts = new HashMap<String, Integer>();
+                                    //不允许时长
+                                    final HashMap<String, Long> wakeLockNotAllowTimes = new HashMap<String, Long>();
+                                    //每次允许的唤醒时间
+                                    final HashMap<String, ArrayList<Long>> wakeLockAllTimes = new HashMap<String, ArrayList<Long>>();
+                                    //每次不允许的唤醒时间
+                                    final HashMap<String, ArrayList<Long>> wakeLockNotAllowAllTimes = new HashMap<String, ArrayList<Long>>();
+                                    //唤醒锁名称
+                                    final HashMap<String, ArrayList<String>> wakeLocks = new HashMap<String, ArrayList<String>>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllowTimes", wakeLockAllowTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowTimes", wakeLockNotAllowTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllowCounts", wakeLockAllowCounts);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowCounts", wakeLockNotAllowCounts);
 
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllTimes", wakeLockAllTimes);
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowAllTimes", wakeLockNotAllowAllTimes);
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLocks", wakeLocks);
-                                class MyReciver extends BroadcastReceiver {
-                                    @Override
-                                    public void onReceive(Context context, Intent intent) {
-                                        if (wakeLocks.size() == 0){
-                                            return;
-                                        }
-                                        String action = intent.getAction();
-                                        if ("com.click369.wakelock.giveinfo".equals(action)) {
-                                            Intent intent1 = new Intent("com.click369.wakelock.getinfo");
-                                            intent1.putExtra("wakeLockAllowTimes", wakeLockAllowTimes);
-                                            intent1.putExtra("wakeLockNotAllowTimes", wakeLockNotAllowTimes);
-                                            intent1.putExtra("wakeLockAllowCounts", wakeLockAllowCounts);
-                                            intent1.putExtra("wakeLockNotAllowCounts", wakeLockNotAllowCounts);
-                                            intent1.putExtra("wakeLockAllTimes", wakeLockAllTimes);
-                                            intent1.putExtra("wakeLockNotAllowAllTimes", wakeLockNotAllowAllTimes);
-                                            intent1.putExtra("wakeLocks", wakeLocks);
-                                            context.sendBroadcast(intent1);
-                                        }else if ("com.click369.wakelock.clearinfo".equals(action)) {
-                                            wakeLockAllowCounts.clear();
-                                            wakeLockAllowTimes.clear();
-                                            wakeLockNotAllowTimes.clear();
-                                            wakeLockNotAllowCounts.clear();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllTimes", wakeLockAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowAllTimes", wakeLockNotAllowAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLocks", wakeLocks);
+                                    class MyReciver extends BroadcastReceiver {
+                                        @Override
+                                        public void onReceive(Context context, Intent intent) {
+                                            if (wakeLocks.size() == 0) {
+                                                return;
+                                            }
+                                            String action = intent.getAction();
+                                            if ("com.click369.wakelock.giveinfo".equals(action)) {
+                                                Intent intent1 = new Intent("com.click369.wakelock.getinfo");
+                                                intent1.putExtra("wakeLockAllowTimes", wakeLockAllowTimes);
+                                                intent1.putExtra("wakeLockNotAllowTimes", wakeLockNotAllowTimes);
+                                                intent1.putExtra("wakeLockAllowCounts", wakeLockAllowCounts);
+                                                intent1.putExtra("wakeLockNotAllowCounts", wakeLockNotAllowCounts);
+                                                intent1.putExtra("wakeLockAllTimes", wakeLockAllTimes);
+                                                intent1.putExtra("wakeLockNotAllowAllTimes", wakeLockNotAllowAllTimes);
+                                                intent1.putExtra("wakeLocks", wakeLocks);
+                                                context.sendBroadcast(intent1);
+                                            } else if ("com.click369.wakelock.clearinfo".equals(action)) {
+                                                wakeLockAllowCounts.clear();
+                                                wakeLockAllowTimes.clear();
+                                                wakeLockNotAllowTimes.clear();
+                                                wakeLockNotAllowCounts.clear();
 
-                                            wakeLockAllTimes.clear();
-                                            wakeLockNotAllowAllTimes.clear();
-                                            wakeLocks.clear();
+                                                wakeLockAllTimes.clear();
+                                                wakeLockNotAllowAllTimes.clear();
+                                                wakeLocks.clear();
+                                            }
                                         }
                                     }
+                                    IntentFilter intentFilter = new IntentFilter();
+                                    intentFilter.addAction("com.click369.wakelock.giveinfo");
+                                    intentFilter.addAction("com.click369.wakelock.clearinfo");
+                                    cxt.registerReceiver(new MyReciver(), intentFilter);
                                 }
-                                IntentFilter intentFilter = new IntentFilter();
-                                intentFilter.addAction("com.click369.wakelock.giveinfo");
-                                intentFilter.addAction("com.click369.wakelock.clearinfo");
-                                cxt.registerReceiver(new MyReciver(), intentFilter);
+                            } catch (Exception e) {
                             }
-                        }catch (Exception e){
                         }
                     }
-                };
-                XposedUtil.hookConstructorMethod(powerMangerClass,clss,hook);
-            }else{
-                XposedBridge.log("^^^^^^^^^^^^^^^^^PowerManager 未找到 ^^^^^^^^^^^^^^^");
+                });
+            }else {
+                Constructor cs[] = powerMangerClass.getDeclaredConstructors();
+                if (cs != null && cs.length > 0) {
+                    final Class clss[] = cs[0].getParameterTypes();
+                    XC_MethodHook hook = new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            try {
+                                Context cxt = (Context) methodHookParam.args[0];
+                                if (cxt != null && cxt instanceof Application) {
+                                    //该唤醒锁是否允许
+                                    final HashMap<String, Long> wakeLockStartAllowTimes = new HashMap<String, Long>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockStartAllowTimes", wakeLockStartAllowTimes);
+                                    final HashMap<String, Long> wakeLockStartNotAllowTimes = new HashMap<String, Long>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockStartNotAllowTimes", wakeLockStartNotAllowTimes);
+                                    //规则时长
+                                    final HashMap<String, Long> wakeLockRoleTimes = new HashMap<String, Long>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockRoleTimes", wakeLockRoleTimes);
+                                    //允许次数
+                                    final HashMap<String, Integer> wakeLockAllowCounts = new HashMap<String, Integer>();
+                                    //允许时长
+                                    final HashMap<String, Long> wakeLockAllowTimes = new HashMap<String, Long>();
+                                    //不允许次数
+                                    final HashMap<String, Integer> wakeLockNotAllowCounts = new HashMap<String, Integer>();
+                                    //不允许时长
+                                    final HashMap<String, Long> wakeLockNotAllowTimes = new HashMap<String, Long>();
+                                    //每次允许的唤醒时间
+                                    final HashMap<String, ArrayList<Long>> wakeLockAllTimes = new HashMap<String, ArrayList<Long>>();
+                                    //每次不允许的唤醒时间
+                                    final HashMap<String, ArrayList<Long>> wakeLockNotAllowAllTimes = new HashMap<String, ArrayList<Long>>();
+                                    //唤醒锁名称
+                                    final HashMap<String, ArrayList<String>> wakeLocks = new HashMap<String, ArrayList<String>>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllowTimes", wakeLockAllowTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowTimes", wakeLockNotAllowTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllowCounts", wakeLockAllowCounts);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowCounts", wakeLockNotAllowCounts);
+
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockAllTimes", wakeLockAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLockNotAllowAllTimes", wakeLockNotAllowAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "wakeLocks", wakeLocks);
+                                    class MyReciver extends BroadcastReceiver {
+                                        @Override
+                                        public void onReceive(Context context, Intent intent) {
+                                            if (wakeLocks.size() == 0) {
+                                                return;
+                                            }
+                                            String action = intent.getAction();
+                                            if ("com.click369.wakelock.giveinfo".equals(action)) {
+                                                Intent intent1 = new Intent("com.click369.wakelock.getinfo");
+                                                intent1.putExtra("wakeLockAllowTimes", wakeLockAllowTimes);
+                                                intent1.putExtra("wakeLockNotAllowTimes", wakeLockNotAllowTimes);
+                                                intent1.putExtra("wakeLockAllowCounts", wakeLockAllowCounts);
+                                                intent1.putExtra("wakeLockNotAllowCounts", wakeLockNotAllowCounts);
+                                                intent1.putExtra("wakeLockAllTimes", wakeLockAllTimes);
+                                                intent1.putExtra("wakeLockNotAllowAllTimes", wakeLockNotAllowAllTimes);
+                                                intent1.putExtra("wakeLocks", wakeLocks);
+                                                context.sendBroadcast(intent1);
+                                            } else if ("com.click369.wakelock.clearinfo".equals(action)) {
+                                                wakeLockAllowCounts.clear();
+                                                wakeLockAllowTimes.clear();
+                                                wakeLockNotAllowTimes.clear();
+                                                wakeLockNotAllowCounts.clear();
+
+                                                wakeLockAllTimes.clear();
+                                                wakeLockNotAllowAllTimes.clear();
+                                                wakeLocks.clear();
+                                            }
+                                        }
+                                    }
+                                    IntentFilter intentFilter = new IntentFilter();
+                                    intentFilter.addAction("com.click369.wakelock.giveinfo");
+                                    intentFilter.addAction("com.click369.wakelock.clearinfo");
+                                    cxt.registerReceiver(new MyReciver(), intentFilter);
+                                }
+                            } catch (Exception e) {
+                            }
+                        }
+                    };
+                    XposedUtil.hookConstructorMethod(powerMangerClass, clss, hook);
+                } else {
+                    XposedBridge.log("^^^^^^^^^^^^^^^^^PowerManager 未找到 ^^^^^^^^^^^^^^^");
+                }
             }
         }catch (Throwable e){
             e.printStackTrace();

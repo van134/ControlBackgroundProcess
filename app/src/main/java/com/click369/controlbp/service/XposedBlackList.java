@@ -52,7 +52,8 @@ public class XposedBlackList {
                     }
                 }
             });
-        }else if(xpBlackListPrefs.getBoolean(lpparam.packageName+"/nocheckxp",false)){
+        }
+        if(xpBlackListPrefs.getBoolean(lpparam.packageName+"/nocheckxp",false)){
 //            if(lpparam.packageName.equals("com.unionpay")){
 //                XposedBridge.log("云闪付反检测HOOK START");
 //                XC_MethodHook hook = new XC_MethodHook() {
@@ -71,6 +72,7 @@ public class XposedBlackList {
 //                        return;
 //                    }
 //                };
+//                XposedUtil.hookMethod(lpparam.classLoader, "com.bangcle.andjni.JniLib", "cZ",hook);
 //                XposedUtil.hookMethod(lpparam.classLoader, "com.unionpay.lib.react.utils.d", "a",hook);
 //                XposedUtil.hookMethod(lpparam.classLoader, "com.unionpay.uppay.mobile.utils.g", "a",hook);
 //                XposedUtil.hookMethod(lpparam.classLoader, "com.unionpay.mobile.device.utils.RootCheckerUtils", "isRoot",hook);

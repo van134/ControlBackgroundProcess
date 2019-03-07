@@ -27,29 +27,19 @@ import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.util.ArrayList;
 
-/*
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ControlFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ControlFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class ControlFragment extends BaseFragment {
     private Handler h = new Handler();
     public ControlAdapter adapter;
     private ListView listView;
     private TopSearchView topView;
-//    private EditText editText;
-//    private FrameLayout alertFl;
     public static int curColor = Color.BLACK;
     private TextView serviceTv,broadTv,wakelockTv,alarmTv,strongWakeLockTv,strongAlarmTv;//alertTv,closeTv;
     private SharedPreferences modPrefs;//,settingPrefs;
     public static boolean isClick = false;
     public ControlFragment() {
-        // Required empty public constructor
-    }
 
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,13 +83,9 @@ public class ControlFragment extends BaseFragment {
             strongAlarmTv.setEnabled(false);
         }
     }
-    @SuppressLint("WorldReadableFiles")
+
     private void initView(View v){
-//        settingPrefs = SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_APPSETTINGS);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
         modPrefs =  SharedPrefsUtil.getInstance(getContext()).modPrefs;//SharedPrefsUtil.getPreferences(this.getActivity(),Common.PREFS_SETTINGNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-        modPrefs.edit().remove(Common.PACKAGENAME+"/broad").commit();
-//        isBroadStop = settingPrefs.getBoolean(Common.PREFS_SETTING_ISMUBEISTOPRECEIVER,false);
-//        modPrefs.edit().putBoolean(Common.PACKAGENAME+"/broad",true).commit();
         listView = (ListView)v.findViewById(R.id.main_listview);
         strongWakeLockTv = (TextView)v.findViewById(R.id.main_control_waklock_tv);
         strongAlarmTv = (TextView)v.findViewById(R.id.main_control_alarm_tv);
@@ -274,28 +260,12 @@ public class ControlFragment extends BaseFragment {
         broadTv.setOnClickListener(listener);
         wakelockTv.setOnClickListener(listener);
         alarmTv.setOnClickListener(listener);
-//        loadApp();
         fresh();
         loadY(listView,this.getClass(),adapter.sortType);
     }
 
     @Override
-    public void onStop() {
-//        if (isClickItem){
-//            isClickItem = false;
-//            Intent intent = new Intent(getActivity(), WatchDogService.class);
-//            getActivity().startService(intent);
-//        }
-        super.onStop();
-    }
-
-    @Override
     public void onHiddenChanged(boolean hidden) {
-//        if (hidden&&isClickItem){
-//            isClickItem = false;
-//            Intent intent = new Intent(getActivity(), WatchDogService.class);
-//            getActivity().startService(intent);
-//        }else
         if (!hidden){
             fresh();
             loadY(listView,this.getClass(),adapter.sortType);

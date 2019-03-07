@@ -159,7 +159,7 @@
         <activity android:name=".activity.DozeWhiteListActivity" android:resizeableActivity = "true" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ColorNavBarActivity" android:resizeableActivity = "true" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ADBTestActivity" android:resizeableActivity = "true"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
-        <activity android:name=".activity.ChangePhotoActivity" android:process=":com.click369.process.changephoto"  android:resizeableActivity = "true"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.ChangePhotoActivity" android:process="other.ui"  android:resizeableActivity = "true"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ColorSetActivity" android:resizeableActivity = "true"
             android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.UIBarBlackListActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
@@ -170,11 +170,12 @@
         <activity android:name=".activity.PrivacyLogActivity" android:resizeableActivity = "true" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ChangeLocActivity"
             android:resizeableActivity = "true"
-            android:process=":com.click369.process.loc"
+            android:process="other.ui"
             android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.SkipDialogActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.UnLockActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:resizeableActivity = "true"
             android:excludeFromRecents="true"
             android:theme="@style/translucent" >

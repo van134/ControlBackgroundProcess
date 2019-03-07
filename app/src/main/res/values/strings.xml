@@ -9,7 +9,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="accessibility_description">返回强退监听器</string>
-    <string name="mainalert">请认真阅读以下内容(以后每次更新都会提示一次)：
+    <string name="mainalert">请认真阅读以下内容：
+        \n温馨提示：不会用或出现问题请先去看 问题/日志 模块中的说明。
         \n1.应用控制器大多功能需要ROOT和XPosed支持。
         \n2.不要尝试用其他优化软件优化应用控制器，后台服务WatchDog必须保留，否则会导致各种异常甚至更加耗电。
         \n3.应用控制器的功能非常多,不需要的功能模块可以在设置中自由关闭。

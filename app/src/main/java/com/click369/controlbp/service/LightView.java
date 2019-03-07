@@ -292,11 +292,8 @@ public class LightView extends View {
             setAlpha(0.0f);
             unInitAnimation();
             setVisibility(View.GONE);
-
             destroyDrawingCache();
             gcBitmap();
-
-
             post(new Runnable() {
                 @Override
                 public void run() {

@@ -37,8 +37,8 @@
                         style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="记录应用开启及关闭日志\n(可在常见问题及日志中查看)"
-                        android:id="@+id/setting_backlog_sw"
+                        android:text="应用控制器退出时自杀前台(开启可以减少控制器后台内存占用,如果您频繁打开控制器则不要开启)"
+                        android:id="@+id/setting_backkillself_sw"
                         android:checked="false" />
                 </FrameLayout>
 

@@ -236,7 +236,7 @@ public class XposedTextView {
                     }
                 });
             }
-        }catch (RuntimeException e){
+        }catch (Throwable e){
             e.printStackTrace();
         }
     }

@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.AppStartService;
+import com.click369.controlbp.service.WatchDogService;
 
 /**
  * Created by asus on 2017/10/19.
@@ -80,7 +80,7 @@ public class LockAppSwitchView {
             String names[] = {Common.PREFS_APPSTART_ISSHOWUI,Common.PREFS_SETTING_OFFSCLOCK,
                     Common.PREFS_APPSTART_ISSHOWNUMBERLOCK,Common.PREFS_SETTING_USEPWDLOCK};
             if(tag ==1){
-                AppStartService.isOffScLockApp = isChecked;
+                WatchDogService.isOffScLockApp = isChecked;
             }if (tag == 3){
                 if (isChecked==false&&settings.getString(Common.PREFS_SETTING_APPPWD,"").length()==4&&!isCloseOk){
                     Intent intent = new Intent(cxt,SetPWDActivity.class);

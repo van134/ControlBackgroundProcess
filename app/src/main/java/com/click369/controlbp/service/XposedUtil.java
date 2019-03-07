@@ -17,6 +17,7 @@ import android.view.ViewParent;
 import android.widget.TextView;
 
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.util.TimeUtil;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -39,6 +40,7 @@ public class XposedUtil {
     //    static long lastReloadTime = 0;
     public static void reloadInfos(Context c,
                                    SharedPreferences autoStartPrefs,
+                                   SharedPreferences recentPrefs,
                                    SharedPreferences controlPrefs,
                                    SharedPreferences settingPrefs,
                                    SharedPreferences skipDialogPrefs,
@@ -52,8 +54,8 @@ public class XposedUtil {
         Intent intentb = new Intent("com.click369.control.ams.initreload");
         intentb.putExtra("isNeedFloadOnSys", isneed);
         intentb.putExtra("autoStartPrefs", (Serializable) autoStartPrefs.getAll());
+        intentb.putExtra("recentPrefs", (Serializable) recentPrefs.getAll());
         intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
-//        intentb.putExtra("muBeiPrefs", (Serializable) muBeiPrefs.getAll());
         intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
         intentb.putExtra("skipDialogPrefs", (Serializable) skipDialogPrefs.getAll());
         c.sendBroadcast(intentb);
@@ -491,6 +493,10 @@ public class XposedUtil {
     }
     public static void hookMethod(Class cls,Class clss[],String methodName,XC_MethodHook hook){
         try {
+            if(cls==null){
+                XposedBridge.log("CONTROL_类未找到");
+                return;
+            }
             int len = clss!=null?clss.length:0;
             switch (len){
                 case 0:
@@ -578,6 +584,10 @@ public class XposedUtil {
     public static void hookConstructorMethod(Class cls,Class clss[],XC_MethodHook hook){
 
         try {
+            if(cls==null){
+                XposedBridge.log("CONTROL_类未找到");
+                return;
+            }
             int len = clss!=null?clss.length:0;
             switch (len){
                 case 0:
@@ -706,5 +716,20 @@ public class XposedUtil {
             XposedBridge.log("^^^^^^^^^^^^^^类未找到  "+name+"  "+e+"^^^^^^^^^^^^^^^^^");
         }
         return null;
+    }
+
+    public static String getErroInfo(Throwable arg1){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(TimeUtil.changeMils2String(System.currentTimeMillis(),"出错时间:yyyy-MM-dd HH:mm:ss") +"\n系统版本:" +android.os.Build.VERSION.RELEASE+"\n手机型号:" +android.os.Build.MODEL+ "\n错误原因：\n");
+        stringBuilder.append(arg1.getMessage() + "\n");
+        StackTraceElement[] stackTrace = arg1.getStackTrace();
+        for (int i = 0; i < stackTrace.length; i++) {
+            stringBuilder.append("file:" + stackTrace[i].getFileName() + " class:"
+                    + stackTrace[i].getClassName() + " method:"
+                    + stackTrace[i].getMethodName() + " line:"
+                    + stackTrace[i].getLineNumber() + "\n");
+        }
+        stringBuilder.append("\n\n");
+        return stringBuilder.toString();
     }
 }

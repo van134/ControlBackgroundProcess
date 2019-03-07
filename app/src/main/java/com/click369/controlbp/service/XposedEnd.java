@@ -69,7 +69,7 @@ public class XposedEnd {
                         }
                     }
                 });
-            }else if(lpparam.packageName.equals("com.google.vr.apps.ornament")&&settingPrefs.getBoolean("archange",false)){
+            }else if("com.google.vr.apps.ornament".equals(lpparam.packageName)&&settingPrefs.getBoolean("archange",false)){
                 final Class surClass = XposedHelpers.findClass("android.graphics.SurfaceTexture", lpparam.classLoader);
                 XposedHelpers.findAndHookMethod(surClass,"setDefaultBufferSize",int.class,int.class, new XC_MethodHook() {
                     @Override

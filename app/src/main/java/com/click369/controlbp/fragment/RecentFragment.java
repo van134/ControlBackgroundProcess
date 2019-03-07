@@ -18,6 +18,7 @@ import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.RecentAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
@@ -139,7 +140,7 @@ public class RecentFragment extends BaseFragment {
                                 ed.putBoolean(ai.getPackageName()+"/forceclean",true);
                                 ed.commit();
                                 ai.isRecentForceClean = true;
-                                if (MainActivity.isLinkRecentAndNotStop) {
+                                if (WatchDogService.isLinkRecentAndNotStop) {
                                     SharedPreferences.Editor ed1 = appStartPrefs.edit();
                                     ed1.putBoolean(ai.getPackageName() + "/autostart", true).commit();
                                     ai.isAutoStart = true;
@@ -151,7 +152,7 @@ public class RecentFragment extends BaseFragment {
                                 SharedPreferences.Editor ed = recentPrefs.edit();
                                 ed.remove(ai.getPackageName()+"/forceclean").commit();
                                 ai.isRecentForceClean = false;
-                                if(MainActivity.isLinkRecentAndNotStop&&!ai.isBackForceStop){
+                                if(WatchDogService.isLinkRecentAndNotStop&&!ai.isBackForceStop){
                                     SharedPreferences.Editor ed1 = appStartPrefs.edit();
                                     ed1.remove(ai.getPackageName()+"/autostart").commit();
                                     ai.isAutoStart = false;

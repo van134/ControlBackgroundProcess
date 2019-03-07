@@ -1,6 +1,8 @@
 package com.click369.controlbp.activity;
 
 import android.app.ProgressDialog;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -21,6 +23,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.adapter.IFWCompActBroadAdapter;
@@ -276,7 +279,18 @@ public class IFWCompActivity extends BaseActivity {
                     ActivityInfo si = (ActivityInfo)adapter.getItem(position);
                     name = si.name;
                 }
-                AlertUtil.showAlertMsg(IFWCompActivity.this,"完整名称\n"+name);
+                final String copy = name;
+                AlertUtil.showAllNameAlertMsg(IFWCompActivity.this, "完整名称\n" + name, new AlertUtil.InputCallBack() {
+                    @Override
+                    public void backData(String txt, int tag) {
+                        if(tag==1){
+                            ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+                            // 将文本内容放到系统剪贴板里。
+                            cm.setText(copy);
+                            Toast.makeText(IFWCompActivity.this,"完整名称已复制到你的粘贴板",Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
                 return true;
             }
         });

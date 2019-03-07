@@ -76,8 +76,8 @@ public class BaseActivity extends AppCompatActivity {
     public static HashSet<String> loadeds = new HashSet<String>();
     public static boolean isLoadIcon = true;
     public static boolean isUpdateAppTime = false;
-    public SharedPrefsUtil sharedPrefs;
-    public AppLoaderUtil appLoaderUtil;
+    public static SharedPrefsUtil sharedPrefs;
+    public static AppLoaderUtil appLoaderUtil;
     private static HashMap<String,Long> procTimeInfos = new HashMap<String,Long>();
     private static HashMap<String,Long> procRunTimes = new HashMap<String,Long>();
     private TextView titleView;
@@ -137,8 +137,9 @@ public class BaseActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+            StatusBarCompat.setStatusBarColor(this,MainActivity.isNightMode?Color.BLACK:Color.parseColor(MainActivity.THEME_COLOR),false);
         }
-        StatusBarCompat.setStatusBarColor(this,MainActivity.isNightMode?Color.BLACK:Color.parseColor(MainActivity.THEME_COLOR),false);
+
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 //            if(MainActivity.isNightMode) {
@@ -188,7 +189,7 @@ public class BaseActivity extends AppCompatActivity {
 //        View view = window.getDecorView();
 //        GCUtil.startGC(view,true);
 //        GCUtil.unbindDrawables(view);
-        System.gc();
+//        System.gc();
     }
 
     public static void setProcBgTimeInfos(HashMap<String,Long> procTimeInfos){
@@ -370,20 +371,20 @@ public class BaseActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 final AppInfo ai = (AppInfo)(adapter.getItem(i));
                 final AppStateInfo asi = AppLoaderUtil.allAppStateInfos.containsKey(ai.packageName)?AppLoaderUtil.allAppStateInfos.get(ai.packageName):new AppStateInfo();
-
-                String titles[] = {"启动该应用","清空该应用的所有设置","打开后定时结束该程序"};
+                String appName = ai.appName;
+                String titles[] = {"启动"+appName,"清空"+appName+"的所有设置","打开"+appName+"应用信息","打开后定时结束"+appName};
                 final boolean isRun = ai.isRunning;
                 if(isRun&&(ai.isSetTimeStopApp)){
-                    titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序","取消已设置的定时结束设置","杀死该进程"};
+                    titles = new String[]{"启动"+appName,"清空"+appName+"的所有设置","打开"+appName+"应用信息","打开后定时结束"+appName,"取消对"+appName+"已设置的定时结束设置","杀死"+appName+"进程"};
                     choose = 0;
                 }else if(isRun&&(!ai.isSetTimeStopApp)){
-                    titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序","杀死该进程"};
+                    titles = new String[]{"启动"+appName,"清空"+appName+"的所有设置","打开"+appName+"应用信息","打开后定时结束"+appName,"杀死"+appName+"进程"};
                     choose = 1;
                 }else if(!isRun&&(ai.isSetTimeStopApp)){
-                    titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序","取消已设置的定时结束设置"};
+                    titles = new String[]{"启动"+appName,"清空"+appName+"的所有设置","打开"+appName+"应用信息","打开后定时结束"+appName,"取消对"+appName+"已设置的定时结束设置"};
                     choose = 2;
                 }else if(!isRun&&(!ai.isSetTimeStopApp)){
-                    titles = new String[]{"启动该应用","清空该应用的所有设置","打开后定时结束该程序"};
+                    titles = new String[]{"启动"+appName,"清空"+appName+"的所有设置","打开"+appName+"应用信息","打开后定时结束"+appName};
                     choose = 3;
                 }
                 final String t = ai.isSetTimeStopApp? ai.setTimeStopAppTime+"":"";
@@ -418,8 +419,10 @@ public class BaseActivity extends AppCompatActivity {
                                }
                                }
                            });
+                        }else if (tag == 2){
+                            PackageUtil.getAppDetailSettingIntent(cxt,ai.packageName);
                         }else{
-                           if(tag==2){
+                           if(tag==3){
                                String []titles1 = new String[]{"仅下次生效","永久生效"};
                                AlertUtil.showListAlert(cxt, "请选择模式", titles1, new AlertUtil.InputCallBack() {
                                    @Override
@@ -473,11 +476,11 @@ public class BaseActivity extends AppCompatActivity {
                                        }
                                    }
                                });
-                            }else  if ((tag==3&&choose == 1)||(tag==4&&choose == 0)){
+                           }else  if ((tag==4&&choose == 1)||(tag==5&&choose == 0)){
                                XposedStopApp.stopApk(ai.packageName, cxt);
                                ai.isRunning = false;
                                adapter.notifyDataSetChanged();
-                           }else if(tag==3&&(choose == 0||choose == 2)){
+                           }else if(tag==4&&(choose == 0||choose == 2)){
                                ai.setTimeStopAppTime = 0;
                                ai.isSetTimeStopApp = false;
                                ai.isSetTimeStopOneTime= false;

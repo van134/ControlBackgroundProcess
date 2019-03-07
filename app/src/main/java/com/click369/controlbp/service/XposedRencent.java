@@ -193,17 +193,16 @@ public class XposedRencent {
                                         return;
                                     }
                                 }else if (recentPrefs.getBoolean(pkg + "/forceclean", false)) {
+                                    Activity activity = (Activity)param.thisObject;
                                     if("com.tencent.mm".equals(pkg)){
                                         String cls = getClsByTask(task);
-                                        if(!"com.tencent.mm.ui.LauncherUI".equals(cls)){
+                                        if("com.tencent.mm.plugin.appbrand.ui.AppBrandUI".equals(cls)){
                                         }else{
-                                            Activity activity = (Activity)param.thisObject;
                                             Intent intent = new Intent("com.click369.control.removerecent");
                                             intent.putExtra("pkg", pkg);
                                             activity.sendBroadcast(intent);
                                         }
                                     }else{
-                                        Activity activity = (Activity)param.thisObject;
                                         Intent intent = new Intent("com.click369.control.removerecent");
                                         intent.putExtra("pkg", pkg);
                                         activity.sendBroadcast(intent);

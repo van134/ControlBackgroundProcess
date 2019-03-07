@@ -19,6 +19,7 @@ import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
+import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.util.ArrayList;
@@ -109,9 +110,9 @@ public class NewWatchDogService extends AccessibilityService {
         Log.i("DOZE", "辅助服务开启");
 //        WatchDogService.launcherPkgs.clear();
 //        WatchDogService.imePkgs.clear();
-        WatchDogService.homePkg = WatchDogService.getDefaultHome(this);
-        Set<String> launcherPkgs = WatchDogService.getLauncherPackageName(this);
-        ArrayList<String> imePkgs = WatchDogService.getInputPackageName(this);
+        WatchDogService.homePkg = PackageUtil.getDefaultHome(this);
+        Set<String> launcherPkgs = PackageUtil.getLauncherPackageName(this);
+        ArrayList<String> imePkgs = PackageUtil.getInputPackageName(this);
         for(String l:launcherPkgs){
             if( AppLoaderUtil.allAppStateInfos.containsKey(l)){
                 AppLoaderUtil.allAppStateInfos.get(l).isHomePkg = true;
@@ -147,6 +148,7 @@ public class NewWatchDogService extends AccessibilityService {
             Intent intent1 = new Intent("com.click369.control.accessclose");
             sendBroadcast(intent1);
         }
+        handler = null;
 //        SharedPreferences settings = getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
 //        if (settings.getBoolean(Common.ISCOLORBAROPEN,false)){
 //            Intent intent = new Intent(this,ColorNavBarService.class);

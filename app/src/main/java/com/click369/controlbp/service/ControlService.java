@@ -1,9 +1,9 @@
 package com.click369.controlbp.service;
 
 import com.click369.controlbp.common.Common;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
-import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
@@ -23,36 +23,71 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 	}
 
 	private void initData(){
-		settingPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_APPSETTINGS);
-		controlPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_SETTINGNAME);
-		wakeLockPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_WAKELOCKNAME);
-		alarmPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_ALARMNAME);
-		autoStartPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_AUTOSTARTNAME);
-		barPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_UIBARLIST);
-		testPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_COLORBARTEST);
-		recentPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_RECENTLIST);
-		dozePrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_DOZELIST);
-		adPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_ADLIST);
-		tvPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_TVLIST);
-		pmPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_PMLIST);
-		dialogPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_SKIPDIALOG);
-		xpBlackListPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_XPBLACKLIST);
-		privacyPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_PRIVACY);
-		controlPrefs.makeWorldReadable();
-		wakeLockPrefs.makeWorldReadable();
-		alarmPrefs.makeWorldReadable();
-		autoStartPrefs.makeWorldReadable();
-		barPrefs.makeWorldReadable();
-		testPrefs.makeWorldReadable();
-		settingPrefs.makeWorldReadable();
-		recentPrefs.makeWorldReadable();
-		dozePrefs.makeWorldReadable();
-		adPrefs.makeWorldReadable();
-		tvPrefs.makeWorldReadable();
-		pmPrefs.makeWorldReadable();
-		dialogPrefs.makeWorldReadable();
-		xpBlackListPrefs.makeWorldReadable();
-		privacyPrefs.makeWorldReadable();
+		try {
+			if(settingPrefs==null){
+				settingPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_APPSETTINGS);
+				settingPrefs.makeWorldReadable();
+			}
+			if(controlPrefs==null) {
+				controlPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_SETTINGNAME);
+				controlPrefs.makeWorldReadable();
+			}
+			if(wakeLockPrefs==null) {
+				wakeLockPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_WAKELOCKNAME);
+				wakeLockPrefs.makeWorldReadable();
+			}
+			if(alarmPrefs == null){
+				alarmPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.PREFS_ALARMNAME);
+				alarmPrefs.makeWorldReadable();
+			}
+			if(autoStartPrefs == null) {
+				autoStartPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_AUTOSTARTNAME);
+				autoStartPrefs.makeWorldReadable();
+			}
+			if(barPrefs == null) {
+				barPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_UIBARLIST);
+				barPrefs.makeWorldReadable();
+			}
+			if(testPrefs == null){
+				testPrefs = new XSharedPreferences(Common.PACKAGENAME,Common.IPREFS_COLORBARTEST);
+				testPrefs.makeWorldReadable();
+			}
+			if(recentPrefs == null) {
+				recentPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.IPREFS_RECENTLIST);
+				recentPrefs.makeWorldReadable();
+			}
+			if(dozePrefs == null) {
+				dozePrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_DOZELIST);
+				dozePrefs.makeWorldReadable();
+			}
+			if(adPrefs == null) {
+				adPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.IPREFS_ADLIST);
+				adPrefs.makeWorldReadable();
+			}
+			if(tvPrefs == null) {
+				tvPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.IPREFS_TVLIST);
+				tvPrefs.makeWorldReadable();
+			}
+			if(pmPrefs == null) {
+				pmPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.IPREFS_PMLIST);
+				pmPrefs.makeWorldReadable();
+			}
+			if(dialogPrefs == null) {
+				dialogPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_SKIPDIALOG);
+				dialogPrefs.makeWorldReadable();
+			}
+			if(xpBlackListPrefs == null) {
+				xpBlackListPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_XPBLACKLIST);
+				xpBlackListPrefs.makeWorldReadable();
+			}
+			if(privacyPrefs == null) {
+				privacyPrefs = new XSharedPreferences(Common.PACKAGENAME, Common.PREFS_PRIVACY);
+				privacyPrefs.makeWorldReadable();
+			}
+		}catch (Throwable arg1){
+			arg1.printStackTrace();
+			XposedBridge.log("重要！！！CONTROL_初始化共享参数出错 "+XposedUtil.getErroInfo(arg1));
+		}
 	}
 
 //	@Override
@@ -71,34 +106,61 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
     @Override
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 		try {
-			if(lpparam.packageName.startsWith("com.fkzhang")){
+			if (lpparam == null || lpparam.packageName == null || lpparam.packageName.startsWith("com.fkzhang")) {
 				return;
 			}
-			if (lpparam.packageName.equals("com.click369.controlbp")) {
+//			initData();
+			if ("com.click369.controlbp".equals(lpparam.packageName)) {
 				XposedHelpers.findAndHookMethod("com.click369.controlbp.activity.MainActivity", lpparam.classLoader,
 						"isModuleActive", XC_MethodReplacement.returnConstant(true));
-//				settingPrefs.reload();
-//				boolean isUIChangeOpen = settingPrefs.getBoolean(Common.ALLSWITCH_UI,true);
-//				if(isUIChangeOpen){
-//					XposedToast.loadPackage(lpparam, barPrefs);
-//				}
-//				return;
 			}
-			settingPrefs.reload();
-			xpBlackListPrefs.reload();
-			boolean isBlackXpOpen = settingPrefs.getBoolean(Common.ALLSWITCH_XPBLACKLIST,true);
-			if(isBlackXpOpen&&xpBlackListPrefs.getBoolean(lpparam.packageName+"/contorlxpblack",false)){
+			XposedBroadCast.loadPackage(lpparam);
+			if (settingPrefs != null) {
+				settingPrefs.reload();
+			} else {
+				XposedBridge.log("重要！！！CONTROL_共享参数settingPrefs为空");
+			}
+			if (xpBlackListPrefs != null) {
+				xpBlackListPrefs.reload();
+			} else {
+				XposedBridge.log("重要！！！CONTROL_共享参数xpBlackListPrefs为空");
+			}
+			boolean isBlackXpOpen = settingPrefs.getBoolean(Common.ALLSWITCH_XPBLACKLIST, true);
+			if (isBlackXpOpen&&xpBlackListPrefs!=null && xpBlackListPrefs.getBoolean(lpparam.packageName + "/contorlxpblack", false)) {
 				return;
 			}
+			if ("com.android.systemui".equals(lpparam.packageName)||
+					"android".equals(lpparam.packageName)) {
 
-			XposedAMS.loadPackage(lpparam,settingPrefs,controlPrefs,autoStartPrefs,recentPrefs,barPrefs,dialogPrefs);
-			XposedMedia.loadPackage(lpparam);
-			if (settingPrefs.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true)){
-				XposedAppStart.loadPackage(lpparam, autoStartPrefs);
+				XposedAMS.loadPackage(lpparam, settingPrefs, controlPrefs, autoStartPrefs, recentPrefs, barPrefs, dialogPrefs);
+
+				boolean isUIChangeOpen = settingPrefs.getBoolean(Common.ALLSWITCH_UI,true);
+				boolean isRecentOpen = settingPrefs.getBoolean(Common.ALLSWITCH_RECNETCARD,true);
+				if(recentPrefs!=null){
+					XposedRencent.loadPackage(lpparam, recentPrefs,barPrefs,autoStartPrefs,isRecentOpen,isUIChangeOpen);
+				}
+
+				if (settingPrefs.getBoolean(Common.ALLSWITCH_UNINSTALL_ICE,true)&&pmPrefs!=null){
+					XposedPackageManager.loadPackage(lpparam, pmPrefs);
+				}
+
+				if (settingPrefs.getBoolean(Common.ALLSWITCH_DOZE,true)&&dozePrefs!=null){
+					XposedDoze.loadPackage(lpparam, dozePrefs);
+				}
+
+				XposedMedia.loadPackage(lpparam);
 			}
 
+			boolean isAutoStartOpen = settingPrefs.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true);
+			//如果不用辅助服务 则用hook形式处理
+			boolean isNotNeedAccess = settingPrefs.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true);
+//			boolean isBackStopOpen = settingPrefs.getBoolean(Common.ALLSWITCH_BACKSTOP_MUBEI,true);
+//			if (isAutoStartOpen||isBackStopOpen){
+				XposedAppStartNotifyListener.loadPackage(lpparam, autoStartPrefs,isAutoStartOpen,isNotNeedAccess);
+//			}
+
 			boolean isOneOpen = settingPrefs.getBoolean(Common.ALLSWITCH_SERVICE_BROAD,true);
-			if (isOneOpen){
+			if (isOneOpen&&controlPrefs!=null){
 				XposedWakeLock.loadPackage(lpparam, controlPrefs,wakeLockPrefs,isOneOpen);
 				XposedAlarm.loadPackage(lpparam, controlPrefs,alarmPrefs,isOneOpen);
 			}
@@ -107,32 +169,28 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 				XposedAccessKeyListener.loadPackage(lpparam,testPrefs);
 			}
 
-			boolean isUIChangeOpen = settingPrefs.getBoolean(Common.ALLSWITCH_UI,true);
-			boolean isRecentOpen = settingPrefs.getBoolean(Common.ALLSWITCH_RECNETCARD,true);
-			XposedRencent.loadPackage(lpparam, recentPrefs,barPrefs,autoStartPrefs,isRecentOpen,isUIChangeOpen);
-
-			if (settingPrefs.getBoolean(Common.ALLSWITCH_UNINSTALL_ICE,true)){
-				XposedPackageManager.loadPackage(lpparam, pmPrefs);
-			}
-			if (settingPrefs.getBoolean(Common.ALLSWITCH_DOZE,true)){
-				XposedDoze.loadPackage(lpparam, dozePrefs);
-			}
 			//如果不用辅助服务 则用hook形式处理
-			if (settingPrefs.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true)){
-				XposedStartListenerNotify.loadPackage(lpparam);
-			}
+//			if (settingPrefs.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true)){
+//				XposedStartListenerNotify.loadPackage(lpparam);
+//			}
 
-			if (isUIChangeOpen){
-				XposedBar.loadPackage(lpparam, barPrefs, testPrefs,settingPrefs);
-				XposedToast.loadPackage(lpparam, barPrefs);
+			if (settingPrefs.getBoolean(Common.ALLSWITCH_UI,true)){
+				if(barPrefs!=null){
+					XposedBar.loadPackage(lpparam, barPrefs, testPrefs,settingPrefs);
+				}
+				if(barPrefs!=null){
+					XposedToast.loadPackage(lpparam, barPrefs);
+				}
 			}
 			if(settingPrefs.getBoolean(Common.ALLSWITCH_ADSKIP,true)){
-				XposedAD.loadPackage(lpparam,adPrefs);
-				XposedDialog.loadPackage(lpparam,dialogPrefs);
+				if(adPrefs!=null){
+					XposedAD.loadPackage(lpparam,adPrefs);
+				}
+				if(dialogPrefs!=null){
+					XposedDialog.loadPackage(lpparam,dialogPrefs);
+				}
 			}
-			if(settingPrefs.getBoolean(Common.ALLSWITCH_PRIVACY,true)){
-				XposedPrivacy.loadPackage(lpparam,privacyPrefs);
-			}
+
 			if(tvPrefs!=null){
 				XposedTextView.loadPackage(lpparam,tvPrefs);
 			}
@@ -143,27 +201,20 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 				int h = settingPrefs.getInt(Common.PREFS_SETTING_SCREENHEIGHT,0);
 				XposedActivity.loadPackage(lpparam,isGetCodetoEdit,isLongClickOpenConfig,w,h);
 			}
-
-
 			boolean isOtherOpen = settingPrefs.getBoolean(Common.ALLSWITCH_OTHERS,true);
-//			if(isOtherOpen&&(lpparam.packageName.equals("com.tencent.mm")||
-//					lpparam.packageName.equals("com.autonavi.minimap")||
-//					lpparam.packageName.equals("com.tencent.qqlite")||
-//					lpparam.packageName.equals("com.sdu.didi.gsui")||
-//					lpparam.packageName.equals("com.sdu.didi.psnger")||
-//					lpparam.packageName.equals("com.tencent.mobileqq"))){
-//				XposedLocation.loadPackage(lpparam,settingPrefs);
-//			}
 			if(isOtherOpen){
 				XposedSms.loadPackage(lpparam,settingPrefs);
 			}
-
-			if(isBlackXpOpen){
+			if(isBlackXpOpen&&xpBlackListPrefs!=null){
 				XposedBlackList.loadPackage(lpparam,xpBlackListPrefs);
 			}
+			if(settingPrefs.getBoolean(Common.ALLSWITCH_PRIVACY,true)&&privacyPrefs!=null){
+				XposedPrivacy.loadPackage(lpparam,privacyPrefs);
+			}
 			XposedEnd.loadPackage(lpparam,settingPrefs);
-		}catch (Throwable e){
-			XposedBridge.log(lpparam.packageName+"^^^^^^^^^^^^^重要！！！ MAIN  HOOK出错"+e+"^^^^^^^^^^^^^^^");
+		}catch (Throwable arg1){
+			arg1.printStackTrace();
+			XposedBridge.log("重要！！！CONTROL_出错"+lpparam.packageName+"  "+XposedUtil.getErroInfo(arg1));
 		}
 	}
 

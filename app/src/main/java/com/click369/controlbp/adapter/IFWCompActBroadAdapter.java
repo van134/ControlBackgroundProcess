@@ -121,6 +121,7 @@ public class IFWCompActBroadAdapter extends BaseAdapter{
 		String dataName = data.name.trim();//.replaceAll("\\$","/\\$");
 		boolean isDiable = c.ifwString.contains(dataName)||!PackageUtil.isEnable(data.packageName,dataName,pm);
 		viewHolder.stopTv.setText(isDiable?"已禁用": (ContainsKeyWord.isContainsWord(dataName)?"建议禁用":"未禁用"));
+//		viewHolder.stopTv.setTextColor(isDiable? Color.RED:IFWCompActivity.curColor);
 		viewHolder.stopTv.setTextColor(isDiable? Color.RED:(ContainsKeyWord.isContainsWord(dataName)?Color.BLUE:IFWCompActivity.curColor));
 		return convertView;
 	}

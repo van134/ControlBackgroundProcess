@@ -46,7 +46,7 @@ public class XposedDialog {
                         Context context = (Context)(mContextField.get(methodHookParam.thisObject));
                         View mDecor = (View)(mDecorField.get(methodHookParam.thisObject));
                         String pkg = context.getPackageName();
-                        if (!Common.PACKAGENAME.equals(pkg)&&mDecor!=null){
+                        if (!Common.PACKAGENAME.equals(pkg)&&!"com.tencent.mm".equals(pkg)&&mDecor!=null){
                             dialogPrefs.reload();
                             Set<String> keywords = dialogPrefs.getStringSet(Common.PREFS_SKIPDIALOG_KEYWORDS,new LinkedHashSet<String>());
                             if (keywords.size()>0){

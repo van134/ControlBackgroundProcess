@@ -14,6 +14,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -245,27 +246,36 @@ public class PrivacyControlActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if(isChange){
-            isChange =false;
-            AppInfo ai = AppLoaderUtil.allHMAppInfos.get(pkg);
-            if(ai!=null&&ai.isRunning){
-                AlertUtil.showConfirmAlertMsg(PrivacyControlActivity.this, "设置改变后重启应用生效，是否杀死" + appName + "？", new AlertUtil.InputCallBack() {
-                    @Override
-                    public void backData(String txt, int tag) {
-                        if(tag == 1){
-                            XposedStopApp.stopApk(pkg,PrivacyControlActivity.this);
-                        }
-                        finish();
-                    }
-                });
-                return;
-            }
-
-        }
-        super.onBackPressed();
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        if(keyCode==KeyEvent.KEYCODE_HOME&&isChange){
+//            isChange = false;
+//            XposedStopApp.stopApk(pkg,PrivacyControlActivity.this);
+//        }
+//        return super.onKeyDown(keyCode, event);
+//    }
+//
+//    @Override
+//    public void onBackPressed() {
+//        if(isChange){
+//            isChange =false;
+////            AppInfo ai = AppLoaderUtil.allHMAppInfos.get(pkg);
+////            if(ai!=null&&ai.isRunning){
+////                AlertUtil.showConfirmAlertMsg(PrivacyControlActivity.this, "设置改变后重启应用生效，是否杀死" + appName + "？", new AlertUtil.InputCallBack() {
+////                    @Override
+////                    public void backData(String txt, int tag) {
+////                        if(tag == 1){
+//                            XposedStopApp.stopApk(pkg,PrivacyControlActivity.this);
+////                        }
+////                        finish();
+////                    }
+////                });
+////                return;
+////            }
+//
+//        }
+//        super.onBackPressed();
+//    }
 
     @Override
     protected void onStart() {
@@ -275,6 +285,10 @@ public class PrivacyControlActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        if(isChange){
+            isChange = false;
+            XposedStopApp.stopApk(pkg,PrivacyControlActivity.this);
+        }
     }
 
     @Override

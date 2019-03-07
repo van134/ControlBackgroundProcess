@@ -34,6 +34,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedAlarm {
+    public static boolean isReg = false;
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,
                                    final XSharedPreferences controlPrefs,
                                    final XSharedPreferences alarmPrefs,
@@ -82,72 +83,65 @@ public class XposedAlarm {
 
             final Class alarmManagerClass = XposedUtil.findClass("android.app.AlarmManager", lpparam.classLoader);
             final Class powerMangerClass = XposedUtil.findClass("android.os.PowerManager", lpparam.classLoader);
-            //下面代码导致LG出现问题
-            Constructor cs[] = powerMangerClass.getDeclaredConstructors();
-            if (cs!=null&&cs.length>0){
-                final Class clss[] = cs[0].getParameterTypes();
-                XC_MethodHook hook2 = new XC_MethodHook() {
+            if(Build.VERSION.SDK_INT>Build.VERSION_CODES.O_MR1 ){
+                XposedUtil.hookMethod(powerMangerClass, XposedUtil.getParmsByName(powerMangerClass, "newWakeLock"), "newWakeLock", new XC_MethodHook() {
                     @Override
-                    protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                        try {
-//                            Context cxt = null;
-//                            if (clss.length>0&&methodHookParam.args[0] instanceof Context){
-//                                cxt = (Context)methodHookParam.args[0];
-//                            }else if (clss.length==2&&methodHookParam.args[1] instanceof Context){
-//                                cxt = (Context)methodHookParam.args[1];
-//                            }else if (clss.length==3&&methodHookParam.args[2] instanceof Context){
-//                                cxt = (Context)methodHookParam.args[2];
-//                            }
-                            Context cxt = (Context) methodHookParam.args[0];
-                            if (cxt!=null&&cxt instanceof Application) {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        if(!isReg){
+                            isReg = true;
+                            try {
+                                Field field = powerMangerClass.getDeclaredField("mContext");
+                                field.setAccessible(true);
+                                Context cxt = (Context) field.get(param.thisObject);
+                                if (cxt != null && cxt instanceof Application) {
 //                            if (cxt!=null) {
-                                //规则时长
-                                final HashMap<String, Long[]> alarmRoleTimes = new HashMap<String, Long[]>();
-                                XposedHelpers.setAdditionalStaticField(powerMangerClass, "alarmRoleTimes",alarmRoleTimes);
-                                //允许次数
-                                final HashMap<String, Integer> alarmAllowCounts = new HashMap<String, Integer>();
-                                //不允许次数
-                                final HashMap<String, Integer> alarmNotAllowCounts = new HashMap<String, Integer>();
-                                //每次允许的唤醒时间 数组中第一个为设定时间 第二个为要唤醒的时间
-                                final HashMap<String, ArrayList<Long[]>> alarmAllTimes = new HashMap<String, ArrayList<Long[]>>();
-                                //每次不允许的唤醒时间 数组中第一个为设定时间 第二个为要唤醒的时间
-                                final HashMap<String, ArrayList<Long[]>> alarmNotAllowAllTimes = new HashMap<String, ArrayList<Long[]>>();
-                                //唤醒锁名称
-                                final HashMap<String, ArrayList<String>> alarms = new HashMap<String, ArrayList<String>>();
-                                XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmAllowCounts", alarmAllowCounts);
-                                XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmNotAllowCounts", alarmNotAllowCounts);
+                                    //规则时长
+                                    final HashMap<String, Long[]> alarmRoleTimes = new HashMap<String, Long[]>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "alarmRoleTimes", alarmRoleTimes);
+                                    //允许次数
+                                    final HashMap<String, Integer> alarmAllowCounts = new HashMap<String, Integer>();
+                                    //不允许次数
+                                    final HashMap<String, Integer> alarmNotAllowCounts = new HashMap<String, Integer>();
+                                    //每次允许的唤醒时间 数组中第一个为设定时间 第二个为要唤醒的时间
+                                    final HashMap<String, ArrayList<Long[]>> alarmAllTimes = new HashMap<String, ArrayList<Long[]>>();
+                                    //每次不允许的唤醒时间 数组中第一个为设定时间 第二个为要唤醒的时间
+                                    final HashMap<String, ArrayList<Long[]>> alarmNotAllowAllTimes = new HashMap<String, ArrayList<Long[]>>();
+                                    //唤醒锁名称
+                                    final HashMap<String, ArrayList<String>> alarms = new HashMap<String, ArrayList<String>>();
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmAllowCounts", alarmAllowCounts);
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmNotAllowCounts", alarmNotAllowCounts);
 
-                                XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmAllTimes", alarmAllTimes);
-                                XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmNotAllowAllTimes", alarmNotAllowAllTimes);
-                                XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarms", alarms);
-                                class MyReciver extends BroadcastReceiver {
-                                    @Override
-                                    public void onReceive(Context context, Intent intent) {
-                                        try {
-                                            if (alarms.size() == 0){
-                                                return;
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmAllTimes", alarmAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmNotAllowAllTimes", alarmNotAllowAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarms", alarms);
+                                    class MyReciver extends BroadcastReceiver {
+                                        @Override
+                                        public void onReceive(Context context, Intent intent) {
+                                            try {
+                                                if (alarms.size() == 0) {
+                                                    return;
+                                                }
+                                                String action = intent.getAction();
+                                                if ("com.click369.alarm.giveinfo".equals(action)) {
+                                                    Intent intent1 = new Intent("com.click369.alarm.getinfo");
+                                                    intent1.putExtra("alarmAllowCounts", alarmAllowCounts);
+                                                    intent1.putExtra("alarmNotAllowCounts", alarmNotAllowCounts);
+                                                    intent1.putExtra("alarmAllTimes", alarmAllTimes);
+                                                    intent1.putExtra("alarmNotAllowAllTimes", alarmNotAllowAllTimes);
+                                                    intent1.putExtra("alarms", alarms);
+                                                    context.sendBroadcast(intent1);
+                                                } else if ("com.click369.alarm.clearinfo".equals(action)) {
+                                                    alarmAllowCounts.clear();
+                                                    alarmNotAllowCounts.clear();
+                                                    alarmAllTimes.clear();
+                                                    alarmNotAllowAllTimes.clear();
+                                                    alarms.clear();
+                                                }
+                                            } catch (Throwable e) {
+                                                e.printStackTrace();
                                             }
-                                            String action = intent.getAction();
-                                            if ("com.click369.alarm.giveinfo".equals(action)) {
-                                                Intent intent1 = new Intent("com.click369.alarm.getinfo");
-                                                intent1.putExtra("alarmAllowCounts", alarmAllowCounts);
-                                                intent1.putExtra("alarmNotAllowCounts", alarmNotAllowCounts);
-                                                intent1.putExtra("alarmAllTimes", alarmAllTimes);
-                                                intent1.putExtra("alarmNotAllowAllTimes", alarmNotAllowAllTimes);
-                                                intent1.putExtra("alarms", alarms);
-                                                context.sendBroadcast(intent1);
-                                            }else if ("com.click369.alarm.clearinfo".equals(action)) {
-                                                alarmAllowCounts.clear();
-                                                alarmNotAllowCounts.clear();
-                                                alarmAllTimes.clear();
-                                                alarmNotAllowAllTimes.clear();
-                                                alarms.clear();
-                                            }
-                                        }catch (Throwable e){
-                                            e.printStackTrace();
                                         }
                                     }
-                                }
 
 //                                alarmPrefs.reload();
 //                                if(alarmPrefs.getBoolean(Common.PREFS_SETTING_ALARM_LOOK,false)&&SystemClock.uptimeMillis()>1000*60){
@@ -156,17 +150,102 @@ public class XposedAlarm {
                                         intentFilter.addAction("com.click369.alarm.giveinfo");
                                         intentFilter.addAction("com.click369.alarm.clearinfo");
                                         cxt.registerReceiver(new MyReciver(), intentFilter);
-                                    }catch (Throwable e){
+                                    } catch (Throwable e) {
                                     }
 //                                }
+                                }
+                            } catch (Exception e) {
                             }
-                        }catch (Throwable e){
-//                        e.printStackTrace();
-//                            Log.i("CONTROL","广播强制注销");
                         }
                     }
-                };
-                XposedUtil.hookConstructorMethod(powerMangerClass, clss,hook2);
+                });
+            }else {
+                //下面代码导致LG出现问题
+                Constructor cs[] = powerMangerClass.getDeclaredConstructors();
+                if (cs != null && cs.length > 0) {
+                    final Class clss[] = cs[0].getParameterTypes();
+                    XC_MethodHook hook2 = new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            try {
+//                            Context cxt = null;
+//                            if (clss.length>0&&methodHookParam.args[0] instanceof Context){
+//                                cxt = (Context)methodHookParam.args[0];
+//                            }else if (clss.length==2&&methodHookParam.args[1] instanceof Context){
+//                                cxt = (Context)methodHookParam.args[1];
+//                            }else if (clss.length==3&&methodHookParam.args[2] instanceof Context){
+//                                cxt = (Context)methodHookParam.args[2];
+//                            }
+                                Context cxt = (Context) methodHookParam.args[0];
+                                if (cxt != null && cxt instanceof Application) {
+//                            if (cxt!=null) {
+                                    //规则时长
+                                    final HashMap<String, Long[]> alarmRoleTimes = new HashMap<String, Long[]>();
+                                    XposedHelpers.setAdditionalStaticField(powerMangerClass, "alarmRoleTimes", alarmRoleTimes);
+                                    //允许次数
+                                    final HashMap<String, Integer> alarmAllowCounts = new HashMap<String, Integer>();
+                                    //不允许次数
+                                    final HashMap<String, Integer> alarmNotAllowCounts = new HashMap<String, Integer>();
+                                    //每次允许的唤醒时间 数组中第一个为设定时间 第二个为要唤醒的时间
+                                    final HashMap<String, ArrayList<Long[]>> alarmAllTimes = new HashMap<String, ArrayList<Long[]>>();
+                                    //每次不允许的唤醒时间 数组中第一个为设定时间 第二个为要唤醒的时间
+                                    final HashMap<String, ArrayList<Long[]>> alarmNotAllowAllTimes = new HashMap<String, ArrayList<Long[]>>();
+                                    //唤醒锁名称
+                                    final HashMap<String, ArrayList<String>> alarms = new HashMap<String, ArrayList<String>>();
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmAllowCounts", alarmAllowCounts);
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmNotAllowCounts", alarmNotAllowCounts);
+
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmAllTimes", alarmAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarmNotAllowAllTimes", alarmNotAllowAllTimes);
+                                    XposedHelpers.setAdditionalStaticField(alarmManagerClass, "alarms", alarms);
+                                    class MyReciver extends BroadcastReceiver {
+                                        @Override
+                                        public void onReceive(Context context, Intent intent) {
+                                            try {
+                                                if (alarms.size() == 0) {
+                                                    return;
+                                                }
+                                                String action = intent.getAction();
+                                                if ("com.click369.alarm.giveinfo".equals(action)) {
+                                                    Intent intent1 = new Intent("com.click369.alarm.getinfo");
+                                                    intent1.putExtra("alarmAllowCounts", alarmAllowCounts);
+                                                    intent1.putExtra("alarmNotAllowCounts", alarmNotAllowCounts);
+                                                    intent1.putExtra("alarmAllTimes", alarmAllTimes);
+                                                    intent1.putExtra("alarmNotAllowAllTimes", alarmNotAllowAllTimes);
+                                                    intent1.putExtra("alarms", alarms);
+                                                    context.sendBroadcast(intent1);
+                                                } else if ("com.click369.alarm.clearinfo".equals(action)) {
+                                                    alarmAllowCounts.clear();
+                                                    alarmNotAllowCounts.clear();
+                                                    alarmAllTimes.clear();
+                                                    alarmNotAllowAllTimes.clear();
+                                                    alarms.clear();
+                                                }
+                                            } catch (Throwable e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+
+//                                alarmPrefs.reload();
+//                                if(alarmPrefs.getBoolean(Common.PREFS_SETTING_ALARM_LOOK,false)&&SystemClock.uptimeMillis()>1000*60){
+                                    try {
+                                        IntentFilter intentFilter = new IntentFilter();
+                                        intentFilter.addAction("com.click369.alarm.giveinfo");
+                                        intentFilter.addAction("com.click369.alarm.clearinfo");
+                                        cxt.registerReceiver(new MyReciver(), intentFilter);
+                                    } catch (Throwable e) {
+                                    }
+//                                }
+                                }
+                            } catch (Throwable e) {
+//                        e.printStackTrace();
+//                            Log.i("CONTROL","广播强制注销");
+                            }
+                        }
+                    };
+                    XposedUtil.hookConstructorMethod(powerMangerClass, clss, hook2);
+                }
             }
             //上面代码导致LG出现问题
 

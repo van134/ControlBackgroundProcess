@@ -41,7 +41,7 @@ public class XposedMedia {
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam){
         try {
 //                XposedBridge.log("==================media1==================");
-            if(lpparam.packageName.equals("android")) {
+            if("android".equals(lpparam.packageName)) {
 //                final Class frcls = XposedHelpers.findClass("com.android.server.audio.FocusRequester", lpparam.classLoader);
 //                Class clss1[] = XposedUtil.getParmsByName(frcls, "handleFocusGain");
 //                Class clss2[] = XposedUtil.getParmsByName(frcls, "handleFocusLoss");

@@ -11,7 +11,7 @@ import com.click369.controlbp.util.SharedPrefsUtil;
 /**
  * Created by asus on 2017/10/27.
  */
-public class MyApp extends Application {
+public class MyApp extends BaseApp {
     @Override
     public void onCreate() {
         super.onCreate();

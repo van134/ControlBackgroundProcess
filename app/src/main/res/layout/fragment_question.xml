@@ -76,13 +76,37 @@
                 android:layout_gravity="center_vertical" />
         </LinearLayout>
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:background="@drawable/alert_backgroundshape"
             android:id="@+id/question_alert_fl"
             android:layout_marginTop="3dp">
+            <LinearLayout
+                android:id="@+id/question_long_ll"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="记录动作日志\n(按home/back键对应用的处理动作的日志记录)"
+                        android:id="@+id/setting_backlog_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+            </LinearLayout>
             <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -102,7 +126,7 @@
                     android:layout_marginRight="4dp" />
             </ScrollView>
 
-        </FrameLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:orientation="vertical"

@@ -60,9 +60,9 @@ public class XposedStopApp {
             newAsi.isOpenFromIceRome = asi.isOpenFromIceRome;
             AppLoaderUtil.allAppStateInfos.put(pkg,newAsi);
             AppLoaderUtil.runLists.remove(pkg);
-            if(ai.isLockApp){
-                SharedPrefsUtil.getInstance(cxt).autoStartNetPrefs.edit().remove(pkg+"/lockok").commit();
-            }
+//            if(ai.isLockApp){
+//                SharedPrefsUtil.getInstance(cxt).autoStartNetPrefs.edit().remove(pkg+"/lockok").commit();
+//            }
             if(ai.getPackageName().equals(WatchDogService.musicPlayPkg)){
                 WatchDogService.musicPlayPkg = "";
             }

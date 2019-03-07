@@ -103,6 +103,9 @@ public class IceRoomView{
                         @Override
                         public void backData(String txt, int tag) {
                             if(tag == 1){
+                                Intent intentm = new Intent("com.click369.control.pms."+(ai.isDisable?"enablepkg":"disablepkg"));
+                                intentm.putExtra("pkg",ai.packageName);
+                                cxt.sendBroadcast(intentm);
                                 ShellUtilNoBackData.execCommand("pm "+(ai.isDisable?"enable":"disable")+" "+ai.packageName);
                                 ai.isDisable = !ai.isDisable;
                                 adapter.freshList();
@@ -125,6 +128,9 @@ public class IceRoomView{
                         @Override
                         public void backData(String txt, int tag) {
                             if(tag == 0){
+                                Intent intentm = new Intent("com.click369.control.pms."+(ai.isDisable?"enablepkg":"disablepkg"));
+                                intentm.putExtra("pkg",ai.packageName);
+                                cxt.sendBroadcast(intentm);
                                 ShellUtilNoBackData.execCommand("pm "+(ai.isDisable?"enable":"disable")+" "+ai.packageName);
                                 ai.isDisable = !ai.isDisable;
                                 adapter.freshList();

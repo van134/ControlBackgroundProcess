@@ -14,10 +14,12 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.fragment.ForceStopFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.PinyinCompare;
@@ -29,27 +31,18 @@ import java.util.Collections;
 
 public class ForceStopAdapter extends BaseAdapter{
 	public ArrayList<AppInfo> bjdatas = new ArrayList<AppInfo>();
-//	public ArrayList<String> choosedatas = new ArrayList<String>();
 	private LayoutInflater inflater;
 	public int sortType = -1;
 	private Context c;
-//	private SharedPreferences modPrefs;
-//	private SharedPreferences muBeiPrefs;
-//	private SharedPreferences appStartPrefs;
 	public String fliterName = "u";
-//	public ArrayList<StudentInfo> chooseInfo = new ArrayList<StudentInfo>();
 	public ForceStopAdapter(Context context) {
 		c = context;
 		inflater = LayoutInflater.from(context);
-//		this.modPrefs = modPrefs;
-//		this.muBeiPrefs = muBeiPrefs;
-//		this.appStartPrefs = appStartPrefs;
 	}
 
 	public void setData(ArrayList<AppInfo> datas){
 		bjdatas.clear();
 		bjdatas.addAll(datas);
-//		this.notifyDataSetChanged();
 		freshList();
 	}
 
@@ -73,7 +66,9 @@ public class ForceStopAdapter extends BaseAdapter{
 				for(AppInfo ai :apps){
 					if(ai.getAppName().toLowerCase().contains(name.trim().toLowerCase())
 							||ai.getPackageName().toLowerCase().contains(name.trim().toLowerCase())){
-						bjdatas.add(ai);
+						if (TopSearchView.appType==2||(TopSearchView.appType==0&&ai.isUser)||(TopSearchView.appType==1&&!ai.isUser)) {
+							bjdatas.add(ai);
+						}
 					}
 				}
 			}
@@ -90,12 +85,6 @@ public class ForceStopAdapter extends BaseAdapter{
 	public void freshList(){
 		PinyinCompare comparent = new PinyinCompare();
 		Collections.sort(this.bjdatas, comparent);
-//		if (sortType == -1){
-//			this.notifyDataSetChanged();
-//			return;
-//		}
-//		String exs[] = {"/service","/wakelock","/alarm"};
-////		Collections.sort(this.choosedatas, comparent);
 		ArrayList<AppInfo> temp = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNoChoose = new ArrayList<AppInfo>();
 		ArrayList<AppInfo> tempNewApp = new ArrayList<AppInfo>();
@@ -181,12 +170,6 @@ public class ForceStopAdapter extends BaseAdapter{
 		viewHolder.appTimeTv.setTextColor(color);
 		viewHolder.appNameTv.setTextColor(color);
 		viewHolder.appIcon.setImageBitmap(AppLoaderUtil.allHMAppIcons.get(data.packageName));
-//		File file = null;
-//		if(BaseActivity.isLoadIcon||BaseActivity.loadeds.contains(data.packageName)){
-//			BaseActivity.loadeds.add(data.packageName);
-//			file = data.iconFile;
-//		}
-//		Glide.with(c).load(file).into(viewHolder.appIcon);
 		viewHolder.iceIv.setImageResource(data.isDisable?R.mipmap.ice: data.isSetTimeStopApp?R.mipmap.icon_clock:R.mipmap.empty);
 		viewHolder.appNameTv.setTag(position);
 		viewHolder.offIv.setTag(position);
@@ -217,11 +200,11 @@ public class ForceStopAdapter extends BaseAdapter{
 				if (isStop){
 					ed.remove(ai.getPackageName()+"/backstop").commit();
 					ai.isBackForceStop = false;
-					if(MainActivity.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
+					if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
 						SharedPrefsUtil.getInstance(c).autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
 						ai.isAutoStart = false;
 					}
-					if (MainActivity.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
+					if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
 						ai.isRecentForceClean = false;
 					}
@@ -242,11 +225,11 @@ public class ForceStopAdapter extends BaseAdapter{
 				}else if (isMubei){
 					ed.remove(ai.getPackageName()+"/backstop").commit();
 					ai.isBackForceStop = false;
-					if(MainActivity.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
+					if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
 						SharedPrefsUtil.getInstance(c).autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
 						ai.isAutoStart = false;
 					}
-					if (MainActivity.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
+					if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
 						ai.isRecentForceClean = false;
 					}
@@ -258,11 +241,11 @@ public class ForceStopAdapter extends BaseAdapter{
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/backstop",true).commit();
 					ai.isBackForceStop = true;
-					if (MainActivity.isLinkStopAndAuto&&!ai.isAutoStart) {
+					if (WatchDogService.isLinkStopAndAuto&&!ai.isAutoStart) {
 						SharedPrefsUtil.getInstance(c).autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/autostart", true).commit();
 						ai.isAutoStart = true;
 					}
-					if (MainActivity.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
+					if (WatchDogService.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().putBoolean(ai.getPackageName() + "/forceclean", true).commit();
 						ai.isRecentForceClean = true;
 					}
@@ -348,7 +331,7 @@ public class ForceStopAdapter extends BaseAdapter{
 				if (isStop){
 					ed.remove(ai.getPackageName()+"/offstop").commit();
 					ai.isOffscForceStop = false;
-					if(MainActivity.isLinkStopAndAuto&&!ai.isRecentForceClean&&!ai.isBackForceStop){
+					if(WatchDogService.isLinkStopAndAuto&&!ai.isRecentForceClean&&!ai.isBackForceStop){
 						SharedPrefsUtil.getInstance(c).autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
 						ai.isAutoStart = false;
 					}
@@ -369,11 +352,11 @@ public class ForceStopAdapter extends BaseAdapter{
 				}else if (isMubei){
 					ed.remove(ai.getPackageName()+"/offstop").commit();
 					ai.isOffscForceStop = false;
-					if(MainActivity.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isBackForceStop){
+					if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isBackForceStop){
 						SharedPrefsUtil.getInstance(c).autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
 						ai.isAutoStart = false;
 					}
-					if (MainActivity.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isBackForceStop) {
+					if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isBackForceStop) {
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
 						ai.isRecentForceClean = false;
 					}
@@ -388,11 +371,11 @@ public class ForceStopAdapter extends BaseAdapter{
 					ai.isOffscForceStop = true;
 					ed.remove(ai.getPackageName()+"/offmubei").commit();
 					ai.isOffscMuBei = false;
-					if (MainActivity.isLinkStopAndAuto&&!ai.isAutoStart) {
+					if (WatchDogService.isLinkStopAndAuto&&!ai.isAutoStart) {
 						SharedPrefsUtil.getInstance(c).autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/autostart", true).commit();
 						ai.isAutoStart = true;
 					}
-					if (MainActivity.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
+					if (WatchDogService.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
 						SharedPrefsUtil.getInstance(c).recentPrefs.edit().putBoolean(ai.getPackageName() + "/forceclean", true).commit();
 						ai.isRecentForceClean = true;
 					}

@@ -1,6 +1,7 @@
 package com.click369.controlbp.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /*
  * A simple {@link Fragment} subclass.
@@ -176,6 +178,7 @@ public class AppStartFragment extends BaseFragment {
                     @Override
                     public void backData(String txt, int tag) {
                         if(tag==0){
+                            HashSet<String> pkgs = new HashSet<String>();
                             for(AppInfo ai:adapter.bjdatas){
                                 if (ai.isNotStop||ai.isStopApp) {
                                     continue;
@@ -184,14 +187,25 @@ public class AppStartFragment extends BaseFragment {
                                 ed.putBoolean(ai.getPackageName()+"/notstop",true);
                                 ed.commit();
                                 ai.isNotStop = true;
+                                pkgs.add(ai.packageName);
                             }
+                            Intent intent = new Intent("com.click369.control.ams.changepersistent");
+                            intent.putExtra("persistent",true);
+                            intent.putExtra("pkgs",pkgs);
+                            getActivity().sendBroadcast(intent);
                             adapter.notifyDataSetChanged();
                         }else if(tag==2){
+                            HashSet<String> pkgs = new HashSet<String>();
                             for(AppInfo ai:adapter.bjdatas){
                                 SharedPreferences.Editor ed = modPrefs.edit();
                                 ed.remove(ai.getPackageName()+"/notstop").commit();
                                 ai.isNotStop = false;
+                                pkgs.add(ai.packageName);
                             }
+                            Intent intent = new Intent("com.click369.control.ams.changepersistent");
+                            intent.putExtra("persistent",false);
+                            intent.putExtra("pkgs",pkgs);
+                            getActivity().sendBroadcast(intent);
                             adapter.notifyDataSetChanged();
                         }
                     }

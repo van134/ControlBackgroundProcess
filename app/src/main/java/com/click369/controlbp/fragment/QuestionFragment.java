@@ -17,10 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,10 +32,13 @@ import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.adapter.QuestionAdapter;
 import com.click369.controlbp.bean.Question;
+import com.click369.controlbp.common.Common;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.service.XposedSms;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.PackageUtil;
+import com.click369.controlbp.util.SharedPrefsUtil;
 import com.click369.controlbp.util.TimeUtil;
 
 import java.io.File;
@@ -47,9 +53,10 @@ import java.util.TreeSet;
 public class QuestionFragment extends BaseFragment {
     private ListView list;
     private ScrollView scview;
+    private Switch logSw;
     private TextView showAlertTv,showLogAlertTv,showAppLogAlertTv,showAmsLogTv,alertTv;
     private EditText et;
-    private FrameLayout alertFl;
+    private LinearLayout alertFl,logLL;
     private QuestionAdapter adapter;
     public static int curColor = Color.BLACK;
     public static int chooseIndex = -1;
@@ -203,9 +210,20 @@ public class QuestionFragment extends BaseFragment {
         showLogAlertTv = (TextView)v.findViewById(R.id.question_showlogalert);
         alertTv = (TextView)v.findViewById(R.id.question_alert_tv);
         showAmsLogTv = (TextView)v.findViewById(R.id.question_showamslogalert);
-        alertFl = (FrameLayout) v.findViewById(R.id.question_alert_fl);
-
+        alertFl = (LinearLayout) v.findViewById(R.id.question_alert_fl);
+        logLL = (LinearLayout) v.findViewById(R.id.question_long_ll);
+        logSw = (Switch) v.findViewById(R.id.setting_backlog_sw);
+        logLL.setVisibility(View.GONE);
+        logSw.setChecked(SharedPrefsUtil.getInstance(getContext()).settings.getBoolean(Common.PREFS_SETTING_BACKLOGOPEN,false));
+        logSw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                WatchDogService.isSaveBackLog = isChecked;
+                SharedPrefsUtil.getInstance(getContext()).settings.edit().putBoolean(Common.PREFS_SETTING_BACKLOGOPEN,isChecked).commit();
+            }
+        });
         curColor = showAlertTv.getCurrentTextColor();
+        logSw.setTextColor(curColor);
         et = (EditText) v.findViewById(R.id.question_et);
         et.setTextColor(curColor);
         et.setHintTextColor(curColor);
@@ -229,6 +247,7 @@ public class QuestionFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 BaseActivity.zhenDong(getContext());
+                logLL.setVisibility(View.GONE);
                 logMSG = FileUtil.getAssetsString(getContext(),"update.txt");
                 if(logMSG.equals("暂无更新日志")||logMSG.length()<5){
                     alertTv.setText("暂无更新日志");
@@ -252,6 +271,8 @@ public class QuestionFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
 //                XposedSms.test(getActivity());
+                BaseActivity.zhenDong(getContext());
+                logLL.setVisibility(View.GONE);
                 byte data[] = FileUtil.readFile(FileUtil.ROOTPATH+ File.separator+"errorlog.txt");
                 logMSG = new String((data==null||data.length==0)?"暂无出错日志".getBytes():data);
                 if(logMSG.equals("暂无出错日志")||logMSG.length()<5){
@@ -277,6 +298,7 @@ public class QuestionFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 BaseActivity.zhenDong(getContext());
+                logLL.setVisibility(View.VISIBLE);
                 byte data[] = FileUtil.readFile(FileUtil.ROOTPATH+ File.separator+"backlog.txt");
                 logMSG = new String((data==null||data.length==0)?"暂无动作日志,动作日志需要在设置中打开记录开关".getBytes():data);
                 if(logMSG.startsWith("暂无动作日志")||logMSG.length()<5){
@@ -306,6 +328,7 @@ public class QuestionFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
                 BaseActivity.zhenDong(getContext());
+                logLL.setVisibility(View.GONE);
                 if (chooseType!=3){
                     alertTv.setText("两秒内如果没有数据则证明没有任何系统记录，或者您更新应用后没有重启");
                     alertFl.setVisibility(View.VISIBLE);

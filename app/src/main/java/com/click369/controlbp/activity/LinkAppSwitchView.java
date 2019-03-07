@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.service.WatchDogService;
 
 /**
  * Created by asus on 2017/10/19.
@@ -43,10 +44,10 @@ public class LinkAppSwitchView {
         stopAndRemoveStopSw.setTag(1);
         recentNotCleanAndNotstopSw.setTag(2);
         recentRemoveAndAutoSw.setTag(3);
-        stopAndAutoSw.setChecked(MainActivity.isLinkStopAndAuto);
-        stopAndRemoveStopSw.setChecked(MainActivity.isLinkStopAndRemoveStop);
-        recentNotCleanAndNotstopSw.setChecked(MainActivity.isLinkRecentAndNotStop);
-        recentRemoveAndAutoSw.setChecked(MainActivity.isLinkRecentAndAuto);
+        stopAndAutoSw.setChecked(WatchDogService.isLinkStopAndAuto);
+        stopAndRemoveStopSw.setChecked(WatchDogService.isLinkStopAndRemoveStop);
+        recentNotCleanAndNotstopSw.setChecked(WatchDogService.isLinkRecentAndNotStop);
+        recentRemoveAndAutoSw.setChecked(WatchDogService.isLinkRecentAndAuto);
         SwitchClick sc = new SwitchClick();
         stopAndAutoSw.setOnCheckedChangeListener(sc);
         stopAndRemoveStopSw.setOnCheckedChangeListener(sc);
@@ -65,13 +66,13 @@ public class LinkAppSwitchView {
                     Common.PREFS_SETTING_LINK_RECNETREMOVEANDAUTOSTART};
             settings.edit().putBoolean(names[tag],isChecked).commit();
             if (tag == 0){
-                MainActivity.isLinkStopAndAuto = isChecked;
+                WatchDogService.isLinkStopAndAuto = isChecked;
             }else if(tag == 1){
-                MainActivity.isLinkStopAndRemoveStop = isChecked;
+                WatchDogService.isLinkStopAndRemoveStop = isChecked;
             }else if(tag == 2){
-                MainActivity.isLinkRecentAndNotStop = isChecked;
+                WatchDogService.isLinkRecentAndNotStop = isChecked;
             }else if(tag == 3){
-                MainActivity.isLinkRecentAndAuto = isChecked;
+                WatchDogService.isLinkRecentAndAuto = isChecked;
             }
         }
     }

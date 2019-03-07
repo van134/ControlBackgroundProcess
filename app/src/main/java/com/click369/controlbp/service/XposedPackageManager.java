@@ -99,6 +99,12 @@ public class XposedPackageManager {
                                                 method.setAccessible(true);
                                                 String pkg = intent.getStringExtra("pkg");
                                                 method.invoke(methodHookParam.thisObject,pkg, PackageManager.COMPONENT_ENABLED_STATE_ENABLED,PackageManager.DONT_KILL_APP,0,"android");
+                                            }else if("com.click369.control.pms.disablepkg".equals(action)){
+                                                alert = "冻结";
+                                                Method method = pmsCls.getDeclaredMethod("setApplicationEnabledSetting",String.class,int.class,int.class,int.class,String.class);
+                                                method.setAccessible(true);
+                                                String pkg = intent.getStringExtra("pkg");
+                                                method.invoke(methodHookParam.thisObject,pkg, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,PackageManager.DONT_KILL_APP,0,"android");
                                             }else if("com.click369.control.pms.deletepkg".equals(action)){
                                                 alert = "卸载软件";
                                                 final Class delexCss[] = XposedUtil.getParmsByName(pmsCls,"deletePackageX");
@@ -156,6 +162,7 @@ public class XposedPackageManager {
                                             Context cxt = (Context) cxtField.get(methodHookParam.thisObject);
                                             IntentFilter intentFilter = new IntentFilter();
                                             intentFilter.addAction("com.click369.control.pms.enablepkg");
+                                            intentFilter.addAction("com.click369.control.pms.disablepkg");
                                             intentFilter.addAction("com.click369.control.pms.clearcache");
                                             intentFilter.addAction("com.click369.control.pms.cleardata");
                                             intentFilter.addAction("com.click369.control.pms.deletepkg");

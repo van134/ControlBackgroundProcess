@@ -162,6 +162,50 @@ public class AlertUtil {
         builder.create().show();
     }
 
+    public static void showUpdateAlertMsg(final Context cxt,final String msg,final InputCallBack ic){
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(cxt);
+        builder.setTitle("更新提示！");
+        builder.setMessage(msg);
+        builder.setPositiveButton("去下载", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(ic!=null){
+                    ic.backData("",2);
+                }
+            }
+        });
+        builder.setNegativeButton("以后提示", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ic.backData("",1);
+            }
+        });
+        builder.setNeutralButton("该版本不在提示", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ic.backData("",0);
+            }
+        });
+        builder.setCancelable(false);
+        builder.create().show();
+    }
+
+    public static void showAllNameAlertMsg(final Context cxt,final String msg,final InputCallBack ic){
+        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(cxt);
+        builder.setTitle("提示！");
+        builder.setMessage(msg);
+        builder.setPositiveButton("复制完整名称", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(ic!=null){
+                    ic.backData("",1);
+                }
+            }
+        });
+        builder.setCancelable(false);
+        builder.create().show();
+    }
+
     public static void showAlertMsg(final Context cxt,final String msg){
         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(cxt);
         builder.setTitle("提示！");

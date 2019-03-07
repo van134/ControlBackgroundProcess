@@ -32,6 +32,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.AppCompatTextView;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -79,10 +80,12 @@ import com.click369.controlbp.fragment.XpBlackListFragment;
 import com.click369.controlbp.receiver.BootStartReceiver;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
+import com.click369.controlbp.service.XposedBroadCast;
 import com.click369.controlbp.service.XposedUtil;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.BackupRestoreUtil;
+import com.click369.controlbp.util.CpuUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.GCUtil;
 import com.click369.controlbp.util.GetPhoto;
@@ -93,7 +96,12 @@ import com.click369.controlbp.util.SoftKeyboardStateHelper;
 import com.click369.controlbp.util.TimeUtil;
 import com.githang.statusbar.StatusBarCompat;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -140,10 +148,7 @@ public class MainActivity extends BaseActivity
     public static String COLOR_IDLE = "#6dcb21";
     public static boolean isNightMode = false;
     public static boolean isAutoChange = false;
-    public static boolean isLinkStopAndAuto = true;
-    public static boolean isLinkStopAndRemoveStop = true;
-    public static boolean isLinkRecentAndAuto = true;
-    public static boolean isLinkRecentAndNotStop = false;
+
     private Toolbar toolbar;
     private BackupRestoreUtil backupRestoreUtil;
     public DrawerLayout drawer;
@@ -181,6 +186,23 @@ public class MainActivity extends BaseActivity
         loadAppCallBack = new LoadAppCallBackImp();
         appLoaderUtil.addAppChangeListener(loadAppCallBack);
         backupRestoreUtil = new BackupRestoreUtil(this);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M&&sharedPrefs.settings.getBoolean(Common.ALLSWITCH_DOZE,true)) {
+            sharedPrefs.settings.edit().putBoolean(Common.ALLSWITCH_DOZE,false).commit();
+        }
+        File qualcpuFile = new File(getFilesDir(),"qualcomm");
+        if(!qualcpuFile.exists()&&CpuUtil.isQualcommCpu()){
+            try {
+                qualcpuFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if(!qualcpuFile.exists()&&sharedPrefs.settings.getBoolean(Common.ALLSWITCH_CPUSET,true)){
+            sharedPrefs.settings.edit().putBoolean(Common.ALLSWITCH_CPUSET,false).commit();
+            WatchDogService.isLockUnlockCPU = false;
+        }
+
         isNightMode = sharedPrefs.uiBarPrefs.getBoolean(Common.PREFS_SETTING_UI_THEME_MODE,false);
         THEME_COLOR = sharedPrefs.uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_COLOR,"#1a9dac");
         THEME_TEXT_COLOR = sharedPrefs.uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_TEXT_COLOR,"#1a9dac");
@@ -328,7 +350,9 @@ public class MainActivity extends BaseActivity
         whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
         h.postDelayed(showAlert,1000);
         initFileBg(0);
-        Log.i("CONTROL","currentTimeMillis  "+System.currentTimeMillis());
+        if(!WatchDogService.isRoot){
+            WatchDogService.isRoot = sharedPrefs.settings.getBoolean("ISROOT",false);
+        }
     }
 
     public void initThemeColor(){
@@ -449,6 +473,7 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    boolean isShowAlert = false;
     Runnable showAlert  = new Runnable() {
         @Override
         public void run() {
@@ -456,9 +481,11 @@ public class MainActivity extends BaseActivity
                 menuTv.setAlpha(0.5f);
                 menuTv.setEnabled(false);
                 showNotActive();
+                isShowAlert = true;
             }else{
                 int saveCode = sharedPrefs.settings.getInt(Common.BUILDCODE,0);
                 if(saveCode!=BuildConfig.VERSION_CODE){
+                    isShowAlert = true;
                     sharedPrefs.settings.edit().putInt(Common.BUILDCODE,BuildConfig.VERSION_CODE).commit();
                     h.postDelayed(new Runnable() {
                         @Override
@@ -514,10 +541,6 @@ public class MainActivity extends BaseActivity
             ComponentName componentName = new ComponentName(this, BootStartReceiver.class);
             packageManager.setComponentEnabledSetting(componentName,PackageManager.COMPONENT_ENABLED_STATE_ENABLED,PackageManager.DONT_KILL_APP);
         }
-        isLinkStopAndAuto = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_STOPANDAUTOSTART,true);
-        isLinkStopAndRemoveStop = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_STOPANDREMOVERECENTSTOP,true);
-        isLinkRecentAndNotStop = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_RECNETNOTCLEANANDNOTSTOP,false);
-        isLinkRecentAndAuto = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_LINK_RECNETREMOVEANDAUTOSTART,true);
         isUpdateAppTime = sharedPrefs.settings.getBoolean(Common.PREFS_SETTING_ISUPDATEAPPTIME,false);
         listenerSoftInput();
 
@@ -616,6 +639,7 @@ public class MainActivity extends BaseActivity
 //        if(TEST){
 //            return;
 //        }
+//        XposedBroadCast.sendRequestWithHttpClient();
         try {
             if(!WatchDogService.isKillRun) {
                 Intent intent = new Intent(MainActivity.this, WatchDogService.class);
@@ -641,9 +665,17 @@ public class MainActivity extends BaseActivity
             Intent intent = new Intent("com.click369.control.uss.getappidlestate");
             intent.putExtra("pkgs", pkgs);
             sendBroadcast(intent);
+
+            if(!isShowAlert){
+                update();
+            }else{
+                isShowAlert = false;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
 
     private void restartMethod(){
@@ -694,7 +726,7 @@ public class MainActivity extends BaseActivity
                 for(String app:WatchDogService.preventErrAppNames){
                     sb.append(app).append(" ");
                 }
-                AlertUtil.showAlertMsg(MainActivity.this,"系统检测到 "+sb.toString()+"被频繁启动且频繁阻止，检查对该应用的设置（可以尝试取消对其的禁止自启或关闭该应用的通知读取权限）");
+                AlertUtil.showAlertMsg(MainActivity.this,"系统检测到 "+sb.toString()+"被频繁启动很可能其他APP需要依赖该应用，应用控制器本次取消对其阻止（可以尝试取消对其的禁止自启或关闭该应用的通知读取权限）");
                 WatchDogService.preventErrAppNames.clear();
             }
         }
@@ -730,21 +762,25 @@ public class MainActivity extends BaseActivity
     }
 
     private void listenerSoftInput() {
-        SoftKeyboardStateHelper softKeyboardStateHelper = new SoftKeyboardStateHelper(this);
-        softKeyboardStateHelper.addSoftKeyboardStateListener(new SoftKeyboardStateHelper.SoftKeyboardStateListener() {
-            @Override
-            public void onSoftKeyboardOpened(int keyboardHeightInPx) {
-                h.removeCallbacks(updateTimeInfo);
-            }
-
-            @Override
-            public void onSoftKeyboardClosed() {
-                h.removeCallbacks(updateTimeInfo);
-                if(isUpdateAppTime) {
-                    h.postDelayed(updateTimeInfo, 1000);
+        try {
+            SoftKeyboardStateHelper softKeyboardStateHelper = new SoftKeyboardStateHelper(this);
+            softKeyboardStateHelper.addSoftKeyboardStateListener(new SoftKeyboardStateHelper.SoftKeyboardStateListener() {
+                @Override
+                public void onSoftKeyboardOpened(int keyboardHeightInPx) {
+                    h.removeCallbacks(updateTimeInfo);
                 }
-            }
-        });
+                @Override
+                public void onSoftKeyboardClosed() {
+                    h.removeCallbacks(updateTimeInfo);
+                    if(isUpdateAppTime) {
+                        h.postDelayed(updateTimeInfo, 1000);
+                    }
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
     @Override
     protected void onStop() {
@@ -765,6 +801,7 @@ public class MainActivity extends BaseActivity
         if(WatchDogService.isNeedAMSReadLoad){
             XposedUtil.reloadInfos(this,
                     sharedPrefs.autoStartNetPrefs,
+                    sharedPrefs.recentPrefs,
                     sharedPrefs.modPrefs,
                     sharedPrefs.settings,
                     sharedPrefs.skipDialogPrefs,
@@ -772,6 +809,7 @@ public class MainActivity extends BaseActivity
         }
         super.onStop();
     }
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -779,18 +817,20 @@ public class MainActivity extends BaseActivity
 //            return;
 //        }
         isUIRun = false;
-        if (sharedPrefs.settings.getBoolean(Common.ALLSWITCH_IFW,true)) {
-            ifwFragment.destory();
-        }
-
+//        if (sharedPrefs.settings.getBoolean(Common.ALLSWITCH_IFW,true)) {
+//            ifwFragment.destory();
+//        }
         if(fragments!=null){
             for(BaseFragment bf:fragments){
+                if (bf==null){
+                    continue;
+                }
                 bf.onDestroyView();
-                bf = null;
             }
             fragments = null;
         }
-
+        MainActivity.this.getSupportFragmentManager().getFragments().clear();
+        System.gc();
     }
     long backTime= 0;
     @Override
@@ -811,9 +851,15 @@ public class MainActivity extends BaseActivity
                 BaseActivity.isPressBack = true;
                 TopSearchView.searchText = "";
 //                super.onBackPressed();
-//                Intent intent = new Intent("com.click369.control.ams.removeselfactivity");
-//                sendBroadcast(intent);
                 moveTaskToBack(true);
+                if(WatchDogService.isBackKillSelf){
+                    h.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            WatchDogService.killAndRestartSelf(getApplicationContext());
+                        }
+                    },500);
+                }
             }
             backTime = System.currentTimeMillis();
         }
@@ -979,15 +1025,18 @@ public class MainActivity extends BaseActivity
                                                     sharedPrefs.pmPrefs.edit().clear().commit();
                                                     sharedPrefs.settings.edit().clear().commit();
                                                     sharedPrefs.setTimeStopPrefs.edit().clear().commit();
+                                                    sharedPrefs.cpuPrefs.edit().clear().commit();
+                                                    sharedPrefs.wakeLockPrefs.edit().clear().commit();
+                                                    sharedPrefs.alarmPrefs.edit().clear().commit();
+                                                    sharedPrefs.privacyPrefs.edit().clear().commit();
                                                     sharedPrefs.settings.edit().putInt(Common.PREFS_SETTING_SCREENWIDTH,0).commit();
                                                     XposedUtil.reloadInfos(MainActivity.this,
                                                             sharedPrefs.autoStartNetPrefs,
+                                                            sharedPrefs.recentPrefs,
                                                             sharedPrefs.modPrefs,
                                                             sharedPrefs.settings,
                                                             sharedPrefs.skipDialogPrefs,
                                                             sharedPrefs.uiBarPrefs);
-
-                                                    showT("清除成功,重启手机生效");
                                                     restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
                                                 }else if(page == R.id.nav_autostart_lock_control){
                                                     sharedPrefs.autoStartNetPrefs.edit().clear().commit();
@@ -996,6 +1045,7 @@ public class MainActivity extends BaseActivity
                                                     restartSelfConfirm("重新启动应用控制器生效，是否重启控制器？");
                                                 }else if(page == R.id.nav_adskip_control){
                                                     sharedPrefs.adPrefs.edit().clear().commit();
+                                                    sharedPrefs.skipDialogPrefs.edit().clear().commit();
                                                 }else if(page == R.id.nav_recentcard_control){
                                                     sharedPrefs.recentPrefs.edit().clear().commit();
                                                 }else if(page == R.id.nav_cpuset_control){
@@ -1323,4 +1373,90 @@ public class MainActivity extends BaseActivity
         }
     };
 
+    public void update(){
+        long time = sharedPrefs.settings.getLong("UPDATE_CHECK_TIME",0);
+        if(System.currentTimeMillis()-time<1000*60*60*4){
+            return;
+        }
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    String s = get("https://www.coolapk.com/apk/com.click369.controlbp");
+                    String news = s.substring(s.indexOf("<title>应用控制器(com.click369.controlbp) - "),s.indexOf(" - 应用 - 酷安网</title>"));
+                    news = news.replace("<title>应用控制器(com.click369.controlbp) - ","");
+                    String not = sharedPrefs.settings.getString("NOT_ALERT_UPDATE","");;
+                    if(!TextUtils.isEmpty(news)&&news.contains(".")&&!not.equals(news)){
+                        String newss[] = news.split("\\.");
+                        String n = "";
+                        for(String a:newss){
+                            n+= a;
+                        }
+                        String oldss[] = BuildConfig.VERSION_NAME.split("\\.");
+                        String m = "";
+                        for(String a:oldss){
+                            m+= a;
+                        }
+                        final String v = news;
+                        if(Integer.parseInt(m)<Integer.parseInt(n)){
+                            h.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AlertUtil.showUpdateAlertMsg(MainActivity.this, "检测到应用控制器有新版本" + v + ",请去酷安下载更新，或点击去下载通过浏览器下载更新。", new AlertUtil.InputCallBack() {
+                                        @Override
+                                        public void backData(String txt, int tag) {
+                                            if(tag == 0){
+                                                sharedPrefs.settings.edit().putString("NOT_ALERT_UPDATE",v).commit();
+                                            }else if(tag == 1){
+
+                                            }else if(tag == 2){
+                                                Intent intent = new Intent();
+                                                intent.setAction("android.intent.action.VIEW");
+                                                Uri content_url = Uri.parse("https://www.coolapk.com/apk/com.click369.controlbp");
+                                                intent.setData(content_url);
+                                                startActivity(intent);
+                                            }
+
+                                        }
+                                    });
+                                    sharedPrefs.settings.edit().putLong("UPDATE_CHECK_TIME",System.currentTimeMillis()).commit();
+                                }
+                            });
+                        }else{
+                            Log.i("CONTROL","没有新版本");
+                        }
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }.start();
+    }
+
+    public static String get(String ss){
+        try{
+            URL url = new URL(ss);
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(6000);
+            connection.setReadTimeout(6000);
+            InputStream in = connection.getInputStream();
+            byte datas[] = new byte[1024];
+            int len = 0;
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            while((len=in.read(datas))!=-1){
+                byteArrayOutputStream.write(datas,0,len);
+            }
+            in.close();
+            byteArrayOutputStream.flush();
+            byteArrayOutputStream.close();
+            connection.disconnect();
+            byte mDatas[] = byteArrayOutputStream.toByteArray();
+            final String urlStr = new String(mDatas);
+            return urlStr;
+        }catch (Throwable e){
+
+        }
+        return null;
+    }
 }

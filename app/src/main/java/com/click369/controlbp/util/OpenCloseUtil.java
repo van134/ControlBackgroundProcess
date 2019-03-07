@@ -253,6 +253,7 @@ public class OpenCloseUtil {
             // 设置ComponentName参数1:packagename参数2:MainActivity路径
             ComponentName cn = new ComponentName(packagename, className);
             intent.setComponent(cn);
+            intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
             intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             try{
                 act.startActivity(intent);

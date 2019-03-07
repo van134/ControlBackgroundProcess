@@ -9,6 +9,7 @@ import android.util.Log;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.OpenCloseUtil;
+import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.SharedPrefsUtil;
 
 import java.lang.reflect.Method;
@@ -58,11 +59,11 @@ public class TestDataInit {
 //        e.putInt("com.tencent.qqmobile/topcolor", Color.TRANSPARENT);
 //        e.putInt("com.tencent.qqmobile/bottomcolor", Color.WHITE);
 
-        HashSet<String> list = WatchDogService.getLauncherPackageName(cxt);
+        HashSet<String> list = PackageUtil.getLauncherPackageName(cxt);
         for(String p:list){
             e.putBoolean(p+"/blacklist",true);
         }
-        ArrayList<String> ime = WatchDogService.getInputPackageName(cxt);
+        ArrayList<String> ime = PackageUtil.getInputPackageName(cxt);
         for(String p:ime){
             e.putBoolean(p+"/ime",true);
         }

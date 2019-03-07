@@ -67,7 +67,7 @@ public class SettingFragment extends BaseFragment {
         linkAppSwitchView.initView();
         curColor = ((TextView)v.findViewById(R.id.setting_title1_tv)).getCurrentTextColor();
         isShowSideBarSw = (Switch) v.findViewById(R.id.setting_showsidebar_sw);
-        backSw = (Switch) v.findViewById(R.id.setting_backlog_sw);
+        backSw = (Switch) v.findViewById(R.id.setting_backkillself_sw);
         iceStopSw = (Switch) v.findViewById(R.id.setting_ice_stop_sw);
         setTimeStopZWModeSw = (Switch) v.findViewById(R.id.setting_settimestopzwmode_sw);
         setTimeStopPwdModeSw = (Switch) v.findViewById(R.id.setting_settimestoppwdmode_sw);
@@ -125,7 +125,7 @@ public class SettingFragment extends BaseFragment {
         homeSb = (SeekBar) v.findViewById(R.id.setting_homedelay_sb);
         offSb = (SeekBar) v.findViewById(R.id.setting_offdelay_sb);
         isShowSideBarSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SHOWSIDEBAR,true));
-        backSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_BACKLOGOPEN,false));
+        backSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_BACKKILLSELF,false));
         notExitAudioPlaySw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,false));
         iceStopSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICESTOPICE,false));
         iceRemoveSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEBACKICE,true));
@@ -210,7 +210,7 @@ public class SettingFragment extends BaseFragment {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             BaseActivity.zhenDong(getContext());
             int tag= (Integer) buttonView.getTag();
-            String names[] = {Common.PREFS_SETTING_BACKLOGOPEN,Common.PREFS_SETTING_SHOWSIDEBAR,Common.PREFS_SETTING_ICEBACKICE,
+            String names[] = {Common.PREFS_SETTING_BACKKILLSELF,Common.PREFS_SETTING_SHOWSIDEBAR,Common.PREFS_SETTING_ICEBACKICE,
                     Common.PREFS_SETTING_ICEOFFICE,"","",
                     Common.PREFS_SETTING_SETTIMESTOPMODE,Common.PREFS_SETTING_ICESTOPICE,Common.PREFS_SETTING_STOPAPPBYXP,
                     Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
@@ -218,7 +218,7 @@ public class SettingFragment extends BaseFragment {
                     Common.PREFS_SETTING_ZHENDONG,Common.PREFS_SETTING_ISUPDATEAPPTIME,Common.PREFS_SETTING_ISLONGCLICKOPENCONFIG,
                     Common.PREFS_SETTING_ISALWAYSKILLOFF,Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY};
             if (tag == 0){
-                WatchDogService.isSaveBackLog = isChecked;
+                WatchDogService.isBackKillSelf = isChecked;
             }else if (tag == 2){
                 WatchDogService.isAtuoRemoveIce = isChecked;
             }else if(tag == 3){

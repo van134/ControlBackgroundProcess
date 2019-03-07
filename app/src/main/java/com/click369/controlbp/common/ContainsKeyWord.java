@@ -102,6 +102,7 @@ public class ContainsKeyWord {
         full1.add("com.tencent.mm.plugin.scanner.ui.BaseScanUI");
         full1.add("com.tencent.mm.plugin.mmsight.ui.SightCaptureUI");
         full1.add("com.tencent.mm.plugin.scanner.ui.SingleTopScanUI");
+        full1.add("com.tencent.mm.plugin.story.ui.StoryCaptureUI");
         fullCpuCoreApp.put("com.tencent.mm",full1);
         ArrayList<String> full2 = new ArrayList<String>();
         full2.add("com.alipay.mobile.scan.as.main.MainCaptureActivity");
@@ -114,8 +115,6 @@ public class ContainsKeyWord {
         full4.add("com.tencent.mobileqq.richmedia.capture.activity.CameraCaptureActivity");
         full4.add("dov.com.qq.im.QIMCameraCaptureActivity");
         fullCpuCoreApp.put("com.tencent.mobileqq",full4);
-
-
     }
 
     public static boolean isContainsWord(String str){

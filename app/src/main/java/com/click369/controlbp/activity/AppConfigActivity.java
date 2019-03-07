@@ -64,9 +64,6 @@ public class AppConfigActivity extends BaseActivity {
     ImageView barOpenImg,barLockImg;
     TextView subTitle;
     AppInfo ai;
-//    public SharedPreferences modPrefs,wakeLockPrefs,alarmPrefs,forceStopPrefs,muBeiPrefs,settings,ifwCountPrefs,uiBarPrefs,autoStartNetPrefs,recentPrefs,dozePrefs,adPrefs,pmPrefs;
-
-//    boolean isClick =false;
     String appName =null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,18 +136,23 @@ public class AppConfigActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 BaseActivity.zhenDong(AppConfigActivity.this);
-                String titles[]={"结束"+appName+"进程","打开"+appName+"应用信息","重启"+appName+"进程","打开"+appName+"后定时结束","清除"+appName+"所有控制（IFW除外）","打开应用控制器"};
+                String t = ai.isRunning?"结束":"打开";
+                String titles[]={t+appName+"进程","打开"+appName+"应用信息","重启"+appName+"进程","打开"+appName+"后定时结束","清除"+appName+"所有控制（IFW除外）","打开应用控制器"};
                 if(ai.isSetTimeStopApp){
-                    titles = new String[]{"结束"+appName+"进程","打开"+appName+"应用信息","重启"+appName+"进程","打开"+appName+"后定时结束","取消"+appName+"的定时结束设置","清除"+appName+"所有控制（IFW除外）","打开应用控制器"};
+                    titles = new String[]{t+appName+"进程","打开"+appName+"应用信息","重启"+appName+"进程","打开"+appName+"后定时结束","取消"+appName+"的定时结束设置","清除"+appName+"所有控制（IFW除外）","打开应用控制器"};
                 }
                 AlertUtil.showListAlert(AppConfigActivity.this, "请选择", titles, new AlertUtil.InputCallBack() {
                     @Override
                     public void backData(String txt, int tag) {
                         if(tag==0){
-                            XposedStopApp.stopApk(ai.getPackageName(),AppConfigActivity.this);
+                            if( ai.isRunning){
+                                XposedStopApp.stopApk(ai.getPackageName(),AppConfigActivity.this);
+                            }else{
+                                OpenCloseUtil.doStartApplicationWithPackageName(ai.packageName,AppConfigActivity.this);
+                            }
                             finish();
                         }else if(tag==1){
-                            getAppDetailSettingIntent();
+                            PackageUtil.getAppDetailSettingIntent(AppConfigActivity.this,ai.packageName);
                             finish();
                         }else if(tag==2){
                             XposedStopApp.stopApk(ai.getPackageName(),AppConfigActivity.this);
@@ -415,73 +417,6 @@ public class AppConfigActivity extends BaseActivity {
         });
     }
 
-    private void initData(){
-
-
-//        ifwCountPrefs = SharedPrefsUtil.getPreferences(this, Common.PREFS_APPIFWCOUNT);// getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
-//        modPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_SETTINGNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-//        wakeLockPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_WAKELOCKNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-//        alarmPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_ALARMNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_SETTINGNAME, Context.MODE_WORLD_READABLE);
-//        forceStopPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_FORCESTOPNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_FORCESTOPNAME, Context.MODE_WORLD_READABLE);
-//        muBeiPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_MUBEILIST);
-//        autoStartNetPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_AUTOSTARTNAME);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-//        uiBarPrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_UIBARLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_AUTOSTARTNAME, Context.MODE_WORLD_READABLE);
-//        settings = SharedPrefsUtil.getPreferences(this,Common.PREFS_APPSETTINGS);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        recentPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_RECENTLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        dozePrefs = SharedPrefsUtil.getPreferences(this,Common.PREFS_DOZELIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        adPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_ADLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-//        pmPrefs = SharedPrefsUtil.getPreferences(this,Common.IPREFS_PMLIST);// getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
-
-
-//        ai.isServiceStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/service", false);
-//        ai.isBroadStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/broad", false);
-//        ai.isWakelockStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/wakelock", false);
-//        ai.isAlarmStop = sharedPrefs.modPrefs.getBoolean(ai.getPackageName() + "/alarm", false);
-//
-//        ai.isBackForceStop = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/backstop", false);
-//        ai.isBackMuBei = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/backmubei", false);
-//        ai.isOffscForceStop = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/offstop", false);
-//        ai.isOffscMuBei = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/offmubei", false);
-////        ai.isInMuBei = sharedPrefs.muBeiPrefs.getInt(ai.getPackageName(), -1)==0;
-//        ai.isHomeMuBei = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/homemubei", false);
-//        ai.isHomeIdle = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/idle", false);
-//        ai.isNotifyNotExit = sharedPrefs.forceStopPrefs.getBoolean(ai.getPackageName() + "/notifynotexit", false);
-//
-//        ai.isAutoStart = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/autostart", false);
-//        ai.isStopApp = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/stopapp", false);
-//        ai.isLockApp = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/lockapp", false);
-//        ai.isNotStop = sharedPrefs.autoStartNetPrefs.getBoolean(ai.getPackageName() + "/notstop", false);
-//
-//        ai.isDozeOffsc = sharedPrefs.dozePrefs.getBoolean(ai.getPackageName() + "/offsc", false);
-//        ai.isDozeOnsc = sharedPrefs.dozePrefs.getBoolean(ai.getPackageName() + "/onsc", false);
-//        ai.isDozeOpenStop = sharedPrefs.dozePrefs.getBoolean(ai.getPackageName() + "/openstop", false);
-//
-//        ai.isRecentNotClean = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/notclean", false);
-//        ai.isRecentForceClean = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/forceclean", false);
-//        ai.isRecentBlur = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/blur", false);
-//        ai.isRecentNotShow = sharedPrefs.recentPrefs.getBoolean(ai.getPackageName() + "/notshow", false);
-//
-//        ai.isBarLockList = sharedPrefs.uiBarPrefs.getBoolean(ai.getPackageName() + "/locklist", false);
-//        ai.isBarColorList = sharedPrefs.uiBarPrefs.getBoolean(ai.getPackageName() + "/colorlist", false);
-//
-//        ai.isNotUnstall = sharedPrefs.pmPrefs.getBoolean(ai.getPackageName() + "/notunstall", false);
-//
-//        ai.serviceDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwservice", 0);
-//        ai.broadCastDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwreceiver", 0);
-//        ai.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwactivity", 0);
-//        ai.isADJump = sharedPrefs.adPrefs.getInt(ai.getPackageName() + "/ad", 0) != 0;
-//        PackageManager  pm = getPackageManager();
-//        try{
-//            PackageInfo piS = pm.getPackageInfo(ai.packageName, PackageManager.GET_SERVICES | PackageManager.GET_DISABLED_COMPONENTS);
-//            PackageInfo piB = pm.getPackageInfo(ai.packageName, PackageManager.GET_RECEIVERS | PackageManager.GET_DISABLED_COMPONENTS);
-//            PackageInfo piA = pm.getPackageInfo(ai.packageName, PackageManager.GET_ACTIVITIES | PackageManager.GET_DISABLED_COMPONENTS);
-//            ai.activityCount = piA.activities != null ? piA.activities.length : 0;
-//            ai.serviceCount = piS.services != null ? piS.services.length : 0;
-//            ai.broadCastCount = piB.receivers != null ? piB.receivers.length : 0;
-//        }catch (Exception e){
-//            e.printStackTrace();
-//        }
-    }
     private void initClickListener(){
         class ForceStopListener implements View.OnClickListener{
             @Override
@@ -494,11 +429,11 @@ public class AppConfigActivity extends BaseActivity {
                         if (ai.isBackForceStop){
                             ed.remove(ai.getPackageName()+"/backstop").commit();
                             ai.isBackForceStop = false;
-                            if(MainActivity.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
+                            if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
                                 sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
                                 ai.isAutoStart = false;
                             }
-                            if (MainActivity.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
+                            if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
                                 sharedPrefs.recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
                                 ai.isRecentForceClean = false;
                             }
@@ -519,11 +454,11 @@ public class AppConfigActivity extends BaseActivity {
                         }else if (ai.isBackMuBei){
                             ed.remove(ai.getPackageName()+"/backstop").commit();
                             ai.isBackForceStop = false;
-                            if(MainActivity.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
+                            if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isOffscForceStop){
                                 sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
                                 ai.isAutoStart = false;
                             }
-                            if (MainActivity.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
+                            if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isOffscForceStop) {
                                 sharedPrefs.recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
                                 ai.isRecentForceClean = false;
                             }
@@ -533,11 +468,11 @@ public class AppConfigActivity extends BaseActivity {
                         }else{
                             ed.putBoolean(ai.getPackageName()+"/backstop",true).commit();
                             ai.isBackForceStop = true;
-                            if (MainActivity.isLinkStopAndAuto&&!ai.isAutoStart) {
+                            if (WatchDogService.isLinkStopAndAuto&&!ai.isAutoStart) {
                                 sharedPrefs.autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/autostart", true).commit();
                                 ai.isAutoStart = true;
                             }
-                            if (MainActivity.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
+                            if (WatchDogService.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
                                 sharedPrefs.recentPrefs.edit().putBoolean(ai.getPackageName() + "/forceclean", true).commit();
                                 ai.isRecentForceClean = true;
                             }
@@ -592,9 +527,13 @@ public class AppConfigActivity extends BaseActivity {
                         if (ai.isOffscForceStop){
                             ed.remove(ai.getPackageName()+"/offstop").commit();
                             ai.isOffscForceStop = false;
-                            if(MainActivity.isLinkStopAndAuto&&!ai.isRecentForceClean&&!ai.isBackForceStop){
+                            if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isBackForceStop){
                                 sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
                                 ai.isAutoStart = false;
+                            }
+                            if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isBackForceStop) {
+                                sharedPrefs.recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
+                                ai.isRecentForceClean = false;
                             }
                             if (MainActivity.isModuleActive()) {
                                 if (ai.isServiceStop){
@@ -613,11 +552,11 @@ public class AppConfigActivity extends BaseActivity {
                         }else if (ai.isOffscMuBei){
                             ed.remove(ai.getPackageName()+"/offstop").commit();
                             ai.isOffscForceStop = false;
-                            if(MainActivity.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isBackForceStop){
+                            if(WatchDogService.isLinkStopAndAuto&&ai.isAutoStart&&!ai.isBackForceStop){
                                 sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
                                 ai.isAutoStart = false;
                             }
-                            if (MainActivity.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isBackForceStop) {
+                            if (WatchDogService.isLinkStopAndRemoveStop&&ai.isRecentForceClean&&!ai.isBackForceStop) {
                                 sharedPrefs.recentPrefs.edit().remove(ai.getPackageName() + "/forceclean").commit();
                                 ai.isRecentForceClean = false;
                             }
@@ -631,11 +570,11 @@ public class AppConfigActivity extends BaseActivity {
 //                            sharedPrefs.muBeiPrefs.edit().remove(ai.getPackageName()).commit();
                             ed.remove(ai.getPackageName()+"/offmubei").commit();
                             ai.isOffscMuBei = false;
-                            if (MainActivity.isLinkStopAndAuto&&!ai.isAutoStart) {
+                            if (WatchDogService.isLinkStopAndAuto&&!ai.isAutoStart) {
                                 sharedPrefs.autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/autostart", true).commit();
                                 ai.isAutoStart = true;
                             }
-                            if (MainActivity.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
+                            if (WatchDogService.isLinkStopAndRemoveStop&&!ai.isRecentForceClean&&!ai.isRecentNotClean) {
                                 sharedPrefs.recentPrefs.edit().putBoolean(ai.getPackageName() + "/forceclean", true).commit();
                                 ai.isRecentForceClean = true;
                             }
@@ -687,16 +626,18 @@ public class AppConfigActivity extends BaseActivity {
                         if(ai.isRecentNotClean){
                             ai.isRecentNotClean = false;
                             sharedPrefs.recentPrefs.edit().remove(ai.getPackageName()+"/notclean").commit();
-                            if (MainActivity.isLinkRecentAndNotStop&&ai.isNotStop){
+                            if (WatchDogService.isLinkRecentAndNotStop&&ai.isNotStop){
                                 sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName() + "/notstop").commit();
                                 ai.isNotStop = false;
+                                AppStartAdapter.sendBroadChangePersistent(AppConfigActivity.this,ai.getPackageName(),ai.isNotStop);
                             }
                         }else{
                             ai.isRecentNotClean = true;
                             sharedPrefs.recentPrefs.edit().putBoolean(ai.getPackageName()+"/notclean",ai.isRecentNotClean).commit();
-                            if (MainActivity.isLinkRecentAndNotStop&&!ai.isNotStop){
+                            if (WatchDogService.isLinkRecentAndNotStop&&!ai.isNotStop){
                                 sharedPrefs.autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/notstop", true).commit();
                                 ai.isNotStop = true;
+                                AppStartAdapter.sendBroadChangePersistent(AppConfigActivity.this,ai.getPackageName(),ai.isNotStop);
                             }
                             if (sharedPrefs.recentPrefs.contains(ai.getPackageName()+"/forceclean")){
                                 ai.isRecentForceClean = false;
@@ -711,7 +652,7 @@ public class AppConfigActivity extends BaseActivity {
                         if(ai.isRecentForceClean){
                             ai.isRecentForceClean = false;
                             sharedPrefs.recentPrefs.edit().remove(ai.getPackageName()+"/forceclean").commit();
-                            if(MainActivity.isLinkRecentAndAuto&&!ai.isBackForceStop&&!ai.isOffscForceStop){
+                            if(WatchDogService.isLinkRecentAndAuto&&!ai.isBackForceStop&&!ai.isOffscForceStop){
                                 sharedPrefs.autoStartNetPrefs.edit().remove(ai.getPackageName()+"/autostart").commit();
                                 ai.isAutoStart = false;
                             }
@@ -722,7 +663,7 @@ public class AppConfigActivity extends BaseActivity {
                                 ai.isRecentNotClean = false;
                                 sharedPrefs.recentPrefs.edit().remove(ai.getPackageName()+"/notclean").commit();
                             }
-                            if(MainActivity.isLinkRecentAndAuto&&!ai.isAutoStart) {
+                            if(WatchDogService.isLinkRecentAndAuto&&!ai.isAutoStart) {
                                 sharedPrefs.autoStartNetPrefs.edit().putBoolean(ai.getPackageName() + "/autostart", true).commit();
                                 ai.isAutoStart = true;
                             }
@@ -852,35 +793,78 @@ public class AppConfigActivity extends BaseActivity {
                         mode3Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
                         break;
                     case R.id.item_xpblack_all:
-                    case R.id.item_xpblack_control:
-                    case R.id.item_xpblack_nocheck:
-                    case R.id.item_xpblack_setcanhook:
-                        HashMap<Integer,String> hms = new HashMap<Integer,String>();
-                        hms.put(R.id.item_xpblack_all,"allxpblack");
-                        hms.put(R.id.item_xpblack_control,"contorlxpblack");
-                        hms.put(R.id.item_xpblack_nocheck,"nocheckxp");
-                        hms.put(R.id.item_xpblack_setcanhook,"setcanhook");
-//                        int idds[] = {R.id.item_xpblack_all,R.id.item_xpblack_control,R.id.item_xpblack_nocheck,R.id.item_xpblack_setcanhook};
-//                        String keyNames[] = {"allxpblack","contorlxpblack","nocheckxp","setcanhook"};
-//                        int index = idds[view.getId()];
-                        boolean isblackAllXp = ai.isblackAllXp;
-                        boolean isblackControlXp = ai.isblackControlXp;
-                        boolean isNoCheckXp = ai.isNoCheckXp;
-                        boolean isSetCanHookXp = ai.isSetCanHookXp;
-                        XpBlackListAdapter.reset(ai,sharedPrefs.xpBlackListPrefs,AppConfigActivity.this);
-                        boolean isIn = false;
-                        String s = hms.get(view.getId());
-                        if (s.equals("allxpblack")&&!isblackAllXp){ai.isblackAllXp = true;isIn = true;}
-                        else if (s.equals("contorlxpblack")&&!isblackControlXp){ai.isblackControlXp = true;isIn = true;}
-                        else if (s.equals("nocheckxp")&&!isNoCheckXp){ai.isNoCheckXp = true;isIn = true;}
-                        else if (s.equals("setcanhook")&&!isSetCanHookXp){ai.isSetCanHookXp = true;isIn = true;}
-                        if(isIn){
-                            sharedPrefs.xpBlackListPrefs.edit().putBoolean(ai.packageName+"/"+s,true).commit();
+                        if(ai.isblackAllXp){
+                            sharedPrefs.xpBlackListPrefs.edit().remove(ai.packageName+"/allxpblack").commit();
+                            ai.isblackAllXp = false;
+                        }else{
+                            sharedPrefs.xpBlackListPrefs.edit().putBoolean(ai.packageName+"/allxpblack",true)
+                                    .remove(ai.packageName+"/contorlxpblack")
+                                    .remove(ai.packageName+"/nocheckxp")
+                                    .remove(ai.packageName+"/setcanhook").commit();
+                            ai.isblackAllXp = true;
+                            ai.isblackControlXp = false;
+                            ai.isSetCanHookXp = false;
+                            ai.isNoCheckXp = false;
                         }
                         xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-                        xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         xpSetCanHookImg.setImageResource(ai.isSetCanHookXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_xpblack_control:
+                        if(ai.isblackControlXp){
+                            sharedPrefs.xpBlackListPrefs.edit().remove(ai.packageName+"/contorlxpblack").commit();
+                            ai.isblackControlXp = false;
+                        }else{
+                            sharedPrefs.xpBlackListPrefs.edit()
+                                    .putBoolean(ai.packageName+"/contorlxpblack",true)
+                                    .remove(ai.packageName+"/allxpblack")
+                                    .remove(ai.packageName+"/nocheckxp")
+                                    .remove(ai.packageName+"/setcanhook").commit();
+                            ai.isblackAllXp = false;
+                            ai.isblackControlXp = true;
+                            ai.isSetCanHookXp = false;
+                            ai.isNoCheckXp = false;
+                        }
+                        xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpSetCanHookImg.setImageResource(ai.isSetCanHookXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_xpblack_nocheck:
+                        if(ai.isNoCheckXp){
+                            sharedPrefs.xpBlackListPrefs.edit().remove(ai.packageName+"/nocheckxp").commit();
+                            ai.isNoCheckXp = false;
+                        }else{
+                            sharedPrefs.xpBlackListPrefs.edit()
+                                    .putBoolean(ai.packageName+"/nocheckxp",true)
+                                    .remove(ai.packageName+"/contorlxpblack")
+                                    .remove(ai.packageName+"/allxpblack").commit();
+                            ai.isNoCheckXp = true;
+                            ai.isblackAllXp = false;
+                            ai.isblackControlXp = false;
+                        }
+                        xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_xpblack_setcanhook:
+                        if(ai.isSetCanHookXp){
+                            sharedPrefs.xpBlackListPrefs.edit().remove(ai.packageName+"/setcanhook").commit();
+                            ai.isSetCanHookXp = false;
+                        }else{
+                            sharedPrefs.xpBlackListPrefs.edit().
+                                    putBoolean(ai.packageName+"/setcanhook",true)
+                                    .remove(ai.packageName+"/contorlxpblack")
+                                    .remove(ai.packageName+"/allxpblack")
+                                    .commit();
+                            ai.isSetCanHookXp = true;
+                            ai.isblackAllXp = false;
+                            ai.isblackControlXp = false;
+                        }
+                        xpSetCanHookImg.setImageResource(ai.isSetCanHookXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         break;
                     case R.id.item_doze_qiantai:
                         ai.isDozeOpenStop = !ai.isDozeOpenStop;
@@ -933,6 +917,7 @@ public class AppConfigActivity extends BaseActivity {
                         ai.isLockApp = false;
                         ai.isAutoStart = false;
                         ai.isNotStop = false;
+                        AppStartAdapter.sendBroadChangePersistent(AppConfigActivity.this,ai.getPackageName(),ai.isNotStop);
                         lockImg.setImageResource(ai.isLockApp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         notRunImg.setImageResource(ai.isStopApp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         notAutoStartImg.setImageResource(ai.isAutoStart?R.mipmap.icon_add:R.mipmap.icon_notdisable);
@@ -1057,6 +1042,7 @@ public class AppConfigActivity extends BaseActivity {
             if(WatchDogService.isNeedAMSReadLoad){
                 XposedUtil.reloadInfos(this,
                         sharedPrefs.autoStartNetPrefs,
+                        sharedPrefs.recentPrefs,
                         sharedPrefs.modPrefs,
                         sharedPrefs.settings,
                         sharedPrefs.skipDialogPrefs,
@@ -1070,6 +1056,9 @@ public class AppConfigActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        setContentView(R.layout.view_null);
+        System.gc();
+
         Intent intent = new Intent("com.click369.control.appconfigclose");
         sendBroadcast(intent);
     }
@@ -1077,54 +1066,7 @@ public class AppConfigActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-//        finish();
     }
-//    public void clearAppSettings(AppInfo ai){
-//        SharedPreferences.Editor modEd = sharedPrefs.modPrefs.edit();
-//        modEd.remove(ai.getPackageName() + "/service");
-//        modEd.remove(ai.getPackageName() + "/broad");
-//        modEd.remove(ai.getPackageName() + "/wakelock");
-//        modEd.remove(ai.getPackageName() + "/alarm");
-//        modEd.commit();
-//
-//        SharedPreferences.Editor forceEd = sharedPrefs.forceStopPrefs.edit();
-//        forceEd.remove(ai.getPackageName() + "/backstop");
-//        forceEd.remove(ai.getPackageName() + "/backmubei");
-//        forceEd.remove(ai.getPackageName() + "/offstop");
-//        forceEd.remove(ai.getPackageName() + "/offmubei");
-//        sharedPrefs.muBeiPrefs.edit().remove(ai.getPackageName()).commit();
-//        forceEd.remove(ai.getPackageName() + "/homemubei");
-//        forceEd.remove(ai.getPackageName() + "/notifynotexit");
-//        forceEd.commit();
-//
-//        SharedPreferences.Editor appstartEd = sharedPrefs.autoStartNetPrefs.edit();
-//        appstartEd.remove(ai.getPackageName() + "/autostart");
-//        appstartEd.remove(ai.getPackageName() + "/stopapp");
-//        appstartEd.remove(ai.getPackageName() + "/lockapp");
-//        appstartEd.remove(ai.getPackageName() + "/notstop");
-//        appstartEd.commit();
-//
-//        SharedPreferences.Editor dozeEd = sharedPrefs.dozePrefs.edit();
-//        dozeEd.remove(ai.getPackageName() + "/offsc");
-//        dozeEd.remove(ai.getPackageName() + "/onsc");
-//        dozeEd.remove(ai.getPackageName() + "/openstop");
-//        dozeEd.commit();
-//
-//        SharedPreferences.Editor recentEd = sharedPrefs.recentPrefs.edit();
-//        recentEd.remove(ai.getPackageName() + "/notclean");
-//        recentEd.remove(ai.getPackageName() + "/forceclean");
-//        recentEd.remove(ai.getPackageName() + "/blur");
-//        recentEd.remove(ai.getPackageName() + "/notshow");
-//        recentEd.commit();
-//
-//        SharedPreferences.Editor barEd = sharedPrefs.uiBarPrefs.edit();
-//        barEd.remove(ai.getPackageName() + "/locklist");
-//        barEd.remove(ai.getPackageName() + "/colorlist");
-//        barEd.commit();
-//
-//        sharedPrefs.pmPrefs.edit().remove(ai.getPackageName() + "/notunstall").commit();
-//        sharedPrefs.adPrefs.edit().remove(ai.getPackageName() + "/ad").commit();
-//    }
     /**
      * 设置视图裁剪的圆角半径
      * @param radius
@@ -1143,12 +1085,6 @@ public class AppConfigActivity extends BaseActivity {
             return;
         }
 
-        /*view.setOutlineProvider(new ViewOutlineProvider() {
-            @Override
-            public void getOutline(View view, Outline outline) {
-                outline.setRoundRect(view.getLeft(), view.getTop(), view.getRight(), view.getBottom(), radius);
-            }
-        });*/
         view.setOutlineProvider(new ViewOutlineProvider() {
 
             @Override
@@ -1157,19 +1093,5 @@ public class AppConfigActivity extends BaseActivity {
             }
         });
         view.setClipToOutline(true);
-    }
-    private void getAppDetailSettingIntent() {
-//        Activity activity = this;
-        Intent localIntent = new Intent();
-        localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (Build.VERSION.SDK_INT >= 9) {
-            localIntent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
-            localIntent.setData(Uri.fromParts("package", ai.getPackageName(), null));
-        } else if (Build.VERSION.SDK_INT <= 8) {
-            localIntent.setAction(Intent.ACTION_VIEW);
-            localIntent.setClassName("com.android.settings","com.android.settings.InstalledAppDetails");
-            localIntent.putExtra("com.android.settings.ApplicationPkgName", ai.getPackageName());
-        }
-        startActivity(localIntent);
     }
 }

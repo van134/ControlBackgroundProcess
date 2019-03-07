@@ -72,6 +72,8 @@ public class SharedPrefsUtil {
     }
 
     public void clearAppSettings(AppInfo ai,boolean isDel){
+        XposedStopApp.stopApk(ai.packageName,context);
+
         SharedPreferences.Editor modEd = modPrefs.edit();
         modEd.remove(ai.getPackageName() + "/service");
         modEd.remove(ai.getPackageName() + "/broad");
@@ -144,6 +146,6 @@ public class SharedPrefsUtil {
                 f.delete();
             }
         }
-        XposedStopApp.stopApk(ai.packageName,context);
+
     }
 }

@@ -39,7 +39,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
     private String title="";
     private String key = "";
     private SharedPreferences barPrefs;
-    private int bgcolor,textcolor,keyColor,lightColor,notifyColor,themeColor,themeBgColor;
+    private int bgcolor,textcolor,keyColor,lightColor,notifyColor,themeColor,themeBgColor,lockBgColor;
     private boolean isbg;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,6 +86,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
             notifyColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR,"#FFFFFF"));
             themeColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_COLOR,"#1a9dac"));
             themeBgColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_BG_COLOR,"#FFFFFF"));
+            lockBgColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR));
             int color = Color.WHITE;
             if(key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
                 editText.setBackgroundColor(keyColor);
@@ -107,6 +108,10 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 editText.setBackgroundColor(themeBgColor);
                 editText.setTextColor(Color.WHITE);
                 color = themeBgColor;
+            }else if(key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)){
+                editText.setBackgroundColor(lockBgColor);
+                editText.setTextColor(Color.WHITE);
+                color = lockBgColor;
             }else{
                 editText.setBackgroundColor(bgcolor);
                 editText.setTextColor(textcolor);
@@ -167,6 +172,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 key.equals(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_COLOR)||
+                key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_BG_COLOR)){
             editText.setBackgroundColor(Color.parseColor("#"+colorStr));
             editText.setText("#"+colorStr);
@@ -193,6 +199,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 key.equals(Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_COLOR)||
+                key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_BG_COLOR)){
             editText.setBackgroundColor(Color.parseColor("#"+colorStr));
             editText.setText("#"+colorStr);
@@ -245,6 +252,9 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 Intent intent = new Intent();
                 intent.putExtra("bgcolor","#"+colorStr);
                 setResult(0x12,intent);
+            }else if(key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)){
+                barPrefs.edit().putString(key,"#"+colorStr).commit();
+                setResult(0x12,null);
             }else{
                 barPrefs.edit().putInt(key,Color.parseColor("#"+colorStr)).commit();
             }

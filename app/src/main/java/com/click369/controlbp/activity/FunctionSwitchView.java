@@ -3,6 +3,7 @@ package com.click369.controlbp.activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
@@ -11,6 +12,10 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.util.AlertUtil;
+import com.click369.controlbp.util.FileUtil;
+
+import java.io.File;
 
 /**
  * Created by asus on 2017/10/19.
@@ -111,6 +116,16 @@ public class FunctionSwitchView {
                     Common.ALLSWITCH_CPUSET,Common.ALLSWITCH_OTHERS};
             if(settingPrefs.getBoolean(names[tag],true)!=isChecked){
                 Toast.makeText(cxt,"重启生效",Toast.LENGTH_LONG).show();
+            }
+            if (tag==9&&Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                AlertUtil.showAlertMsg(cxt,"您的手机版本不支持打盹功能,必须Android M(6.0)及以上才支持打盹！");
+                return;
+            }else if(tag==11){
+                File qualcpuFile = new File(cxt.getFilesDir(),"qualcomm");
+                if(!qualcpuFile.exists()){
+                    AlertUtil.showAlertMsg(cxt,"检测到您的手机不是高通CPU，本功能目前只支持高通CPU！");
+                    return;
+                }
             }
             settingPrefs.edit().putBoolean(names[tag],isChecked).commit();
         }

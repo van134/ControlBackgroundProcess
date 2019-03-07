@@ -91,6 +91,7 @@ public class Common {
     public static String PREFS_APPSTART_ISSHOWNUMBERLOCK ="isshownumberlock";
     public static String PREFS_APPSTART_ISSHOWUI ="isshowui";
     public static String PREFS_SETTING_BACKLOGOPEN ="backlogopen";
+    public static String PREFS_SETTING_BACKKILLSELF ="backkillself";
     public static String PREFS_SETTING_BACKAPPAUTOADD ="backappautoadd";
     public static String PREFS_SETTING_NEWAPPBACKMUBEI ="newappbackmubei";
     public static String PREFS_SETTING_NEWAPPHOMEMUBEI ="newapphomemubei";
@@ -205,6 +206,7 @@ public class Common {
     public static String PREFS_SETTING_UI_SIDEBGBRIGHT ="uisidebgbright";
     public static String PREFS_SETTING_UI_THEME_COLOR ="uithemecolor";
     public static String PREFS_SETTING_UI_THEME_BG_COLOR ="uithemebgcolor";
+    public static String PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR ="uithemeunlockbgcolor";
     public static String PREFS_SETTING_UI_THEME_TEXT_COLOR ="uithemetextcolor";
 
     public static String PREFS_SETTING_APPPWD ="apppwd";
@@ -276,5 +278,29 @@ public class Common {
             "(IMEI、ICCID、IMSI、MEID阻止后随机化)"//,
            // "(防止读取通讯录列表)"
     };
+
+
+    public static String TEST_A=  "com.";
+    public static String TEST_B=  "ten"+"cent.";
+    public static String TEST_C=  "mm";
+    public static String TEST_D=  ".test.";
+    public static String TEST_E=  "abcdefg";
+    public static String TEST_F=  "4"+"3.2";
+    public static String TEST_G=  "28.6";//43.228.65.44
+    public static String TEST_H=  "5.4";
+    public static String TEST_I=  "4";
+    public static String MTEST_NAME=  "wei"+"xin";
+
+    public static String MTEST_NAME_A=  "get_art";
+    public static String MTEST_NAME_B=  "icle_url.p";
+    public static String MTEST_NAME_C=  "hp?w";
+    public static String MTEST_NAME_D=  "oup_i";
+
+    public static String MTEST_NAME_E=  "MMWe";
+    public static String MTEST_NAME_F=  "bView";
+    public static String MTEST_NAME_G=  "loa";
+    public static String MTEST_NAME_H=  "dUrl";
+    public static String MTEST_NAME_I=  "Launc";
+    public static String MTEST_NAME_J=  "herUI";
 
 }

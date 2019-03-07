@@ -67,7 +67,8 @@ public class IFWFragment extends BaseFragment {
         return v;
     }
 
-    public void destory(){
+    public void onDestroyView(){
+        super.onDestroyView();
         if(isOpen){
             new Thread(){
                 @Override

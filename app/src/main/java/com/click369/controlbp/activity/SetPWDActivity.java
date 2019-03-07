@@ -53,6 +53,7 @@ public class SetPWDActivity extends BaseActivity {
     private File imgFile = null;
     boolean isSet = false;//是设置还是验证
     boolean isClosePWD = false;
+    String bgColor = MainActivity.THEME_COLOR;
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +61,9 @@ public class SetPWDActivity extends BaseActivity {
          settingPrefs =sharedPrefs.settings;// SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
             requestWindowFeature(Window.FEATURE_NO_TITLE);
             setContentView(R.layout.activity_unlock);
-            initView();
+        bgColor = SharedPrefsUtil.getInstance(getApplicationContext()).uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR);
+
+        initView();
             mainRl = (RelativeLayout) findViewById(R.id.unlock_main_rl);
             msgTv = (TextView)this.findViewById(R.id.unlock_msg_tv);
             pwdTv = (TextView)this.findViewById(R.id.unlock_pwd_tv);
@@ -76,6 +79,8 @@ public class SetPWDActivity extends BaseActivity {
             getPhoto.setPhotofile(imgFile);
             if (imgFile!=null&&imgFile.exists()){
                 mainRl.setBackground(Drawable.createFromPath(imgFile.getAbsolutePath()));
+            }else{
+                mainRl.setBackgroundColor(Color.parseColor(bgColor));
             }
 //            mainRl.setOnLongClickListener(new View.OnLongClickListener() {
 //                @Override

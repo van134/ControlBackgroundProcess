@@ -11,6 +11,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -46,7 +47,7 @@ public class XposedActivity {
     private static long downtime = 0;
 //    private static long sddowntime = 0;
     private static Activity act = null;
-    private static Handler handler = new Handler();
+    private static Handler handler;
     private static boolean isDown = false;
     private static BroadcastReceiver broadcastReceiver;
     private static Runnable r = new Runnable() {
@@ -88,6 +89,9 @@ public class XposedActivity {
                 protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                     try {
                         if(isListener) {
+                            if(handler==null){
+                                handler = new Handler();
+                            }
                             MotionEvent me =  (MotionEvent)methodHookParam.args[0];
                             float x = me.getX();
                             float y = me.getY();

@@ -20,7 +20,6 @@ public class GCUtil {
                 Bitmap bmp = drawable.getBitmap();
                 if (null != bmp && !bmp.isRecycled()) {
                     bmp.recycle();
-                    bmp = null;
                 }
             }
         }else if(v!=null){
@@ -29,12 +28,9 @@ public class GCUtil {
                 Bitmap bmp = drawable.getBitmap();
                 if (null != bmp && !bmp.isRecycled()) {
                     bmp.recycle();
-                    bmp = null;
                 }
             }
         }
-        v.setBackgroundResource(0);
-        v=null;
     }
 
 
@@ -61,14 +57,14 @@ public class GCUtil {
 
 
     /*是否释放背景图  true:释放;false:不释放*/
-    private static boolean flagWithBackgroud = false;
+//    private static boolean flagWithBackgroud = false;
     /**
      *
      */
-    public static void startGC(View layout,boolean flagWithBackgroudTmep) {
+    public static void startGC(View layout) {
         if(layout!=null&&layout instanceof ViewGroup){
-            flagWithBackgroud = flagWithBackgroudTmep;
             recycle((ViewGroup) layout);
+            ((ViewGroup) layout).removeAllViews();
         }
     }
 
@@ -78,6 +74,7 @@ public class GCUtil {
      * @param layout 需要释放图片的布局     *
      */
     private static void recycle(ViewGroup layout) {
+        releaseBitMap(layout);
         for (int i = 0; i < layout.getChildCount(); i++) {
             //获得该布局的所有子布局
             View subView = layout.getChildAt(i);
@@ -86,47 +83,38 @@ public class GCUtil {
                 //递归回收
                 recycle((ViewGroup)subView);
             } else {
-                //是Imageview的子例
-                if (subView instanceof ImageView) {
-                    //回收占用的Bitmap
-                    recycleImageViewBitMap((ImageView)subView);
-                    //如果flagWithBackgroud为true,则同时回收背景图
-                    if (flagWithBackgroud) {
-
-                        recycleBackgroundBitMap((ImageView)subView);
-                    }
-                }
+                releaseBitMap(subView);
             }
         }
     }
-
-    private static void recycleBackgroundBitMap(ImageView view) {
-        if (view != null&&view.getBackground()!=null&&view.getBackground() instanceof BitmapDrawable) {
-            BitmapDrawable bd = (BitmapDrawable) view.getBackground();
-            rceycleBitmapDrawable(bd);
-        }
-    }
-
-    private static void recycleImageViewBitMap(ImageView imageView) {
-        if (imageView != null&&imageView.getDrawable()!=null&&imageView.getDrawable() instanceof BitmapDrawable) {
-            BitmapDrawable bd = (BitmapDrawable) imageView.getDrawable();
-            rceycleBitmapDrawable(bd);
-        }
-    }
-
-    private static void rceycleBitmapDrawable(BitmapDrawable bd) {
-        if (bd != null) {
-            Bitmap bitmap = bd.getBitmap();
-            rceycleBitmap(bitmap);
-        }
-        bd = null;
-    }
-
-    private static void rceycleBitmap(Bitmap bitmap) {
-        if (bitmap != null && !bitmap.isRecycled()) {
-            bitmap.recycle();
-            bitmap = null;
-        }
-    }
+//
+//    private static void recycleBackgroundBitMap(ImageView view) {
+//        if (view != null&&view.getBackground()!=null&&view.getBackground() instanceof BitmapDrawable) {
+//            BitmapDrawable bd = (BitmapDrawable) view.getBackground();
+//            rceycleBitmapDrawable(bd);
+//        }
+//    }
+//
+//    private static void recycleImageViewBitMap(ImageView imageView) {
+//        if (imageView != null&&imageView.getDrawable()!=null&&imageView.getDrawable() instanceof BitmapDrawable) {
+//            BitmapDrawable bd = (BitmapDrawable) imageView.getDrawable();
+//            rceycleBitmapDrawable(bd);
+//        }
+//    }
+//
+//    private static void rceycleBitmapDrawable(BitmapDrawable bd) {
+//        if (bd != null) {
+//            Bitmap bitmap = bd.getBitmap();
+//            rceycleBitmap(bitmap);
+//        }
+//        bd = null;
+//    }
+//
+//    private static void rceycleBitmap(Bitmap bitmap) {
+//        if (bitmap != null && !bitmap.isRecycled()) {
+//            bitmap.recycle();
+//            bitmap = null;
+//        }
+//    }
 
 }

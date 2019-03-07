@@ -76,13 +76,15 @@ public class XposedPrivacy {
     private static LocationListener ll;
 //    private static double lat=39.916803,lon = 116.403766;//lat纬度  lon//经度
     private static double lat=0,lon = 0;//lat纬度  lon//经度
-    private static Handler handler = new Handler();
+    private static Handler handler ;//不能再这里初始化  部分系统会出现问题
     private static Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            HashMap<Long,String> minfos = new HashMap<Long,String>();
+            minfos.putAll(infos);
             Intent intent = new Intent("com.click369.control.ams.sendprivacyinfo");
             intent.putExtra("pkg",pkg);
-            intent.putExtra("infos",infos);
+            intent.putExtra("infos",minfos);
             if(mContext!=null){
                 mContext.sendBroadcast(intent);
                 infos.clear();
@@ -104,12 +106,12 @@ public class XposedPrivacy {
         }
         isSelfGetTime = false;
         if(handler!=null&&count>0){
-            if(count>80){
+            if(count>40){
                 handler.removeCallbacks(runnable);
-                runnable.run();
+                handler.postDelayed(runnable,10);
             }else{
                 handler.removeCallbacks(runnable);
-                handler.postDelayed(runnable,3000);
+                handler.postDelayed(runnable,2000);
             }
         }
     }
@@ -157,8 +159,6 @@ public class XposedPrivacy {
             final boolean isPreventWifi = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_WIFIINFO])||isChangeLoc;
             final boolean isPreventDevInfo = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEINFO])||(isChangeLoc&&!isDIDISIJI);
             final boolean isPreventTime = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CHANGETIME]);
-//            final boolean isPreventContact = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CONTACTINFO]);
-//            XposedBridge.log("CONTROL_PRIVACY_PKG:"+lpparam.packageName+" isChangeLoc "+isChangeLoc);
             if(privacyPrefs.contains(lpparam.packageName + "/changetime")){
                 time = privacyPrefs.getLong(lpparam.packageName + "/changetime", 0);
             }
@@ -186,27 +186,7 @@ public class XposedPrivacy {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     mContext = ((Application)(param.thisObject)).getApplicationContext();
-//                    privacyPrefs.reload();
-//                    final Set<String> switchs1 = privacyPrefs.getStringSet(lpparam.packageName+"/prilist",new HashSet<String>());
-//                    switchs.clear();
-//                    switchs.addAll(switchs1);
-//                    final boolean isChangeLoc = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CHANGELOC]);
-//                    if(isChangeLoc){
-//                        try {
-//                            String lonLat = privacyPrefs.getString(lpparam.packageName+"/changeloc","116.403766,39.916803");
-//                            if(lonLat.contains(",")){
-//                                String ss[] = lonLat.split(",");
-//                                lon = Double.parseDouble(ss[0]);
-//                                lat = Double.parseDouble(ss[1]);
-//                            }
-//                        }catch (Exception e){
-//                            lat=39.916803;lon = 116.403766;
-//                        }
-//                        if("com.alibaba.android.rimet".equals(lpparam.packageName)){
-//                            lat = lat+0.0012;
-//                            lon = lon-0.0044;
-//                        }
-//                    }
+                    handler = new Handler();
                 }
             });
 

@@ -60,6 +60,8 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.click369.controlbp.activity.BaseActivity.sharedPrefs;
+
 
 public class OtherFragment extends BaseFragment {
     private TextView jxCleanTv,cleanSysTv,cleanProcessTv,kjRunTv,kjIceTv,kjCleanTv,
@@ -104,6 +106,13 @@ public class OtherFragment extends BaseFragment {
         getMsgCodeToETSw.setTextColor(curColor);
 //        colorBarTv = (TextView) v.findViewById(R.id.other_colorbar_tv);
         kjCPUTv = (TextView) v.findViewById(R.id.other_kj_cpu_tv);
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_CPUSET,true)){
+            try {
+                ((View)kjCPUTv.getParent()).setVisibility(View.GONE);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
         jxCleanTv = (TextView) v.findViewById(R.id.other_jixian_tv);
         cleanSysTv = (TextView) v.findViewById(R.id.other_cleansys_tv);
         cleanProcessTv = (TextView) v.findViewById(R.id.other_cleanprocess_tv);
@@ -358,8 +367,7 @@ public class OtherFragment extends BaseFragment {
                     Intent intent1 = new Intent("com.click369.control.rebootsystemui");
                     activity.sendBroadcast(intent1);
                 }else if (tag == 4){
-                    Intent intent1 = new Intent("com.click369.control.ams.killself");
-                    activity.sendBroadcast(intent1);
+                    WatchDogService.killAndRestartSelf(activity);
                 }else{
                     final int myTag = tag;
                     AlertUtil.showConfirmAlertMsg(activity, "是否" + titles[tag]+ "?", new AlertUtil.InputCallBack() {

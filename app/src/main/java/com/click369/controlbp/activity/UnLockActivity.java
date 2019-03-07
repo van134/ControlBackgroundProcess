@@ -34,12 +34,11 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.common.Common;
-import com.click369.controlbp.service.AppStartService;
-import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.FileUtil;
+import com.click369.controlbp.util.GCUtil;
 import com.click369.controlbp.util.GetPhoto;
 import com.click369.controlbp.util.MyFingerUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
@@ -66,7 +65,8 @@ public class UnLockActivity extends Activity {
     private RelativeLayout mainRl;
     private GetPhoto getPhoto;
     private File imgFile = null;
-    private boolean isUsePwd = false;
+    private boolean isUsePwd = false,isneedbroad = false;//,isfromresume=false;
+    private String bgColor = MainActivity.THEME_COLOR;
 //    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -76,9 +76,13 @@ public class UnLockActivity extends Activity {
 
         pkg = this.getIntent().getStringExtra("pkg");
         cls = this.getIntent().getStringExtra("class");
+        isneedbroad = this.getIntent().getBooleanExtra("isneedbroad",false)&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+//        isfromresume = this.getIntent().getBooleanExtra("isfromresume",false);
         mIntent = this.getIntent().getParcelableExtra("intent");
-        autoStartPrefs = SharedPrefsUtil.getInstance(this).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_AUTOSTARTNAME);
-         settingPrefs = SharedPrefsUtil.getInstance(this).settings;//SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
+        autoStartPrefs =  SharedPrefsUtil.getInstance(this.getApplicationContext()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_AUTOSTARTNAME);
+        settingPrefs = SharedPrefsUtil.getInstance(this.getApplicationContext()).settings;//SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
+        bgColor = SharedPrefsUtil.getInstance(getApplicationContext()).uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR);
+
         Log.i("CONTROL","准备解锁：pkg"+pkg+"  intent "+mIntent);
         if(pkg==null||pkg.length()==0){
             this.finish();
@@ -102,8 +106,6 @@ public class UnLockActivity extends Activity {
                 }
             },500);
         }else{
-
-
             setContentView(R.layout.activity_unlock);
             initView();
             mainRl = (RelativeLayout) findViewById(R.id.unlock_main_rl);
@@ -131,6 +133,8 @@ public class UnLockActivity extends Activity {
             getPhoto.setPhotofile(imgFile);
             if (imgFile!=null&&imgFile.exists()){
                 mainRl.setBackground(Drawable.createFromPath(imgFile.getAbsolutePath()));
+            }else{
+                mainRl.setBackgroundColor(Color.parseColor(bgColor));
             }
             mainRl.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -166,7 +170,7 @@ public class UnLockActivity extends Activity {
                                         imgFile.delete();
                                     }
                                     mainRl.setBackground(null);
-                                    mainRl.setBackgroundColor(Color.parseColor("#ff1cadfb"));
+                                    mainRl.setBackgroundColor(Color.parseColor(bgColor));
                                 }
                             }
                         });
@@ -295,24 +299,36 @@ public class UnLockActivity extends Activity {
     }
 
     private void startact(){
-        if(mIntent!=null){
-            try {
-                if("com.android.settings".equals(mIntent.getPackage())){
-                    Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                    startActivity(intent);
+        try {
+            if(isneedbroad){
+                Intent intent = new Intent("com.click369.lock");
+                intent.putExtra("islockok",true);
+                intent.putExtra("pkg",pkg);
+                sendBroadcast(intent);
+            }else{
+//                if(isfromresume){
+//                   return;
+//                }
+                if(mIntent!=null){
+                    if("com.android.settings".equals(mIntent.getPackage())){
+                        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                        startActivity(intent);
+                    }else{
+                        mIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+                        mIntent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        UnLockActivity.this.startActivity(mIntent);
+                    }
                 }else{
-                    UnLockActivity.this.startActivity(mIntent);
+                    if("com.android.settings".equals(pkg)){
+                        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                        startActivity(intent);
+                    }else {
+                        OpenCloseUtil.doStartApplicationWithPackageName(pkg, cls, UnLockActivity.this);
+                    }
                 }
-            }catch (Exception e){
-
             }
-        }else{
-            if("com.android.settings".equals(pkg)){
-                Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                startActivity(intent);
-            }else {
-                OpenCloseUtil.doStartApplicationWithPackageName(pkg, cls, UnLockActivity.this);
-            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -378,17 +394,27 @@ public class UnLockActivity extends Activity {
     @Override
     public void onBackPressed() {
 //        moveTaskToBack(false);
-        if(AppLoaderUtil.allAppStateInfos!=null&&AppLoaderUtil.allAppStateInfos.containsKey(pkg)){
-            AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyHome = true;
-            AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyBack = false;
-        }
+//        if(AppLoaderUtil.allAppStateInfos!=null&&AppLoaderUtil.allAppStateInfos.containsKey(pkg)){
+//            AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyHome = true;
+//            AppLoaderUtil.allAppStateInfos.get(pkg).isPressKeyBack = false;
+//        }
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);// 注意
         intent.addCategory(Intent.CATEGORY_HOME);
         startActivity(intent);
 
+        Intent intent1 = new Intent("com.click369.control.unlockback");
+        intent1.putExtra("pkg",pkg);
+        sendBroadcast(intent1);
+
         h.removeCallbacks(cancelFinger);
         MyFingerUtil.cancel();
+        if(isneedbroad){
+            Intent intent11 = new Intent("com.click369.lock");
+            intent11.putExtra("islockok",false);
+            intent11.putExtra("pkg",pkg);
+            sendBroadcast(intent11);
+        }
         UnLockActivity.this.finish();
         super.onBackPressed();
     }
@@ -400,6 +426,9 @@ public class UnLockActivity extends Activity {
         pkg = "";
         mIntent = null;
         cls = "";
+        GCUtil.releaseBitMap(mainRl);
+        setContentView(R.layout.view_null);
+        System.gc();
     }
 
     StringBuilder passWord = new StringBuilder();

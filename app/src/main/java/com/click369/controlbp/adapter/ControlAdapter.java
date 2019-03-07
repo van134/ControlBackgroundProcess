@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
+import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.fragment.ControlFragment;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
@@ -71,7 +72,9 @@ public class ControlAdapter extends BaseAdapter{
 				for(AppInfo ai :apps){
 					if(ai.getAppName().toLowerCase().contains(name.trim().toLowerCase())
 							||ai.getPackageName().toLowerCase().contains(name.trim().toLowerCase())){
-						bjdatas.add(ai);
+						if (TopSearchView.appType==2||(TopSearchView.appType==0&&ai.isUser)||(TopSearchView.appType==1&&!ai.isUser)) {
+							bjdatas.add(ai);
+						}
 					}
 				}
 			}
@@ -272,10 +275,6 @@ public class ControlAdapter extends BaseAdapter{
 					return;
 				}
 				ControlFragment.isClick = true;
-//				else if(!ControlFragment.isBroadStop){
-//					AlertUtil.showAlertMsg(c,"由于部分系统对广播处理后会导致卡顿或唤醒异常，所以该功能默认关闭，如果需要使用请到设置中打开开关并重启手机，如果使用有问题请关闭广播开关。");
-//					return;
-//				}
 				BaseActivity.zhenDong(c);
 				final ImageView buttonView = (ImageView)(v);
 				int g = (Integer)buttonView.getTag();

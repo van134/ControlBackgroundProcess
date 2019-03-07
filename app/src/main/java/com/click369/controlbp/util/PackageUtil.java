@@ -15,7 +15,12 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.receiver.AddAppReceiver;
@@ -301,4 +306,58 @@ public class PackageUtil {
         return d;
     }
 
+
+    public static HashSet<String> getLauncherPackageName(Context context) {
+        HashSet<String> packageNames = new HashSet<String>();
+        String hpkg = getDefaultHome(context);
+        if(!TextUtils.isEmpty(hpkg)){
+            packageNames.add(hpkg);
+        }else{
+            final Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            List<ResolveInfo> resolveInfo = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo ri : resolveInfo) {
+                packageNames.add(ri.activityInfo.packageName);
+            }
+        }
+        return packageNames;
+    }
+
+    public static String getDefaultHome(Context context) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        final ResolveInfo res = context.getPackageManager().resolveActivity(intent, 0);
+        if (res.activityInfo == null) {
+        } else if (res.activityInfo.packageName.equals("android")) {
+//            Log.e("CONTROL", "resolveActivity--->无默认设置");
+        } else {
+//            Log.e("CONTROL", "默认桌面为：" + res.activityInfo.packageName + "." + res.activityInfo.name);
+            return res.activityInfo.packageName;
+        }
+        return "";
+    }
+    public static  ArrayList<String> getInputPackageName(Context context) {
+        ArrayList<String> packageNames = new ArrayList<String>();
+        InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        List<InputMethodInfo> methodList = imm.getInputMethodList();
+        for(InputMethodInfo imi:methodList){
+            packageNames.add(imi.getPackageName());
+        }
+        return packageNames;
+    }
+
+    public static void getAppDetailSettingIntent(Context context,String pkg) {
+//        Activity activity = this;
+        Intent localIntent = new Intent();
+        localIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (Build.VERSION.SDK_INT >= 9) {
+            localIntent.setAction("android.settings.APPLICATION_DETAILS_SETTINGS");
+            localIntent.setData(Uri.fromParts("package", pkg, null));
+        } else if (Build.VERSION.SDK_INT <= 8) {
+            localIntent.setAction(Intent.ACTION_VIEW);
+            localIntent.setClassName("com.android.settings","com.android.settings.InstalledAppDetails");
+            localIntent.putExtra("com.android.settings.ApplicationPkgName", pkg);
+        }
+        context.startActivity(localIntent);
+    }
 }

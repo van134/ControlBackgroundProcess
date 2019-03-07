@@ -8,8 +8,8 @@ android {
         applicationId "com.click369.controlbp"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 173
-        versionName "3.0"
+        versionCode 178
+        versionName "3.0.7"
         multiDexEnabled true
     }
     buildTypes {
@@ -50,7 +50,8 @@ dependencies {
 //    compile 'com.github.bumptech.glide:glide:4.3.1'
     compile 'de.hdodenhof:circleimageview:2.2.0'
     compile 'com.android.support:support-v4:22.0.0'
-    compile 'com.githang:status-bar-compat:0.3'//状态栏
+    compile 'com.githang:status-bar-compat:0.7'//状态栏
     provided 'de.robv.android.xposed:api:82'
     provided 'de.robv.android.xposed:api:82:sources'
+    compile 'com.android.support:multidex'
 }
