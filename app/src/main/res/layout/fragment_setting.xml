@@ -18,7 +18,7 @@
                 style="@style/mtextSize"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="全局相关、服务、强退、冷藏等相关设置"
+                android:text="全局相关设置"
                 android:id="@+id/setting_title1_tv" />
             <LinearLayout
                 android:orientation="vertical"
@@ -97,91 +97,8 @@
                         android:checked="true" />
                 </FrameLayout>
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"  />
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
 
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="禁止自启的应用未运行时禁止系统代推消息"
-                        android:id="@+id/setting_autostartnotnotify_sw"
-                        android:checked="true" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"  />
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
 
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="被强退的应用从最近任务移除"
-                        android:id="@+id/setting_exitremoverecent_sw"
-                        android:checked="true" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"  />
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
-
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="正在播放音频的应用不执行‘强退/墓碑/待机/冻结’"
-                        android:id="@+id/setting_notexitaudio_sw"
-                        android:checked="false" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"  />
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
-
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="返回/熄屏强退的应用后台超时12小时后杀死"
-                        android:id="@+id/setting_checktimeout_sw"
-                        android:checked="false" />
-                </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"  />
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp" >
-
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="熄屏时的动作时间未到再次亮屏时不取消执行"
-                        android:id="@+id/setting_alwayskilloff_sw"
-                        android:checked="false" />
-                </FrameLayout>
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
@@ -220,6 +137,111 @@
                         android:id="@+id/setting_stopmode_sw"
                         android:checked="false" />
                 </FrameLayout>
+
+
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp"
+                    android:visibility="visible" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="点按震动"
+                        android:id="@+id/setting_zhendong_sw"
+                        android:checked="false" />
+                </FrameLayout>
+
+            </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                style="@style/mtextSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="强退、待机、墓碑、自启动相关设置" />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="@drawable/alert_backgroundshape"
+                android:layout_marginBottom="15dp">
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="正在播放音频的应用不执行‘强退/墓碑/待机/冻结’"
+                        android:id="@+id/setting_notexitaudio_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="被强退的应用从最近任务移除"
+                        android:id="@+id/setting_exitremoverecent_sw"
+                        android:checked="true" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="返回/熄屏强退的应用后台超时12小时后杀死"
+                        android:id="@+id/setting_checktimeout_sw"
+                        android:checked="false" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="4dp" >
+
+                    <Switch
+                        style="@style/mtextSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:text="熄屏时的动作时间未到再次亮屏时不取消执行"
+                        android:id="@+id/setting_alwayskilloff_sw"
+                        android:checked="false" />
+                </FrameLayout>
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
@@ -241,69 +263,6 @@
                         android:checked="false"
                         android:visibility="visible" />
                 </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"
-                    android:visibility="visible" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp"
-                    android:visibility="visible">
-
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="冷藏室应用启动后从最近任务划掉重新冷藏\n(该选项需要最近任务和启动控制功能开启)"
-                        android:id="@+id/setting_ice_remove_sw"
-                        android:checked="false" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line"
-                    android:visibility="visible" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp"
-                    android:visibility="visible" >
-
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="冷藏室应用启动后熄屏重新冷藏\n(延迟时长与熄屏强退延迟同步)"
-                        android:id="@+id/setting_ice_off_sw"
-                        android:checked="false" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line" />
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp"
-                    android:visibility="visible" >
-
-                    <Switch
-                        style="@style/mtextSize"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="冷藏室应用启动后返回退出重新冷藏\n(延迟时长与返回强退延迟同步)"
-                        android:id="@+id/setting_ice_stop_sw"
-                        android:checked="false" />
-                </FrameLayout>
-
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
@@ -342,6 +301,7 @@
                         android:id="@+id/setting_settimestopzwmode_sw"
                         android:checked="false" />
                 </FrameLayout>
+
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="2px"
@@ -361,24 +321,23 @@
                         android:id="@+id/setting_settimestopnotshowdialog_sw"
                         android:checked="false" />
                 </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line" />
 
                 <FrameLayout
                     android:layout_width="match_parent"
+                    android:layout_height="2px"
+                    android:background="@drawable/line"  />
+                <FrameLayout
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="4dp"
-                    android:visibility="visible" >
+                    android:layout_marginLeft="4dp" >
 
                     <Switch
                         style="@style/mtextSize"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:text="点按震动"
-                        android:id="@+id/setting_zhendong_sw"
-                        android:checked="false" />
+                        android:text="禁止自启的应用未运行时禁止系统代推消息"
+                        android:id="@+id/setting_autostartnotnotify_sw"
+                        android:checked="true" />
                 </FrameLayout>
 
                 <FrameLayout
@@ -538,15 +497,102 @@
                     </LinearLayout>
                 </FrameLayout>
 
-                <FrameLayout
+                </LinearLayout>
+        </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    style="@style/mtextSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="冷藏、卸载相关设置" />
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="2px"
-                    android:background="@drawable/line" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/alert_backgroundshape"
+                    android:layout_marginBottom="15dp">
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="4dp"
+                        android:visibility="visible">
 
+                        <Switch
+                            style="@style/mtextSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:text="冷藏室应用启动后从最近任务划掉重新冷藏\n(该选项需要最近任务和启动控制功能开启)"
+                            android:id="@+id/setting_ice_remove_sw"
+                            android:checked="false" />
+                    </FrameLayout>
 
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@drawable/line"
+                        android:visibility="visible" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="4dp"
+                        android:visibility="visible" >
+
+                        <Switch
+                            style="@style/mtextSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:text="冷藏室应用启动后熄屏重新冷藏\n(延迟时长与熄屏强退延迟同步)"
+                            android:id="@+id/setting_ice_off_sw"
+                            android:checked="false" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@drawable/line" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="4dp"
+                        android:visibility="visible" >
+
+                        <Switch
+                            style="@style/mtextSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:text="冷藏室应用启动后返回退出重新冷藏\n(延迟时长与返回强退延迟同步)"
+                            android:id="@+id/setting_ice_stop_sw"
+                            android:checked="false" />
+                    </FrameLayout>
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@drawable/line"
+                        android:visibility="visible" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="4dp"
+                        android:visibility="visible" >
+
+                        <Switch
+                            style="@style/mtextSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:text="禁止卸载的应用不能清除用户数据"
+                            android:id="@+id/setting_notunstall_notclear_sw"
+                            android:checked="false" />
+                    </FrameLayout>
+                </LinearLayout>
 
             </LinearLayout>
-
             <include
                 layout="@layout/layout_lockapp"
                 android:layout_width="match_parent"

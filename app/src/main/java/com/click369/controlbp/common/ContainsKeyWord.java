@@ -94,6 +94,7 @@ public class ContainsKeyWord {
         notLockAppPage.add("com.click369.controlbp.activity.RunningActivity");
         notLockAppPage.add("com.click369.controlbp.activity.AppConfigActivity");
         notLockAppPage.add("com.alipay.android.phone.wallet.buscode.BusCodeActivity");
+        notLockAppPage.add("com.alipay.android.phone.wallet.buscode.v50.BusCodeHomeActivity");
         notLockAppPage.add("com.alipay.mobile.quinox.LauncherActivity");
         notLockAppPage.add("com.android.webview");
         notLockAppPage.add("com.google.android.webview");

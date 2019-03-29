@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.IFWAdapter;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.common.ContainsKeyWord;
 import com.click369.controlbp.util.FileUtil;
@@ -49,7 +51,8 @@ public class IFWFragment extends BaseFragment {
     public static int curColor = Color.BLACK;
     private Handler h = new Handler();
     public static AppInfo ai;
-    private boolean isOpen;
+//    private boolean isOpen;
+    public static boolean isShowAllName = false;
     public IFWFragment() {
     }
 
@@ -69,14 +72,7 @@ public class IFWFragment extends BaseFragment {
 
     public void onDestroyView(){
         super.onDestroyView();
-        if(isOpen){
-            new Thread(){
-                @Override
-                public void run() {
-                    SELinuxUtil.openSEL();
-                }
-            }.start();
-        }
+
     }
 
     @SuppressLint("WorldReadableFiles")
@@ -156,13 +152,13 @@ public class IFWFragment extends BaseFragment {
         new Thread() {
             @Override
             public void run() {
-                try {
-                    isStrart = true;
-                    isOpen = SELinuxUtil.isSELOpen();
-                    if(isOpen){
-                        SELinuxUtil.closeSEL();
-                    }
+                isStrart = true;
+                boolean isOpen = SELinuxUtil.isSELOpen();
+                if(isOpen){
+                    SELinuxUtil.closeSEL();
+                }
 
+                try {
                     h.post(new Runnable() {
                         @Override
                         public void run() {
@@ -294,6 +290,10 @@ public class IFWFragment extends BaseFragment {
                     }
                 }catch (Exception e){
 
+                }finally {
+                    if(isOpen){
+                        SELinuxUtil.openSEL();
+                    }
                 }
             }
         }.start();
@@ -312,6 +312,10 @@ public class IFWFragment extends BaseFragment {
     }
     ProgressDialog pd = null;
     public void startDis1(){
+        if(!WatchDogService.isRoot){
+            Toast.makeText(getContext(),"检测到没有ROOT权限，请赋予ROOT权限后再使用",Toast.LENGTH_LONG).show();
+            return;
+        }
         if(adapter.bjdatas.size()==appLoader.allAppInfos.size()){
             adapter.fliterList("u",appLoader.allAppInfos);
         }
@@ -322,78 +326,87 @@ public class IFWFragment extends BaseFragment {
         new Thread(){
             @Override
             public void run() {
+
                 synchronized (appLoader.allAppInfos) {
-//                    boolean isSEL = SELinuxUtil.isSELOpen();
-//                    if (isSEL) {
-//                        SELinuxUtil.closeSEL();
-//                    }
-//                    PackageManager pm = IFWFragment.this.getActivity().getApplication().getPackageManager();
-                    ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
-                    apps.addAll(adapter.bjdatas);
-                    for (final AppInfo ai : apps) {
-                        try{
-                            Log.i("CONTROL", "正在阉割000" + ai.getAppName());
-                            h.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Log.i("CONTROL", "正在阉割111");
-                                    try {
-                                        pd.setMessage("正在阉割" + ai.appName + "...");
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                    boolean isSEL = SELinuxUtil.isSELOpen();
+                    if (isSEL) {
+                        SELinuxUtil.closeSEL();
+                    }
+                    try{
+                        //                    PackageManager pm = IFWFragment.this.getActivity().getApplication().getPackageManager();
+                        ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
+                        apps.addAll(adapter.bjdatas);
+                        for (final AppInfo ai : apps) {
+                            try{
+                                Log.i("CONTROL", "正在阉割000" + ai.getAppName());
+                                h.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.i("CONTROL", "正在阉割111");
+                                        try {
+                                            pd.setMessage("正在阉割" + ai.appName + "...");
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+
+                                ServiceInfo[] infos = PackageUtil.getServicesByPkg(IFWFragment.this.getActivity(), ai.getPackageName());
+                                String ifw = FileUtil.readIFWList(ai.getPackageName() + IFWCompActivity.EXT_SERVICE);
+                                if (infos == null || infos.length == 0) {
+                                    continue;
+                                }
+
+                                //                    ArrayList<String> lists = new ArrayList<String>();
+                                for (ServiceInfo data : infos) {
+                                    final String dataName = data.name;//.replaceAll("\\$", "/\\$");
+                                    boolean isEnable = !ifw.contains(dataName);//PackageUtil.isEnable(data.packageName, dataName, pm) &&
+                                    if (isEnable && ContainsKeyWord.isContainsWord(data.name)) {
+                                        ai.serviceDisableCount++;
+                                        FileUtil.writeIFWList(data.packageName + IFWCompActivity.EXT_SERVICE, data.packageName, dataName, FileUtil.IFWTYPE_SERVICE);
+                                        //                            lists.add("pm disable "+data.packageName+"/"+dataName);
+                                        h.post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                try {
+                                                    Log.i("CONTROL", "正在阉割2");
+                                                    pd.setMessage("正在阉割" + ai.appName + "中的\n" + dataName + "\n请等待...");
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        });
                                     }
                                 }
-                            });
-
-                            ServiceInfo[] infos = PackageUtil.getServicesByPkg(IFWFragment.this.getActivity(), ai.getPackageName());
-                            String ifw = FileUtil.readIFWList(ai.getPackageName() + IFWCompActivity.EXT_SERVICE);
-                            if (infos == null || infos.length == 0) {
-                                continue;
+                                ifwCountPrefs.edit().putInt(ai.getPackageName()+"/ifwserivce",ai.serviceDisableCount).commit();
+                                //                    ShellUtilBackStop.execCommand(lists);
+//                            Thread.sleep(50);
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-
-    //                    ArrayList<String> lists = new ArrayList<String>();
-                            for (ServiceInfo data : infos) {
-                                final String dataName = data.name;//.replaceAll("\\$", "/\\$");
-                                boolean isEnable = !ifw.contains(dataName);//PackageUtil.isEnable(data.packageName, dataName, pm) &&
-                                if (isEnable && ContainsKeyWord.isContainsWord(data.name)) {
-                                    ai.serviceDisableCount++;
-                                    FileUtil.writeIFWList(data.packageName + IFWCompActivity.EXT_SERVICE, data.packageName, dataName, FileUtil.IFWTYPE_SERVICE);
-    //                            lists.add("pm disable "+data.packageName+"/"+dataName);
-                                    h.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            try {
-                                                Log.i("CONTROL", "正在阉割2");
-                                                pd.setMessage("正在阉割" + ai.appName + "中的\n" + dataName + "\n请等待...");
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                    });
+                        }
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Log.i("DOZEX", "阉割完成1");
+                                    if (pd != null && pd.isShowing()) {
+                                        pd.dismiss();
+                                    }
+                                    loadDisableCount();
+                                    AlertUtil.showAlertMsg(IFWFragment.this.getActivity(), "阉割完成，建议重启!");
+                                    pd = null;
+                                } catch (Exception e) {
                                 }
                             }
-                            ifwCountPrefs.edit().putInt(ai.getPackageName()+"/ifwserivce",ai.serviceDisableCount).commit();
-    //                    ShellUtilBackStop.execCommand(lists);
-//                            Thread.sleep(50);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                        });
+                    }catch (Exception e){
+
+                    } finally {
+                        if(isSEL){
+                            SELinuxUtil.openSEL();
                         }
                     }
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Log.i("DOZEX", "阉割完成1");
-                                if (pd != null && pd.isShowing()) {
-                                    pd.dismiss();
-                                }
-                                loadDisableCount();
-                                AlertUtil.showAlertMsg(IFWFragment.this.getActivity(), "阉割完成，建议重启!");
-                                pd = null;
-                            } catch (Exception e) {
-                            }
-                        }
-                    });
                 }
             }
         }.start();
@@ -410,140 +423,169 @@ public class IFWFragment extends BaseFragment {
 //        });
     }
     private void startBackDis1(){
+        if(!WatchDogService.isRoot){
+            Toast.makeText(getContext(),"检测到没有ROOT权限，请赋予ROOT权限后再使用",Toast.LENGTH_LONG).show();
+            return;
+        }
         if(pd==null){
             pd= ProgressDialog.show(this.getActivity(),"正在恢复","准备恢复...",true,false);
         }
         new Thread(){
             @Override
             public void run() {
-//                boolean isSEL = SELinuxUtil.isSELOpen();
-//                if(isSEL){
-//                    SELinuxUtil.closeSEL();
-//                }
-                PackageManager pm = IFWFragment.this.getActivity().getApplication().getPackageManager();
-                ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
-                apps.addAll(adapter.bjdatas);
-                for(final AppInfo ai:apps){
+                boolean isSEL = SELinuxUtil.isSELOpen();
+                if(isSEL){
+                    SELinuxUtil.closeSEL();
+                }
+                try{
+                    PackageManager pm = IFWFragment.this.getActivity().getApplication().getPackageManager();
+                    ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
+                    apps.addAll(adapter.bjdatas);
+                    for(final AppInfo ai:apps){
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                pd.setMessage("正在恢复"+ai.appName+"...");
+                            }
+                        });
+
+                        ServiceInfo[] infos = PackageUtil.getServicesByPkg(IFWFragment.this.getActivity(), ai.getPackageName());
+                        if(infos==null||infos.length==0){continue;}
+                        FileUtil.delIFWList(ai.getPackageName()+IFWCompActivity.EXT_SERVICE);
+                        ArrayList<String> lists = new ArrayList<String>();
+                        for (ServiceInfo data : infos) {
+                            final String dataName = data.name;//.replaceAll("\\$", "/\\$");
+                            boolean isEnable = PackageUtil.isEnable(data.packageName, dataName, pm);
+                            if (!isEnable&& ContainsKeyWord.isContainsWord(dataName)) {
+                                lists.add("pm enable "+data.packageName+"/"+dataName);
+                                h.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try{
+                                            pd.setMessage("正在恢复"+ai.appName+"中的\n"+dataName+"\n请等待...");
+                                        } catch (Exception e) {
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                        ai.serviceDisableCount = 0;
+                        if(lists.size()>0){
+                            ShellUtilNoBackData.execCommand(lists);
+                        }
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     h.post(new Runnable() {
                         @Override
                         public void run() {
-                            pd.setMessage("正在恢复"+ai.appName+"...");
+                            try{
+                                if(pd!=null&&pd.isShowing()){
+                                    pd.dismiss();
+                                }
+                                loadDisableCount();
+                                AlertUtil.showAlertMsg(IFWFragment.this.getActivity(),"恢复完成，建议重启!");
+                                pd = null;
+                            }catch (Exception e){
+                            }
                         }
                     });
+                }catch (Exception e){
 
-                    ServiceInfo[] infos = PackageUtil.getServicesByPkg(IFWFragment.this.getActivity(), ai.getPackageName());
-                    if(infos==null||infos.length==0){continue;}
-                    FileUtil.delIFWList(ai.getPackageName()+IFWCompActivity.EXT_SERVICE);
-                    ArrayList<String> lists = new ArrayList<String>();
-                    for (ServiceInfo data : infos) {
-                        final String dataName = data.name;//.replaceAll("\\$", "/\\$");
-                        boolean isEnable = PackageUtil.isEnable(data.packageName, dataName, pm);
-                        if (!isEnable&& ContainsKeyWord.isContainsWord(dataName)) {
-                            lists.add("pm enable "+data.packageName+"/"+dataName);
-                            h.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try{
-                                        pd.setMessage("正在恢复"+ai.appName+"中的\n"+dataName+"\n请等待...");
-                                    } catch (Exception e) {
-                                    }
-                                }
-                            });
-                        }
-                    }
-                    ai.serviceDisableCount = 0;
-                    if(lists.size()>0){
-                        ShellUtilNoBackData.execCommand(lists);
-                    }
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                } finally {
+                    if(isSEL){
+                        SELinuxUtil.openSEL();
                     }
                 }
-                h.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        try{
-                            if(pd!=null&&pd.isShowing()){
-                                pd.dismiss();
-                            }
-                            loadDisableCount();
-                            AlertUtil.showAlertMsg(IFWFragment.this.getActivity(),"恢复完成，建议重启!");
-                            pd = null;
-                        }catch (Exception e){
-                        }
-                    }
-                });
             }
         }.start();
     }
 
     public void backup(){
+        if(!WatchDogService.isRoot){
+            Toast.makeText(getContext(),"检测到没有ROOT权限，请赋予ROOT权限后再使用",Toast.LENGTH_LONG).show();
+            return;
+        }
         if(pd==null){
             pd= ProgressDialog.show(this.getActivity(),"备份","正在备份...",true,false);
         }
         new Thread(){
             @Override
             public void run() {
-                FileUtil.changeQX(777,"/data/system/ifw");
-                File ifwFiles[] =   new File("/data/system/ifw").listFiles();
+                boolean isSEL = SELinuxUtil.isSELOpen();
+                if(isSEL){
+                    SELinuxUtil.closeSEL();
+                }
+                try{
+
+                    FileUtil.changeQX(777,"/data/system/ifw");
+                    File ifwFiles[] =   new File("/data/system/ifw").listFiles();
 //                List<String> lists = new ArrayList<String>();
 //                for(File f:ifwFiles){
 //                    lists.add("chmod 777 "+f.getAbsolutePath());
 //                }
 //                ShellUtils.execCommand(lists,true,false);
-                if(ifwFiles.length>0){
-                    File oldfiles[] = new File(FileUtil.IFWPATH).listFiles();
-                    for(File of:oldfiles){
-                        if(of.getName().endsWith(IFWCompActivity.EXT_ACTIVITY+".xml")||
-                                of.getName().endsWith(IFWCompActivity.EXT_SERVICE+".xml")||
-                                of.getName().endsWith(IFWCompActivity.EXT_BROADCASE+".xml")){
-                            of.delete();
+                    if(ifwFiles.length>0){
+                        File oldfiles[] = new File(FileUtil.IFWPATH).listFiles();
+                        for(File of:oldfiles){
+                            if(of.getName().endsWith(IFWCompActivity.EXT_ACTIVITY+".xml")||
+                                    of.getName().endsWith(IFWCompActivity.EXT_SERVICE+".xml")||
+                                    of.getName().endsWith(IFWCompActivity.EXT_BROADCASE+".xml")){
+                                of.delete();
+                            }
                         }
-                    }
-                    for(final File f:ifwFiles){
-                        File newFile = new File(FileUtil.IFWPATH,f.getName());
+                        for(final File f:ifwFiles){
+                            File newFile = new File(FileUtil.IFWPATH,f.getName());
+                            h.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try{
+                                        pd.setMessage("正在备份\n"+f.getName());
+                                    }catch (Exception e){
+                                    }
+                                }
+                            });
+                            FileUtil.changeQX(777,newFile.getAbsolutePath());
+                            FileUtil.writeFile(newFile.getAbsolutePath(),FileUtil.readFile(f.getAbsolutePath()));
+                            FileUtil.changeQX(600,newFile.getAbsolutePath());
+                        }
                         h.post(new Runnable() {
                             @Override
                             public void run() {
                                 try{
-                                    pd.setMessage("正在备份\n"+f.getName());
+                                    if(pd!=null&&pd.isShowing()){
+                                        pd.dismiss();
+                                    }
+                                    Toast.makeText(getActivity(),"备份完成",Toast.LENGTH_LONG).show();
                                 }catch (Exception e){
                                 }
                             }
                         });
-                        FileUtil.changeQX(777,newFile.getAbsolutePath());
-                        FileUtil.writeFile(newFile.getAbsolutePath(),FileUtil.readFile(f.getAbsolutePath()));
-                        FileUtil.changeQX(600,newFile.getAbsolutePath());
+                    }else{
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try{
+                                    if(pd!=null&&pd.isShowing()){
+                                        pd.dismiss();
+                                    }
+                                    Toast.makeText(getActivity(),"没有IFW数据可备份",Toast.LENGTH_LONG).show();
+                                }catch (Exception e){
+                                }
+                            }
+                        });
                     }
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                if(pd!=null&&pd.isShowing()){
-                                    pd.dismiss();
-                                }
-                                Toast.makeText(getActivity(),"备份完成",Toast.LENGTH_LONG).show();
-                            }catch (Exception e){
-                            }
-                        }
-                    });
-                }else{
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                if(pd!=null&&pd.isShowing()){
-                                    pd.dismiss();
-                                }
-                                Toast.makeText(getActivity(),"没有IFW数据可备份",Toast.LENGTH_LONG).show();
-                            }catch (Exception e){
-                            }
-                        }
-                    });
+                    FileUtil.changeQX(700,"/data/system/ifw");
+                }catch (Exception e){
+
+                } finally {
+                    if(isSEL){
+                        SELinuxUtil.openSEL();
+                    }
                 }
-                FileUtil.changeQX(700,"/data/system/ifw");
             }
         }.start();
     }
@@ -560,6 +602,10 @@ public class IFWFragment extends BaseFragment {
     }
     boolean isok = false;
     public void startRestroe(){
+        if(!WatchDogService.isRoot){
+            Toast.makeText(getContext(),"检测到没有ROOT权限，请赋予ROOT权限后再使用",Toast.LENGTH_LONG).show();
+            return;
+        }
         if(pd==null){
             pd= ProgressDialog.show(this.getActivity(),"还原","正在还原...",true,false);
         }
@@ -569,58 +615,70 @@ public class IFWFragment extends BaseFragment {
             new Thread(){
                 @Override
                 public void run() {
-                    File ifwFile = new File("/data/system/ifw");
-                    if (!ifwFile.exists()) {
-                        FileUtil.changeQX(777, "/data/system");
-                        ifwFile.mkdirs();
-                        FileUtil.changeQX(771, "/data/system");
+                    boolean isSEL = SELinuxUtil.isSELOpen();
+                    if(isSEL){
+                        SELinuxUtil.closeSEL();
                     }
-                    FileUtil.changeQX(777, "/data/system/ifw");
+                    try {
+                        File ifwFile = new File("/data/system/ifw");
+                        if (!ifwFile.exists()) {
+                            FileUtil.changeQX(777, "/data/system");
+                            ifwFile.mkdirs();
+                            FileUtil.changeQX(771, "/data/system");
+                        }
+                        FileUtil.changeQX(777, "/data/system/ifw");
 
-                    for (final File f : ifwFiles) {
-                        if (f.getAbsolutePath().toLowerCase().endsWith("xml")) {
-                            h.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        pd.setMessage("正在还原\n"+f.getName());
-                                    } catch (Exception e) {
+                        for (final File f : ifwFiles) {
+                            if (f.getAbsolutePath().toLowerCase().endsWith("xml")) {
+                                h.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            pd.setMessage("正在还原\n" + f.getName());
+                                        } catch (Exception e) {
+                                        }
                                     }
+                                });
+                                isok = true;
+                                File newFile = new File("/data/system/ifw", f.getName());
+                                try {
+                                    newFile.createNewFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
                                 }
-                            });
-                            isok = true;
-                            File newFile = new File("/data/system/ifw", f.getName());
-                            try {
-                                newFile.createNewFile();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            FileUtil.changeQX(777, newFile.getAbsolutePath());
-                            FileUtil.writeFile(newFile.getAbsolutePath(), FileUtil.readFile(f.getAbsolutePath()));
-                        }
-                    }
-                    List<String> lists2 = new ArrayList<String>();
-                    File allFiles[] = new File("/data/system/ifw").listFiles();
-                    if(allFiles!=null){
-                        for (File f : allFiles) {
-                            lists2.add("chmod 600 " + f.getAbsolutePath());
-                        }
-                    }
-                    lists2.add("chmod 700 /data/system/ifw");
-                    ShellUtils.execCommand(lists2, true, false);
-                    loadDisableCount();
-                    h.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try{
-                                if(pd!=null&&pd.isShowing()){
-                                    pd.dismiss();
-                                }
-                                Toast.makeText(getActivity(),isok ? "恢复完成，重启生效" : "没有备份数据，所以无法恢复",Toast.LENGTH_LONG).show();
-                            }catch (Exception e) {
+                                FileUtil.changeQX(777, newFile.getAbsolutePath());
+                                FileUtil.writeFile(newFile.getAbsolutePath(), FileUtil.readFile(f.getAbsolutePath()));
                             }
                         }
-                    });
+                        List<String> lists2 = new ArrayList<String>();
+                        File allFiles[] = new File("/data/system/ifw").listFiles();
+                        if (allFiles != null) {
+                            for (File f : allFiles) {
+                                lists2.add("chmod 600 " + f.getAbsolutePath());
+                            }
+                        }
+                        lists2.add("chmod 700 /data/system/ifw");
+                        ShellUtils.execCommand(lists2, true, false);
+                        loadDisableCount();
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    if (pd != null && pd.isShowing()) {
+                                        pd.dismiss();
+                                    }
+                                    Toast.makeText(getActivity(), isok ? "恢复完成，重启生效" : "没有备份数据，所以无法恢复", Toast.LENGTH_LONG).show();
+                                } catch (Exception e) {
+                                }
+                            }
+                        });
+                    }catch (Exception e){
+
+                    }finally {
+                        if(isSEL){
+                            SELinuxUtil.openSEL();
+                        }
+                    }
                 }
             }.start();
         } else {
@@ -633,25 +691,37 @@ public class IFWFragment extends BaseFragment {
             @Override
             public void backData(String txt, int tag) {
                 if(tag == 1){
-                    File ifwFile = new File("/data/system/ifw");
-                    if(!ifwFile.exists()){
-                       return;
+                    boolean isSEL = SELinuxUtil.isSELOpen();
+                    if(isSEL){
+                        SELinuxUtil.closeSEL();
                     }
-                    FileUtil.changeQX(777,"/data/system/ifw");
-                    File ifwFiles[] =   new File("/data/system/ifw").listFiles();
-                    if(ifwFiles.length>0){
-                        for(File f:ifwFiles){
-                            f.delete();
+                    try {
+                        File ifwFile = new File("/data/system/ifw");
+                        if(!ifwFile.exists()){
+                           return;
+                        }
+                        FileUtil.changeQX(777,"/data/system/ifw");
+                        File ifwFiles[] =   new File("/data/system/ifw").listFiles();
+                        if(ifwFiles.length>0){
+                            for(File f:ifwFiles){
+                                f.delete();
+                            }
+                        }
+                        FileUtil.changeQX(700,"/data/system/ifw");
+                        Toast.makeText(getActivity(),"清除完成",Toast.LENGTH_LONG).show();
+                        for(AppInfo ai:appLoader.allAppInfos){
+                            ai.activityDisableCount = 0;
+                            ai.serviceDisableCount = 0;
+                            ai.broadCastDisableCount = 0;
+                        }
+                        ifwCountPrefs.edit().clear().apply();
+                    }catch (Exception e){
+
+                    }finally {
+                        if(isSEL){
+                            SELinuxUtil.openSEL();
                         }
                     }
-                    FileUtil.changeQX(700,"/data/system/ifw");
-                    Toast.makeText(getActivity(),"清除完成",Toast.LENGTH_LONG).show();
-                    for(AppInfo ai:appLoader.allAppInfos){
-                        ai.activityDisableCount = 0;
-                        ai.serviceDisableCount = 0;
-                        ai.broadCastDisableCount = 0;
-                    }
-                    ifwCountPrefs.edit().clear().apply();
                     fresh();
                 }
             }

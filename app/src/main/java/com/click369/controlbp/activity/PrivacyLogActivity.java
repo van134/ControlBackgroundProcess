@@ -139,14 +139,14 @@ public class PrivacyLogActivity extends BaseActivity {
                                 if(exDatas.containsKey(Common.PRIVACY_KEYS[index])){
                                     PrivacyLogAdapter.PriLog log = new PrivacyLogAdapter.PriLog();
                                     log.isPrevent = Boolean.parseBoolean(ps[1]);
-                                    log.name = Common.PRIVACY_TITLES[index];
+                                    log.name = Common.PRIVACY_LOG_TITLES[index];
                                     log.time = TimeUtil.changeMils2String(t, "MM-dd HH:mm:ss");
                                     exDatas.get(Common.PRIVACY_KEYS[index]).add(0,log);
                                 }else {
                                     ArrayList<PrivacyLogAdapter.PriLog> logs = new ArrayList<PrivacyLogAdapter.PriLog>();
                                     PrivacyLogAdapter.PriLog log = new PrivacyLogAdapter.PriLog();
                                     log.isPrevent = Boolean.parseBoolean(ps[1]);
-                                    log.name = Common.PRIVACY_TITLES[index];
+                                    log.name = Common.PRIVACY_LOG_TITLES[index];
                                     log.time = TimeUtil.changeMils2String(t, "MM-dd HH:mm:ss");
                                     logs.add(log);
                                     exDatas.put(Common.PRIVACY_KEYS[index],logs);

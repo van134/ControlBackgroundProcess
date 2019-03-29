@@ -154,7 +154,7 @@ public class XposedBar {
                 if(lpparam.packageName.equals("com.android.systemui")) {
                     try {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && barPrefs.getBoolean(Common.PREFS_SETTING_UI_TOPBAR, false)) {
-                            Class barBackClass = XposedHelpers.findClass("com.android.systemui.statusbar.phone.BarTransitions$BarBackgroundDrawable", lpparam.classLoader);
+                            Class barBackClass = XposedUtil.findClass("com.android.systemui.statusbar.phone.BarTransitions$BarBackgroundDrawable", lpparam.classLoader);
                             if (barBackClass != null) {
                                 try {
                                     Constructor ms[] = barBackClass.getDeclaredConstructors();

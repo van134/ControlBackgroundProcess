@@ -34,7 +34,7 @@ public class SettingFragment extends BaseFragment {
             notExitAudioPlaySw,checkTimeOutSw,
             setTimeStopPwdModeSw,setTimeStopZWModeSw,setTimeStopNotShowDialogSw,
             stopAppModeSw,exitRemoveRecentSw,muBeiStopReceiverSw,
-            notneedAccessSw,zhendongSw,backSw;//,offSw,autoStartSw,newAppAddRemoveRecentExit,,recentRemoveSw
+            notneedAccessSw,zhendongSw,backSw,notCleanDataSw;//,offSw,autoStartSw,newAppAddRemoveRecentExit,,recentRemoveSw
     private TextView backDelayTimeTv,homeDelayTimeTv,offDelayTimeTv;
     private SeekBar backSb,homeSb,offSb;
     private SharedPreferences settings;
@@ -69,6 +69,7 @@ public class SettingFragment extends BaseFragment {
         isShowSideBarSw = (Switch) v.findViewById(R.id.setting_showsidebar_sw);
         backSw = (Switch) v.findViewById(R.id.setting_backkillself_sw);
         iceStopSw = (Switch) v.findViewById(R.id.setting_ice_stop_sw);
+        notCleanDataSw = (Switch) v.findViewById(R.id.setting_notunstall_notclear_sw);
         setTimeStopZWModeSw = (Switch) v.findViewById(R.id.setting_settimestopzwmode_sw);
         setTimeStopPwdModeSw = (Switch) v.findViewById(R.id.setting_settimestoppwdmode_sw);
         setTimeStopNotShowDialogSw = (Switch) v.findViewById(R.id.setting_settimestopnotshowdialog_sw);
@@ -94,7 +95,7 @@ public class SettingFragment extends BaseFragment {
         isShowSideBarSw.setTextColor(curColor);
         iceRemoveSw.setTextColor(curColor);
         iceOffSw.setTextColor(curColor);
-//        autoNightSw.setTextColor(curColor);
+        notCleanDataSw.setTextColor(curColor);
 //        nightModeSw.setTextColor(curColor);
         iceStopSw.setTextColor(curColor);
         stopAppModeSw.setTextColor(curColor);
@@ -130,6 +131,7 @@ public class SettingFragment extends BaseFragment {
         iceStopSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICESTOPICE,false));
         iceRemoveSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEBACKICE,true));
         iceOffSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_ICEOFFICE,false));
+        notCleanDataSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_NOTUNSTALLNOTCLEAN,true));
 
         setTimeStopZWModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPMODE,false));
         setTimeStopPwdModeSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPPWDMODE,false));
@@ -156,7 +158,7 @@ public class SettingFragment extends BaseFragment {
         isShowSideBarSw.setTag(1);
         iceRemoveSw.setTag(2);
         iceOffSw.setTag(3);
-//        autoNightSw.setTag(4);
+        notCleanDataSw.setTag(4);
 //        nightModeSw.setTag(5);
         setTimeStopZWModeSw.setTag(6);
         iceStopSw.setTag(7);
@@ -178,6 +180,7 @@ public class SettingFragment extends BaseFragment {
         isShowSideBarSw.setOnCheckedChangeListener(sc);
         iceRemoveSw.setOnCheckedChangeListener(sc);
         iceOffSw.setOnCheckedChangeListener(sc);
+        notCleanDataSw.setOnCheckedChangeListener(sc);
 
         setTimeStopZWModeSw.setOnCheckedChangeListener(sc);
         setTimeStopPwdModeSw.setOnCheckedChangeListener(sc);
@@ -211,7 +214,7 @@ public class SettingFragment extends BaseFragment {
             BaseActivity.zhenDong(getContext());
             int tag= (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_SETTING_BACKKILLSELF,Common.PREFS_SETTING_SHOWSIDEBAR,Common.PREFS_SETTING_ICEBACKICE,
-                    Common.PREFS_SETTING_ICEOFFICE,"","",
+                    Common.PREFS_SETTING_ICEOFFICE,Common.PREFS_SETTING_NOTUNSTALLNOTCLEAN,"",
                     Common.PREFS_SETTING_SETTIMESTOPMODE,Common.PREFS_SETTING_ICESTOPICE,Common.PREFS_SETTING_STOPAPPBYXP,
                     Common.PREFS_SETTING_SETTIMESTOPPWDMODE,Common.PREFS_SETTING_ISNOTEXITAUDIOPLAY,Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC,
                     Common.PREFS_SETTING_EXITREMOVERECENT,Common.PREFS_SETTING_ISCHECKTIMEOUTAPP,Common.PREFS_SETTING_ISNOTNEEDACCESS,
@@ -223,8 +226,11 @@ public class SettingFragment extends BaseFragment {
                 WatchDogService.isAtuoRemoveIce = isChecked;
             }else if(tag == 3){
                 WatchDogService.isAtuoOffScIce = isChecked;
-            }else if(tag ==5 ){
-
+            }else if(tag ==4){
+                WatchDogService.isNotUntallNotclean = isChecked;
+                Intent intent = new Intent("com.click369.control.pms.changeunstallcleanstate");
+                intent.putExtra("isNotUntallNotclean",isChecked);
+                getContext().sendBroadcast(intent);
             }else if((tag ==7)){
                 WatchDogService.isAtuoStopIce = isChecked;
             }else if((tag ==6)){

@@ -23,6 +23,7 @@ import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.Notify;
 import com.click369.controlbp.util.SharedPrefsUtil;
+import com.click369.controlbp.view.WaveProgressView;
 
 import java.io.File;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
     private String title="";
     private String key = "";
     private SharedPreferences barPrefs;
-    private int bgcolor,textcolor,keyColor,lightColor,notifyColor,themeColor,themeBgColor,lockBgColor;
+    private int bgcolor,textcolor,keyColor,lightColor,notifyColor,themeColor,themeBgColor,lockBgColor,lockAnimColor;
     private boolean isbg;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,6 +88,7 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
             themeColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_COLOR,"#1a9dac"));
             themeBgColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_BG_COLOR,"#FFFFFF"));
             lockBgColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR));
+            lockAnimColor = Color.parseColor(barPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR, WaveProgressView.WAVE_PAINT_COLOR));
             int color = Color.WHITE;
             if(key.equals(Common.PREFS_SETTING_UI_KEYCOLOR)){
                 editText.setBackgroundColor(keyColor);
@@ -112,6 +114,10 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 editText.setBackgroundColor(lockBgColor);
                 editText.setTextColor(Color.WHITE);
                 color = lockBgColor;
+            }else if(key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR)){
+                editText.setBackgroundColor(lockAnimColor);
+                editText.setTextColor(Color.WHITE);
+                color = lockAnimColor;
             }else{
                 editText.setBackgroundColor(bgcolor);
                 editText.setTextColor(textcolor);
@@ -173,7 +179,8 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_COLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)||
-                key.equals(Common.PREFS_SETTING_UI_THEME_BG_COLOR)){
+                key.equals(Common.PREFS_SETTING_UI_THEME_BG_COLOR)||
+                key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR)){
             editText.setBackgroundColor(Color.parseColor("#"+colorStr));
             editText.setText("#"+colorStr);
             if(key.equals(Common.PREFS_SETTING_UI_THEME_COLOR)){
@@ -200,7 +207,8 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 key.equals(Common.PREFS_SETTING_UI_LIGHTCOLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_COLOR)||
                 key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)||
-                key.equals(Common.PREFS_SETTING_UI_THEME_BG_COLOR)){
+                key.equals(Common.PREFS_SETTING_UI_THEME_BG_COLOR)||
+                key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR)){
             editText.setBackgroundColor(Color.parseColor("#"+colorStr));
             editText.setText("#"+colorStr);
         }else{
@@ -253,6 +261,9 @@ public class ColorSetActivity extends BaseActivity implements SeekBar.OnSeekBarC
                 intent.putExtra("bgcolor","#"+colorStr);
                 setResult(0x12,intent);
             }else if(key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR)){
+                barPrefs.edit().putString(key,"#"+colorStr).commit();
+                setResult(0x12,null);
+            }else if(key.equals(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR)){
                 barPrefs.edit().putString(key,"#"+colorStr).commit();
                 setResult(0x12,null);
             }else{

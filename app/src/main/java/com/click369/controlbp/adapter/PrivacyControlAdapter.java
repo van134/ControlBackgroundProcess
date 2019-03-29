@@ -91,6 +91,18 @@ public class PrivacyControlAdapter extends BaseAdapter{
 		}else if(position==Common.PRI_TYPE_CHANGETIME){
 			viewHolder.stopTv.setText(isDiable?"已开启\n(长按设置时间)":"未开启");
 			viewHolder.nameTv.setText(name+(isDiable? TimeUtil.changeMils2String(PrivacyControlActivity.setTime,"\n(当前时间起点为: yyyy-MM-dd HH:mm)"):""));
+		}else if(position==Common.PRI_TYPE_DEVICEIMEIINFO){
+			viewHolder.stopTv.setText(isDiable?"已开启\n(长按自定义IMEI)":"未开启");
+			viewHolder.nameTv.setText(name+"\n"+(isDiable?(PrivacyControlActivity.IMEI.length()>0?("(当前的IMEI为:"+PrivacyControlActivity.IMEI+")"):Common.PRIVACY_ALERT[position]):Common.PRIVACY_ALERT[position]));
+		}else if(position==Common.PRI_TYPE_DEVICEIMSIINFO){
+			viewHolder.stopTv.setText(isDiable?"已开启\n(长按自定义IMSI)":"未开启");
+			viewHolder.nameTv.setText(name+"\n"+(isDiable?(PrivacyControlActivity.IMSI.length()>0?("(当前的IMSI为:"+PrivacyControlActivity.IMSI+")"):Common.PRIVACY_ALERT[position]):Common.PRIVACY_ALERT[position]));
+		}else if(position==Common.PRI_TYPE_REDIRFIEDIR){
+			viewHolder.stopTv.setText(isDiable?"已重定向\n(长按自定义文件夹)":"未重定向");
+			viewHolder.nameTv.setText(name+"\n"+(isDiable?(PrivacyControlActivity.newDir.length()>0?("(当前文件夹为:"+PrivacyControlActivity.newDir+")"):Common.PRIVACY_ALERT[position]):Common.PRIVACY_ALERT[position]));
+		}else if(position==Common.PRI_TYPE_NETTYPE_WIFI||position==Common.PRI_TYPE_NETTYPE_4G){
+			viewHolder.stopTv.setText(isDiable?"已开启":"未开启");
+			viewHolder.nameTv.setText(name+"\n"+Common.PRIVACY_ALERT[position]);
 		}else{
 			viewHolder.stopTv.setText(isDiable?"已禁用":"未禁用");
 			viewHolder.nameTv.setText(name+"\n"+Common.PRIVACY_ALERT[position]);

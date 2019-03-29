@@ -238,6 +238,7 @@ public class ForceStopAdapter extends BaseAdapter{
 					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
 						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
 					}
+					BaseActivity.sendBroadAMSRemovePkg(c,ai.packageName);
 				}else{
 					ed.putBoolean(ai.getPackageName()+"/backstop",true).commit();
 					ai.isBackForceStop = true;
@@ -255,9 +256,11 @@ public class ForceStopAdapter extends BaseAdapter{
 						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
 						ai.isInMuBei = false;
 					}
+					BaseActivity.sendBroadAMSRemovePkg(c,ai.packageName);
 				}
 				buttonView.setImageResource(ai.isBackMuBei?R.mipmap.icon_dead:ai.isBackForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 				ForceStopFragment.isClick = true;
+				notifyDataSetChanged();
 			}
 		});
 
@@ -275,14 +278,14 @@ public class ForceStopAdapter extends BaseAdapter{
 					ed.remove(ai.getPackageName()+"/homemubei").commit();
 					ai.isHomeMuBei = false;
 					if(!ai.isHomeMuBei&&!ai.isBackMuBei&&!ai.isOffscMuBei){
-						BaseActivity.sendBroadAMSRemovePkg(c,ai.getPackageName());
 						ai.isInMuBei = false;
 					}
+					BaseActivity.sendBroadAMSRemovePkg(c,ai.packageName);
 				}else if(ai.isHomeIdle){
 					ed.remove(ai.getPackageName()+"/idle").commit();
 					ai.isHomeIdle = false;
-
 					ed.remove(ai.getPackageName()+"/homestop").commit();
+					WatchDogService.sendIdle(c,ai.packageName,false);
 					if (MainActivity.isModuleActive()){
 						if (ai.isServiceStop){
 							AlertUtil.showAlertMsg(c,"检测到你已经在第一项的禁用服务中禁用了该应用的服务，所以设置墓碑模式将不会生效，如果要使用墓碑模式请在第一项的禁用服务中取消勾选。");
@@ -314,8 +317,10 @@ public class ForceStopAdapter extends BaseAdapter{
 					ed.putBoolean(ai.getPackageName()+"/idle",true).commit();
 					ai.isHomeIdle = true;
 				}
+
 				buttonView.setImageResource(ai.isHomeMuBei?R.mipmap.icon_dead:ai.isHomeIdle?R.mipmap.icon_idle:R.mipmap.icon_notdisable);
 				ForceStopFragment.isClick = true;
+				notifyDataSetChanged();
 			}
 		});
 		viewHolder.offIv.setOnClickListener(new View.OnClickListener() {

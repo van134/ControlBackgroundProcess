@@ -19,14 +19,17 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.hardware.fingerprint.FingerprintManagerCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,6 +47,7 @@ import com.click369.controlbp.util.MyFingerUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
 import com.click369.controlbp.util.PermissionUtils;
 import com.click369.controlbp.util.SharedPrefsUtil;
+import com.click369.controlbp.view.WaveProgressView;
 
 import net.qiujuer.genius.blur.StackBlur;
 
@@ -57,23 +61,61 @@ public class UnLockActivity extends Activity {
     private int errorCount = 0;
     private SharedPreferences autoStartPrefs;
     private TextView msgTv,pwdTv;
-    private LinearLayout numberLL;
+    private ImageView imge;
+    private LinearLayout numberLL,mumBackLL;
     private Intent mIntent;
     private String pkg,cls;
-    private boolean isNotShowUI = true,isShowKey = true;
+    private boolean isNotShowUI = true,isShowANIM = true,isShowKey = true;
     private SharedPreferences settingPrefs;
     private RelativeLayout mainRl;
     private GetPhoto getPhoto;
     private File imgFile = null;
     private boolean isUsePwd = false,isneedbroad = false;//,isfromresume=false;
     private String bgColor = MainActivity.THEME_COLOR;
-//    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+
+    private WaveProgressView wpv;
+    private int max_progress = 60;
+    private int progress = 0;
+    private boolean isAdd = true;
+    private static final int FLAG_ONE = 0X0001;
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if(wpv==null||!wpv.isShown()){
+                return;
+            }
+            if (progress >= wpv.getScHeight()*0.1){
+                isAdd = false;
+            }else if(progress<=1){
+                isAdd = true;
+            }
+            if(isAdd){
+                progress+=1;
+            }else{
+                progress-=1;
+            }
+
+            switch (msg.what) {
+                case FLAG_ONE:
+
+                    if(wpv!=null&&wpv.isShown()){
+//                        wpv.setCurrent(progress, "");
+                        wpv.setProgress(progress);
+                        wpv.invalidate();
+//                        Log.i("WAVE","progress  "+progress);
+//                        waveView.setCurrent(progress, progress + "%");
+                        sendEmptyMessageDelayed(FLAG_ONE, 40);
+                    }
+                    break;
+            }
+        }
+    };
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
         pkg = this.getIntent().getStringExtra("pkg");
         cls = this.getIntent().getStringExtra("class");
         isneedbroad = this.getIntent().getBooleanExtra("isneedbroad",false)&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
@@ -82,6 +124,7 @@ public class UnLockActivity extends Activity {
         autoStartPrefs =  SharedPrefsUtil.getInstance(this.getApplicationContext()).autoStartNetPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_AUTOSTARTNAME);
         settingPrefs = SharedPrefsUtil.getInstance(this.getApplicationContext()).settings;//SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
         bgColor = SharedPrefsUtil.getInstance(getApplicationContext()).uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR);
+        WaveProgressView.WAVE_PAINT_COLOR = SharedPrefsUtil.getInstance(getApplicationContext()).uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR,WaveProgressView.WAVE_PAINT_COLOR);
 
         Log.i("CONTROL","准备解锁：pkg"+pkg+"  intent "+mIntent);
         if(pkg==null||pkg.length()==0){
@@ -89,6 +132,7 @@ public class UnLockActivity extends Activity {
             return;
         }
         isNotShowUI = settingPrefs.getBoolean(Common.PREFS_APPSTART_ISSHOWUI,false);
+        isShowANIM = settingPrefs.getBoolean(Common.PREFS_SETTING_LOCKISSHOWANIM,true);
         if (isNotShowUI){
             Window window = this.getWindow();
             window.setGravity(Gravity.TOP| Gravity.LEFT);
@@ -112,6 +156,27 @@ public class UnLockActivity extends Activity {
             msgTv = (TextView)this.findViewById(R.id.unlock_msg_tv);
             pwdTv = (TextView)this.findViewById(R.id.unlock_pwd_tv);
             numberLL = (LinearLayout) this.findViewById(R.id.unlock_number_ll);
+            mumBackLL = (LinearLayout) this.findViewById(R.id.unlock_numberbackground_ll);
+            imge = (ImageView) this.findViewById(R.id.unlock_numberbackground_img);
+
+
+            wpv = (WaveProgressView) this.findViewById(R.id.loadingImageView);
+            if(!isShowANIM){
+                wpv.setVisibility(View.GONE);
+                imge.setVisibility(View.VISIBLE);
+            }else{
+                imge.setVisibility(View.INVISIBLE);
+                mumBackLL.setBackgroundColor(Color.TRANSPARENT);
+                progress = 0;
+                wpv.setAlpha(0.8f);
+//            wpv.setWaveColor("#FFFFFF");
+                DisplayMetrics dm = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(dm);
+                wpv.setScHeight(dm.heightPixels);
+                handler.sendEmptyMessageDelayed(FLAG_ONE, 10);
+            }
+
+
             isShowKey= settingPrefs.getBoolean(Common.PREFS_APPSTART_ISSHOWNUMBERLOCK,true);
             isUsePwd = settingPrefs.getBoolean(Common.PREFS_SETTING_USEPWDLOCK,false);
             numberLL.setVisibility(isShowKey?View.VISIBLE:View.GONE);
@@ -132,10 +197,15 @@ public class UnLockActivity extends Activity {
             getPhoto.setIsNeedCrop(true);
             getPhoto.setPhotofile(imgFile);
             if (imgFile!=null&&imgFile.exists()){
-                mainRl.setBackground(Drawable.createFromPath(imgFile.getAbsolutePath()));
+                Drawable d = Drawable.createFromPath(imgFile.getAbsolutePath());
+                mainRl.setBackground(d);
+//                wpv.setBackground(d);
+
             }else{
                 mainRl.setBackgroundColor(Color.parseColor(bgColor));
+//                wpv.setBackgroundColor(Color.parseColor(bgColor));
             }
+
             mainRl.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
@@ -212,7 +282,7 @@ public class UnLockActivity extends Activity {
                     }else{
                         Toast.makeText(UnLockActivity.this,"设备不支持指纹，直接进入。",Toast.LENGTH_LONG).show();
                         autoStartPrefs.edit().putBoolean(pkg+"/lockok",true).commit();
-                        UnLockActivity.this.finish();
+
                         startact();
                     }
                 }
@@ -279,7 +349,7 @@ public class UnLockActivity extends Activity {
                     }
                     autoStartPrefs.edit().putBoolean(pkg+"/lockok",true).commit();
                     errorCount = 0;
-                    UnLockActivity.this.finish();
+
                     startact();
 
 //                        autoStartPrefs.edit().remove(pkg+"/lockok").commit();
@@ -292,7 +362,7 @@ public class UnLockActivity extends Activity {
             }else{
                 Toast.makeText(UnLockActivity.this,"设备不支持指纹，直接进入。",Toast.LENGTH_LONG).show();
                 autoStartPrefs.edit().putBoolean(pkg+"/lockok",true).commit();
-                UnLockActivity.this.finish();
+
                 startact();
             }
         }
@@ -327,6 +397,12 @@ public class UnLockActivity extends Activity {
                     }
                 }
             }
+            h.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    UnLockActivity.this.finish();
+                }
+            },500);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -338,6 +414,7 @@ public class UnLockActivity extends Activity {
         if(!isNotShowUI) {
             MyFingerUtil.cancel();
         }
+        handler.removeMessages(FLAG_ONE);
     }
 
     @Override
@@ -346,6 +423,7 @@ public class UnLockActivity extends Activity {
         if(!isNotShowUI){
             initFrg();
         }
+        handler.sendEmptyMessage(FLAG_ONE);
     }
 
     @Override
@@ -427,6 +505,7 @@ public class UnLockActivity extends Activity {
         mIntent = null;
         cls = "";
         GCUtil.releaseBitMap(mainRl);
+        GCUtil.releaseBitMap(wpv);
         setContentView(R.layout.view_null);
         System.gc();
     }
@@ -509,7 +588,7 @@ public class UnLockActivity extends Activity {
                     wrongTime=0;
                     h.removeCallbacks(cancelFinger);
                     MyFingerUtil.cancel();
-                    UnLockActivity.this.finish();
+
                     startact();
                 }else{
 //                    Date d1 = new Date( System.currentTimeMillis());

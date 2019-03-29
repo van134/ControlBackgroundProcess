@@ -199,7 +199,7 @@
                                 android:layout_height="wrap_content"
                                 android:id="@+id/doze_scon_sb"
                                 android:indeterminate="false"
-                                android:max="3600"
+                                android:max="999999"
                                 android:progress="0"
                                 android:layout_marginTop="5dp" />
                         </LinearLayout>
@@ -251,7 +251,7 @@
                                 android:layout_height="wrap_content"
                                 android:id="@+id/doze_scoff_sb"
                                 android:indeterminate="false"
-                                android:max="3600"
+                                android:max="999999"
                                 android:progress="0"
                                 android:layout_marginTop="5dp" />
                         </LinearLayout>
@@ -307,7 +307,7 @@
                                 android:layout_height="wrap_content"
                                 android:id="@+id/doze_scoffdelay_sb"
                                 android:indeterminate="false"
-                                android:max="3600"
+                                android:max="999999"
                                 android:progress="0"
                                 android:layout_marginTop="5dp" />
                         </LinearLayout>

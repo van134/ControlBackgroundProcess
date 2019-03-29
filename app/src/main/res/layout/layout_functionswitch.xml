@@ -167,7 +167,7 @@
                 style="@style/mtextSize"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="网络/位置/权限"
+                android:text="网络/权限/位置/重定向"
                 android:id="@+id/setting_allsw_privacy_control"
                 android:checked="false" />
         </FrameLayout>

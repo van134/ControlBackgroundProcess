@@ -7,6 +7,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.click369.controlbp.R;
@@ -23,6 +24,7 @@ public class TopSearchView {
     public EditText editText;
     public FrameLayout alertFl;
     public TextView alertTv,closeOpenTv,sysAppTv,userAppTv;
+    public ImageView clearIv;
     public static int appType = 0;//0用户  1系统  2用户系统
     private CallBack cb;
     private View v;
@@ -53,6 +55,7 @@ public class TopSearchView {
             editText.setHintTextColor(Color.GRAY);
         }
 //        userAppTv.setTextColor(Color.parseColor("#40d0b7"));
+        clearIv = (ImageView) v.findViewById(R.id.top_clear_iv);
         sysAppTv = (TextView)v.findViewById(R.id.main_sysapp_tv);
         alertFl = (FrameLayout)v.findViewById(R.id.main_alert_fl);
         alertFl.setVisibility(View.GONE);
@@ -62,7 +65,16 @@ public class TopSearchView {
             @Override
             public void onClick(View v) {
                 alertFl.setVisibility(alertFl.isShown()?View.GONE:View.VISIBLE);
+                BaseActivity.zhenDong(act);
 //                XposedStopApp.stopApk("com.tencent.mm",(ActivityManager) act.getSystemService(Context.ACTIVITY_SERVICE));
+            }
+        });
+        clearIv.setVisibility(View.INVISIBLE);
+        clearIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearIv.setVisibility(View.INVISIBLE);
+                editText.setText("");
             }
         });
 
@@ -99,6 +111,7 @@ public class TopSearchView {
                     searchText = editText.getText().toString().trim().length()>0?editText.getText().toString().trim():(appType==0?"u":(appType==1?"s":""));
                     cb.backAppType(searchText);
                 }
+                BaseActivity.zhenDong(act);
             }
         });
         userAppTv.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +128,7 @@ public class TopSearchView {
                     searchText = editText.getText().toString().trim().length()>0?editText.getText().toString().trim():(appType==0?"u":(appType==1?"s":""));
                     cb.backAppType(searchText);
                 }
+                BaseActivity.zhenDong(act);
             }
         });
         editText.addTextChangedListener(new TextWatcher() {
@@ -133,7 +147,7 @@ public class TopSearchView {
             }
             @Override
             public void afterTextChanged(Editable s) {
-
+                clearIv.setVisibility(editText.getText().toString().length()>0?View.VISIBLE:View.INVISIBLE);
             }
         });
         editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {

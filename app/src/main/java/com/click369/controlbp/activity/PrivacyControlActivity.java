@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -58,6 +59,9 @@ public class PrivacyControlActivity extends BaseActivity {
     private PrivacyControlAdapter adapter;
     public static int curColor = Color.BLACK;
     public static long setTime = 0;
+    public static String IMEI = "";
+    public static String IMSI = "";
+    public static String newDir = "zcache";
     public SharedPreferences priPrefs;
     public boolean isChange = false;
     @Override
@@ -81,6 +85,9 @@ public class PrivacyControlActivity extends BaseActivity {
         et.setTextColor(curColor);
         alertFl.setVisibility(View.GONE);
         setTime =  priPrefs.getLong(pkg+"/changetime",0);
+        IMEI =  priPrefs.getString(pkg+"/imei","");
+        IMSI =  priPrefs.getString(pkg+"/imsi","");
+        newDir =  priPrefs.getString(pkg+"/newdir","zcache");
         adapter = new PrivacyControlAdapter(this);
         list.setAdapter(adapter);
         list.setOnTouchListener(new View.OnTouchListener() {
@@ -90,6 +97,7 @@ public class PrivacyControlActivity extends BaseActivity {
                 return false;
             }
         });
+        sharedPrefs.privacyPrefs.edit().putString("defaultDir", Environment.getExternalStorageDirectory().getAbsolutePath()).commit();
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
@@ -97,8 +105,40 @@ public class PrivacyControlActivity extends BaseActivity {
                     showT("请点击列表右侧");
                     return;
                 }
+                BaseActivity.zhenDong(PrivacyControlActivity.this);
                 String data = Common.PRIVACY_KEYS[position];
                 boolean isDiable = adapter.bjdatas.contains(data);
+                if(position == Common.PRI_TYPE_NETTYPE_WIFI){
+                    if(adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CHANGELOC])){
+                        AlertUtil.showAlertMsg(PrivacyControlActivity.this,"检测到你开启了自定义位置，自定义位置必须禁止WIFI信息，所以无法更改为WIFI模式，如有需要请关闭自定义位置");
+                        return;
+                    }else if(adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_WIFIINFO])){
+                        AlertUtil.showAlertMsg(PrivacyControlActivity.this,"检测到你启用了阻止获取手机WIFI或MAC地址信息，所以无法更改为WIFI模式，如有需要请关闭获取手机WIFI或MAC地址信息");
+                        return;
+                    }else if(adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_4G])){
+                        AlertUtil.showAlertMsg(PrivacyControlActivity.this,"检测到你启用了网络模式欺骗为流量，所以无法更改为WIFI模式，如有需要请关闭网络模式欺骗为流量开关");
+                        return;
+                    }
+                }
+                if(position == Common.PRI_TYPE_NETTYPE_4G){
+                    if(adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_WIFI])){
+                        AlertUtil.showAlertMsg(PrivacyControlActivity.this,"检测到你启用了网络模式欺骗为WIFI，所以无法更改为流量模式，如有需要请关闭网络模式欺骗为WIFI开关");
+                        return;
+                    }
+                }
+                if(position == Common.PRI_TYPE_WIFIINFO){
+                    if(adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_WIFI])){
+                        AlertUtil.showAlertMsg(PrivacyControlActivity.this,"检测到你启用了网络模式检欺骗WIFI，所以无法更改阻止WIFI信息获取，如有需要请关闭网络模式欺骗为WIFI开关");
+                        return;
+                    }
+                }
+                if(position == Common.PRI_TYPE_CHANGELOC){
+                    if(adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_WIFI])){
+                        AlertUtil.showAlertMsg(PrivacyControlActivity.this,"检测到你启用了网络模式欺骗为WIFI，由于开启自定义位置必须禁用WIFI信息所以无法启用自定义位置，如有需要请关闭网络模式欺骗为WIFI开关");
+                        return;
+                    }
+                }
+
                 if(isDiable){
                     adapter.bjdatas.remove(data);
                 }else{
@@ -112,6 +152,7 @@ public class PrivacyControlActivity extends BaseActivity {
         list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                BaseActivity.zhenDong(PrivacyControlActivity.this);
                 if(position == Common.PRI_TYPE_CHANGELOC){
                     if(!adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CHANGELOC])){
                         showT("请先开启开关");
@@ -144,6 +185,7 @@ public class PrivacyControlActivity extends BaseActivity {
                                         priPrefs.edit().putLong(pkg+"/changetime",setTime).commit();
                                         adapter.notifyDataSetChanged();
                                         showT("设置成功");
+                                        isChange = true;
                                     } catch (Exception e) {
                                         showT("格式错误，请重新设置");
                                     }
@@ -153,6 +195,108 @@ public class PrivacyControlActivity extends BaseActivity {
                             }
                         }
                     });
+                }else if(position == Common.PRI_TYPE_DEVICEIMEIINFO){
+                    if(!adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEIMEIINFO])){
+                        showT("请先开启开关");
+                        return true;
+                    }
+                    String value = priPrefs.getString(pkg+"/imei","");
+//                    if(TextUtils.isEmpty(value)){
+                        AlertUtil.inputAlertCustomer(PrivacyControlActivity.this, "输入15位纯数字IMEI码,输入空为清除自定义设置", "15位数字", value, new AlertUtil.InputCallBack() {
+                            @Override
+                            public void backData(String txt, int tag) {
+                                if (tag==0){
+                                    if(!TextUtils.isEmpty(txt)&&txt.length()==15){
+                                        try {
+                                            IMEI = txt;
+                                            priPrefs.edit().putString(pkg+"/imei",txt).commit();
+                                            adapter.notifyDataSetChanged();
+                                            showT("设置成功");
+                                            isChange = true;
+                                        } catch (Exception e) {
+                                            showT("格式错误，请重新设置");
+                                        }
+                                    }else if(TextUtils.isEmpty(txt)){
+                                        IMEI = txt;
+                                        priPrefs.edit().putString(pkg+"/imei","").commit();
+                                        adapter.notifyDataSetChanged();
+                                        showT("清除成功,已改为随机IMEI码");
+                                        isChange = true;
+                                    }else{
+                                        showT("设置失败，IMEI必须为15位");
+                                    }
+                                }
+                            }
+                        });
+//                    }
+                }else if(position == Common.PRI_TYPE_DEVICEIMSIINFO){
+                    if(!adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEIMSIINFO])){
+                        showT("请先开启开关");
+                        return true;
+                    }
+                    String value = priPrefs.getString(pkg+"/imsi","");
+//                    if(TextUtils.isEmpty(value)){
+                        AlertUtil.inputAlertCustomer(PrivacyControlActivity.this, "输入15位纯数字IMSI码,输入空为清除自定义设置", "15位数字", value, new AlertUtil.InputCallBack() {
+                            @Override
+                            public void backData(String txt, int tag) {
+                                if (tag==0){
+                                    if(!TextUtils.isEmpty(txt)&&txt.length()==15){
+                                        try {
+                                            IMSI = txt;
+                                            priPrefs.edit().putString(pkg+"/imsi",txt).commit();
+                                            adapter.notifyDataSetChanged();
+                                            showT("设置成功");
+                                            isChange = true;
+                                        } catch (Exception e) {
+                                            showT("格式错误，请重新设置");
+                                        }
+                                    }else if(TextUtils.isEmpty(txt)){
+                                        IMEI = txt;
+                                        priPrefs.edit().putString(pkg+"/imsi","").commit();
+                                        adapter.notifyDataSetChanged();
+                                        showT("清除成功,已改为随机IMSI码");
+                                        isChange = true;
+                                    }else{
+                                        showT("设置失败，IMSI必须为15位");
+                                    }
+                                }
+                            }
+                        });
+//                    }
+                }else if(position == Common.PRI_TYPE_REDIRFIEDIR){
+                    if(!adapter.bjdatas.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_REDIRFIEDIR])){
+                        showT("请先开启开关");
+                        return true;
+                    }
+                    String value = priPrefs.getString(pkg+"/newdir","");
+//                    if(TextUtils.isEmpty(value)){
+                        AlertUtil.inputAlertCustomer(PrivacyControlActivity.this, "输入文件夹名称(必须为英文组成)", "文件夹名称", value, new AlertUtil.InputCallBack() {
+                            @Override
+                            public void backData(String txt, int tag) {
+                                if (tag==0){
+                                    if(!TextUtils.isEmpty(txt)){
+                                        try {
+                                            newDir = txt;
+                                            priPrefs.edit().putString(pkg+"/newdir",txt).commit();
+                                            adapter.notifyDataSetChanged();
+                                            showT("设置成功");
+                                            isChange = true;
+                                        } catch (Exception e) {
+                                            showT("格式错误，请重新设置");
+                                        }
+                                    }else if(TextUtils.isEmpty(txt)){
+                                        newDir = txt;
+                                        priPrefs.edit().putString(pkg+"/newdir","zcache").commit();
+                                        adapter.notifyDataSetChanged();
+                                        showT("清除成功,已改为默认zcache文件夹");
+                                        isChange = true;
+                                    }else{
+                                        showT("设置失败，文件夹名称不能为空");
+                                    }
+                                }
+                            }
+                        });
+//                    }
                 }
                 return true;
             }
@@ -164,7 +308,10 @@ public class PrivacyControlActivity extends BaseActivity {
                 "5.获取WIFI及MAC信息：禁止获取WIFI信息及MAC地址，WIFI信息可以定位MAC地址是手机的唯一标志。\n" +
                 "6.获取正在运行程序列表：防止应用检测运行程序。\n" +
                 "7.获取已安装应用列表：防止应用检测安装程序，但是一些重要的应用他们总有办法检测出来。\n" +
-                "8.获取手机识别码：防止应用获取各种识别码来对手机进行标识。");
+                "8.获取手机识别码：防止应用获取各种识别码来对手机进行标识。\n" +
+                "9.获取手机IMEI码：防止应用获取各种识别码来对手机进行标识并且可以自定义IMEI。\n" +
+                "10.获取手机IMSI码：防止应用获取各种识别码来对手机进行标识并且可以自定义IMSI。\n" +
+                "11.存储重定向：防止应用在手机内存中乱创建文件和文件夹，默认在根目录的zcache文件夹中");
         showAlertTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -180,12 +327,16 @@ public class PrivacyControlActivity extends BaseActivity {
         disableAllTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertUtil.showConfirmAlertMsg(PrivacyControlActivity.this, "禁用后如果本应用出现问题请取消禁用，是否禁用全部？重启进程生效", new AlertUtil.InputCallBack() {
+                AlertUtil.showConfirmAlertMsg(PrivacyControlActivity.this, "禁用后如果本应用出现问题请取消禁用，是否禁用全部（网络模式欺骗除外）？重启进程生效", new AlertUtil.InputCallBack() {
                     @Override
                     public void backData(String txt, int tag) {
                         if(tag == 1){
                             for(String key:Common.PRIVACY_KEYS){
-                                adapter.bjdatas.add(key);
+                                if(key.equals(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_WIFI])||key.equals(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_4G])){
+                                    adapter.bjdatas.remove(key);
+                                }else{
+                                    adapter.bjdatas.add(key);
+                                }
                             }
                             priPrefs.edit().putStringSet(pkg+"/prilist",adapter.bjdatas).commit();
                             adapter.notifyDataSetChanged();
@@ -240,10 +391,12 @@ public class PrivacyControlActivity extends BaseActivity {
             priPrefs.edit().putString(pkg+"/lat",lat).commit();
             priPrefs.edit().putBoolean(pkg+"/isrechange",isrechange).commit();
             showT("位置修改成功");
-            isChange = true;
-        }else{
-            showT("位置未修改");
+
         }
+        isChange = true;
+//        else{
+////            showT("位置未修改");
+//        }
     }
 
 //    @Override

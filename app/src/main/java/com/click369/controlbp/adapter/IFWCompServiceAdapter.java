@@ -12,7 +12,9 @@ import android.widget.TextView;
 
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.IFWCompActivity;
+import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.common.ContainsKeyWord;
+import com.click369.controlbp.fragment.IFWFragment;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PinyinCompareDisable;
 
@@ -106,7 +108,7 @@ public class IFWCompServiceAdapter extends BaseAdapter{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
 		String s ="",runs="";
-		if(data.name.indexOf(".")>-1&&!c.isShowAllName){
+		if(data.name.indexOf(".")>-1&&!IFWFragment.isShowAllName){
 			s = data.name.substring(data.name.lastIndexOf(".")+1).trim();
 			viewHolder.nameTv.setText(s.length()>4?s:data.name);
 		}else{
@@ -120,10 +122,10 @@ public class IFWCompServiceAdapter extends BaseAdapter{
 		}
 		String dataName = data.name;//.replaceAll("\\$","/\\$");
 		boolean isDiable = c.ifwString.contains(dataName)||!PackageUtil.isEnable(data.packageName, dataName, pm);//!PackageUtil.isEnable(data.packageName,dataName,pm)||
-		viewHolder.stopTv.setText(isDiable?"已禁用": isContains(runs)?"正在运行":(ContainsKeyWord.isContainsWord(dataName)?"建议禁用":"未禁用"));
+		viewHolder.stopTv.setText(isDiable?"已禁用": (ContainsKeyWord.isContainsWord(dataName)?"建议禁用":"未禁用"));
 //		viewHolder.stopTv.setTextColor(isDiable?Color.RED: isContains(runs)?Color.GREEN:IFWCompActivity.curColor);
 		viewHolder.stopTv.setTextColor(isDiable?Color.RED:(ContainsKeyWord.isContainsWord(dataName)?Color.BLUE:IFWCompActivity.curColor));
-		viewHolder.nameTv.setTextColor(isContains(runs)?Color.GREEN:IFWCompActivity.curColor);
+		viewHolder.nameTv.setTextColor(isContains(runs)?Color.parseColor(MainActivity.COLOR_RUN):IFWCompActivity.curColor);
 //		viewHolder.stopTv.setTextColor(isDiable? Color.RED:isContains(runs)? Color.GREEN:IFWCompActivity.curColor);
 		return convertView;
 	}

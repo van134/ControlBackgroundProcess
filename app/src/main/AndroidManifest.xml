@@ -19,7 +19,6 @@
     <!-- 移除快捷方式 -->
     <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR"/>
-    <meta-data android:name="android.max_aspect" android:value="2.1" />
     <application
         android:allowBackup="true"
         android:name=".activity.MyApp"
@@ -33,6 +32,9 @@
             android:name="xposedmodule"
             android:value="true" />
         <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1"/>
+        <meta-data
             android:name="xposedminversion"
             android:value="54" />
         <meta-data
@@ -43,7 +45,7 @@
             android:label="@string/app_name"
             android:exported="true"
             android:theme="@style/AppTheme.NoActionBar"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:resizeableActivity = "true"
             android:taskAffinity=""
@@ -139,6 +141,15 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.ChooseDirActivity"
+            android:screenOrientation="portrait"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:finishOnTaskLaunch="false"
+            android:windowSoftInputMode="stateHidden|stateUnchanged"
+            android:theme="@style/AppTheme.translucent" >
+        </activity>
+        <activity
             android:name=".activity.CPUSetActivity"
             android:exported="true"
             android:resizeableActivity = "true"
@@ -155,6 +166,7 @@
         </activity>
         <activity android:name=".activity.IFWCompActivity"
             android:screenOrientation="portrait"
+            android:resizeableActivity="true"
             android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.DozeWhiteListActivity" android:resizeableActivity = "true" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.ColorNavBarActivity" android:resizeableActivity = "true" android:screenOrientation="portrait" android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
@@ -173,6 +185,7 @@
             android:process="other.ui"
             android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.SkipDialogActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
+        <activity android:name=".activity.NewDirActivity" android:screenOrientation="portrait"  android:windowSoftInputMode="stateHidden|stateUnchanged"></activity>
         <activity android:name=".activity.UnLockActivity"
             android:exported="true"
             android:launchMode="singleTop"

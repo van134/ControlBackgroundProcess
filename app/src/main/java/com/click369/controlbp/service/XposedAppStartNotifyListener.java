@@ -141,7 +141,7 @@ public class XposedAppStartNotifyListener {
                                 }
                             }
                         }
-                    } catch (RuntimeException e) {
+                    } catch (Throwable e) {
                         e.printStackTrace();
                     }
                 }

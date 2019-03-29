@@ -33,6 +33,7 @@ import com.click369.controlbp.service.XposedStopApp;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.PackageUtil;
+import com.click369.controlbp.util.SELinuxUtil;
 import com.click369.controlbp.util.ShellUtils;
 
 import java.util.ArrayList;
@@ -53,7 +54,8 @@ public class IFWCompActivity extends BaseActivity {
     public String ifwString = "";
     public static HashSet<String> runServices = new HashSet<String>();
     private boolean isStop = false;
-    public boolean isShowAllName = false;
+    private boolean isSelOpen = false;
+
     public ArrayList<ServiceInfo> serviceInfos = new ArrayList<ServiceInfo>();
     public ArrayList<ActivityInfo> activityInfos = new ArrayList<ActivityInfo>();
     private SharedPreferences ifwCountPrefs;
@@ -64,11 +66,11 @@ public class IFWCompActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ifwcomp);
-//        isSelOpen = SELinuxUtil.isSELOpen();
-//
-//        if(isSelOpen){
-//            SELinuxUtil.closeSEL();
-//        }
+        isSelOpen = SELinuxUtil.isSELOpen();
+
+        if(isSelOpen){
+            SELinuxUtil.closeSEL();
+        }
         ifwCountPrefs = sharedPrefs.ifwCountPrefs;//SharedPrefsUtil.getPreferences(this,Common.PREFS_APPIFWCOUNT);// getApplicationContext().getSharedPreferences(Common.PREFS_APPIFWCOUNT, Context.MODE_WORLD_READABLE);
         Intent intent= this.getIntent();
         appName = intent.getStringExtra("name");
@@ -279,18 +281,18 @@ public class IFWCompActivity extends BaseActivity {
                     ActivityInfo si = (ActivityInfo)adapter.getItem(position);
                     name = si.name;
                 }
-                final String copy = name;
-                AlertUtil.showAllNameAlertMsg(IFWCompActivity.this, "完整名称\n" + name, new AlertUtil.InputCallBack() {
-                    @Override
-                    public void backData(String txt, int tag) {
-                        if(tag==1){
+//                final String copy = pkg+"/"+name;
+//                AlertUtil.showAllNameAlertMsg(IFWCompActivity.this, "完整名称\n" + name, new AlertUtil.InputCallBack() {
+//                    @Override
+//                    public void backData(String txt, int tag) {
+//                        if(tag==1){
                             ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
                             // 将文本内容放到系统剪贴板里。
-                            cm.setText(copy);
-                            Toast.makeText(IFWCompActivity.this,"完整名称已复制到你的粘贴板",Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
+                            cm.setText(pkg+"/"+name);
+                            Toast.makeText(IFWCompActivity.this,"完整包名及组件名已复制到你的粘贴板",Toast.LENGTH_LONG).show();
+//                        }
+//                    }
+//                });
                 return true;
             }
         });
@@ -303,11 +305,12 @@ public class IFWCompActivity extends BaseActivity {
         showAllNameTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isShowAllName = !isShowAllName;
-                showAllNameTv.setTextColor(isShowAllName?Color.parseColor("#40d0b7"):curColor);
+                IFWFragment.isShowAllName = !IFWFragment.isShowAllName;
+                showAllNameTv.setTextColor(IFWFragment.isShowAllName?Color.parseColor("#40d0b7"):curColor);
                 adapter.notifyDataSetChanged();
             }
         });
+        showAllNameTv.setTextColor(IFWFragment.isShowAllName?Color.parseColor("#40d0b7"):curColor);
         disableAllTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -514,16 +517,16 @@ public class IFWCompActivity extends BaseActivity {
                 String appName = et.getText().toString();
 
                     if(appName.trim().length()==0){
-                        isShowAllName = false;
-                        showAllNameTv.setTextColor(isShowAllName?Color.parseColor("#40d0b7"):curColor);
+                        IFWFragment.isShowAllName = false;
+                        showAllNameTv.setTextColor(IFWFragment.isShowAllName?Color.parseColor("#40d0b7"):curColor);
                         if(type == 0) {
                             ((IFWCompServiceAdapter) adapter).setData(serviceInfos);
                         }else{
                             ((IFWCompActBroadAdapter) adapter).setData(activityInfos);
                         }
                     }else{
-                        isShowAllName = true;
-                        showAllNameTv.setTextColor(isShowAllName?Color.parseColor("#40d0b7"):Color.BLACK);
+                        IFWFragment.isShowAllName = true;
+                        showAllNameTv.setTextColor(IFWFragment.isShowAllName?Color.parseColor("#40d0b7"):Color.BLACK);
                         if(type == 0) {
                             ArrayList<ServiceInfo> sis = new ArrayList<ServiceInfo>();
                             for (ServiceInfo si : serviceInfos) {
@@ -573,9 +576,9 @@ public class IFWCompActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        if(isSelOpen){
-//            SELinuxUtil.openSEL();
-//        }
+        if(isSelOpen){
+            SELinuxUtil.openSEL();
+        }
     }
     private String getContainsName(String name){
         String s ="";

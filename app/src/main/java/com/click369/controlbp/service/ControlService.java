@@ -1,9 +1,40 @@
 package com.click369.controlbp.service;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.ResolveInfo;
+import android.graphics.Color;
+import android.os.Environment;
+import android.os.Handler;
+import android.view.Gravity;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+
 import com.click369.controlbp.common.Common;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
+import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
@@ -12,6 +43,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 
 public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPackage {//,IXposedHookInitPackageResources
+
 	private XSharedPreferences controlPrefs,
 		wakeLockPrefs,alarmPrefs,settingPrefs,
 		autoStartPrefs,barPrefs,recentPrefs,dozePrefs,
@@ -103,18 +135,27 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 //		}
 //	}
 
+	public static void log(String text){
+	//        if (isLog){
+		XposedBridge.log("MMTEST_"+text);
+	//        }
+	}
     @Override
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 		try {
 			if (lpparam == null || lpparam.packageName == null || lpparam.packageName.startsWith("com.fkzhang")) {
 				return;
 			}
+//			if(true){
+//				return;
+//			}
 //			initData();
 			if ("com.click369.controlbp".equals(lpparam.packageName)) {
 				XposedHelpers.findAndHookMethod("com.click369.controlbp.activity.MainActivity", lpparam.classLoader,
 						"isModuleActive", XC_MethodReplacement.returnConstant(true));
 			}
-			XposedBroadCast.loadPackage(lpparam);
+			XposedBroadCast.loadPackage(lpparam,recentPrefs);
+
 			if (settingPrefs != null) {
 				settingPrefs.reload();
 			} else {

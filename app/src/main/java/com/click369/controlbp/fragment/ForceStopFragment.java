@@ -81,7 +81,7 @@ public class ForceStopFragment extends BaseFragment {
         BaseActivity.addListClickListener(listView,adapter,getActivity());
         topView = new TopSearchView(this.getActivity(),v);
         topView.initView();
-        String msg = "1.返回时、后台时、熄屏时分别可设置两种模式(点击多次进行切换)。返回时、熄屏时第一种是强退模式第二种是墓碑模式，后台时第一种是墓碑模式(十字架图标)第二种是待机模式（AppStandby暂停图标），而且当设置了后台墓碑熄屏和返回墓碑会自动取消，强退为直接杀死进程墓碑则为进入缓存停止执行任务（个别应用可能失效），如果在第一项的服务中设置了禁用则本功能的墓碑无法生效。\n2.选择通知排除的应用在有通知时不会执行设置的任何操作。\n3.返回强退和熄屏强退需要保证本应用后台不被杀死。\n4.添加返回强退的时同时会添加到禁止自启列表中。";
+        String msg = "1.返回时、后台时、熄屏时分别可设置两种模式(点击多次进行切换)。返回时、熄屏时第一种是强退模式第二种是墓碑模式，后台时第一种是墓碑模式(十字架图标)第二种是待机模式（AppStandby暂停图标），而且当设置了后台墓碑熄屏和返回墓碑会自动取消，强退为直接杀死进程墓碑则为进入缓存停止执行任务（个别应用可能失效），如果在第一项的服务中设置了禁用则本功能的墓碑无法生效。\n2.选择通知排除的应用在有通知时不会执行设置的任何操作。\n3.返回强退和熄屏强退需要保证本应用后台不被杀死。\n4.添加返回强退的时同时会添加到禁止自启列表中。\n5.各种颜色说明：亮绿色-正在运行 深红色-运行并进入待机 暗黄色-运行并进入墓碑 暗灰色-没有运行";
         topView.setAlertText(msg,0,false);
         topView.setListener(new TopSearchView.CallBack() {
             @Override
@@ -144,6 +144,7 @@ public class ForceStopFragment extends BaseFragment {
                                 ai.isBackForceStop = false;
                                 ai.isBackMuBei = false;
                             }
+                            BaseActivity.sendBroadAMSRemovePkg(getActivity(),null);
                             adapter.notifyDataSetChanged();
                         }
                         isClick = true;
@@ -200,6 +201,7 @@ public class ForceStopFragment extends BaseFragment {
                                 ai.isHomeMuBei = false;
                             }
                             adapter.notifyDataSetChanged();
+                            BaseActivity.sendBroadAMSRemovePkg(getActivity(),null);
                         }
                         isClick = true;
                     }

@@ -75,7 +75,7 @@ public class SkipDialogActivity extends BaseActivity {
         adapter.bjdatas.addAll(skipDialogPrefs.getStringSet(type==0?Common.PREFS_SKIPDIALOG_KEYWORDS:Common.PREFS_SKIPNOTIFY_KEYWORDS,new LinkedHashSet<String>()));
         listView.setAdapter(adapter);
         setTitle(type==0?"对话框跳过":"通知屏蔽");
-        String t = type == 0?"请添加要跳过的对话框中显示的关键文字，添加后重启对应的进程生效。(关键文字可以是对话框的标题、内容或按钮标题,三种中的一种，内容尽可能精确)":"请添加屏蔽的通知中显示的关键文字或要屏蔽的应用名称，添加后立即生效。(关键文字必须是通知内容的一部分，不能以标题为关键文字，内容尽可能精确";
+        String t = type == 0?"请添加要跳过的对话框中显示的关键文字(如果屏蔽指定应用的某对话框输入格式为 应用名称@关键字)，添加后重启对应的进程生效。(关键文字可以是对话框的标题、内容或按钮标题,三种中的一种，内容尽可能精确)":"请添加屏蔽的通知中显示的关键文字或要屏蔽的应用名称，添加后立即生效。(关键文字必须是通知内容的一部分，不能以标题为关键文字，内容尽可能精确";
         alert.setText(t);
 //        ScreenLightServiceUtil.sendShowLight(LightView.LIGHT_TYPE_MSG,this);
     }

@@ -334,36 +334,66 @@ public class AppConfigActivity extends BaseActivity {
         broadImg.setImageResource(ai.isBroadStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         wakeLockImg.setImageResource(ai.isWakelockStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         alarmImg.setImageResource(ai.isAlarmStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_SERVICE_BROAD,true)){
+            View view = (View)alarmImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         offScImg.setImageResource(ai.isOffscMuBei?R.mipmap.icon_dead:ai.isOffscForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         backImg.setImageResource(ai.isBackMuBei?R.mipmap.icon_dead:ai.isBackForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         homeImg.setImageResource(ai.isHomeMuBei?R.mipmap.icon_dead:ai.isHomeIdle?R.mipmap.icon_idle:R.mipmap.icon_notdisable);//data.isHomeForceStop?R.mipmap.icon_disable:
         notifyImg.setImageResource(ai.isNotifyNotExit?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_BACKSTOP_MUBEI,true)){
+            View view = (View)offScImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         keepImg.setImageResource(ai.isRecentNotClean?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         killImg.setImageResource(ai.isRecentForceClean?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         blurImg.setImageResource(ai.isRecentBlur?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         hideImg.setImageResource(ai.isRecentNotShow?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_RECNETCARD,true)){
+            View view = (View)killImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         lockImg.setImageResource(ai.isLockApp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         notRunImg.setImageResource(ai.isStopApp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         notAutoStartImg.setImageResource(ai.isAutoStart?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         notStopImg.setImageResource(ai.isNotStop?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true)){
+            View view = (View)lockImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
 
         xpAllImg.setImageResource(ai.isblackAllXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         xpControlImg.setImageResource(ai.isblackControlXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         xpNoCheckImg.setImageResource(ai.isNoCheckXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         xpSetCanHookImg.setImageResource(ai.isSetCanHookXp?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_XPBLACKLIST,true)){
+            View view = (View)xpAllImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         dongJieImg.setImageResource(ai.isDisable?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         notUninstallImg.setImageResource(ai.isNotUnstall?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         clearDataImg.setImageResource(R.mipmap.icon_enter);
         clearCacheImg.setImageResource(R.mipmap.icon_enter);
         unInstallImg.setImageResource(R.mipmap.icon_enter);
 
+        if(WatchDogService.isNotUntallNotclean){
+            clearDataImg.setAlpha(ai.isNotUnstall?0.3f:1.0f);
+            clearDataImg.setEnabled(!ai.isNotUnstall);
+        }
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_UNINSTALL_ICE,true)){
+            View view = (View)clearDataImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
+
+
         priWifiImg.setImageResource((ai.isPriWifiPrevent?R.mipmap.icon_disable:R.mipmap.icon_notdisable));
         priMobileImg.setImageResource((ai.isPriMobilePrevent?R.mipmap.icon_disable:R.mipmap.icon_notdisable));
         priSwitchImg.setImageResource((ai.isPriSwitchOpen?R.mipmap.icon_add:R.mipmap.icon_notdisable));
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_PRIVACY,true)){
+            View view = (View)priWifiImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         if(!ai.isPriSwitchOpen){
             priLogImg.setAlpha(0.5f);
             priControlImg.setAlpha(0.5f);
@@ -373,14 +403,23 @@ public class AppConfigActivity extends BaseActivity {
         mode1Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         mode2Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==2)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         mode3Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_ADSKIP,true)){
+            View view = (View)mode1Img.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         dozeOffScImg.setImageResource(ai.isDozeOffsc?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         dozeOnScImg.setImageResource(ai.isDozeOnsc?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         dozeQianTaiImg.setImageResource(ai.isDozeOpenStop?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_DOZE,true)){
+            View view = (View)dozeOffScImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         barOpenImg.setImageResource(ai.isBarColorList?R.mipmap.icon_add:R.mipmap.icon_notdisable);
         barLockImg.setImageResource(ai.isBarLockList?R.mipmap.icon_add:R.mipmap.icon_notdisable);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_UI,true)){
+            View view = (View)barOpenImg.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         barLockImg.setEnabled(ai.isBarColorList);
         barLockImg.setAlpha(ai.isBarColorList?1.0f:0.5f);
 
@@ -391,7 +430,10 @@ public class AppConfigActivity extends BaseActivity {
 
         ifwServceTitle.append(" ");
         ifwServceTitle.append(builder);
-
+        if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_IFW,true)){
+            View view = (View)ifwServceTitle.getParent().getParent();
+            view.setVisibility(View.GONE);
+        }
         serStr = ai.broadCastDisableCount+"/"+ai.broadCastCount;
         builder = new SpannableStringBuilder(serStr);
         builder.setSpan(redSpan,0, serStr.indexOf("/"), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -493,6 +535,7 @@ public class AppConfigActivity extends BaseActivity {
                         }else if(ai.isHomeIdle){
                             ed.remove(ai.getPackageName()+"/idle").commit();
                             ai.isHomeIdle = false;
+                            WatchDogService.sendIdle(AppConfigActivity.this,ai.packageName,false);
                             ed.remove(ai.getPackageName()+"/homestop").commit();
                             if (MainActivity.isModuleActive()){
                                 if (ai.isServiceStop){
@@ -727,6 +770,10 @@ public class AppConfigActivity extends BaseActivity {
                         ai.isNotUnstall = !ai.isNotUnstall;
                         sharedPrefs.pmPrefs.edit().putBoolean(ai.getPackageName() + "/notunstall",ai.isNotUnstall).commit();
                         notUninstallImg.setImageResource(ai.isNotUnstall?R.mipmap.icon_add:R.mipmap.icon_notdisable);
+                        if(WatchDogService.isNotUntallNotclean){
+                            clearDataImg.setAlpha(ai.isNotUnstall?0.3f:1.0f);
+                            clearDataImg.setEnabled(!ai.isNotUnstall);
+                        }
                         break;
                     case R.id.item_pri_switch:
                         ai.isPriSwitchOpen = !ai.isPriSwitchOpen;

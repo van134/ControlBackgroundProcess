@@ -25,6 +25,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedPackageManager {
+    public static boolean isNotUnstallNotClean = true;
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences pmPrefs) {
         try {
             if (lpparam.packageName.equals("android")) {
@@ -105,6 +106,8 @@ public class XposedPackageManager {
                                                 method.setAccessible(true);
                                                 String pkg = intent.getStringExtra("pkg");
                                                 method.invoke(methodHookParam.thisObject,pkg, PackageManager.COMPONENT_ENABLED_STATE_DISABLED,PackageManager.DONT_KILL_APP,0,"android");
+                                            }else if("com.click369.control.pms.changeunstallcleanstate".equals(action)){
+                                                isNotUnstallNotClean = intent.getBooleanExtra("isNotUntallNotclean",true);
                                             }else if("com.click369.control.pms.deletepkg".equals(action)){
                                                 alert = "卸载软件";
                                                 final Class delexCss[] = XposedUtil.getParmsByName(pmsCls,"deletePackageX");
@@ -166,6 +169,7 @@ public class XposedPackageManager {
                                             intentFilter.addAction("com.click369.control.pms.clearcache");
                                             intentFilter.addAction("com.click369.control.pms.cleardata");
                                             intentFilter.addAction("com.click369.control.pms.deletepkg");
+                                            intentFilter.addAction("com.click369.control.pms.changeunstallcleanstate");
                                             if (cxt!=null) {
                                                 cxt.registerReceiver(new MyReciver(), intentFilter);
                                             }
@@ -192,6 +196,29 @@ public class XposedPackageManager {
                                         if (pmPrefs.getBoolean(pkg + "/notunstall", false)) {
 //                                            XposedBridge.log("^^^^^^^^^^^^^^PackageManagerService deletePackage 阻止卸载 " + pkg + "^^^^^^^^^^^^^^^^^");
                                             methodHookParam.setResult(-1);
+                                            return;
+                                        }
+                                    }
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }catch (Throwable e){
+                        e.printStackTrace();
+                    }
+                    try {
+                        XposedUtil.hookMethod(pmsCls, XposedUtil.getParmsByName(pmsCls, "clearApplicationUserData"), "clearApplicationUserData", new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                                try {
+                                    String pkg = (String) methodHookParam.args[0];
+                                    if (pkg != null) {
+                                        if(pmPrefs.hasFileChanged()){
+                                            pmPrefs.reload();
+                                        }
+                                        if (isNotUnstallNotClean&&pmPrefs.getBoolean(pkg + "/notunstall", false)) {
+                                            methodHookParam.setResult(null);
                                             return;
                                         }
                                     }

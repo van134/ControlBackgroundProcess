@@ -42,6 +42,7 @@ public class MyDozeService {
     public static final ArrayList<String> logs = new ArrayList<String>();
     private Set<String> onWhiteList = new HashSet<String>();
     private Set<String> offWhiteList = new HashSet<String>();
+    private Set<String> sameWhiteList = new HashSet<String>();
     private  WatchDogService service;
     private MyDozeReceiver mdr;
 //    private BettryReceiver br;
@@ -347,6 +348,9 @@ public class MyDozeService {
         if(offWhiteList.size()>0){
             DozeWhiteListUtil.removeWhiteList(offWhiteList);
         }
+        if(sameWhiteList.size()>0){
+            DozeWhiteListUtil.removeWhiteList(sameWhiteList);
+        }
     }
 
     public void loadWhilteList(){
@@ -354,6 +358,16 @@ public class MyDozeService {
         if(all.size()>0){
             onWhiteList = DozeWhiteListUtil.getWhiteList(all.keySet(),1);
             offWhiteList = DozeWhiteListUtil.getWhiteList(all.keySet(),0);
+            for(String s:onWhiteList){
+                if(offWhiteList.contains(s)){
+                    sameWhiteList.add(s);
+                }
+            }
+            if(!offWhiteList.contains("com.tencent.mm")){
+                offWhiteList.add("com.tencent.mm");
+            }
+            onWhiteList.removeAll(sameWhiteList);
+            offWhiteList.removeAll(sameWhiteList);
         }
     }
 

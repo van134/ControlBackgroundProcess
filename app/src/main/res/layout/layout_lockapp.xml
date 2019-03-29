@@ -86,6 +86,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 style="@style/mtextSize"
+                android:text="键盘输入背景显示动画效果"
+                android:id="@+id/setting_showanim_sw"
+                android:checked="false" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="2px"
+            android:background="@drawable/line"
+            android:visibility="visible" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="4dp" >
+
+            <Switch
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                style="@style/mtextSize"
                 android:text="密码验证使用自定义密码\n(关闭为时间密码，当前时间减1分钟，例:1745)"
                 android:id="@+id/setting_usepwd_sw"
                 android:checked="false" />

@@ -616,6 +616,15 @@ public class BaseActivity extends AppCompatActivity {
         Intent intent = new Intent("com.click369.control.ams.removemubei");
         intent.putExtra("apk",pkg);
         cxt.sendBroadcast(intent);
+
+        Intent intent1 = new Intent("com.click369.control.uss.setappidle");
+        intent1.putExtra("pkg",pkg);
+        intent1.putExtra("idle",false);
+        cxt.sendBroadcast(intent1);
+        MainActivity.pkgIdleStates.remove(pkg);
+        if(AppLoaderUtil.allHMAppInfos.containsKey(pkg)){
+            AppLoaderUtil.allHMAppInfos.get(pkg).isInMuBei = false;
+        }
     }
 
 

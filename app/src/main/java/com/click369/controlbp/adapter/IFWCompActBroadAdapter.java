@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.IFWCompActivity;
 import com.click369.controlbp.common.ContainsKeyWord;
+import com.click369.controlbp.fragment.IFWFragment;
 import com.click369.controlbp.util.PackageUtil;
 import com.click369.controlbp.util.PinyinCompareDisable;
 import com.click369.controlbp.util.PinyinCompareDisableReceiver;
@@ -105,7 +106,7 @@ public class IFWCompActBroadAdapter extends BaseAdapter{
 		}else{
 			viewHolder = (ViewHolder)convertView.getTag();
 		}
-		if(data.name.indexOf(".")>-1&&!c.isShowAllName){
+		if(data.name.indexOf(".")>-1&&!IFWFragment.isShowAllName){
 			String s = data.name.substring(data.name.lastIndexOf(".")+1).trim();
 			viewHolder.nameTv.setText(s.length()>1?s:data.name);
 		}else{

@@ -80,6 +80,7 @@ import com.click369.controlbp.fragment.XpBlackListFragment;
 import com.click369.controlbp.receiver.BootStartReceiver;
 import com.click369.controlbp.service.NewWatchDogService;
 import com.click369.controlbp.service.WatchDogService;
+import com.click369.controlbp.service.XposedAMS;
 import com.click369.controlbp.service.XposedBroadCast;
 import com.click369.controlbp.service.XposedUtil;
 import com.click369.controlbp.util.AlertUtil;
@@ -143,9 +144,9 @@ public class MainActivity extends BaseActivity
     private int page = 0;
 //    public static String runing = "";
     public static String COLOR = "#00ccff";
-    public static String COLOR_RUN = "#40d0b7";
-    public static String COLOR_MUBEI = "#FF8C00";
-    public static String COLOR_IDLE = "#6dcb21";
+    public static String COLOR_RUN = "#00cd50";//"#00cd50";
+    public static String COLOR_MUBEI = "#e89437";
+    public static String COLOR_IDLE = "#e04134";
     public static boolean isNightMode = false;
     public static boolean isAutoChange = false;
 
@@ -346,13 +347,18 @@ public class MainActivity extends BaseActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
             ShortCutUtil.initDynamicShortcuts(this);
         }
-        appLoaderUtil.loadLocalApp();
         whiteApps.putAll(FileUtil.getWhiteList(MainActivity.this));
         h.postDelayed(showAlert,1000);
         initFileBg(0);
         if(!WatchDogService.isRoot){
             WatchDogService.isRoot = sharedPrefs.settings.getBoolean("ISROOT",false);
         }
+        new Thread(){
+            @Override
+            public void run() {
+                appLoaderUtil.loadLocalApp();
+            }
+        }.start();
     }
 
     public void initThemeColor(){
@@ -368,12 +374,13 @@ public class MainActivity extends BaseActivity
                     navInfoLL.setBackgroundDrawable(null);
                 }
                 navInfoLL.setBackgroundColor(Color.parseColor(THEME_COLOR));
-                int color = Color.parseColor(THEME_COLOR);
-                int alpha = (color & 0xff000000) >>> 24;
-                int red = ((color & 0x00ff0000) >> 16)+10;
-                int green = ((color & 0x0000ff00) >> 8)+10;
-                int blue = (color & 0x000000ff)+10;
-                navigationView.setBackgroundColor(Color.argb(alpha,red>255?255:red,green>255?255:green,blue>255?255:blue));
+//                int color = Color.parseColor(THEME_COLOR);
+//                int alpha = (color & 0xff000000) >>> 24;
+//                int red = ((color & 0x00ff0000) >> 16)+10;
+//                int green = ((color & 0x0000ff00) >> 8)+10;
+//                int blue = (color & 0x000000ff)+10;
+//                navigationView.setBackgroundColor(Color.argb(alpha,red>255?255:red,green>255?255:green,blue>255?255:blue));
+                navigationView.setBackgroundColor(Color.parseColor(THEME_COLOR));
 //            navigationView.setBackgroundResource(R.drawable.slider_bg1);
 
             }
@@ -625,7 +632,6 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onRestart() {
         super.onRestart();
-
         if(uiControlFragment.ischeck){
             uiControlFragment.ischeck = false;
             uiControlFragment.startRound(this);
@@ -633,49 +639,56 @@ public class MainActivity extends BaseActivity
         restartMethod();
     }
 
+    public static boolean isStart = false;
+    public static boolean isFirst = true;
     @Override
     protected void onResume() {
         super.onResume();
-//        if(TEST){
-//            return;
-//        }
-//        XposedBroadCast.sendRequestWithHttpClient();
         try {
-            if(!WatchDogService.isKillRun) {
-                Intent intent = new Intent(MainActivity.this, WatchDogService.class);
-                MainActivity.this.startService(intent);
-            }
+           new Thread(){
+               @Override
+               public void run() {
 
-            h.removeCallbacks(updateTimeInfo);
-            h.postDelayed(updateTimeInfo,1);
-            HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
-            appLoaderUtil.reloadRunList();
-            for (String s : AppLoaderUtil.runLists) {
-                pkgs.put(s, false);
-            }
-            for(AppInfo ai:appLoaderUtil.allAppInfos){
-                ai.isRunning = AppLoaderUtil.runLists.contains(ai.getPackageName());
-            }
-            if(chooseFragment!=null){
-                chooseFragment.fresh();
-            }
-            appLoaderUtil.addAppChangeListener(loadAppCallBack);
-            appLoaderUtil.loadAppSetting();
-            sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
-            Intent intent = new Intent("com.click369.control.uss.getappidlestate");
-            intent.putExtra("pkgs", pkgs);
-            sendBroadcast(intent);
+                   if(!WatchDogService.isKillRun) {
+                       Intent intent = new Intent(MainActivity.this, WatchDogService.class);
+                       MainActivity.this.startService(intent);
+                   }
 
-            if(!isShowAlert){
-                update();
-            }else{
-                isShowAlert = false;
-            }
+                   h.removeCallbacks(updateTimeInfo);
+                   h.postDelayed(updateTimeInfo,1);
+                   HashMap<String, Boolean> pkgs = new HashMap<String, Boolean>();
+                   appLoaderUtil.reloadRunList();
+                   try {
+                       for (String s : AppLoaderUtil.runLists) {
+                           pkgs.put(s, false);
+                       }
+                       int len = appLoaderUtil.allAppInfos.size();
+                       for(int i = 0;i<len;i++){
+                           AppInfo ai = appLoaderUtil.allAppInfos.get(i);
+                           ai.isRunning = AppLoaderUtil.runLists.contains(ai.getPackageName());
+                       }
+                   }catch (Exception e){
+                   }
+                   if(chooseFragment!=null){
+                       chooseFragment.fresh();
+                   }
+                   appLoaderUtil.addAppChangeListener(loadAppCallBack);
+                   appLoaderUtil.loadAppSetting();
+                   sendBroadcast(new Intent(("com.click369.control.ams.getprocinfo")));
+                   Intent intent = new Intent("com.click369.control.uss.getappidlestate");
+                   intent.putExtra("pkgs", pkgs);
+                   sendBroadcast(intent);
+
+                   if(!isShowAlert){
+                       update();
+                   }else{
+                       isShowAlert = false;
+                   }
+               }
+           }.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     private void restartMethod(){
@@ -958,6 +971,13 @@ public class MainActivity extends BaseActivity
         menuTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+                    String[] permissions= {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+                    if(!PermissionUtils.checkPermissionAllGranted(MainActivity.this,permissions)){
+                        PermissionUtils.requestPermission(MainActivity.this,permissions);
+                    }
+                }
+
                 String titles[] = {"备份设置","还原设置","清除所有","刷新应用"};
                 if(page == R.id.nav_ifw_control){
                     titles = new String[]{"备份IFW","还原IFW","一键阉割","恢复阉割","清空所有"};
@@ -1114,6 +1134,15 @@ public class MainActivity extends BaseActivity
                             }
                         }
                     }
+
+                    if(appLoaderUtil.allHMAppInfos.containsKey("com.tencent.mm")){
+                        AppInfo ai = appLoaderUtil.allHMAppInfos.get("com.tencent.mm");
+                        if(ai.isHomeIdle||ai.isHomeMuBei||ai.isBackMuBei){
+                            AppLoaderUtil.allAppStateInfos.get("com.tencent.mm").isInIdle = true;
+                            pkgIdleStates.add("com.tencent.mm");
+                        }
+                    }
+
                     pkgIdleStates.addAll(pkgs);
                     if(chooseFragment!=null){
                         chooseFragment.fresh();
@@ -1233,12 +1262,11 @@ public class MainActivity extends BaseActivity
         @Override
         public void onLoadLocalAppFinish() {
             if(AppLoaderUtil.allHMAppInfos.size()>0){
-                loadAppIcons();
                 if(!appLoaderUtil.isAppChange){
                     appLoaderUtil.loadAppSetting();
                 }
+                loadAppIcons();
             }
-
         }
         @Override
         public void onLoadAppFinish() {
@@ -1279,7 +1307,7 @@ public class MainActivity extends BaseActivity
     boolean isInLoadNewIcon = false;
     private void loadAppIcons(){
         h.removeCallbacks(loadIcons);
-        h.postDelayed(loadIcons,200);
+        h.postDelayed(loadIcons,400);
     }
 
     Runnable loadIcons = new Runnable() {
@@ -1289,7 +1317,7 @@ public class MainActivity extends BaseActivity
                 @Override
                 public void run() {
                     try {
-//                    synchronized (MainActivity.this) {
+                    synchronized (MainActivity.this) {
 //                    Log.i("CONTROL","load icons");
                         final Set<String> pkgs = new HashSet<>();
                         pkgs.addAll(AppLoaderUtil.allHMAppInfos.keySet());
@@ -1330,7 +1358,7 @@ public class MainActivity extends BaseActivity
                                 }
                             }
                         });
-//                    }
+                    }
                     }catch (Throwable e){
                         e.printStackTrace();
                     }
@@ -1382,6 +1410,7 @@ public class MainActivity extends BaseActivity
             @Override
             public void run() {
                 try {
+                    Thread.sleep(2000);
                     String s = get("https://www.coolapk.com/apk/com.click369.controlbp");
                     String news = s.substring(s.indexOf("<title>应用控制器(com.click369.controlbp) - "),s.indexOf(" - 应用 - 酷安网</title>"));
                     news = news.replace("<title>应用控制器(com.click369.controlbp) - ","");
@@ -1402,7 +1431,7 @@ public class MainActivity extends BaseActivity
                             h.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    AlertUtil.showUpdateAlertMsg(MainActivity.this, "检测到应用控制器有新版本" + v + ",请去酷安下载更新，或点击去下载通过浏览器下载更新。", new AlertUtil.InputCallBack() {
+                                    AlertUtil.showUpdateAlertMsg(MainActivity.this, "检测到应用控制器有新版本" + v + ",请去下载更新。", new AlertUtil.InputCallBack() {
                                         @Override
                                         public void backData(String txt, int tag) {
                                             if(tag == 0){

@@ -22,6 +22,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -43,18 +44,23 @@ import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 
 import com.click369.controlbp.bean.AppInfo;
+import com.click369.controlbp.bean.DirBean;
 import com.click369.controlbp.common.Common;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -68,6 +74,10 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  * Created by asus on 2017/10/30.
  */
 public class XposedPrivacy {
+    private static String IMEI = (long)(Math.random()*10000000000L)+""+(long)(Math.random()*100000L);
+    private static String IMSI = (long)(Math.random()*10000000000L)+""+(long)(Math.random()*100000L);
+    private static String newDir = "zcache";
+    private static String defaultDir = null;
     private static Context mContext;
     private static HashMap<Long,String> infos = new HashMap<Long,String>();
     private static long time = 0;
@@ -80,15 +90,19 @@ public class XposedPrivacy {
     private static Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            HashMap<Long,String> minfos = new HashMap<Long,String>();
-            minfos.putAll(infos);
-            Intent intent = new Intent("com.click369.control.ams.sendprivacyinfo");
-            intent.putExtra("pkg",pkg);
-            intent.putExtra("infos",minfos);
-            if(mContext!=null){
-                mContext.sendBroadcast(intent);
-                infos.clear();
-                count = 0;
+            try {
+                HashMap<Long,String> minfos = new HashMap<Long,String>();
+                minfos.putAll(infos);
+                Intent intent = new Intent("com.click369.control.ams.sendprivacyinfo");
+                intent.putExtra("pkg",pkg);
+                intent.putExtra("infos",minfos);
+                if(mContext!=null){
+                    mContext.sendBroadcast(intent);
+                    infos.clear();
+                    count = 0;
+                }
+            }catch (Throwable e){
+                e.printStackTrace();
             }
         }
     };
@@ -96,29 +110,124 @@ public class XposedPrivacy {
     private static long lastTime = 0;
     private static boolean isSelfGetTime = false;
     private static void sendBroad(String p,String info,boolean isSend){
-        pkg = p;
-        isSelfGetTime = true;
-        if(info!=null&&!(info.equals(lastInfo)&& System.currentTimeMillis()-lastTime<800)){
-            infos.put(System.currentTimeMillis(),info);
-            lastInfo = info;
-            lastTime = System.currentTimeMillis();
-            count++;
-        }
-        isSelfGetTime = false;
-        if(handler!=null&&count>0){
-            if(count>40){
-                handler.removeCallbacks(runnable);
-                handler.postDelayed(runnable,10);
-            }else{
-                handler.removeCallbacks(runnable);
-                handler.postDelayed(runnable,2000);
+        try {
+            pkg = p;
+            isSelfGetTime = true;
+            if(info!=null&&!(info.equals(lastInfo)&& System.currentTimeMillis()-lastTime<800)){
+                infos.put(System.currentTimeMillis(),info);
+                lastInfo = info;
+                lastTime = System.currentTimeMillis();
+                count++;
             }
+            isSelfGetTime = false;
+            if(handler!=null&&count>0){
+                if(count>40){
+                    handler.removeCallbacks(runnable);
+                    handler.postDelayed(runnable,10);
+                }else{
+                    handler.removeCallbacks(runnable);
+                    handler.postDelayed(runnable,2000);
+                }
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
         }
     }
 
 
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences privacyPrefs){
         privacyPrefs.reload();
+        if(privacyPrefs.getBoolean(Common.PREFS_PRIVATE_NEWDIR_ALLSWITCH,false)){
+            defaultDir = privacyPrefs.getString( "defaultDir", null);
+            final HashSet<String> sets = (HashSet<String>)privacyPrefs.getStringSet( Common.PREFS_PRIVATE_NEWDIR_KEYWORDS, new HashSet<String>());
+            if(defaultDir!=null&&sets!=null&&sets.size()>0){
+                final HashMap<String,String> newDirs = new HashMap<>();
+                for(String s:sets){
+                    String ss[] = s.split("\\|");
+                    newDirs.put(ss[0],ss[1]);
+                }
+                final List<String> keys = new ArrayList<String>(newDirs.keySet());
+                Collections.sort(keys, new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        int flags = 0;
+                        if (o1.length()<o2.length()) {
+                            flags = 1;
+                        }else if(o1.length()>o2.length()) {
+                            flags = -1;
+                        }else {
+                            flags = 0;
+                        }
+                        return flags;
+                    }
+                });
+                XC_MethodHook hookFileDirs = new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
+                        try {
+                            Object obj = param.args[0];
+                            if(obj instanceof String){
+                                String s1 = (String)obj;
+                                String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
+                                String s = s1+s2;
+                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)){
+                                    String key = null;
+                                    for(String set:keys){
+                                        if(s.contains(defaultDir+File.separator+set)){
+                                            key = set;
+                                            break;
+                                        }
+                                    }
+                                    if(key!=null){
+                                        if(param.args.length == 1){
+                                            param.args[0] = s.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key));
+                                        }else if(param.args.length == 2){
+                                            if(s1.contains(defaultDir+File.separator+key)){
+                                                param.args[0] = s1.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key));
+                                            }else if(s2.contains(key)){
+                                                param.args[1] = s2.replace(key,newDirs.get(key));
+                                            }
+                                        }
+                                    }
+                                }
+                            }else if(obj instanceof File){
+                                File f = (File)obj;
+                                String s1 = f.getAbsolutePath();
+                                String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
+                                String s = s1+s2;
+                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)) {
+                                    String key = null;
+                                    for(String set:keys){
+                                        if(s.contains(defaultDir+File.separator+set)){
+                                            key = set;
+                                            break;
+                                        }
+                                    }
+                                    if(key!=null){
+                                        if(param.args.length == 1){
+                                            param.args[0] = new File(s.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key)));
+                                        }else if(param.args.length == 2){
+                                            if(s1.contains(defaultDir+File.separator+key)){
+                                                param.args[0] = new File(s1.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key)));
+                                            }else if(s2.contains(key)){
+                                                param.args[1] = s2.replace(key,newDirs.get(key));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                XposedUtil.hookConstructorMethod(File.class,new Class[]{File.class,String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class,String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class},hookFileDirs);
+            }
+        }
+
+
         if(privacyPrefs.getBoolean(lpparam.packageName+"/priwifi",false)||
                 privacyPrefs.getBoolean(lpparam.packageName+"/primobile",false)){
             final Class netinfoCls = XposedUtil.findClass("android.net.NetworkInfo", lpparam.classLoader);
@@ -148,6 +257,7 @@ public class XposedPrivacy {
             XposedUtil.hookMethod(netinfoCls, XposedUtil.getParmsByName(netinfoCls, "isAvailable"), "isAvailable",hooknetinfo);
             XposedUtil.hookMethod(netinfoCls, XposedUtil.getParmsByName(netinfoCls, "isConnected"), "isConnected",hooknetinfo);
         }
+
         if(privacyPrefs.getBoolean(lpparam.packageName+"/priswitch",false)){
             final boolean isDIDISIJI = "com.sdu.didi.gsui".equals(lpparam.packageName);//排除didi司机端
             final Set<String> switchs = privacyPrefs.getStringSet(lpparam.packageName+"/prilist",new HashSet<String>());
@@ -157,11 +267,38 @@ public class XposedPrivacy {
             final boolean isPreventGps = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_GPSINFO])||isChangeLoc;
             final boolean isPreventBaseStation = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_BASESTATION])||isChangeLoc;
             final boolean isPreventWifi = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_WIFIINFO])||isChangeLoc;
-            final boolean isPreventDevInfo = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEINFO])||(isChangeLoc&&!isDIDISIJI);
+            final boolean isPreventDevInfo = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEINFO]);//||(isChangeLoc&&!isDIDISIJI);
+            final boolean isPreventDevIMEIInfo = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEIMEIINFO]);//||(isChangeLoc&&!isDIDISIJI);
+            final boolean isPreventDevIMSIInfo = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEIMSIINFO]);//||(isChangeLoc&&!isDIDISIJI);
             final boolean isPreventTime = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CHANGETIME]);
+            final boolean isPreventFileDir = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_REDIRFIEDIR]);
+            final boolean isPreventNetTypeWifi = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_WIFI]);
+            final boolean isPreventNetType4G = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_4G]);
             if(privacyPrefs.contains(lpparam.packageName + "/changetime")){
                 time = privacyPrefs.getLong(lpparam.packageName + "/changetime", 0);
             }
+            if(privacyPrefs.contains(lpparam.packageName + "/newdir")){
+                newDir = privacyPrefs.getString(lpparam.packageName + "/newdir", "zcache");
+                if(newDir==null||newDir.trim().length()==0){
+                    newDir = "zcache";
+                }
+            }
+            if(isPreventFileDir){
+                defaultDir = privacyPrefs.getString( "defaultDir", null);
+            }
+            if(isPreventDevIMEIInfo){
+                String IMEITemp = privacyPrefs.getString(lpparam.packageName + "/imei", "");
+                if(IMEITemp.length()==15){
+                    IMEI = IMEITemp;
+                }
+            }
+            if(isPreventDevIMSIInfo){
+                String IMSITemp = privacyPrefs.getString(lpparam.packageName + "/imsi", "");
+                if(IMSITemp.length()==15){
+                    IMSI = IMSITemp;
+                }
+            }
+
             if(isChangeLoc){
                 try {
                     String lonStr = privacyPrefs.getString(lpparam.packageName+"/lon","0");
@@ -181,12 +318,43 @@ public class XposedPrivacy {
                 }
 
             }
+
             final Class appCls = XposedUtil.findClass("android.app.Application", lpparam.classLoader);
             XposedUtil.hookMethod(appCls, XposedUtil.getParmsByName(appCls, "onCreate"), "onCreate", new XC_MethodHook() {
                 @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    mContext = ((Application)(param.thisObject)).getApplicationContext();
-                    handler = new Handler();
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    try {
+                        if(param.thisObject!=null){
+                            mContext = ((Application)(param.thisObject)).getApplicationContext();
+                        }
+                        if(mContext==null){
+                            handler = new Handler();
+                        }else{
+                            handler = new Handler(mContext.getMainLooper());
+                        }
+                    }catch (Exception e){
+
+                    }
+                }
+            });
+            final Class actCls = XposedUtil.findClass("android.app.Activity", lpparam.classLoader);
+            XposedUtil.hookMethod(actCls, XposedUtil.getParmsByName(actCls, "onCreate"), "onCreate", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    try {
+                        if(mContext==null&&param.thisObject!=null){
+                            mContext = ((Activity)(param.thisObject)).getApplicationContext();
+                        }
+                        if(handler==null){
+                            if(mContext==null){
+                                handler = new Handler();
+                            }else{
+                                handler = new Handler(mContext.getMainLooper());
+                            }
+                        }
+                    }catch (Exception e){
+
+                    }
                 }
             });
 
@@ -653,6 +821,10 @@ public class XposedPrivacy {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     try {
                         sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_WIFIINFO]+"|"+isPreventWifi,true);
+                        if(param.method.getName().equals("getTypeName")||param.method.getName().equals("getType")){
+                            sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_WIFI]+"|"+isPreventNetTypeWifi,false);
+                            sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_NETTYPE_4G]+"|"+isPreventNetType4G,true);
+                        }
                         if(isPreventWifi){
                             if(param.method.getName().equals("getTypeName")){
                                 param.setResult("MOBILE");
@@ -665,6 +837,21 @@ public class XposedPrivacy {
                                 param.setResult(true);
                             }else if(param.method.getName().equals("getInterfaceAddresses")){
                                 param.setResult("");
+                            }
+                        }else if(isPreventNetTypeWifi){
+                            if(param.method.getName().equals("getTypeName")){
+                                param.setResult("WIFI");
+                            }else if(param.method.getName().equals("getType")){
+                                param.setResult(ConnectivityManager.TYPE_WIFI);
+                            }else if(param.method.getName().equals("isAvailable")||
+                                    param.method.getName().equals("isConnected")){
+                                param.setResult(true);
+                            }
+                        }else if(isPreventNetType4G){
+                            if(param.method.getName().equals("getTypeName")){
+                                param.setResult("MOBILE");
+                            }else if(param.method.getName().equals("getType")){
+                                param.setResult(ConnectivityManager.TYPE_MOBILE);
                             }
                         }
                     }catch (Exception e){
@@ -696,6 +883,12 @@ public class XposedPrivacy {
                                 param.setResult(false);
                             }else if(param.method.getName().equals("getWifiState")){
                                 param.setResult(WifiManager.WIFI_STATE_DISABLED);
+                            }
+                        }else if(isPreventNetTypeWifi){
+                            if(param.method.getName().equals("isWifiEnabled")){
+                                param.setResult(true);
+                            }else if(param.method.getName().equals("getWifiState")){
+                                param.setResult(WifiManager.WIFI_STATE_ENABLED);
                             }
                         }
 
@@ -733,15 +926,7 @@ public class XposedPrivacy {
                                 param.setResult(i1+""+i2);
                             }else if(param.method.getName().equals("getLine1Number")){
                                 param.setResult("");
-                            }else if(param.method.getName().equals("getImei")){//15位
-                                long i1 = (long)(Math.random()*10000000000L);
-                                long i2 = (long)(Math.random()*100000L);
-                                param.setResult(i1+""+i2);
                             }else if(param.method.getName().equals("getMeid")){
-                                long i1 = (long)(Math.random()*10000000000L);
-                                long i2 = (long)(Math.random()*100000L);
-                                param.setResult(i1+""+i2);
-                            }else if(param.method.getName().equals("getSubscriberId")){
                                 long i1 = (long)(Math.random()*10000000000L);
                                 long i2 = (long)(Math.random()*100000L);
                                 param.setResult(i1+""+i2);
@@ -764,11 +949,42 @@ public class XposedPrivacy {
             };
             XposedUtil.hookMethod(teleCls, XposedUtil.getParmsByName(teleCls, "getDeviceId"), "getDeviceId",hookteleinfo);
             XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getLine1Number"), "getLine1Number",hookteleinfo);
-            XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getImei"), "getImei",hookteleinfo);
             XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getMeid"), "getMeid",hookteleinfo);
-            XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getSubscriberId"), "getSubscriberId",hookteleinfo);
             XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getSimSerialNumber"), "getSimSerialNumber",hookteleinfo);
             XposedUtil.hookMethod(sysSecCls, new Class[]{ContentResolver.class,String.class}, "getInt",hookteleinfo);
+
+
+            XC_MethodHook hookImeiinfo = new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    try {
+                        sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEIMEIINFO]+"|"+isPreventDevIMEIInfo,true);
+                        if(isPreventDevIMEIInfo&&param.method.getName().equals("getImei")){//15位
+                            param.setResult(IMEI);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            };
+            XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getImei"), "getImei",hookImeiinfo);
+
+
+            XC_MethodHook hookImsiinfo = new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    try {
+                        sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_DEVICEIMSIINFO]+"|"+isPreventDevIMSIInfo,true);
+                        if(isPreventDevIMSIInfo&&param.method.getName().equals("getSubscriberId")){
+                            param.setResult(IMSI);
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            };
+            XposedUtil.hookMethod(teleCls, XposedUtil.getMaxLenParmsByName(teleCls, "getSubscriberId"), "getSubscriberId",hookImsiinfo);
+
             if (isPreventTime) {
                 try {
                     final Long[] baseHolder = new Long[1];
@@ -809,28 +1025,124 @@ public class XposedPrivacy {
                     e.printStackTrace();
                 }
             }
-//            XC_MethodHook hookResolver = new XC_MethodHook() {
-//                @Override
-//                protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
-//                    try {
-//                        if(param.args.length>3&&param.args[0]!=null&&param.args[2] instanceof Bundle&&param.args[0] instanceof Uri){
-//                            Uri uri = (Uri)param.args[0];
-//                            XposedBridge.log("CONTACT_URI:"+uri.toString());
-//                            if(ContactsContract.Contacts.CONTENT_URI.equals(uri)||ContactsContract.CommonDataKinds.Phone.CONTENT_URI.equals(uri)){
-//                                sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_CONTACTINFO]+"|"+isPreventContact,true);
-//                                if(isPreventContact){
-//                                    String url = uri.toString().replace("contacts","fuck");
-//                                    param.args[0] = Uri.parse(url);
+
+            XC_MethodHook hookFileDir = new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+                    try {
+                        sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_REDIRFIEDIR]+"|"+isPreventFileDir,true);
+//                        if (isPreventFileDir) {
+//                            String s = param.getResult().toString() ;
+//                            if(s!=null&&!isContainsKeyWord(s)&&!s.contains(newDir)){
+//                                s = s.replace(defaultDir,defaultDir+ File.separator + newDir);
+//                                param.setResult(new File(s));
+//                            }else if(s!=null&&isContainsKeyWord(s)&&s.contains(newDir)){
+//                                s = s.replace(File.separator+newDir,"");
+//                                param.setResult(new File(s));
+//                            }
+//                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            if(isPreventFileDir&&defaultDir!=null){
+//                XC_MethodHook hookFileDirs = new XC_MethodHook() {
+//                    @Override
+//                    protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
+//                        try {
+//                            if(isPreventFileDir){
+//                                Object obj = param.args[0];
+//                                if(obj instanceof String){
+//                                    String s = (String)obj;
+//                                    if(s!=null&&!isContainsKeyWord(s)&&!s.contains(newDir)){
+//                                        if(param.args.length==2){
+//                                            String s1 = (String)param.args[1];
+//                                            if(!isContainsKeyWord(s+File.separator+s1)&&!s1.contains(newDir)){
+//                                                s = s.replace(defaultDir,defaultDir+ File.separator + newDir);
+//                                                param.args[0] = s;
+//                                            }else if(isContainsKeyWord(s)&&s.contains(newDir)){
+//                                                s = s.replace(File.separator+newDir,"");
+//                                                param.args[0] = s;
+//                                            }
+//                                        }else{
+//                                            s = s.replace(defaultDir,defaultDir+ File.separator + newDir);
+//                                            param.args[0] = s;
+//                                        }
+//                                    }else if(s!=null&&isContainsKeyWord(s)&&s.contains(newDir)){
+//                                        s = s.replace(File.separator+newDir,"");
+//                                        param.args[0] = s;
+//                                    }
+//                                }else if(obj instanceof File){
+//                                    File f = (File)obj;
+//                                    String s = f.getAbsolutePath();
+//                                    if(s!=null&&!isContainsKeyWord(s)&&!s.contains(newDir)) {
+//                                        if(param.args.length==2){
+//                                            String s1 = (String)param.args[1];
+//                                            if(!isContainsKeyWord(s+File.separator+s1)&&!s1.contains(newDir)){
+//                                                s = s.replace(defaultDir,defaultDir+ File.separator + newDir);
+//                                                param.args[0] = new File(s);
+//                                            }else if(isContainsKeyWord(s)&&s.contains(newDir)){
+//                                                s = s.replace(File.separator+newDir,"");
+//                                                param.args[0] = new File(s);
+//                                            }
+//                                        }else{
+//                                            s = s.replace(defaultDir, defaultDir + File.separator + newDir);
+//                                            param.args[0] = new File(s);
+//                                        }
+//
+//                                    }else if(s!=null&&isContainsKeyWord(s)&&s.contains(newDir)){
+//                                        s = s.replace(File.separator+newDir,"");
+//                                        param.args[0] = new File(s);
+//                                    }
 //                                }
 //                            }
-//                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
 //                        }
-//                    }catch (Exception e){
-//                        e.printStackTrace();
 //                    }
-//                }
-//            };
-//            XposedUtil.hook_methods(ContentResolver.class,"query",hookResolver);
+//                };
+//                XposedUtil.hookConstructorMethod(File.class,new Class[]{File.class,String.class},hookFileDirs);
+//                XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class,String.class},hookFileDirs);
+//                XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class},hookFileDirs);
+                XC_MethodHook hookFileDirs = new XC_MethodHook() {
+                    @Override
+                    protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
+                        try {
+                            Object obj = param.args[0];
+                            if(obj instanceof String){
+                                String s1 = (String)obj;
+                                String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
+                                String s = s1+s2;
+                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)){
+//                                    XposedBridge.log("FILE_TEST_1_"+s+"  "+isContainsKeyWord(s));
+                                    if(!isContainsKeyWord(s)&&s.contains(defaultDir)&&!s.contains(newDir)){
+                                        param.args[0] = s.replace(defaultDir,defaultDir+File.separator+newDir);
+                                    }
+                                }
+                            }else if(obj instanceof File){
+                                File f = (File)obj;
+                                String s1 = f.getAbsolutePath();
+                                String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
+                                String s = s1+s2;
+                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)) {
+//                                    XposedBridge.log("FILE_TEST_2_"+s+"  "+isContainsKeyWord(s));
+                                    if(!isContainsKeyWord(s)&&s.contains(defaultDir)&&!s.contains(newDir)){
+                                        param.args[0] = new File(s.replace(defaultDir,defaultDir+File.separator+newDir));
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                XposedUtil.hookConstructorMethod(File.class,new Class[]{File.class,String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class,String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class},hookFileDirs);
+            }
+            XposedUtil.hookMethod(Environment.class, XposedUtil.getParmsByName(Environment.class, "getExternalStorageDirectory"),"getExternalStorageDirectory", hookFileDir);
+            XposedUtil.hookMethod(Environment.class, XposedUtil.getParmsByName(Environment.class, "getExternalStoragePublicDirectory"),"getExternalStoragePublicDirectory", hookFileDir);
         }
     }
 
@@ -870,4 +1182,20 @@ public class XposedPrivacy {
         }
     }
 
+    private static boolean isContainsKeyWord(String s){
+        return s.contains(defaultDir+File.separator+"Android")||
+                s.contains(newDir+File.separator+"Android")||
+                s.contains(defaultDir+File.separator+"data")||
+                s.contains(newDir+File.separator+"data")||
+                s.contains(defaultDir+File.separator+"backup")||
+                s.contains(newDir+File.separator+"backup")||
+                s.contains(defaultDir+File.separator+"Pictures")||
+                s.contains(newDir+File.separator+"Pictures")||
+                s.contains(defaultDir+File.separator+"DCIM")||
+                s.contains(newDir+File.separator+"DCIM")||
+                s.contains(defaultDir+File.separator+"download")||
+                s.contains(newDir+File.separator+"download")||
+                s.contains(defaultDir+File.separator+"Download")||
+                s.contains(newDir+File.separator+"Download");
+    }
 }

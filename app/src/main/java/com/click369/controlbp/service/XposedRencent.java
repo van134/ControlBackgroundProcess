@@ -60,6 +60,7 @@ import com.click369.controlbp.common.Common;
 import org.w3c.dom.Text;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -94,6 +95,7 @@ public class XposedRencent {
     private static boolean flashEnable = false;
     private static boolean flashEnableException = false;
     private static Context recentContext;
+    private static Bitmap mmbm;
     public static  String getPkgByTask(Class cls,String taskName,Object obj){
         try {
             Field mTaskField = cls.getDeclaredField(taskName);
@@ -169,7 +171,7 @@ public class XposedRencent {
                                    final XSharedPreferences appStartiPrefs,
                                    final boolean isRecentOpen,final boolean isUIChangeOpen){
         try {
-            if(lpparam.packageName.equals("com.android.systemui")&&isRecentOpen&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){//&&Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+            if(lpparam.packageName.equals("com.android.systemui")&&Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){//&&Build.VERSION.SDK_INT < Build.VERSION_CODES.M
                 final Class tvtCls = XposedUtil.findClass("com.android.systemui.recents.views.TaskViewThumbnail", lpparam.classLoader);
                 final Class recentActCls = XposedUtil.findClass("com.android.systemui.recents.RecentsActivity", lpparam.classLoader);
                 final Class deleTaskCls = XposedUtil.findClass("com.android.systemui.recents.events.ui.DeleteTaskDataEvent", lpparam.classLoader);
@@ -179,35 +181,38 @@ public class XposedRencent {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                             try {
-                                Object object =  param.args[0];
-                                Field field = object.getClass().getDeclaredField("task");
-                                field.setAccessible(true);
-                                Object task = field.get(object);
-                                String pkg = getPkgByTask(task);
-                                recentPrefs.reload();
-                                if (pkg != null && recentPrefs.getBoolean(pkg + "/notclean", false)) {
-                                    String cls = getClsByTask(task);
-                                    if("com.tencent.mm".equals(pkg)&&!"com.tencent.mm.ui.LauncherUI".equals(cls)){
-                                    }else {
-                                        param.setResult(false);
-                                        return;
-                                    }
-                                }else if (recentPrefs.getBoolean(pkg + "/forceclean", false)) {
-                                    Activity activity = (Activity)param.thisObject;
-                                    if("com.tencent.mm".equals(pkg)){
+                                if(isRecentOpen){
+                                    Object object =  param.args[0];
+                                    Field field = object.getClass().getDeclaredField("task");
+                                    field.setAccessible(true);
+                                    Object task = field.get(object);
+                                    String pkg = getPkgByTask(task);
+                                    recentPrefs.reload();
+                                    if (pkg != null && recentPrefs.getBoolean(pkg + "/notclean", false)) {
                                         String cls = getClsByTask(task);
-                                        if("com.tencent.mm.plugin.appbrand.ui.AppBrandUI".equals(cls)){
+                                        if("com.tencent.mm".equals(pkg)&&!"com.tencent.mm.ui.LauncherUI".equals(cls)){
+                                        }else {
+                                            param.setResult(false);
+                                            return;
+                                        }
+                                    }else if (recentPrefs.getBoolean(pkg + "/forceclean", false)) {
+                                        Activity activity = (Activity)param.thisObject;
+                                        if("com.tencent.mm".equals(pkg)){
+                                            String cls = getClsByTask(task);
+                                            if("com.tencent.mm.plugin.appbrand.ui.AppBrandUI".equals(cls)){
+                                            }else{
+                                                Intent intent = new Intent("com.click369.control.removerecent");
+                                                intent.putExtra("pkg", pkg);
+                                                activity.sendBroadcast(intent);
+                                            }
                                         }else{
                                             Intent intent = new Intent("com.click369.control.removerecent");
                                             intent.putExtra("pkg", pkg);
                                             activity.sendBroadcast(intent);
                                         }
-                                    }else{
-                                        Intent intent = new Intent("com.click369.control.removerecent");
-                                        intent.putExtra("pkg", pkg);
-                                        activity.sendBroadcast(intent);
                                     }
                                 }
+
                             }catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -225,7 +230,8 @@ public class XposedRencent {
                                 if (methodHookParam.args[0] != null) {
                                    String pkg = getPkgByTask(tvtCls,"mTask",methodHookParam.thisObject);
                                     recentPrefs.reload();
-                                    if (recentPrefs.getBoolean(pkg + "/blur", false)) {
+
+                                    if (isRecentOpen&&recentPrefs.getBoolean(pkg + "/blur", false)) {
                                         Map thbs = (HashMap)XposedHelpers.getAdditionalStaticField(recentActCls,"thbs");
                                         if (thbs==null){
                                             thbs = new HashMap<String,Object>();
@@ -235,6 +241,7 @@ public class XposedRencent {
                                         Object newData = thbs.get(pkg);
                                         if (newData==null) {
                                             if (thumbnailData instanceof Bitmap) {
+                                                Bitmap bm = (Bitmap) thumbnailData;
                                                 methodHookParam.args[0] = fastblur((Bitmap) thumbnailData, 8);
                                             } else {
                                                 Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
@@ -243,7 +250,8 @@ public class XposedRencent {
                                                 scaleField.setAccessible(true);
                                                 Object bmObj = thumbnailField.get(thumbnailData);
                                                 if (bmObj != null) {
-                                                    Bitmap newBm = fastblur((Bitmap) bmObj, 8);
+                                                    Bitmap bm = (Bitmap) bmObj;
+                                                    Bitmap newBm = fastblur((Bitmap) bm, 8);
                                                     thumbnailField.set(thumbnailData, newBm);
                                                 }
                                             }
@@ -252,6 +260,37 @@ public class XposedRencent {
                                             methodHookParam.args[0] = newData;
                                         }
                                     }
+//                                    else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O&&
+//                                            "com.tencent.mm".equals(pkg)&&
+//                                            recentPrefs.getBoolean(pkg+"/notclean",false)){
+//                                        Field mTaskField = tvtCls.getDeclaredField("mTask");
+//                                        mTaskField.setAccessible(true);
+//                                        Object mTask = mTaskField.get(methodHookParam.thisObject);
+//                                        Field topField  = mTask.getClass().getDeclaredField("topActivity");
+//                                        topField.setAccessible(true);
+//                                        ComponentName componentName = (ComponentName) topField.get(mTask);
+//                                        String cls = componentName==null?"":componentName.getClassName();
+////                                        XposedBridge.log("cls  "+cls);
+//                                        File file = new File("/data/wxa.temp");
+//                                        if((cls.endsWith("LauncherUI"))&&file.exists()){//
+//                                            Bitmap mmbm = BitmapFactory.decodeFile("/data/wxa.temp");
+////                                            XposedBridge.log("bm  "+mmbm+"  getWidth "+(mmbm!=null?mmbm.getWidth():0));
+//                                            if(mmbm!=null){
+//                                                Object thumbnailData = methodHookParam.args[0];
+////                                                XposedBridge.log("thumbnailData  "+thumbnailData);
+//                                                if (thumbnailData instanceof Bitmap) {
+//                                                    methodHookParam.args[0] =mmbm;
+//                                                } else {
+//                                                    Field thumbnailField = thumbnailData.getClass().getDeclaredField("thumbnail");
+////                                                    Field scaleField = thumbnailData.getClass().getDeclaredField("scale");
+//                                                    thumbnailField.setAccessible(true);
+////                                                    scaleField.setAccessible(true);
+//                                                    thumbnailField.set(thumbnailData, mmbm);
+//                                                    methodHookParam.args[0] = thumbnailData;
+//                                                }
+//                                            }
+//                                        }
+//                                    }
 
                                 }
                             } catch (Throwable e) {
@@ -684,7 +723,7 @@ public class XposedRencent {
                                         }
                                     }
                                 }
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&roundNumber>0) {
                                     try {
                                         Field field1 = recentHeaderCls.getDeclaredField("mCornerRadius");
                                         field1.setAccessible(true);
@@ -720,17 +759,19 @@ public class XposedRencent {
                                     @Override
                                     protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                         try {
-                                            if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
-                                                Field field = thumbViewCls.getDeclaredField("mConfig");
-                                                field.setAccessible(true);
-                                                Object mConfig = field.get(methodHookParam.thisObject);
-                                                Field rcField = mConfig.getClass().getDeclaredField("taskViewRoundedCornerRadiusPx");
-                                                rcField.setAccessible(true);
-                                                rcField.set(mConfig,roundNumber);
-                                            }else{
-                                                Field field = thumbViewCls.getDeclaredField("mCornerRadius");
-                                                field.setAccessible(true);
-                                                field.set(methodHookParam.thisObject, roundNumber);
+                                            if(roundNumber>0){
+                                                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
+                                                    Field field = thumbViewCls.getDeclaredField("mConfig");
+                                                    field.setAccessible(true);
+                                                    Object mConfig = field.get(methodHookParam.thisObject);
+                                                    Field rcField = mConfig.getClass().getDeclaredField("taskViewRoundedCornerRadiusPx");
+                                                    rcField.setAccessible(true);
+                                                    rcField.set(mConfig,roundNumber);
+                                                }else{
+                                                    Field field = thumbViewCls.getDeclaredField("mCornerRadius");
+                                                    field.setAccessible(true);
+                                                    field.set(methodHookParam.thisObject, roundNumber);
+                                                }
                                             }
                                         } catch (RuntimeException e) {
                                             e.printStackTrace();
@@ -781,9 +822,11 @@ public class XposedRencent {
                                         @Override
                                         protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                             try {
-                                                Field field = avbCls.getDeclaredField("mCornerRadius");
-                                                field.setAccessible(true);
-                                                field.set(methodHookParam.thisObject, roundNumber);
+                                                if(roundNumber>0){
+                                                    Field field = avbCls.getDeclaredField("mCornerRadius");
+                                                    field.setAccessible(true);
+                                                    field.set(methodHookParam.thisObject, roundNumber);
+                                                }
                                             } catch (RuntimeException e) {
                                                 e.printStackTrace();
                                             }
@@ -813,9 +856,12 @@ public class XposedRencent {
                                         @Override
                                         protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                             try {
-                                                Field field = fsdCls.getDeclaredField("mCornerRadius");
-                                                field.setAccessible(true);
-                                                field.set(methodHookParam.thisObject, roundNumber);
+                                                if(roundNumber>0){
+                                                    Field field = fsdCls.getDeclaredField("mCornerRadius");
+                                                    field.setAccessible(true);
+                                                    field.set(methodHookParam.thisObject, roundNumber);
+                                                }
+
                                             } catch (RuntimeException e) {
                                                 e.printStackTrace();
                                             }
@@ -845,17 +891,19 @@ public class XposedRencent {
                                         @Override
                                         protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                                             try {
-                                                if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
-                                                    Field field = tsvCls.getDeclaredField("mConfig");
-                                                    field.setAccessible(true);
-                                                    Object mConfig = field.get(methodHookParam.thisObject);
-                                                    Field rcField = mConfig.getClass().getDeclaredField("taskViewRoundedCornerRadiusPx");
-                                                    rcField.setAccessible(true);
-                                                    rcField.set(mConfig,roundNumber);
-                                                }else {
-                                                    Field field = tsvCls.getDeclaredField("mTaskCornerRadiusPx");
-                                                    field.setAccessible(true);
-                                                    field.set(methodHookParam.thisObject, roundNumber);
+                                                if(roundNumber>0){
+                                                    if(Build.VERSION.SDK_INT == Build.VERSION_CODES.M){
+                                                        Field field = tsvCls.getDeclaredField("mConfig");
+                                                        field.setAccessible(true);
+                                                        Object mConfig = field.get(methodHookParam.thisObject);
+                                                        Field rcField = mConfig.getClass().getDeclaredField("taskViewRoundedCornerRadiusPx");
+                                                        rcField.setAccessible(true);
+                                                        rcField.set(mConfig,roundNumber);
+                                                    }else {
+                                                        Field field = tsvCls.getDeclaredField("mTaskCornerRadiusPx");
+                                                        field.setAccessible(true);
+                                                        field.set(methodHookParam.thisObject, roundNumber);
+                                                    }
                                                 }
                                             } catch (Throwable e) {
                                                 XposedBridge.log("^^^^^^^^^^^^^^mTaskCornerRadiusPx 未找到 ^^^^^^^^^^^^^^^^^");

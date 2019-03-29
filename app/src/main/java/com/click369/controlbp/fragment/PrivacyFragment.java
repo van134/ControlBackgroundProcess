@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.click369.controlbp.R;
 import com.click369.controlbp.activity.BaseActivity;
 import com.click369.controlbp.activity.MainActivity;
+import com.click369.controlbp.activity.NewDirActivity;
 import com.click369.controlbp.activity.TopSearchView;
 import com.click369.controlbp.adapter.IceUnstallAdapter;
 import com.click369.controlbp.adapter.PrivacyAdapter;
@@ -40,7 +41,7 @@ public class PrivacyFragment extends BaseFragment {
     private ListView listView;
     private TopSearchView topView;
     public static int curColor = Color.BLACK;
-    private TextView wifiTv,mobileTv,logTv,controlTv,switchTv;//alertTv,closeTv;
+    private TextView wifiTv,mobileTv,logTv,controlTv,switchTv,main_newdir_tv;//alertTv,closeTv;
     private SharedPreferences modPrefs;
     public PrivacyFragment() {
     }
@@ -67,6 +68,14 @@ public class PrivacyFragment extends BaseFragment {
         mobileTv = (TextView)v.findViewById(R.id.main_mobile_tv);
         controlTv = (TextView)v.findViewById(R.id.main_wakelock_tv);
         switchTv = (TextView)v.findViewById(R.id.main_prov_tv);
+        main_newdir_tv = (TextView)v.findViewById(R.id.main_newdir_tv);
+        main_newdir_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), NewDirActivity.class);
+                startActivity(intent);
+            }
+        });
         curColor = switchTv.getCurrentTextColor();
         adapter = new PrivacyAdapter(this.getActivity(),modPrefs);
         listView.setAdapter(adapter);

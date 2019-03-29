@@ -91,7 +91,7 @@ public class PrivacyLogAdapter extends BaseExpandableListAdapter{
 	@Override
 	public View getGroupView(int i, boolean b, View view, ViewGroup viewGroup) {
 		ViewHolder viewHolder;
-		String name = Common.PRIVACY_TITLES[i+2];
+		String name = Common.PRIVACY_LOG_TITLES[i+2];
 		if(view == null){
 			view= inflater.inflate(R.layout.item_wakelockone, null);
 			viewHolder = new ViewHolder();
@@ -139,7 +139,7 @@ public class PrivacyLogAdapter extends BaseExpandableListAdapter{
 			viewHolder.timeTv.setText("");
 			viewHolder.notallowcountTv.setText("");
 			viewHolder.allowcountTv.setText("");
-			viewHolder.setTv.setText(pl.isPrevent?"拒绝":"允许");
+			viewHolder.setTv.setText(pl.isPrevent?"已处理":"未处理");
 		}else{
 			viewHolder.nameTv.setText("");
 			viewHolder.timeTv.setText("");

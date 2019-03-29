@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:id="@+id/unlock_main_rl"
     android:background="#ff1cadfb">
 
-
+    <com.click369.controlbp.view.WaveProgressView
+        android:id="@+id/loadingImageView"
+        android:layout_centerInParent="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -49,14 +54,16 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/imageView6"
+            android:id="@+id/unlock_numberbackground_img"
             android:src="@mipmap/bolang"
             android:alpha="0.71"
+            android:visibility="invisible"
             android:layout_gravity="bottom"
             android:foregroundGravity="bottom"
             android:scaleType="fitXY" />
 
         <LinearLayout
+            android:id="@+id/unlock_numberbackground_ll"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

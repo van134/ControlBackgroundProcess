@@ -95,7 +95,7 @@ public class XposedDoze {
                                             file.createNewFile();
                                         }
                                     }
-                                } catch (RuntimeException e) {
+                                } catch (Throwable e) {
                                     e.printStackTrace();
 //									XposedBridge.log("++++++++++++++时间更新methoderr"+e);
                                 }
@@ -141,7 +141,7 @@ public class XposedDoze {
                     }
                 }
             }
-        }catch (RuntimeException e){
+        }catch (Throwable e){
             XposedBridge.log("^^^^^^^^^^^^^^toast error "+lpparam.packageName+"  "+e+"^^^^^^^^^^^^^^^^^");
         }
     }

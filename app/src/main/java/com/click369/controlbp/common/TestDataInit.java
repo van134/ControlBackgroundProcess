@@ -97,6 +97,8 @@ public class TestDataInit {
         autostart.putString("com.tencent.mtt/jumpactivity","com.tencent.mtt.external.reader.thirdcall.ThirdCallDispatchActivity");
         autostart.putBoolean("com.taobao.trip/checkautostart",true);
         autostart.putString("com.taobao.trip/homeactivity","com.alipay.mobile.quinox.LauncherActivity");
+        autostart.putBoolean("cn.goapk.market/checkautostart",true);
+        autostart.putString("cn.goapk.market/jumpactivity","cn.goapk.market.AnZhiGeTuiActivity");
         autostart.commit();
 
         SharedPreferences controlPrefs = SharedPrefsUtil.getPreferences(cxt,Common.PREFS_SETTINGNAME);// cxt.getSharedPreferences(Common.IPREFS_COLORBARTEST,Context.MODE_WORLD_READABLE);

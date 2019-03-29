@@ -33,6 +33,7 @@ import com.click369.controlbp.activity.ChangePhotoActivity;
 import com.click369.controlbp.activity.ColorSetActivity;
 import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.activity.UIBarBlackListActivity;
+import com.click369.controlbp.activity.UnLockActivity;
 import com.click369.controlbp.common.Common;
 import com.click369.controlbp.service.LightView;
 import com.click369.controlbp.service.RoundedCornerService;
@@ -44,6 +45,7 @@ import com.click369.controlbp.util.FileUtil;
 import com.click369.controlbp.util.Notify;
 import com.click369.controlbp.util.PermissionUtils;
 import com.click369.controlbp.util.SharedPrefsUtil;
+import com.click369.controlbp.view.WaveProgressView;
 
 import net.qiujuer.genius.blur.StackBlur;
 
@@ -752,7 +754,7 @@ public class UIControlFragment extends BaseFragment {
                     intent.putExtra("key",Common.PREFS_SETTING_UI_NOTIFY_SETCOLOR);
                     startActivity(intent);
                 }else if(v.equals(changeThemeTv)){
-                    AlertUtil.showListAlert(mainActivity, "请选择", new String[]{"自定义标题栏/侧栏主题色","恢复标题栏/侧栏默认主题色","","自定义列表背景主题色","恢复列表默认主题色","","自定义应用锁背景主题色","恢复应用锁默认主题色"}, new AlertUtil.InputCallBack() {
+                    AlertUtil.showListAlert(mainActivity, "请选择", new String[]{"自定义标题栏/侧栏主题色","恢复标题栏/侧栏默认主题色","自定义列表背景主题色","恢复列表默认主题色","自定义应用锁背景主题色","恢复应用锁默认主题色","自定义应用锁动画波浪颜色","恢复应用锁动画波浪颜色"}, new AlertUtil.InputCallBack() {
                         @Override
                         public void backData(String txt, int tag) {
                             if (tag == 0){
@@ -766,22 +768,29 @@ public class UIControlFragment extends BaseFragment {
                                 MainActivity.THEME_COLOR = "#1a9dac";
                                 MainActivity.THEME_TEXT_COLOR = "#1a9dac";
                                 ((MainActivity)getActivity()).initThemeColor();
-                            }else if(tag == 3){
+                            }else if(tag == 2){
                                 Intent intent = new Intent(getActivity(),ColorSetActivity.class);
                                 intent.putExtra("data","应用控制器列表背景主题色");
                                 intent.putExtra("key",Common.PREFS_SETTING_UI_THEME_BG_COLOR);
                                 startActivityForResult(intent,0x12);
-                            }else if(tag == 4){
+                            }else if(tag == 3){
                                 barPrefs.edit().putString(Common.PREFS_SETTING_UI_THEME_BG_COLOR,"#f4f4f4").commit();
                                 MainActivity.THEME_BG_COLOR = "#f4f4f4";
                                 ((MainActivity)getActivity()).setBgColor(Color.parseColor(MainActivity.THEME_BG_COLOR));
-                            }else if(tag == 6){
+                            }else if(tag == 4){
                                 Intent intent = new Intent(getActivity(),ColorSetActivity.class);
                                 intent.putExtra("data","应用锁背景主题色");
                                 intent.putExtra("key",Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR);
                                 startActivityForResult(intent,0x12);
-                            }else if(tag == 7){
+                            }else if(tag == 5){
                                 barPrefs.edit().putString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR).commit();
+                            }else if(tag == 6){
+                                Intent intent = new Intent(getActivity(),ColorSetActivity.class);
+                                intent.putExtra("data","应用锁背波浪动画颜色");
+                                intent.putExtra("key",Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR);
+                                startActivityForResult(intent,0x12);
+                            }else if(tag == 7){
+                                barPrefs.edit().putString(Common.PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR, "#88eeeeee").commit();
                             }
                         }
                     });

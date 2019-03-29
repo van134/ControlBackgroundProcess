@@ -45,7 +45,9 @@ public class EmptyActivity extends AppCompatActivity {
         lp.y = 0;
         lp.width = 1;
         lp.height = 1;
+
         window.setAttributes(lp);
+
         Log.i("CONTROL","start empty");
         if(this.getIntent().hasExtra("data")&&this.getIntent().getStringExtra("data").contains("启动服务")){
             Log.i("CONTROL","start service  启动服务");

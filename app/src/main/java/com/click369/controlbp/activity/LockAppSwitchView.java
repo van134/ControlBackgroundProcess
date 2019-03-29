@@ -22,7 +22,7 @@ public class LockAppSwitchView {
     private SharedPreferences settings;
     public TextView titleTv,setPwdTv;
     private FrameLayout setPwdFl;
-    public Switch isNotShowLockUISw,unlockNumberSw,offscLockSw,usePWDsw;
+    public Switch isNotShowLockUISw,unlockNumberSw,offscLockSw,usePWDsw,showAnimSw;
     private View v;
     private Context cxt;
     private int curColor = Color.BLACK;
@@ -41,26 +41,31 @@ public class LockAppSwitchView {
         offscLockSw = (Switch) v.findViewById(R.id.setting_offsclock_sw);
         unlockNumberSw = (Switch) v.findViewById(R.id.setting_showunlocknumber_sw);
         usePWDsw = (Switch) v.findViewById(R.id.setting_usepwd_sw);
+        showAnimSw = (Switch) v.findViewById(R.id.setting_showanim_sw);
         isNotShowLockUISw.setTextColor(curColor);
         unlockNumberSw.setTextColor(curColor);
         offscLockSw.setTextColor(curColor);
         usePWDsw.setTextColor(curColor);
+        showAnimSw.setTextColor(curColor);
         isNotShowLockUISw.setTag(0);
         offscLockSw.setTag(1);
         unlockNumberSw.setTag(2);
         usePWDsw.setTag(3);
+        showAnimSw.setTag(4);
 
 
         isNotShowLockUISw.setChecked(settings.getBoolean(Common.PREFS_APPSTART_ISSHOWUI,false));
         offscLockSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_OFFSCLOCK,true));
         unlockNumberSw.setChecked(settings.getBoolean(Common.PREFS_APPSTART_ISSHOWNUMBERLOCK,true));
         usePWDsw.setChecked(settings.getBoolean(Common.PREFS_SETTING_USEPWDLOCK,false));
+        showAnimSw.setChecked(settings.getBoolean(Common.PREFS_SETTING_LOCKISSHOWANIM,true));
 
         SwitchClick sc = new SwitchClick();
         isNotShowLockUISw.setOnCheckedChangeListener(sc);
         offscLockSw.setOnCheckedChangeListener(sc);
         unlockNumberSw.setOnCheckedChangeListener(sc);
         usePWDsw.setOnCheckedChangeListener(sc);
+        showAnimSw.setOnCheckedChangeListener(sc);
 
         setPwdTv.setEnabled(usePWDsw.isChecked());
         setPwdTv.setOnClickListener(new View.OnClickListener() {
@@ -78,7 +83,7 @@ public class LockAppSwitchView {
             BaseActivity.zhenDong(cxt);
             int tag= (Integer) buttonView.getTag();
             String names[] = {Common.PREFS_APPSTART_ISSHOWUI,Common.PREFS_SETTING_OFFSCLOCK,
-                    Common.PREFS_APPSTART_ISSHOWNUMBERLOCK,Common.PREFS_SETTING_USEPWDLOCK};
+                    Common.PREFS_APPSTART_ISSHOWNUMBERLOCK,Common.PREFS_SETTING_USEPWDLOCK,Common.PREFS_SETTING_LOCKISSHOWANIM};
             if(tag ==1){
                 WatchDogService.isOffScLockApp = isChecked;
             }if (tag == 3){

@@ -24,7 +24,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -78,6 +82,9 @@ public class XposedUtil {
                 i++;
             }else if ("cleanUpRemovedTaskLocked".equals(m.getName())&&!hms.containsKey("cleanUpRemovedTaskLocked")){
                 hms.put("cleanUpRemovedTaskLocked",m);
+                i++;
+            }else if ("doLowMemReportIfNeededLocked".equals(m.getName())&&!hms.containsKey("doLowMemReportIfNeededLocked")){
+                hms.put("doLowMemReportIfNeededLocked",m);
                 i++;
             }else if ("createRecentTaskInfoFromTaskRecord".equals(m.getName())&&!hms.containsKey("createRecentTaskInfoFromTaskRecord")){
                 hms.put("createRecentTaskInfoFromTaskRecord",m);
@@ -166,6 +173,7 @@ public class XposedUtil {
                     if(m.getParameterTypes().length>=n){
                         mt = m;
                     }
+                    n = m.getGenericParameterTypes().length;
                 }
             }
             if(mt!=null){
@@ -713,7 +721,9 @@ public class XposedUtil {
             return cls;
         }catch (Throwable e){
             e.printStackTrace();
-            XposedBridge.log("^^^^^^^^^^^^^^类未找到  "+name+"  "+e+"^^^^^^^^^^^^^^^^^");
+            if(!name.contains("tencent.mm")){
+                XposedBridge.log("类未找到  "+name+"  "+e);
+            }
         }
         return null;
     }
@@ -732,4 +742,93 @@ public class XposedUtil {
         stringBuilder.append("\n\n");
         return stringBuilder.toString();
     }
+
+
+    public static void setAdjByLrus(Class amsCls, Object ams, HashSet<String> pkgs, int adj){
+        try{
+            Field procsField = amsCls.getDeclaredField("mLruProcesses");
+            procsField.setAccessible(true);
+            ArrayList<Object> procs = new ArrayList<Object>((ArrayList<Object>)procsField.get(ams));
+            if(procs!=null&&procs.size()>0){
+                for(Object proc:procs){
+                    Field infoField = proc.getClass().getDeclaredField("info");
+                    infoField.setAccessible(true);
+                    ApplicationInfo info = (ApplicationInfo)infoField.get(proc);
+                    if(pkgs.contains(info.packageName)){
+                        setAdjByProcess(proc,adj);
+                    }
+                }
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+            XposedBridge.log("^^^^^^^^^^^^^^stopProcess err1 "+ e + "^^^^^^^^^^^^^^^^^");
+        }
+    }
+    public static void setAdjByLru(Class amsCls,Object ams,String pkg,int adj){
+        try{
+            Field procsField = amsCls.getDeclaredField("mLruProcesses");
+            procsField.setAccessible(true);
+            ArrayList<Object> procs = new ArrayList<Object>((ArrayList<Object>)procsField.get(ams));
+            if(procs!=null&&procs.size()>0){
+                for(Object proc:procs){
+                    Field infoField = proc.getClass().getDeclaredField("info");
+                    infoField.setAccessible(true);
+                    ApplicationInfo info = (ApplicationInfo)infoField.get(proc);
+                    if(info.packageName.equals(pkg)){
+                        setAdjByProcess(proc,adj);
+                    }
+                }
+            }
+        }catch (Throwable e){
+            e.printStackTrace();
+            XposedBridge.log("^^^^^^^^^^^^^^stopProcess err1 "+ e + "^^^^^^^^^^^^^^^^^");
+        }
+    }
+
+    public static void setAdjByProcess(Object proc,int adj){
+        try {
+
+
+            Field setAdjField = proc.getClass().getDeclaredField("setAdj");
+            setAdjField.setAccessible(true);
+            Field curAdjField = proc.getClass().getDeclaredField("curAdj");
+            curAdjField.setAccessible(true);
+            Field maxAdjField = proc.getClass().getDeclaredField("maxAdj");
+            maxAdjField.setAccessible(true);
+            Field cachedField = proc.getClass().getDeclaredField("cached");
+            cachedField.setAccessible(true);
+            setAdjField.set(proc,adj);
+            curAdjField.set(proc,adj);
+            maxAdjField.set(proc,adj);
+            cachedField.set(proc,true);
+        }catch (Throwable e){
+            XposedBridge.log("setADJ err "+e.getMessage());
+        }
+
+    }
+
+//    public static List changeList(Set<String> strs){
+//        ArrayList<String> lists = new ArrayList<>(strs);
+//        List list1 = new ArrayList();
+//        List list2 = new ArrayList();
+//        for(int i=0;i<lists.size();i++){
+//            Map param = new HashMap();
+//            param.put(lists.get(i).length(), lists.get(i));
+//            list1.add(param);
+//            list2.add(lists.get(i).length());
+//        }
+//        List newList = new ArrayList(new HashSet(list2));
+//        List resultList = new ArrayList();
+//        for(int j =0;j<newList.size();j++){
+//            List list = new ArrayList();
+//            for(int k=0;k<list1.size();k++){
+//                Map map = (Map)list1.get(k);
+//                if(map.get(newList.get(j)) != null){
+//                    list.add(map.get(newList.get(j)));
+//                }
+//            }
+//            resultList.add(list);
+//        }
+//        return resultList;
+//    }
 }

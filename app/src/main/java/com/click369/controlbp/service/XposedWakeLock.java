@@ -248,8 +248,14 @@ public class XposedWakeLock {
                         tagField.setAccessible(true);
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
-                        controlPrefs.reload();
+
+                        boolean isss = true;
+                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                           isSysProcess = true;
+                            isss = false;
+                        }
                         if (!isSysProcess) {
+                            controlPrefs.reload();
                             if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
 //                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
 //                                    (isTwoOpen && isMubeiStopOther&&muBeiPrefs.getInt(lpparam.packageName, -1) == 0)) {
@@ -267,7 +273,7 @@ public class XposedWakeLock {
                             }
                         }
                         wakeLockPrefs.reload();
-                        if (wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)  && mRefCountedField != null) {
+                        if (isss&&wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)  && mRefCountedField != null) {
                             boolean isAllow = true;
                             //是否在设置中
 //                            boolean isInSet = false;
@@ -325,9 +331,15 @@ public class XposedWakeLock {
                         tagField.setAccessible(true);
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
-                        controlPrefs.reload();
+
+                        boolean isss = true;
+                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                            isSysProcess = true;
+                            isss = false;
+                        }
                         if (!isSysProcess) {
 //                            muBeiPrefs.reload();
+                            controlPrefs.reload();
                             if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
 //                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
 //                                    (isTwoOpen && isMubeiStopOther&&muBeiPrefs.getInt(lpparam.packageName , -1) == 0)) {
@@ -336,7 +348,7 @@ public class XposedWakeLock {
                             }
                         }
                         wakeLockPrefs.reload();
-                        if (wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false) && mRefCountedField != null) {
+                        if (isss&&wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false) && mRefCountedField != null) {
                             boolean isAllow = true;
                             int jianGe = wakeLockPrefs.getInt(pkg + "+" + tag, 0) * 1000;
                             if (jianGe > 0) {
@@ -394,9 +406,18 @@ public class XposedWakeLock {
                         tagField.setAccessible(true);
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
-                        controlPrefs.reload();
+
+                        if(tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                            isSysProcess = true;
+                        }
+                        boolean isss = true;
+                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                            isSysProcess = true;
+                            isss = false;
+                        }
                         if (!isSysProcess) {
 //                            muBeiPrefs.reload();
+                            controlPrefs.reload();
                             if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen)) {
 //                            if ((controlPrefs.getBoolean(lpparam.packageName + "/wakelock", false) && isOneOpen) ||
 //                                    (muBeiPrefs.getInt(lpparam.packageName , -1) == 0 && isTwoOpen && isMubeiStopOther)) {
@@ -414,7 +435,7 @@ public class XposedWakeLock {
                             }
                         }
                         wakeLockPrefs.reload();
-                        if (wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)
+                        if (isss&&wakeLockPrefs.getBoolean(Common.PREFS_SETTING_WAKELOCK_LOOK, false)
                                 && mRefCountedField != null) {
                             int jianGe = wakeLockPrefs.getInt(pkg + "+" + tag, 0) * 1000;
                             String roleName = wakeLockPrefs.getString(pkg + "/startname", "");

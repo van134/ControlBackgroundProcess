@@ -83,6 +83,7 @@ public class RoundedCornerService{
         filter.addAction("com.click369.control.light.hide");
         filter.addAction("com.click369.control.light.changeposition");
         filter.addAction("com.click369.control.float.checkxp");
+        filter.addAction("com.click369.control.float.checkxpself");
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         context.registerReceiver(rec,filter);
         Intent check = new Intent("com.click369.control.ams.float.checkxp");
@@ -94,7 +95,7 @@ public class RoundedCornerService{
     Runnable checkRunable = new Runnable() {
         @Override
         public void run() {
-            Intent check = new Intent("com.click369.control.float.checkxp");
+            Intent check = new Intent("com.click369.control.float.checkxpself");
             check.putExtra("isfloatok",false);
             context.sendBroadcast(check);
         }
@@ -527,7 +528,7 @@ public class RoundedCornerService{
                     screenLightServiceUtil.remove();
                     screenLightServiceUtil.init();
                     screenLightServiceUtil.showLight(LightView.LIGHT_TYPE_TEST);
-                }else if(intent.getAction().equals("com.click369.control.float.checkxp")){
+                }else if(intent.getAction().equals("com.click369.control.float.checkxp")||intent.getAction().equals("com.click369.control.float.checkxpself")){
                     hander.removeCallbacks(checkRunable);
                     if(intent.hasExtra("isfloatok")){
                         WatchDogService.isHasXPFloatVewPermission = intent.getBooleanExtra("isfloatok",false);

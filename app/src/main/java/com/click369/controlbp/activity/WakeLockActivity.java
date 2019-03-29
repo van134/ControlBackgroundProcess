@@ -41,10 +41,14 @@ public class WakeLockActivity extends BaseActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        Intent intent = new Intent(this,MainActivity.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+//        startActivity(intent);
         setContentView(R.layout.fragment_wakelock);
         initView();
         setTitle("增强唤醒锁");
     }
+
 
     private void initView() {
         wakeLockPrefs = sharedPrefs.wakeLockPrefs;//SharedPrefsUtil.getPreferences(this, Common.PREFS_WAKELOCKNAME);//this.getActivity().getApplicationContext().getSharedPreferences(Common.PREFS_APPSETTINGS, Context.MODE_WORLD_READABLE);
@@ -213,6 +217,7 @@ public class WakeLockActivity extends BaseActivity {
     @Override
     public void onStart() {
         super.onStart();
+
     }
 
     @Override

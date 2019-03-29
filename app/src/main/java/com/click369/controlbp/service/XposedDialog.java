@@ -2,6 +2,8 @@ package com.click369.controlbp.service;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
@@ -46,17 +48,45 @@ public class XposedDialog {
                         Context context = (Context)(mContextField.get(methodHookParam.thisObject));
                         View mDecor = (View)(mDecorField.get(methodHookParam.thisObject));
                         String pkg = context.getPackageName();
-                        if (!Common.PACKAGENAME.equals(pkg)&&!"com.tencent.mm".equals(pkg)&&mDecor!=null){
+                        if (!Common.PACKAGENAME.equals(pkg)&&mDecor!=null){//&&!"com.tencent.mm".equals(pkg)
                             dialogPrefs.reload();
                             Set<String> keywords = dialogPrefs.getStringSet(Common.PREFS_SKIPDIALOG_KEYWORDS,new LinkedHashSet<String>());
                             if (keywords.size()>0){
                                 boolean isContains = false;
+
                                 for(String s:keywords){
                                     ArrayList<View> views = new ArrayList<View>();
-                                    mDecor.findViewsWithText(views,s,View.FIND_VIEWS_WITH_TEXT);
+                                    String text = "";
+                                    String apkName = "";
+                                    if(s.contains("@")){
+                                        String ss[] = s.split("@");
+                                        apkName = ss[0];
+                                        text = ss[1];
+                                    }else{
+                                        text = s;
+                                    }
+                                    mDecor.findViewsWithText(views,text,View.FIND_VIEWS_WITH_TEXT);
                                     if(views.size()>0){
                                         isContains = true;
-                                        break;
+                                        if(apkName.length()>0){
+                                            String appName = null;
+                                            try {
+                                                PackageManager pm = context.getPackageManager();
+                                                PackageInfo packageInfo = pm.getPackageInfo(pkg,PackageManager.GET_GIDS);
+                                                if(packageInfo.applicationInfo!=null&&packageInfo.applicationInfo.loadLabel(pm)!=null){
+                                                    appName = packageInfo.applicationInfo.loadLabel(pm).toString();
+                                                }
+                                            }catch (Exception e){
+                                                appName = null;
+                                            }
+                                            if(apkName.equals(appName)){
+                                                break;
+                                            }else{
+                                                isContains = false;
+                                            }
+                                        }else{
+                                            break;
+                                        }
                                     }
                                 }
                                 if(isContains){

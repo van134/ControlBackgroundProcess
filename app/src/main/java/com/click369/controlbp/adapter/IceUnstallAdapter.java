@@ -30,6 +30,7 @@ import com.click369.controlbp.activity.MainActivity;
 import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.bean.AppStateInfo;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.service.WatchDogService;
 import com.click369.controlbp.util.AlertUtil;
 import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.OpenCloseUtil;
@@ -258,10 +259,19 @@ public class IceUnstallAdapter extends BaseAdapter{
 			viewHolder.iceAppIv.setAlpha(1.0f);
 			if (data.isNotUnstall){
 				viewHolder.unstallIv.setEnabled(false);
+
 				viewHolder.unstallIv.setAlpha(0.3f);
+				if(WatchDogService.isNotUntallNotclean){
+					viewHolder.clearDataIv.setEnabled(false);
+					viewHolder.clearDataIv.setAlpha(0.3f);
+				}
 			}else{
 				viewHolder.unstallIv.setEnabled(true);
 				viewHolder.unstallIv.setAlpha(1.0f);
+				if(WatchDogService.isNotUntallNotclean) {
+					viewHolder.clearDataIv.setEnabled(true);
+					viewHolder.clearDataIv.setAlpha(1.0f);
+				}
 			}
 		}
 		if(!MainActivity.isModuleActive()){

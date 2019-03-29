@@ -25,7 +25,7 @@
             android:title="框架禁用/反检测" />
         <item
             android:id="@+id/nav_privacy_control"
-            android:title="网络/位置/权限" />
+            android:title="网络/权限/位置/重定向" />
         <item
             android:id="@+id/nav_adskip_control"
             android:title="广告/通知/对话框" />

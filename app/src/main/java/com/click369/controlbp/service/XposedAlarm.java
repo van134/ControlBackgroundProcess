@@ -277,12 +277,29 @@ public class XposedAlarm {
                     @Override
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         try {
+
+                            boolean isss = true;
                             controlPrefs.reload();
                             if ((controlPrefs.getBoolean(lpparam.packageName + "/alarm", false) && isOneOpen)) {
-                                param.setResult(null);
-                                return;
+//                                XposedBridge.log("Alarm "+tag+"  "+lpparam.packageName);
+                                String tag = tagIndex!=-1?(String) param.args[tagIndex]:null;
+                                tag = tag==null?"NONAME":tag;
+                                if (tag.equals("NONAME")) {
+                                    Object o = XposedHelpers.getAdditionalStaticField(pendingIntentClass, "action");
+                                    if (o != null) {
+                                        tag = (String) o;
+                                        XposedHelpers.setAdditionalStaticField(pendingIntentClass, "action", null);
+                                    }
+                                }
+
+                                if("com.tencent.mm".equals(lpparam.packageName)&&(tag.startsWith("ALARM_ACTION(1")&&tag.endsWith("8)")||"NONAME".equals(tag))){
+                                    isss = false;
+                                }else{
+                                    param.setResult(null);
+                                    return;
+                                }
                             }
-                            if(alarmPrefs!=null){
+                            if(isss&&alarmPrefs!=null){
                                 alarmPrefs.reload();
                                 if(alarmPrefs.getBoolean(Common.PREFS_SETTING_ALARM_LOOK,false)){
                                     int type = (Integer) param.args[0];
@@ -297,49 +314,52 @@ public class XposedAlarm {
                                         }
                                         String pkg = lpparam.packageName;
                                         if(("android".equals(lpparam.processName)&&"android".equals(pkg))||!"android".equals(lpparam.processName)){
-                                            String tag = tagIndex!=-1?(String) param.args[tagIndex]:null;
-                                            tag = tag==null?"NONAME":tag;
-                                            if (tag.equals("NONAME")){
-                                                Object o = XposedHelpers.getAdditionalStaticField(pendingIntentClass, "action");
-                                                if (o!=null){
-                                                    tag = (String)o;
-                                                    XposedHelpers.setAdditionalStaticField(pendingIntentClass, "action",null);
-                                                }
-                                            }
-                                            int jianGe = alarmPrefs.getInt(pkg + "+" + tag, 0) * 1000;
-                                            boolean isAllow = true;
-                                            if (jianGe > 0) {
-                                                long lastTime = getLastAlarmTime(alarmManagerClass,pkg, tag);
-                                                if (System.currentTimeMillis() - lastTime < jianGe) {
-                                                    isAllow = false;
-                                                }
-                                            }else {
-                                                String roleName = alarmPrefs.getString(pkg+"/startname","");
-                                                if(roleName.length()>3&&tag.startsWith(roleName)){
-                                                    int roleTime = alarmPrefs.getInt(pkg+"/starttime",0)*1000;
-                                                    long lastTime = getLastAlarmRoleTime(alarmManagerClass,pkg, roleName);
-                                                    if (System.currentTimeMillis() - lastTime < roleTime) {
-                                                        isAllow = false;
-                                                    }else{
-                                                        setLastAlarmRoleTime(alarmManagerClass,pkg,roleName,wakeTime);
+//                                            if(tag.startsWith("ALARM_ACTION(1")&&tag.endsWith("8)")){
+//                                            }else {
+                                                String tag = tagIndex!=-1?(String) param.args[tagIndex]:null;
+                                                tag = tag==null?"NONAME":tag;
+                                                if (tag.equals("NONAME")) {
+                                                    Object o = XposedHelpers.getAdditionalStaticField(pendingIntentClass, "action");
+                                                    if (o != null) {
+                                                        tag = (String) o;
+                                                        XposedHelpers.setAdditionalStaticField(pendingIntentClass, "action", null);
                                                     }
                                                 }
-                                            }
-                                            saveAlarmInfo(pkg, tag, alarmManagerClass, isAllow,wakeTime);
-
-                                            if (!isAllow) {
-                                                if(clssLength == 11&&param.args[5]!=null){
-                                                    PendingIntent pendingIntent = (PendingIntent) param.args[5];
-                                                    AlarmManager am = (AlarmManager)param.thisObject;
-                                                    am.cancel(pendingIntent);
-                                                }else if(Build.VERSION.SDK_INT > Build.VERSION_CODES.M&&clssLength == 11&&param.args[6]!=null){
-                                                    AlarmManager.OnAlarmListener listener = (AlarmManager.OnAlarmListener) param.args[6];
-                                                    AlarmManager am = (AlarmManager)param.thisObject;
-                                                    am.cancel(listener);
+                                                int jianGe = alarmPrefs.getInt(pkg + "+" + tag, 0) * 1000;
+                                                boolean isAllow = true;
+                                                if (jianGe > 0) {
+                                                    long lastTime = getLastAlarmTime(alarmManagerClass, pkg, tag);
+                                                    if (System.currentTimeMillis() - lastTime < jianGe) {
+                                                        isAllow = false;
+                                                    }
+                                                } else {
+                                                    String roleName = alarmPrefs.getString(pkg + "/startname", "");
+                                                    if (roleName.length() > 3 && tag.startsWith(roleName)) {
+                                                        int roleTime = alarmPrefs.getInt(pkg + "/starttime", 0) * 1000;
+                                                        long lastTime = getLastAlarmRoleTime(alarmManagerClass, pkg, roleName);
+                                                        if (System.currentTimeMillis() - lastTime < roleTime) {
+                                                            isAllow = false;
+                                                        } else {
+                                                            setLastAlarmRoleTime(alarmManagerClass, pkg, roleName, wakeTime);
+                                                        }
+                                                    }
                                                 }
-                                                param.setResult(null);
-                                                return;
-                                            }
+                                                saveAlarmInfo(pkg, tag, alarmManagerClass, isAllow, wakeTime);
+
+                                                if (!isAllow) {
+                                                    if (clssLength == 11 && param.args[5] != null) {
+                                                        PendingIntent pendingIntent = (PendingIntent) param.args[5];
+                                                        AlarmManager am = (AlarmManager) param.thisObject;
+                                                        am.cancel(pendingIntent);
+                                                    } else if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M && clssLength == 11 && param.args[6] != null) {
+                                                        AlarmManager.OnAlarmListener listener = (AlarmManager.OnAlarmListener) param.args[6];
+                                                        AlarmManager am = (AlarmManager) param.thisObject;
+                                                        am.cancel(listener);
+                                                    }
+                                                    param.setResult(null);
+                                                    return;
+                                                }
+//                                            }
                                         }
                                     }
                                 }

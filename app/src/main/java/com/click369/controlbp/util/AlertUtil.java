@@ -25,6 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.InputFilter;
@@ -246,7 +247,7 @@ public class AlertUtil {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static void inputAlert(final Activity cxt, final int tag, final InputCallBack ic){
-        final String holders[] = {"0-3600之间","0-3600之间","0-3600之间","0-3600之间","0-3600之间","60-3600之间","60-3600之间","60-3600之间","0-100之间","0-100之间"};
+        final String holders[] = {"0-3600之间","0-3600之间","0-3600之间","0-3600之间","0-3600之间","60-999999之间","60-999999之间","60-999999之间","0-100之间","0-100之间"};
         final String titles[] = {"返回时强退和墓碑延迟时长","后台时墓碑延迟时长","熄屏时强退和墓碑延迟时长","清除冗余数据","亮屏时打盹时长","熄屏时打盹时长","熄屏打盹延迟","应用控制器背景图片模糊度","应用控制器背景图片透明度"};
         final EditText et = new EditText(cxt);
         et.setHint(holders[tag]);
@@ -263,7 +264,10 @@ public class AlertUtil {
                         if (input.equals("")) {
                             Toast.makeText(cxt.getApplicationContext(), "不能为空！" + input, Toast.LENGTH_LONG).show();
                         }else {
-                            ic.backData(input,tag);
+                            if(input.length()>7){
+                                et.setText(input.substring(0,7));
+                            }
+                            ic.backData(et.getText().toString(),tag);
                         }
                     }
                 })
@@ -280,10 +284,13 @@ public class AlertUtil {
                             .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
                                     InputMethodManager.HIDE_NOT_ALWAYS);
                     String input = et.getText().toString();
+                    if(input.length()>7){
+                        et.setText(input.substring(0,7));
+                    }
                     if (input.equals("")) {
                         Toast.makeText(cxt.getApplicationContext(), "不能为空！" + input, Toast.LENGTH_LONG).show();
                     }else {
-                        ic.backData(input,tag);
+                        ic.backData(et.getText().toString(),tag);
                         ad.dismiss();
                     }
                     return true;
@@ -375,7 +382,9 @@ public class AlertUtil {
         et.setSelection(et.getText().length());
         et.setFilters(new InputFilter[]{new InputFilter.LengthFilter(16)});
         et.setInputType(InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE);
-        et.setKeyListener(DigitsKeyListener.getInstance("1234567890 -:"));
+        if(!"文件夹名称".equals(hit)){
+            et.setKeyListener(DigitsKeyListener.getInstance("1234567890 -:"));
+        }
         et.setBackgroundColor(Color.argb(20,0,0,0));
         et.setPadding(0,30,0,30);
         et.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
@@ -384,11 +393,11 @@ public class AlertUtil {
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         String input = et.getText().toString();
-                        if (input.equals("")) {
-                            Toast.makeText(cxt.getApplicationContext(), "不能为空！" + input, Toast.LENGTH_LONG).show();
-                        }else {
+//                        if (input.equals("")) {
+//                            Toast.makeText(cxt.getApplicationContext(), "不能为空！" + input, Toast.LENGTH_LONG).show();
+//                        }else {
                             ic.backData(input,0);
-                        }
+//                        }
                     }
                 })
                 .setNegativeButton("取消", null)
@@ -525,6 +534,54 @@ public class AlertUtil {
                         ic.backData(input,0);
                         ad.dismiss();
                     }
+                    return true;
+                }
+                return false;
+            }
+        });
+        et.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                et.setFocusableInTouchMode(true);
+                et.requestFocus();
+                InputMethodManager inputManager = (InputMethodManager)et.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.showSoftInput(et, 0);
+
+            }
+        },200);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static void inputTextAlert(final Activity cxt, final String value, final InputCallBack ic){
+        final EditText et = new EditText(cxt);
+        et.setText(value);
+        et.setInputType(InputType.TYPE_TEXT_VARIATION_LONG_MESSAGE);
+        et.setBackgroundColor(Color.argb(20,0,0,0));
+        et.setPadding(0,30,0,30);
+        et.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+        final AlertDialog ad = new AlertDialog.Builder(cxt).setTitle("请输入内容")
+                .setView(et)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String input = et.getText().toString();
+                        ic.backData(input,0);
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+        et.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId,
+                                          KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    // 先隐藏键盘
+                    ((InputMethodManager) et.getContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE))
+                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    String input = et.getText().toString();
+                    ic.backData(input,0);
+                    ad.dismiss();
                     return true;
                 }
                 return false;
