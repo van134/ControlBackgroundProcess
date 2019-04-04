@@ -68,6 +68,8 @@
                     android:layout_marginLeft="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
+                    android:paddingRight="15dp"
+                    android:paddingLeft="2dp"
                     android:text="被屏蔽的对话框弹出时显示简短提示"
                     android:id="@+id/skip_dialog_sw"
                     android:checked="false" />

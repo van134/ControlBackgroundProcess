@@ -90,6 +90,7 @@ public class Common {
 
     public static String PREFS_APPSTART_ISSHOWNUMBERLOCK ="isshownumberlock";
     public static String PREFS_APPSTART_ISSHOWUI ="isshowui";
+    public static String PREFS_SETTING_LOCKISSHOWANIM ="lockisshowanim";
     public static String PREFS_SETTING_BACKLOGOPEN ="backlogopen";
     public static String PREFS_SETTING_BACKKILLSELF ="backkillself";
     public static String PREFS_SETTING_BACKAPPAUTOADD ="backappautoadd";
@@ -102,6 +103,7 @@ public class Common {
     public static String PREFS_SETTING_AUTOSTARTAPPAUTOADD ="autostartappautoadd";
     public static String PREFS_SETTING_ICEBACKICE ="icebackice";
     public static String PREFS_SETTING_ICEOFFICE ="iceoffice";
+    public static String PREFS_SETTING_NOTUNSTALLNOTCLEAN ="notunstallnotclean";
     public static String PREFS_SETTING_ICESTOPICE ="icestopice";
     public static String PREFS_SETTING_BACKDELAYTIME ="backdelaytime";
     public static String PREFS_SETTING_HOMEDELAYTIME ="homedelaytime";
@@ -207,6 +209,7 @@ public class Common {
     public static String PREFS_SETTING_UI_THEME_COLOR ="uithemecolor";
     public static String PREFS_SETTING_UI_THEME_BG_COLOR ="uithemebgcolor";
     public static String PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR ="uithemeunlockbgcolor";
+    public static String PREFS_SETTING_UI_THEME_UNLOCK_ANIM_COLOR ="uithemeunlockanimcolor";
     public static String PREFS_SETTING_UI_THEME_TEXT_COLOR ="uithemetextcolor";
 
     public static String PREFS_SETTING_APPPWD ="apppwd";
@@ -215,7 +218,10 @@ public class Common {
     public static String PREFS_SKIPDIALOG_KEYWORDS ="keywords";
     public static String PREFS_SKIPNOTIFY_KEYWORDS ="notifykeywords";
     public static String PREFS_SKIPDIALOG_ISSHOWTOAST ="isshowtoast";
-//    public static String PREFS_SETTING_UI_ALWAYS_CHANGE ="alwayschange";
+
+
+    public static String PREFS_PRIVATE_NEWDIR_ALLSWITCH ="newdirallswitch";
+    public static String PREFS_PRIVATE_NEWDIR_KEYWORDS ="newdirkeywords";
 
 //    public static String EX_PREVENTSERVICE = "preventService";
 //    public static String EX_PREVENTALARM = "preventAlarm";
@@ -244,7 +250,11 @@ public class Common {
     public static int PRI_TYPE_RUNLIST = 5;
     public static int PRI_TYPE_APPLIST = 6;
     public static int PRI_TYPE_DEVICEINFO = 7;
-    //public static int PRI_TYPE_CONTACTINFO = 8;
+    public static int PRI_TYPE_DEVICEIMEIINFO = 8;
+    public static int PRI_TYPE_DEVICEIMSIINFO = 9;
+    public static int PRI_TYPE_REDIRFIEDIR = 10;
+    public static int PRI_TYPE_NETTYPE_WIFI = 11;
+    public static int PRI_TYPE_NETTYPE_4G= 12;
     public static String PRIVACY_TITLES[] = {
             "为该APP手动选择位置",
             "为该APP手动设置时间",
@@ -253,8 +263,27 @@ public class Common {
             "获取手机WIFI或MAC地址信息",
             "获取正在运行程序列表",
             "获取已安装应用程序信息",
-            "获取手机设备信息"//,
-            //"获取手机通讯录信息"
+            "获取手机设备其他信息",
+            "获取手机IMEI信息",
+            "获取手机IMSI信息",
+            "重定向内存文件夹",
+            "欺骗网络模式为WIFI",
+            "欺骗网络模式为流量"
+    };
+    public static String PRIVACY_LOG_TITLES[] = {
+            "为该APP手动选择位置",
+            "为该APP手动设置时间",
+            "获取GPS地理位置信息",
+            "获取运营商基站信息",
+            "获取手机WIFI或MAC地址信息",
+            "获取正在运行程序列表",
+            "获取已安装应用程序信息",
+            "获取手机设备其他信息",
+            "获取手机IMEI信息",
+            "获取手机IMSI信息",
+            "获取内存文件夹",
+            "获取网络模式_WIFI",
+            "获取网络模式_流量"
     };
     public static String PRIVACY_KEYS[] = {
             "CHANGELOC",
@@ -264,8 +293,12 @@ public class Common {
             "GETWIFIINFO",
             "RUNNINGLIST",
             "APPLICATIONINFOS",
-            "GETIMEIINFO"//,
-           // "GETCONTACT"
+            "GETOTHERINFO",
+            "GETIMEIINFO",
+            "GETIMSIINFO",
+            "REDIRFILEDIR",
+            "NETTYPEWIFI",
+            "NETTYPE4G",
     };
     public static String PRIVACY_ALERT[] = {
             "(设置后会自动阻止部分权限，防止被检测到)",
@@ -275,8 +308,12 @@ public class Common {
             "(WIFI相关可帮助APP定位)",
             "(正在运行的服务应用等信息)",
             "(防止读取应用列表)",
-            "(IMEI、ICCID、IMSI、MEID阻止后随机化)"//,
-           // "(防止读取通讯录列表)"
+            "(ICCID、MEID阻止后随机化)",
+            "(IMEI阻止后随机化，长按可自定义)",
+            "(IMSI阻止后随机化，长按可自定义)",
+            "(重定向后默认zcache文件夹，长按可自定义)",
+            "(启用后APP检测为WIFI模式)",
+            "(启用后APP检测为流量模式)"
     };
 
 
@@ -302,5 +339,9 @@ public class Common {
     public static String MTEST_NAME_H=  "dUrl";
     public static String MTEST_NAME_I=  "Launc";
     public static String MTEST_NAME_J=  "herUI";
+
+
+    public static String MTEST_NAME_K=  ".WebV";
+    public static String MTEST_NAME_L=  "iewUI";
 
 }

@@ -138,6 +138,7 @@ public class WatchDogService extends Service {
     public static boolean isKillRun = false;
     public static boolean isExitRemoveRecent = true;
     public static boolean isNotExitAudioPlay = false;
+    public static boolean isAutoStartNotNotify = false;
 
     public  static boolean isCharging = false;
     public  static boolean isHookOff = false;//是否接电话中
@@ -223,6 +224,7 @@ public class WatchDogService extends Service {
                     key.endsWith("notclean")||
                     key.endsWith("blur")||
                     key.endsWith("forceclean")||
+                    key.endsWith("preventnotify")||
                     key.endsWith("notshow")||
                     key.endsWith(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY)||
                     key.endsWith(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)||
@@ -256,7 +258,14 @@ public class WatchDogService extends Service {
             }else if(appLoader.isAppChange||AppLoaderUtil.allAppInfos.size()==0){
                 appLoader.loadApp();
             }
-            initSomeData();
+        }
+        @Override
+        public void onLoadAppSettingFinish() {
+        }
+    };
+    Runnable delRec = new Runnable() {
+        @Override
+        public void run() {
             if (isExitRemoveRecent&&!isAlreadyCheckRecent&&SystemClock.elapsedRealtime()<1000*60*3){//开机移除没运行的
                 HashSet<String> pkgs = new HashSet<String>();
                 for(AppInfo ai:AppLoaderUtil.allAppInfos){
@@ -271,10 +280,6 @@ public class WatchDogService extends Service {
                 sendBroadcast(intent1);
                 isAlreadyCheckRecent = true;
             }
-        }
-        @Override
-        public void onLoadAppSettingFinish() {
-            initSomeData();
         }
     };
     @Override
@@ -319,6 +324,7 @@ public class WatchDogService extends Service {
         sharedPrefsUtil.setTimeStopPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
         sharedPrefsUtil.recentPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
         sharedPrefsUtil.settings.registerOnSharedPreferenceChangeListener(prefsListener);
+        sharedPrefsUtil.adPrefs.registerOnSharedPreferenceChangeListener(prefsListener);
 
         IntentFilter ifliter = new IntentFilter();
         ifliter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -432,6 +438,7 @@ public class WatchDogService extends Service {
         BaseActivity.isZhenDong = sharedPrefsUtil.settings.getBoolean(Common.PREFS_SETTING_ZHENDONG,true);
         isAlwaysKillOff = sharedPrefsUtil.settings.getBoolean(Common.PREFS_SETTING_ISALWAYSKILLOFF,false);
         isSetTimeStopNotShowDialog = sharedPrefsUtil.settings.getBoolean(Common.PREFS_SETTING_SETTIMESTOPNOTSHOWDIALOG,false);
+        isAutoStartNotNotify = sharedPrefsUtil.settings.getBoolean(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY,false);
 
         File killTimeFile = new File(getFilesDir(),"killtime");
         if(killTimeFile.exists()){
@@ -491,13 +498,15 @@ public class WatchDogService extends Service {
                public void run() {
                    appLoader.loadLocalApp();
                }
-           },3000);
+           },2000);
         }else{
             appLoader.loadLocalApp();
         }
         if(!isRoot){
             checkRoot();
         }
+
+        initSomeData();
     }
 
     public static void killAndRestartSelf(Context context){
@@ -739,30 +748,42 @@ public class WatchDogService extends Service {
             e.printStackTrace();
         }
     }
-
+    ArrayList<String> imePkgs = new ArrayList<String>();
     private void initSomeData(){
-        Set<String>  launcherPkgs = PackageUtil.getLauncherPackageName(this);
-        ArrayList<String> imePkgs = PackageUtil.getInputPackageName(this);
-        notLightPkgs.addAll(imePkgs);
-        notLightPkgs.add("android");
-        notLightPkgs.add("com.android.dialer");
-        for(String l:launcherPkgs){
-            if(AppLoaderUtil.allAppStateInfos.containsKey(l)){
-                AppLoaderUtil.allAppStateInfos.get(l).isHomePkg = true;
-            }
-        }
-        launcherPkgs.clear();
-        for(String i:imePkgs){
-            if(AppLoaderUtil.allAppStateInfos.containsKey(i)) {
-                AppLoaderUtil.allAppStateInfos.get(i).isImePkg = true;
-            }
-        }
-        imePkgs.clear();
+       handler.postDelayed(new Runnable() {
+           @Override
+           public void run() {
+               Set<String>  launcherPkgs = PackageUtil.getLauncherPackageName(WatchDogService.this);
+               imePkgs.clear();;
+               imePkgs.addAll(PackageUtil.getInputPackageName(WatchDogService.this));
+               notLightPkgs.addAll(imePkgs);
+               notLightPkgs.add("android");
+               notLightPkgs.add("com.android.dialer");
+               for(String l:launcherPkgs){
+                   if(AppLoaderUtil.allAppStateInfos.containsKey(l)){
+                       AppLoaderUtil.allAppStateInfos.get(l).isHomePkg = true;
+                   }
+               }
+               launcherPkgs.clear();
+               for(String i:imePkgs){
+                   if(AppLoaderUtil.allAppStateInfos.containsKey(i)) {
+                       AppLoaderUtil.allAppStateInfos.get(i).isImePkg = true;
+                   }
+               }
+               imePkgs.clear();
+           }
+       },5000);
         if(!isProcessRestart&&!isAlreadyLoadNetControl){
             handler.removeCallbacks(initNetRunnable);
-            handler.postDelayed(initNetRunnable,2000);
+            handler.postDelayed(initNetRunnable,1000*10);
         }
+
+        handler.removeCallbacks(delRec);
+        handler.postDelayed(delRec,1000*10);
     }
+
+
+
     Runnable initNetRunnable = new Runnable() {
         @Override
         public void run() {
@@ -870,106 +891,111 @@ public class WatchDogService extends Service {
         }
     };
     private void stopMubeiIdleApp(){
-        if(!itemBACKHOMEOFFIsOpen){
-            return;
-        }
-        HashSet<String> confirmdels = new HashSet<>();
-        HashSet<String> runs = new HashSet<String>(AppLoaderUtil.runLists);
-        for(String key:runs){
-            AppStateInfo asi = AppLoaderUtil.allAppStateInfos.get(key);
-            AppInfo ai = AppLoaderUtil.allHMAppInfos.get(key);
-            if(ai==null||
-                    ai.isblackControlXp||
-                    ai.packageName.equals("com.google.android.gms")||
-                    ai.packageName.equals("com.google.android.gsf")||
-                    ai.packageName.equals("com.google.android.tts")){
-                continue;
-            }
-            if(asi==null){
-                asi = new AppStateInfo();
-                AppLoaderUtil.allAppStateInfos.put(key,asi);
-            }
-            boolean backTimeOK = (System.currentTimeMillis()-asi.backStartTime>=delayBackTime*950||(isScreenOff&&delayBackTime<7));
-            boolean homeTimeOK = (System.currentTimeMillis()-asi.homeStartTime>=delayHomeTime*950||(isScreenOff&&delayHomeTime<7));
-            if(((isNotExitAudioPlay&&!asi.isHasAudioFocus)||!isNotExitAudioPlay)&&
-              (!ai.isNotifyNotExit||(ai.isNotifyNotExit&&!asi.isHasNotify))&&
-               !key.equals(nowPkgName)){
-                boolean isInBack = false;
-                if(isAtuoStopIce&&asi.isOpenFromIceRome&&backTimeOK&&asi.isPressKeyBack){
-                    isInBack = true;
-                    asi.isOpenFromIceRome = false;
-                    Intent intentm = new Intent("com.click369.control.pms.disablepkg");
-                    intentm.putExtra("pkg",ai.packageName);
-                    sendBroadcast(intentm);
-                    ShellUtilNoBackData.execCommand("pm disable " + key);
-                    Log.i("CONTROL","BACK ICE "+ai.packageName);
-                }else if(ai.isBackForceStop&&backTimeOK){
-                    if(asi.isPressKeyBack) {
-                        isInBack = true;
-                        XposedStopApp.stopApk(key, WatchDogService.this);
-                        if(isAlreadyOpenCamera&&ai.packageName.toLowerCase().contains("camera")){
-                            isAlreadyOpenCamera = false;
-                            cleanCache(false);
-                        }
-                        Log.i("CONTROL","BACK STOP IMMD "+ai.packageName);
-                    }else if(!asi.isPressKeyHome){
-                        isInBack = true;
-                        if(!isXPstop&&!isNotNeedAccessibilityService){
-                            XposedStopApp.stopApk(key, WatchDogService.this);
-                            Log.i("CONTROL","BACK STOP IMMD "+ai.packageName);
-                        }else{
+        new Thread(){
+            @Override
+            public void run() {
+                if(!itemBACKHOMEOFFIsOpen){
+                    return;
+                }
+                HashSet<String> confirmdels = new HashSet<>();
+                HashSet<String> runs = new HashSet<String>(AppLoaderUtil.runLists);
+                for(String key:runs){
+                    AppStateInfo asi = AppLoaderUtil.allAppStateInfos.get(key);
+                    AppInfo ai = AppLoaderUtil.allHMAppInfos.get(key);
+                    if(ai==null||
+                            ai.isblackControlXp||
+                            ai.packageName.equals("com.google.android.gms")||
+                            ai.packageName.equals("com.google.android.gsf")||
+                            ai.packageName.equals("com.google.android.tts")){
+                        continue;
+                    }
+                    if(asi==null){
+                        asi = new AppStateInfo();
+                        AppLoaderUtil.allAppStateInfos.put(key,asi);
+                    }
+                    boolean backTimeOK = (System.currentTimeMillis()-asi.backStartTime>=delayBackTime*950||(isScreenOff&&delayBackTime<7));
+                    boolean homeTimeOK = (System.currentTimeMillis()-asi.homeStartTime>=delayHomeTime*950||(isScreenOff&&delayHomeTime<7));
+                    if(((isNotExitAudioPlay&&!asi.isHasAudioFocus)||!isNotExitAudioPlay)&&
+                            (!ai.isNotifyNotExit||(ai.isNotifyNotExit&&!asi.isHasNotify))&&
+                            !key.equals(nowPkgName)){
+                        boolean isInBack = false;
+                        if(isAtuoStopIce&&asi.isOpenFromIceRome&&backTimeOK&&asi.isPressKeyBack){
+                            isInBack = true;
+                            asi.isOpenFromIceRome = false;
+                            Intent intentm = new Intent("com.click369.control.pms.disablepkg");
+                            intentm.putExtra("pkg",ai.packageName);
+                            sendBroadcast(intentm);
+                            ShellUtilNoBackData.execCommand("pm disable " + key);
+                            Log.i("CONTROL","BACK ICE "+ai.packageName);
+                        }else if(ai.isBackForceStop&&backTimeOK){
+                            if(asi.isPressKeyBack) {
+                                isInBack = true;
+                                XposedStopApp.stopApk(key, WatchDogService.this);
+                                if(isAlreadyOpenCamera&&ai.packageName.toLowerCase().contains("camera")){
+                                    isAlreadyOpenCamera = false;
+                                    cleanCache(false);
+                                }
+                                Log.i("CONTROL","BACK STOP IMMD "+ai.packageName);
+                            }else if(!asi.isPressKeyHome){
+                                isInBack = true;
+                                if(!isXPstop&&!isNotNeedAccessibilityService){
+                                    XposedStopApp.stopApk(key, WatchDogService.this);
+                                    Log.i("CONTROL","BACK STOP IMMD "+ai.packageName);
+                                }else{
 //                            if(!"com.coolapk.market".equals(key)){
-                                confirmdels.add(key);
+                                    confirmdels.add(key);
 //                            }
+                                }
+                                Log.i("CONTROL","BACK STOP CONFIRM "+ai.packageName);
+                            }
+                        }else if(ai.isBackMuBei&&backTimeOK){
+                            isInBack = true;
+                            startMuBei(key);
+                            Log.i("CONTROL","BACK MUBEI "+ai.packageName);
                         }
-                        Log.i("CONTROL","BACK STOP CONFIRM "+ai.packageName);
+
+                        if((isScreenOff||isAlwaysKillOff)&&(asi.isReadyOffMuBei||asi.isReadyOffStop||asi.isReadyOffIce)&&
+                                (System.currentTimeMillis()-asi.offScTime>delayOffTime*1000)){
+                            if(isAtuoOffScIce&&asi.isOpenFromIceRome){
+                                asi.isOpenFromIceRome = false;
+                                asi.isReadyOffIce = false;
+
+                                ShellUtilNoBackData.execCommand("pm disable " + key);
+                                Intent intentm = new Intent("com.click369.control.pms.disablepkg");
+                                intentm.putExtra("pkg",ai.packageName);
+                                sendBroadcast(intentm);
+                                Log.i("CONTROL","OFF ICE "+ai.packageName);
+                            }else if(ai.isOffscForceStop){
+                                asi.isReadyOffStop = false;
+                                XposedStopApp.stopApk(key, WatchDogService.this);
+                                Log.i("CONTROL","OFF STOPA "+ai.packageName);
+                            }else if(!asi.isInMuBei&&ai.isOffscMuBei){
+                                asi.isReadyOffMuBei = false;
+                                startMuBei(key);
+                                Log.i("CONTROL","OFF MUBEI "+ai.packageName);
+                            }
+                        }
+                        if(!isInBack&&!asi.isInMuBei&&ai.isHomeMuBei&&homeTimeOK){
+                            startMuBei(key);
+                            Log.i("CONTROL","HOME MUBEI "+ai.packageName);
+                        }else if(!isInBack&&!asi.isInIdle&&ai.isHomeIdle&&homeTimeOK){
+                            startIdle(key);
+                            Log.i("CONTROL","HOME IDLE "+ai.packageName);
+                        }
                     }
-                }else if(ai.isBackMuBei&&backTimeOK){
-                    isInBack = true;
-                    startMuBei(key);
-                    Log.i("CONTROL","BACK MUBEI "+ai.packageName);
                 }
 
-
-                if((isScreenOff||isAlwaysKillOff)&&(asi.isReadyOffMuBei||asi.isReadyOffStop||asi.isReadyOffIce)&&
-                        (System.currentTimeMillis()-asi.offScTime>delayOffTime*1000)){
-                    if(isAtuoOffScIce&&asi.isOpenFromIceRome){
-                        asi.isOpenFromIceRome = false;
-                        asi.isReadyOffIce = false;
-
-                        ShellUtilNoBackData.execCommand("pm disable " + key);
-                        Intent intentm = new Intent("com.click369.control.pms.disablepkg");
-                        intentm.putExtra("pkg",ai.packageName);
-                        sendBroadcast(intentm);
-                        Log.i("CONTROL","OFF ICE "+ai.packageName);
-                    }else if(ai.isOffscForceStop){
-                        asi.isReadyOffStop = false;
-                        XposedStopApp.stopApk(key, WatchDogService.this);
-                        Log.i("CONTROL","OFF STOPA "+ai.packageName);
-                    }else if(!asi.isInMuBei&&ai.isOffscMuBei){
-                        asi.isReadyOffMuBei = false;
-                        startMuBei(key);
-                        Log.i("CONTROL","OFF MUBEI "+ai.packageName);
+                if(confirmdels.size()>0){
+                    try {
+                        Intent intentDel = new Intent("com.click369.control.ams.confirmforcestop");
+                        intentDel.putExtra("pkgs",confirmdels);
+                        sendBroadcast(intentDel);
+                        confirmdels.clear();
+                    }catch (Exception e){
                     }
-                }
-
-                if(!isInBack&&!asi.isInMuBei&&ai.isHomeMuBei&&homeTimeOK){
-                    startMuBei(key);
-                    Log.i("CONTROL","HOME MUBEI "+ai.packageName);
-                }else if(!isInBack&&!asi.isInIdle&&ai.isHomeIdle&&homeTimeOK){
-                    startIdle(key);
-                    Log.i("CONTROL","HOME IDLE "+ai.packageName);
                 }
             }
-        }
-
-
-        if(confirmdels.size()>0){
-            Intent intentDel = new Intent("com.click369.control.ams.confirmforcestop");
-            intentDel.putExtra("pkgs",confirmdels);
-            sendBroadcast(intentDel);
-            confirmdels.clear();
-        }
+        }.start();
     }
 
 
@@ -1706,6 +1732,7 @@ public class WatchDogService extends Service {
         if (TextUtils.isEmpty(apk)||
             ContainsKeyWord.isContainsNotListenerApk(apk)||
             isScreenOff||
+                imePkgs.contains(apk)||
                 (!ISHOOKOK&&notLightPkgs.contains(apk))||
                 (Common.PACKAGENAME.equals(apk)&&(AppConfigActivity.class.getName().equals(cls)||
                         UnLockActivity.class.getName().equals(cls)))){

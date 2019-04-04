@@ -63,8 +63,8 @@ public class ChangeLocActivity extends BaseActivity{
         curColor = alertTv.getCurrentTextColor();
         pkg = getIntent().getStringExtra("pkg");
         name = getIntent().getStringExtra("name");
-        lon = getIntent().getStringExtra("lon");
-        lat = getIntent().getStringExtra("lat");
+        lon = getIntent().getStringExtra("lon")+"";
+        lat = getIntent().getStringExtra("lat")+"";
         isrechange = getIntent().getBooleanExtra("isrechange",false);
         webView=new WebView(this);
 
@@ -155,17 +155,17 @@ public class ChangeLocActivity extends BaseActivity{
         webSettings.setDomStorageEnabled(true);//主要是这句
         webSettings.setJavaScriptEnabled(true);//启用js
         webSettings.setBlockNetworkImage(false);//解决图片不显示
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setLoadsImagesAutomatically(true);
-        webSettings.setAppCacheEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.supportMultipleWindows();
-        webSettings.setAllowContentAccess(true);
+//        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+//        webSettings.setLoadsImagesAutomatically(true);
+//        webSettings.setAppCacheEnabled(true);
+//        webSettings.setDomStorageEnabled(true);
+//        webSettings.supportMultipleWindows();
+//        webSettings.setAllowContentAccess(true);
         webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setSavePassword(true);
-        webSettings.setSaveFormData(true);
+//        webSettings.setUseWideViewPort(true);
+//        webSettings.setLoadWithOverviewMode(true);
+//        webSettings.setSavePassword(true);
+//        webSettings.setSaveFormData(true);
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setJavaScriptEnabled(true);
@@ -243,7 +243,10 @@ public class ChangeLocActivity extends BaseActivity{
     @Override
     protected void onStop() {
         super.onStop();
-        cm.removePrimaryClipChangedListener(lis);
+        try {
+            cm.removePrimaryClipChangedListener(lis);
+        }catch (Exception e){}
+
     }
 
     @Override
@@ -275,7 +278,10 @@ public class ChangeLocActivity extends BaseActivity{
     @Override
     protected void onStart() {
         super.onStart();
-        cm.addPrimaryClipChangedListener(lis);
+        try {
+            cm.addPrimaryClipChangedListener(lis);
+        }catch (Exception e){}
+
     }
 
 }

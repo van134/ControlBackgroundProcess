@@ -274,6 +274,8 @@ public class SettingFragment extends BaseFragment {
                 WatchDogService.isSetTimeStopNotShowDialog = isChecked;
                 setTimeStopZWModeSw.setEnabled(!isChecked);
                 setTimeStopPwdModeSw.setEnabled(!isChecked);
+            }else if(tag ==20){
+                WatchDogService.isAutoStartNotNotify = isChecked;
             }
             settings.edit().putBoolean(names[tag],isChecked).commit();
         }

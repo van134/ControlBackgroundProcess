@@ -149,16 +149,21 @@ public class IFWFragment extends BaseFragment {
         if(isStrart||!settings.getBoolean(Common.PREFS_NAME_IFWCHANGE,true)){
             return;
         }
+
         new Thread() {
             @Override
             public void run() {
                 isStrart = true;
-                boolean isOpen = SELinuxUtil.isSELOpen();
-                if(isOpen){
-                    SELinuxUtil.closeSEL();
-                }
+
+
+//                boolean isOpen = SELinuxUtil.isSELOpen();
+//                if(isOpen){
+//                    SELinuxUtil.closeSEL();
+//                }
 
                 try {
+                    SELinuxUtil.closeSEL();
+                    Thread.sleep(2000);
                     h.post(new Runnable() {
                         @Override
                         public void run() {
@@ -291,9 +296,9 @@ public class IFWFragment extends BaseFragment {
                 }catch (Exception e){
 
                 }finally {
-                    if(isOpen){
-                        SELinuxUtil.openSEL();
-                    }
+//                    if(isOpen){
+//                        SELinuxUtil.openSEL();
+//                    }
                 }
             }
         }.start();
@@ -328,11 +333,12 @@ public class IFWFragment extends BaseFragment {
             public void run() {
 
                 synchronized (appLoader.allAppInfos) {
-                    boolean isSEL = SELinuxUtil.isSELOpen();
-                    if (isSEL) {
-                        SELinuxUtil.closeSEL();
-                    }
+
+
+
                     try{
+                        SELinuxUtil.closeSEL();
+                        Thread.sleep(2000);
                         //                    PackageManager pm = IFWFragment.this.getActivity().getApplication().getPackageManager();
                         ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
                         apps.addAll(adapter.bjdatas);
@@ -403,9 +409,7 @@ public class IFWFragment extends BaseFragment {
                     }catch (Exception e){
 
                     } finally {
-                        if(isSEL){
-                            SELinuxUtil.openSEL();
-                        }
+
                     }
                 }
             }
@@ -433,11 +437,9 @@ public class IFWFragment extends BaseFragment {
         new Thread(){
             @Override
             public void run() {
-                boolean isSEL = SELinuxUtil.isSELOpen();
-                if(isSEL){
-                    SELinuxUtil.closeSEL();
-                }
                 try{
+                    SELinuxUtil.closeSEL();
+                    Thread.sleep(2000);
                     PackageManager pm = IFWFragment.this.getActivity().getApplication().getPackageManager();
                     ArrayList<AppInfo> apps = new ArrayList<AppInfo>();
                     apps.addAll(adapter.bjdatas);
@@ -496,9 +498,9 @@ public class IFWFragment extends BaseFragment {
                 }catch (Exception e){
 
                 } finally {
-                    if(isSEL){
-                        SELinuxUtil.openSEL();
-                    }
+//                    if(isSEL){
+//                        SELinuxUtil.openSEL();
+//                    }
                 }
             }
         }.start();
@@ -515,12 +517,9 @@ public class IFWFragment extends BaseFragment {
         new Thread(){
             @Override
             public void run() {
-                boolean isSEL = SELinuxUtil.isSELOpen();
-                if(isSEL){
-                    SELinuxUtil.closeSEL();
-                }
                 try{
-
+                    SELinuxUtil.closeSEL();
+                    Thread.sleep(2000);
                     FileUtil.changeQX(777,"/data/system/ifw");
                     File ifwFiles[] =   new File("/data/system/ifw").listFiles();
 //                List<String> lists = new ArrayList<String>();
@@ -582,9 +581,9 @@ public class IFWFragment extends BaseFragment {
                 }catch (Exception e){
 
                 } finally {
-                    if(isSEL){
-                        SELinuxUtil.openSEL();
-                    }
+//                    if(isSEL){
+//                        SELinuxUtil.openSEL();
+//                    }
                 }
             }
         }.start();
@@ -615,11 +614,13 @@ public class IFWFragment extends BaseFragment {
             new Thread(){
                 @Override
                 public void run() {
-                    boolean isSEL = SELinuxUtil.isSELOpen();
-                    if(isSEL){
-                        SELinuxUtil.closeSEL();
-                    }
+//                    boolean isSEL = SELinuxUtil.isSELOpen();
+//                    if(isSEL){
+//                        SELinuxUtil.closeSEL();
+//                    }
                     try {
+                        SELinuxUtil.closeSEL();
+                        Thread.sleep(2000);
                         File ifwFile = new File("/data/system/ifw");
                         if (!ifwFile.exists()) {
                             FileUtil.changeQX(777, "/data/system");
@@ -675,9 +676,9 @@ public class IFWFragment extends BaseFragment {
                     }catch (Exception e){
 
                     }finally {
-                        if(isSEL){
-                            SELinuxUtil.openSEL();
-                        }
+//                        if(isSEL){
+//                            SELinuxUtil.openSEL();
+//                        }
                     }
                 }
             }.start();
@@ -691,38 +692,47 @@ public class IFWFragment extends BaseFragment {
             @Override
             public void backData(String txt, int tag) {
                 if(tag == 1){
-                    boolean isSEL = SELinuxUtil.isSELOpen();
-                    if(isSEL){
-                        SELinuxUtil.closeSEL();
-                    }
-                    try {
-                        File ifwFile = new File("/data/system/ifw");
-                        if(!ifwFile.exists()){
-                           return;
-                        }
-                        FileUtil.changeQX(777,"/data/system/ifw");
-                        File ifwFiles[] =   new File("/data/system/ifw").listFiles();
-                        if(ifwFiles.length>0){
-                            for(File f:ifwFiles){
-                                f.delete();
-                            }
-                        }
-                        FileUtil.changeQX(700,"/data/system/ifw");
-                        Toast.makeText(getActivity(),"清除完成",Toast.LENGTH_LONG).show();
-                        for(AppInfo ai:appLoader.allAppInfos){
-                            ai.activityDisableCount = 0;
-                            ai.serviceDisableCount = 0;
-                            ai.broadCastDisableCount = 0;
-                        }
-                        ifwCountPrefs.edit().clear().apply();
-                    }catch (Exception e){
+                   new Thread(){
+                       @Override
+                       public void run() {
+                           try {
+                               SELinuxUtil.closeSEL();
+                               Thread.sleep(2000);
+                               File ifwFile = new File("/data/system/ifw");
+                               if(!ifwFile.exists()){
+                                   return;
+                               }
+                               FileUtil.changeQX(777,"/data/system/ifw");
+                               File ifwFiles[] =   new File("/data/system/ifw").listFiles();
+                               if(ifwFiles.length>0){
+                                   for(File f:ifwFiles){
+                                       f.delete();
+                                   }
+                               }
+                               FileUtil.changeQX(700,"/data/system/ifw");
 
-                    }finally {
-                        if(isSEL){
-                            SELinuxUtil.openSEL();
-                        }
-                    }
-                    fresh();
+                               for(AppInfo ai:appLoader.allAppInfos){
+                                   ai.activityDisableCount = 0;
+                                   ai.serviceDisableCount = 0;
+                                   ai.broadCastDisableCount = 0;
+                               }
+                               ifwCountPrefs.edit().clear().apply();
+                           }catch (Exception e){
+
+                           }finally {
+//                        if(isSEL){
+//                            SELinuxUtil.openSEL();
+//                        }
+                           }
+                          h.post(new Runnable() {
+                              @Override
+                              public void run() {
+                                  Toast.makeText(getActivity(),"清除完成",Toast.LENGTH_LONG).show();
+                                  fresh();
+                              }
+                          });
+                       }
+                   }.start();
                 }
             }
         });

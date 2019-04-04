@@ -188,6 +188,7 @@ public class XposedRencent {
                                     Object task = field.get(object);
                                     String pkg = getPkgByTask(task);
                                     recentPrefs.reload();
+                                    Activity activity = (Activity)param.thisObject;
                                     if (pkg != null && recentPrefs.getBoolean(pkg + "/notclean", false)) {
                                         String cls = getClsByTask(task);
                                         if("com.tencent.mm".equals(pkg)&&!"com.tencent.mm.ui.LauncherUI".equals(cls)){
@@ -196,7 +197,6 @@ public class XposedRencent {
                                             return;
                                         }
                                     }else if (recentPrefs.getBoolean(pkg + "/forceclean", false)) {
-                                        Activity activity = (Activity)param.thisObject;
                                         if("com.tencent.mm".equals(pkg)){
                                             String cls = getClsByTask(task);
                                             if("com.tencent.mm.plugin.appbrand.ui.AppBrandUI".equals(cls)){
@@ -210,6 +210,10 @@ public class XposedRencent {
                                             intent.putExtra("pkg", pkg);
                                             activity.sendBroadcast(intent);
                                         }
+                                    }else {
+                                        Intent intent = new Intent("com.click369.control.removerecent");
+                                        intent.putExtra("pkg", pkg);
+                                        activity.sendBroadcast(intent);
                                     }
                                 }
 

@@ -48,6 +48,11 @@ import com.click369.controlbp.bean.DirBean;
 import com.click369.controlbp.common.Common;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.Collator;
@@ -134,10 +139,12 @@ public class XposedPrivacy {
         }
     }
 
-
+    private static boolean isContainsNotNewDirPkg(String pkg){
+        return pkg.equals("com.android.storagemanager")||pkg.equals("com.android.externalstorage")||pkg.equals("com.sec.android.app.myfiles")||pkg.contains("bin.mt")||pkg.contains("fileexplorer")||pkg.equals("com.speedsoftware.rootexplorer")||pkg.equals("com.estrongs.android.pop");
+    }
     public static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences privacyPrefs){
         privacyPrefs.reload();
-        if(privacyPrefs.getBoolean(Common.PREFS_PRIVATE_NEWDIR_ALLSWITCH,false)){
+        if(!isContainsNotNewDirPkg(lpparam.packageName)&&privacyPrefs.getBoolean(Common.PREFS_PRIVATE_NEWDIR_ALLSWITCH,false)){
             defaultDir = privacyPrefs.getString( "defaultDir", null);
             final HashSet<String> sets = (HashSet<String>)privacyPrefs.getStringSet( Common.PREFS_PRIVATE_NEWDIR_KEYWORDS, new HashSet<String>());
             if(defaultDir!=null&&sets!=null&&sets.size()>0){
@@ -166,14 +173,15 @@ public class XposedPrivacy {
                     protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
                         try {
                             Object obj = param.args[0];
+                            boolean isNotFileCls = !param.thisObject.getClass().getName().endsWith(".File");
                             if(obj instanceof String){
                                 String s1 = (String)obj;
-                                String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
+                                String s2 = param.args.length==1||isNotFileCls?"":File.separator+(String)param.args[1];
                                 String s = s1+s2;
-                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)){
+                                if(s.startsWith("/storage")&&!s.equals(defaultDir)){
                                     String key = null;
                                     for(String set:keys){
-                                        if(s.contains(defaultDir+File.separator+set)){
+                                        if(s.startsWith(defaultDir+File.separator+set)){
                                             key = set;
                                             break;
                                         }
@@ -181,7 +189,7 @@ public class XposedPrivacy {
                                     if(key!=null){
                                         if(param.args.length == 1){
                                             param.args[0] = s.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key));
-                                        }else if(param.args.length == 2){
+                                        }else if(param.args.length == 2&&!isNotFileCls){
                                             if(s1.contains(defaultDir+File.separator+key)){
                                                 param.args[0] = s1.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key));
                                             }else if(s2.contains(key)){
@@ -195,10 +203,10 @@ public class XposedPrivacy {
                                 String s1 = f.getAbsolutePath();
                                 String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
                                 String s = s1+s2;
-                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)) {
+                                if(s.startsWith("/storage")&&!s.equals(defaultDir)) {
                                     String key = null;
                                     for(String set:keys){
-                                        if(s.contains(defaultDir+File.separator+set)){
+                                        if(s.startsWith(defaultDir+File.separator+set)){
                                             key = set;
                                             break;
                                         }
@@ -206,7 +214,7 @@ public class XposedPrivacy {
                                     if(key!=null){
                                         if(param.args.length == 1){
                                             param.args[0] = new File(s.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key)));
-                                        }else if(param.args.length == 2){
+                                        }else if(param.args.length == 2&&!isNotFileCls){
                                             if(s1.contains(defaultDir+File.separator+key)){
                                                 param.args[0] = new File(s1.replace(defaultDir+File.separator+key,defaultDir+File.separator+newDirs.get(key)));
                                             }else if(s2.contains(key)){
@@ -224,6 +232,10 @@ public class XposedPrivacy {
                 XposedUtil.hookConstructorMethod(File.class,new Class[]{File.class,String.class},hookFileDirs);
                 XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class,String.class},hookFileDirs);
                 XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(RandomAccessFile.class,new Class[]{String.class,String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(FileInputStream.class,new Class[]{String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(FileOutputStream.class,new Class[]{String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(FileOutputStream.class,new Class[]{String.class,boolean.class},hookFileDirs);
             }
         }
 
@@ -1110,13 +1122,14 @@ public class XposedPrivacy {
                     protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
                         try {
                             Object obj = param.args[0];
+                            boolean isNotFileCls = !param.thisObject.getClass().getName().endsWith(".File");
                             if(obj instanceof String){
                                 String s1 = (String)obj;
-                                String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
+                                String s2 = param.args.length==1||isNotFileCls?"":File.separator+(String)param.args[1];
                                 String s = s1+s2;
-                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)){
+                                if(s.startsWith("/storage")&&!s.equals(defaultDir)){
 //                                    XposedBridge.log("FILE_TEST_1_"+s+"  "+isContainsKeyWord(s));
-                                    if(!isContainsKeyWord(s)&&s.contains(defaultDir)&&!s.contains(newDir)){
+                                    if(!isContainsKeyWord(s)&&s.startsWith(defaultDir)&&!s.contains(newDir)){
                                         param.args[0] = s.replace(defaultDir,defaultDir+File.separator+newDir);
                                     }
                                 }
@@ -1125,9 +1138,9 @@ public class XposedPrivacy {
                                 String s1 = f.getAbsolutePath();
                                 String s2 = param.args.length==1?"":File.separator+(String)param.args[1];
                                 String s = s1+s2;
-                                if(!s.startsWith("/data/data")&&!s.startsWith("/proc")&&!s.equals(defaultDir)) {
+                                if(s.startsWith("/storage")&&!s.equals(defaultDir)) {
 //                                    XposedBridge.log("FILE_TEST_2_"+s+"  "+isContainsKeyWord(s));
-                                    if(!isContainsKeyWord(s)&&s.contains(defaultDir)&&!s.contains(newDir)){
+                                    if(!isContainsKeyWord(s)&&s.startsWith(defaultDir)&&!s.contains(newDir)){
                                         param.args[0] = new File(s.replace(defaultDir,defaultDir+File.separator+newDir));
                                     }
                                 }
@@ -1140,6 +1153,10 @@ public class XposedPrivacy {
                 XposedUtil.hookConstructorMethod(File.class,new Class[]{File.class,String.class},hookFileDirs);
                 XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class,String.class},hookFileDirs);
                 XposedUtil.hookConstructorMethod(File.class,new Class[]{String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(RandomAccessFile.class,new Class[]{String.class,String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(FileInputStream.class,new Class[]{String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(FileOutputStream.class,new Class[]{String.class},hookFileDirs);
+                XposedUtil.hookConstructorMethod(FileOutputStream.class,new Class[]{String.class,boolean.class},hookFileDirs);
             }
             XposedUtil.hookMethod(Environment.class, XposedUtil.getParmsByName(Environment.class, "getExternalStorageDirectory"),"getExternalStorageDirectory", hookFileDir);
             XposedUtil.hookMethod(Environment.class, XposedUtil.getParmsByName(Environment.class, "getExternalStoragePublicDirectory"),"getExternalStoragePublicDirectory", hookFileDir);

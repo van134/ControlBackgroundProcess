@@ -16,7 +16,9 @@ import android.view.View;
 import android.view.ViewParent;
 import android.widget.TextView;
 
+import com.click369.controlbp.bean.AppInfo;
 import com.click369.controlbp.common.Common;
+import com.click369.controlbp.util.AppLoaderUtil;
 import com.click369.controlbp.util.TimeUtil;
 
 import java.io.Serializable;
@@ -62,8 +64,23 @@ public class XposedUtil {
         intentb.putExtra("controlPrefs", (Serializable) controlPrefs.getAll());
         intentb.putExtra("settingPrefs", (Serializable) settingPrefs.getAll());
         intentb.putExtra("skipDialogPrefs", (Serializable) skipDialogPrefs.getAll());
+        HashMap<String,String> autoStartAppNameMaps = new HashMap<String,String>();
+        HashMap<String,String> preventNotifyMaps = new HashMap<String,String>();
+        if(AppLoaderUtil.allAppInfos.size()>0){
+            for(AppInfo ai : AppLoaderUtil.allAppInfos){
+                if(WatchDogService.isAutoStartNotNotify&&ai.isAutoStart){
+                    autoStartAppNameMaps.put(ai.appName,ai.packageName);
+                }
+                if(ai.isPreventNotify){
+                    preventNotifyMaps.put(ai.appName,ai.packageName);
+                }
+            }
+        }
+        intentb.putExtra("autoStartAppNameMaps", (Serializable) autoStartAppNameMaps);
+        intentb.putExtra("preventNotifyMaps", (Serializable) preventNotifyMaps);
         c.sendBroadcast(intentb);
         WatchDogService.isNeedAMSReadLoad= false;
+        Log.i("CONTROL","reload_info_"+preventNotifyMaps.size()+"  "+autoStartAppNameMaps.size());
     }
     public  static HashMap<String,Method> getAMSParmas(Class amsCls){
         HashMap<String,Method> hms = new HashMap<String,Method>();

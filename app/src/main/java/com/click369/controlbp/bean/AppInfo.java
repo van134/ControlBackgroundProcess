@@ -65,6 +65,7 @@ public class AppInfo implements Serializable {
     public boolean isBarLockList;
     public boolean isBarColorList;
     public boolean isADJump;
+    public boolean isPreventNotify;
     public boolean isNotUnstall;
     public boolean isPriSwitchOpen;
     public boolean isPriWifiPrevent;

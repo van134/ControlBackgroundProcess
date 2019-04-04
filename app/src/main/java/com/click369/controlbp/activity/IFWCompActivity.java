@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -507,6 +508,15 @@ public class IFWCompActivity extends BaseActivity {
                 });
             }
         });
+        final ImageView clearIv = (ImageView)findViewById(R.id.top_clear_iv);
+        clearIv.setVisibility(View.INVISIBLE);
+        clearIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearIv.setVisibility(View.INVISIBLE);
+                et.setText("");
+            }
+        });
         et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -548,7 +558,7 @@ public class IFWCompActivity extends BaseActivity {
             }
             @Override
             public void afterTextChanged(Editable s) {
-
+                clearIv.setVisibility(et.getText().toString().length()>0?View.VISIBLE:View.INVISIBLE);
             }
         });
     }

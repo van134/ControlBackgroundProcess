@@ -18,18 +18,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:weightSum="10">
-
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:id="@+id/adbtest_et"
-                android:layout_below="@+id/disable_tv"
-                android:hint="输入命令"
+            <FrameLayout
                 android:background="@drawable/et_backgroundshape"
+                android:layout_width="0dp"
+                android:layout_weight="8"
                 android:gravity="center"
-                android:layout_weight="6"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp" />
+                android:layout_marginBottom="3dp"
+                android:layout_below="@+id/disable_tv"
+                android:layout_height="wrap_content">
+                <EditText
+
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:id="@+id/adbtest_et"
+                    android:hint="输入命令"
+                    android:textSize="14dp"
+                    android:background="@color/trans"
+                    android:gravity="center" />
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginRight="6dp"
+                    android:src="@drawable/icon_clear"
+                    android:id="@+id/top_clear_iv"
+                    android:layout_gravity="center|right"/>
+            </FrameLayout>
+            <!--<EditText-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="40dp"-->
+                <!--android:id="@+id/adbtest_et"-->
+                <!--android:layout_below="@+id/disable_tv"-->
+                <!--android:hint="输入命令"-->
+                <!--android:background="@drawable/et_backgroundshape"-->
+                <!--android:gravity="center"-->
+                <!--android:layout_weight="6"-->
+                <!--android:layout_marginTop="3dp"-->
+                <!--android:layout_marginBottom="3dp" />-->
 
             <TextView
                 android:layout_width="0dp"
@@ -44,17 +69,17 @@
                 android:textAlignment="gravity"
                 android:layout_gravity="center_vertical" />
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:text="清空"
-                style="@style/mtextSize"
-                android:id="@+id/adbtest_clean_tv"
+            <!--<TextView-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="40dp"-->
+                <!--android:text="清空"-->
+                <!--style="@style/mtextSize"-->
+                <!--android:id="@+id/adbtest_clean_tv"-->
 
-                android:layout_weight="2"
-                android:background="@drawable/et_backgroundshape"
-                android:gravity="center"
-                android:textAlignment="gravity" />
+                <!--android:layout_weight="2"-->
+                <!--android:background="@drawable/et_backgroundshape"-->
+                <!--android:gravity="center"-->
+                <!--android:textAlignment="gravity" />-->
         </LinearLayout>
 
         <ScrollView

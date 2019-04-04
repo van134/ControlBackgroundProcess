@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -213,6 +214,7 @@ public class QuestionFragment extends BaseFragment {
         alertFl = (LinearLayout) v.findViewById(R.id.question_alert_fl);
         logLL = (LinearLayout) v.findViewById(R.id.question_long_ll);
         logSw = (Switch) v.findViewById(R.id.setting_backlog_sw);
+        final ImageView clearIv = (ImageView) v.findViewById(R.id.top_clear_iv);
         logLL.setVisibility(View.GONE);
         logSw.setChecked(SharedPrefsUtil.getInstance(getContext()).settings.getBoolean(Common.PREFS_SETTING_BACKLOGOPEN,false));
         logSw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -346,6 +348,14 @@ public class QuestionFragment extends BaseFragment {
                 chooseType =3;
             }
         });
+        clearIv.setVisibility(View.INVISIBLE);
+        clearIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearIv.setVisibility(View.INVISIBLE);
+                et.setText("");
+            }
+        });
         et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -365,7 +375,7 @@ public class QuestionFragment extends BaseFragment {
             }
             @Override
             public void afterTextChanged(Editable s) {
-
+                clearIv.setVisibility(et.getText().toString().length()>0?View.VISIBLE:View.INVISIBLE);
             }
         });
         alertTv.setOnLongClickListener(new View.OnLongClickListener() {

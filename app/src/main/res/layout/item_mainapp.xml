@@ -3,13 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:weightSum="16">
+    android:weightSum="20">
 
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="7">
+        android:layout_weight="8">
 
         <FrameLayout
             android:layout_width="wrap_content"
@@ -73,7 +73,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/item_main_service"
-        android:layout_weight="3"
+        android:layout_weight="4"
         android:src="@mipmap/icon_notdisable"
         android:layout_gravity="center_vertical" />
 
@@ -81,7 +81,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/item_main_wakelock"
-        android:layout_weight="3"
+        android:layout_weight="4"
         android:src="@mipmap/icon_notdisable"
         android:layout_gravity="center_vertical" />
 
@@ -89,7 +89,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:id="@+id/item_main_alarm"
-        android:layout_weight="3"
+        android:layout_weight="4"
         android:src="@mipmap/icon_notdisable"
         android:layout_gravity="center_vertical" />
 

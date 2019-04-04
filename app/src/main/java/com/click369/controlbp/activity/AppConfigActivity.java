@@ -402,7 +402,7 @@ public class AppConfigActivity extends BaseActivity {
         }
         mode1Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         mode2Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==2)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-        mode3Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+        mode3Img.setImageResource(ai.isPreventNotify?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
         if(!sharedPrefs.settings.getBoolean(Common.ALLSWITCH_ADSKIP,true)){
             View view = (View)mode1Img.getParent().getParent();
             view.setVisibility(View.GONE);
@@ -823,8 +823,7 @@ public class AppConfigActivity extends BaseActivity {
                         break;
                     case R.id.item_ad_one:
                     case R.id.item_ad_two:
-                    case R.id.item_ad_three:
-                        int mode = view.getId()==R.id.item_ad_one?1:(view.getId()==R.id.item_ad_two?2:3);
+                        int mode = view.getId()==R.id.item_ad_one?3:1;
                         if (sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==mode){
                             sharedPrefs.adPrefs.edit().remove(ai.packageName+"/ad").commit();
                             ai.isADJump = false;
@@ -835,9 +834,13 @@ public class AppConfigActivity extends BaseActivity {
                                 sharedPrefs.adPrefs.edit().putString(ai.packageName+"/two", "so.ofo.labofo.activities.journey.MainActivity").commit();
                             }
                         }
-                        mode1Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-                        mode2Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==2)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-                        mode3Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+                        mode1Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+                        mode2Img.setImageResource((sharedPrefs.adPrefs.getInt(ai.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+                        break;
+                    case R.id.item_ad_three:
+                        ai.isPreventNotify = !ai.isPreventNotify;
+                        sharedPrefs.adPrefs.edit().putBoolean(ai.getPackageName() + "/preventnotify",ai.isPreventNotify).commit();
+                        mode3Img.setImageResource(ai.isPreventNotify?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
                         break;
                     case R.id.item_xpblack_all:
                         if(ai.isblackAllXp){

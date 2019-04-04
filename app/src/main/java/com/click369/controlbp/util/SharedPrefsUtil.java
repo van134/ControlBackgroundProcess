@@ -135,6 +135,7 @@ public class SharedPrefsUtil {
 
         pmPrefs.edit().remove(ai.getPackageName() + "/notunstall").commit();
         adPrefs.edit().remove(ai.getPackageName() + "/ad").commit();
+        adPrefs.edit().remove(ai.getPackageName() + "/preventnotify").commit();
         setTimeStopPrefs.edit().remove(ai.getPackageName() + "/one").commit();
         setTimeStopPrefs.edit().remove(ai.getPackageName() + "/long").commit();
         ai.resetSetting();

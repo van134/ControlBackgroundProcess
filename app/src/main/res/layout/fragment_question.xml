@@ -15,19 +15,33 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:weightSum="16">
-
-            <EditText
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:id="@+id/question_et"
-                android:layout_below="@+id/disable_tv"
-                android:hint="搜索"
-                android:textSize="14dp"
+            <FrameLayout
                 android:background="@drawable/et_backgroundshape"
-                android:gravity="center"
+                android:layout_width="0dp"
                 android:layout_weight="8"
+                android:gravity="center"
                 android:layout_marginTop="3dp"
-                android:layout_marginBottom="3dp" />
+                android:layout_marginBottom="3dp"
+                android:layout_below="@+id/disable_tv"
+                android:layout_height="wrap_content">
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:id="@+id/question_et"
+                    android:layout_below="@+id/disable_tv"
+                    android:hint="搜索"
+                    android:textSize="14dp"
+                    android:background="@color/trans"
+                    android:gravity="center" />
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginRight="6dp"
+                    android:src="@drawable/icon_clear"
+                    android:id="@+id/top_clear_iv"
+                    android:layout_gravity="center|right"/>
+            </FrameLayout>
+
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="40dp"

@@ -70,6 +70,9 @@ public class NewDirActivity extends BaseActivity {
                 newDirAllSw = isChecked;
                 adapter.notifyDataSetChanged();
                 add.setEnabled(newDirAllSw);
+                newdir_edit.setEnabled(newDirAllSw);
+                add.setAlpha(newDirAllSw?1.0f:0.5f);
+                newdir_edit.setAlpha(newDirAllSw?1.0f:0.5f);
             }
         });
         alert = (TextView) this.findViewById(R.id.skipdialog_alert);
@@ -101,9 +104,9 @@ public class NewDirActivity extends BaseActivity {
         add = (ImageView) this.findViewById(R.id.skipdialog_add);
         add.setOnClickListener(new AddClickListener());
         add.setEnabled(newDirAllSw);
-        newdir_input.setEnabled(newDirAllSw);
+        newdir_edit.setEnabled(newDirAllSw);
         add.setAlpha(newDirAllSw?1.0f:0.5f);
-        newdir_input.setAlpha(newDirAllSw?1.0f:0.5f);
+        newdir_edit.setAlpha(newDirAllSw?1.0f:0.5f);
 //        curColor = onTitle.getCurrentTextColor();
         adapter = new NewDirListAdapter(this,priPrefs);
         adapter.bjdatas.clear();
@@ -151,13 +154,13 @@ public class NewDirActivity extends BaseActivity {
                 if(!TextUtils.isEmpty(path)){
                     boolean isc = false;
                     for(String s:adapter.bjdatas){
-                        if(s.contains(path+"|")){
+                        if(s.startsWith(path+"|")||s.endsWith("|"+path)){
                             isc = true;
                             break;
                         }
                     }
                     if(isc){
-                        showT("该内容已经被包含");
+                        showT("该内容已经被包含或重定向目标文件夹已存在，请重新选择");
                     }else if(isContainsKeyWord(path)){
                         showT("不能包含系统公共文件夹，请重新命名");
                     }else{
@@ -179,7 +182,7 @@ public class NewDirActivity extends BaseActivity {
                 if(!TextUtils.isEmpty(path)){
                     String searchPath = null;
                     for(String s:adapter.bjdatas){
-                        if(s.contains(path+"|")){
+                        if(s.startsWith(path+"|")){
                             searchPath = s;
                             break;
                         }

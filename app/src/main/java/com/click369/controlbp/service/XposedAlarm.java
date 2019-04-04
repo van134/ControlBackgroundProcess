@@ -292,7 +292,7 @@ public class XposedAlarm {
                                     }
                                 }
 
-                                if("com.tencent.mm".equals(lpparam.packageName)&&(tag.startsWith("ALARM_ACTION(1")&&tag.endsWith("8)")||"NONAME".equals(tag))){
+                                if("com.tencent.mm".equals(lpparam.packageName)&&(tag.startsWith("ALARMACTION(1")&&tag.endsWith("8)")||"NONAME".equals(tag))){
                                     isss = false;
                                 }else{
                                     param.setResult(null);

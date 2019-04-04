@@ -93,44 +93,17 @@ public class XposedAD {
                                         }
                                     }
                                 }
-//                                else if(type == 3){//从第一个跳第三个
-//                                    if (adPrefs.getString(lpparam.packageName + "/one","").equals(act.getClass().getName())) {
-//                                        String three = adPrefs.getString(lpparam.packageName + "/three", "");
-//                                        if(three.length()>0){
-//                                            nextCls = XposedHelpers.findClass(three, lpparam.classLoader);
-////                                            XposedBridge.log("++++++++++++++1"+lpparam.packageName+"从第一个跳第三个"+nextCls);
-//                                        }
-//                                    }else if(adPrefs.getString(lpparam.packageName + "/two","").equals(act.getClass().getName())){
-//                                        if(act.getClass().getName().toLowerCase().contains(".ad")){
-//                                            act.finish();
-//                                        }
-//                                    }else if(adPrefs.getString(lpparam.packageName + "/three","").equals(act.getClass().getName())){
-//                                        if(act.getClass().getName().toLowerCase().contains(".ad")){
-//                                            act.finish();
-//                                        }
-//                                    }
-//                                }
                                 if (nextCls != null) {
                                     Intent intent = new Intent(act, nextCls);
                                     act.startActivity(intent);
                                     act.finish();
                                 }
-//                                if (adPrefs.getString(lpparam.packageName + "/one","").equals(act.getClass().getName())) {
-//                                    Class nextCls = XposedHelpers.findClass(adPrefs.getString(lpparam.packageName + "/two", ""), lpparam.classLoader);
-//                                    if (nextCls != null) {
-////                                        XposedBridge.log("++++++++++++++2" + lpparam.packageName + "  twoclass " + nextCls);
-//                                        Intent intent = new Intent(act, nextCls);
-//                                        act.startActivity(intent);
-//                                        act.finish();
-//                                    }
-//                                }
                             }catch (RuntimeException e){
                                 e.printStackTrace();
                             }
                         }
                     });
                 }else if (type==3){
-
                     Class tvcls = XposedHelpers.findClass("android.widget.TextView",lpparam.classLoader);
                     if(tvcls!=null){
                         XposedHelpers.findAndHookConstructor(tvcls,Context.class, AttributeSet.class,int.class,int.class, new XC_MethodHook() {

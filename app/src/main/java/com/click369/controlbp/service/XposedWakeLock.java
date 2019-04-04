@@ -250,7 +250,7 @@ public class XposedWakeLock {
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
 
                         boolean isss = true;
-                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakeLock:3")&&tag.endsWith("9")){
                            isSysProcess = true;
                             isss = false;
                         }
@@ -333,7 +333,7 @@ public class XposedWakeLock {
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
 
                         boolean isss = true;
-                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakeLock:3")&&tag.endsWith("9")){
                             isSysProcess = true;
                             isss = false;
                         }
@@ -407,11 +407,11 @@ public class XposedWakeLock {
                         String tag = ((String) tagField.get(param.thisObject)).trim();
                         boolean isSysProcess = "android".equals(lpparam.processName) || pkg.equals("android") || pkg.equals("com.android.systemui") || pkg.equals("com.android.phone");
 
-                        if(tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                        if(tag!=null&&tag.startsWith("WakeLock:3")&&tag.endsWith("9")){
                             isSysProcess = true;
                         }
                         boolean isss = true;
-                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakerLock:3")&&tag.endsWith("9")){
+                        if("com.tencent.mm".equals(lpparam.packageName)&&tag!=null&&tag.startsWith("WakeLock:3")&&tag.endsWith("9")){
                             isSysProcess = true;
                             isss = false;
                         }

@@ -7,12 +7,15 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -30,7 +33,7 @@ import java.util.HashMap;
  */
 public class ADBTestActivity extends BaseActivity{
     private EditText et;
-    private TextView okTv,cleanTv,infoTv;
+    private TextView okTv,infoTv;
     private int curColor= Color.BLACK;
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,7 +41,7 @@ public class ADBTestActivity extends BaseActivity{
         setContentView(R.layout.activity_adbtest);
         et = (EditText)this.findViewById(R.id.adbtest_et);
         okTv = (TextView) this.findViewById(R.id.adbtest_ok_tv);
-        cleanTv = (TextView)this.findViewById(R.id.adbtest_clean_tv);
+//        cleanTv = (TextView)this.findViewById(R.id.adbtest_clean_tv);
         infoTv = (TextView)this.findViewById(R.id.adbtest_info_tv);
         curColor = infoTv.getCurrentTextColor();
         et.setTextColor(curColor);
@@ -70,10 +73,32 @@ public class ADBTestActivity extends BaseActivity{
                 }
             }
         });
-        cleanTv.setOnClickListener(new View.OnClickListener() {
+//        cleanTv.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                infoTv.setText("...");
+//            }
+//        });
+        final ImageView clearIv = (ImageView)findViewById(R.id.top_clear_iv);
+        clearIv.setVisibility(View.INVISIBLE);
+        clearIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                infoTv.setText("...");
+                clearIv.setVisibility(View.INVISIBLE);
+                et.setText("");
+            }
+        });
+        et.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+                clearIv.setVisibility(et.getText().toString().length()>0?View.VISIBLE:View.INVISIBLE);
             }
         });
     }

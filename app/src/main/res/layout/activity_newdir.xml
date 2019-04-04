@@ -35,7 +35,9 @@
                     android:layout_marginLeft="4dp"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:text="全局重定向文件夹总开关"
+                    android:paddingRight="15dp"
+                    android:paddingLeft="2dp"
+                    android:text="全局重定向文件夹总开关\n(若导致卡顿请关闭,打开或关闭都需要重启手机)"
                     android:id="@+id/newdir_allsw_sw"
                     android:checked="false" />
             </FrameLayout>
@@ -61,7 +63,7 @@
                     android:gravity="left|center"
                     android:layout_marginTop="6dp"
                     android:layout_marginBottom="6dp"
-                    android:text="请添加要重定向的内存根目录文件夹（只能是根目录文件夹），默认为zcache,点击文件夹名称可进行自定义修改。" />
+                    android:text="请添加要重定向的内存目录文件夹，默认重定向zcache,点击文件夹名称可进行自定义修改，设置之后重启手机或杀死所有进程（个别文件夹使用底层JNI创建重定向可能会失效）。" />
                 <ImageView
                     android:id="@+id/skipdialog_add"
                     android:layout_width="0dp"
@@ -101,8 +103,6 @@
                     android:layout_gravity="center"
                     android:src="@mipmap/pen"/>
             </LinearLayout>
-
-
 
             <FrameLayout
                 android:layout_width="match_parent"

@@ -98,11 +98,11 @@ public class AdAdapter extends BaseAdapter{
 		this.bjdatas.clear();
 		for(AppInfo ai:temp){
 
-			if(sortType == 0&&modPrefs.getInt(ai.packageName+"/ad",0)==1){
+			if(sortType == 0&&modPrefs.getInt(ai.packageName+"/ad",0)==3){
 				this.bjdatas.add(ai);
-			}else if(sortType == 1&&modPrefs.getInt(ai.packageName+"/ad",0)==2){
+			}else if(sortType == 1&&modPrefs.getInt(ai.packageName+"/ad",0)==1){
 				this.bjdatas.add(ai);
-			}else if(sortType == 2&&modPrefs.getInt(ai.packageName+"/ad",0)==3){
+			}else if(sortType == 2&&ai.isPreventNotify){
 				this.bjdatas.add(ai);
 			}else{
 				if(ai.isRunning){
@@ -178,9 +178,9 @@ public class AdAdapter extends BaseAdapter{
 		viewHolder.serviceIv.setTag(position);
 		viewHolder.wakelockIv.setTag(position);
 		viewHolder.alarmIv.setTag(position);
-		viewHolder.serviceIv.setImageResource((modPrefs.getInt(data.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-		viewHolder.wakelockIv.setImageResource((modPrefs.getInt(data.packageName+"/ad",0)==2)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
-		viewHolder.alarmIv.setImageResource((modPrefs.getInt(data.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+		viewHolder.serviceIv.setImageResource((modPrefs.getInt(data.packageName+"/ad",0)==3)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+		viewHolder.wakelockIv.setImageResource((modPrefs.getInt(data.packageName+"/ad",0)==1)?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
+		viewHolder.alarmIv.setImageResource(data.isPreventNotify?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
 		if (data.isDisable){
 			convertView.setAlpha(0.5f);
 			convertView.setEnabled(false);
@@ -192,6 +192,32 @@ public class AdAdapter extends BaseAdapter{
 			convertView.setAlpha(0.5f);
 		}
 		viewHolder.serviceIv.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(!MainActivity.isModuleActive()){
+					Toast.makeText(c,"该功能需要XP框架支持",Toast.LENGTH_LONG).show();
+					return;
+				}
+				BaseActivity.zhenDong(c);
+				final ImageView buttonView = (ImageView)(v);
+				int g = (Integer)buttonView.getTag();
+				final AppInfo ai = bjdatas.get(g);
+				if (ai.isDisable){
+					return;
+				}
+				final boolean isStop = (modPrefs.getInt(ai.packageName+"/ad",0)==3);
+				if (isStop){
+					modPrefs.edit().remove(ai.packageName+"/ad").remove(ai.packageName+"/one").remove(ai.packageName+"/two").remove(ai.packageName+"/three").commit();
+					ai.isADJump = false;
+				}else{
+					modPrefs.edit().putInt(ai.packageName+"/ad",3).putString(ai.packageName+"/one", OpenCloseUtil.getFirstActivity(ai.packageName,c)).commit();
+					ai.isADJump = true;
+				}
+				XposedStopApp.stopApk(ai.getPackageName(),c);
+				notifyDataSetChanged();
+			}
+		});
+		viewHolder.wakelockIv.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if(!MainActivity.isModuleActive()){
@@ -220,32 +246,6 @@ public class AdAdapter extends BaseAdapter{
 				notifyDataSetChanged();
 			}
 		});
-		viewHolder.wakelockIv.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if(!MainActivity.isModuleActive()){
-					Toast.makeText(c,"该功能需要XP框架支持",Toast.LENGTH_LONG).show();
-					return;
-				}
-				BaseActivity.zhenDong(c);
-				final ImageView buttonView = (ImageView)(v);
-				int g = (Integer)buttonView.getTag();
-				final AppInfo ai = bjdatas.get(g);
-				if (ai.isDisable){
-					return;
-				}
-				final boolean isStop = (modPrefs.getInt(ai.packageName+"/ad",0)==2);
-				if (isStop){
-					modPrefs.edit().remove(ai.packageName+"/ad").commit();
-					ai.isADJump = false;
-				}else{
-					modPrefs.edit().putInt(ai.packageName+"/ad",2).putString(ai.packageName+"/one", OpenCloseUtil.getFirstActivity(ai.packageName,c)).commit();
-					ai.isADJump = true;
-				}
-				XposedStopApp.stopApk(ai.getPackageName(),c);
-				notifyDataSetChanged();
-			}
-		});
 		viewHolder.alarmIv.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -260,15 +260,14 @@ public class AdAdapter extends BaseAdapter{
 				if (ai.isDisable){
 					return;
 				}
-				final boolean isStop = (modPrefs.getInt(ai.packageName+"/ad",0)==3);
+				final boolean isStop = ai.isPreventNotify;
 				if (isStop){
-					modPrefs.edit().remove(ai.packageName+"/ad").remove(ai.packageName+"/one").remove(ai.packageName+"/two").remove(ai.packageName+"/three").commit();
-					ai.isADJump = false;
+					modPrefs.edit().remove(ai.packageName+"/preventnotify").commit();
+					ai.isPreventNotify = false;
 				}else{
-					modPrefs.edit().putInt(ai.packageName+"/ad",3).putString(ai.packageName+"/one", OpenCloseUtil.getFirstActivity(ai.packageName,c)).commit();
-					ai.isADJump = true;
+					modPrefs.edit().putBoolean(ai.packageName+"/preventnotify",true).commit();
+					ai.isPreventNotify = true;
 				}
-				XposedStopApp.stopApk(ai.getPackageName(),c);
 				notifyDataSetChanged();
 			}
 		});

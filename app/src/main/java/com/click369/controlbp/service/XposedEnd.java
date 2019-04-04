@@ -51,7 +51,7 @@ public class XposedEnd {
     public  static void loadPackage(final XC_LoadPackage.LoadPackageParam lpparam,final XSharedPreferences settingPrefs){
         try{
             //为了快速启动  hook到桌面应用 桌面刚加载就启动控制器
-            if (settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName)){//settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName) lpparam.packageName.equals(settingPrefs.getString("homeapk",""))
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1&&settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName)){//settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName) lpparam.packageName.equals(settingPrefs.getString("homeapk",""))
                 final Class appCls = XposedHelpers.findClass("android.app.Application",lpparam.classLoader);
                 XposedHelpers.findAndHookMethod(appCls, "onCreate",  new XC_MethodHook() {
                     @Override
@@ -69,6 +69,7 @@ public class XposedEnd {
                         }
                     }
                 });
+                return;
             }else if("com.google.vr.apps.ornament".equals(lpparam.packageName)&&settingPrefs.getBoolean("archange",false)){
                 final Class surClass = XposedHelpers.findClass("android.graphics.SurfaceTexture", lpparam.classLoader);
                 XposedHelpers.findAndHookMethod(surClass,"setDefaultBufferSize",int.class,int.class, new XC_MethodHook() {

@@ -542,8 +542,8 @@ public class BaseActivity extends AppCompatActivity {
                 navInfos.add(new NavInfo(0,"不允许自动启动",null,ai.isAutoStart));
                 navInfos.add(new NavInfo(0,"启动后常驻内存",null,ai.isNotStop));
 
-                navInfos.add(new NavInfo(0,"让所有模块失效",null,ai.isblackAllXp));
-                navInfos.add(new NavInfo(0,"让所有控制器失效",null,ai.isblackControlXp));
+                navInfos.add(new NavInfo(0,"让所有模块对该APP失效",null,ai.isblackAllXp));
+                navInfos.add(new NavInfo(0,"让控制器对该APP失效",null,ai.isblackControlXp));
                 navInfos.add(new NavInfo(0,"阻止检测XP框架",null,ai.isNoCheckXp));
                 navInfos.add(new NavInfo(0,"防止反Xposed",null,ai.isSetCanHookXp));
 
@@ -552,6 +552,7 @@ public class BaseActivity extends AppCompatActivity {
                 navInfos.add(new NavInfo(0,"隐私开关",null,ai.isPriSwitchOpen));
 
                 navInfos.add(new NavInfo(0,"跳过广告",null,ai.isADJump));
+                navInfos.add(new NavInfo(0,"屏蔽通知",null,ai.isPreventNotify));
 
                 navInfos.add(new NavInfo(0,"是否冻结",null,ai.isDisable));
                 navInfos.add(new NavInfo(0,"阻止卸载",null,ai.isNotUnstall));

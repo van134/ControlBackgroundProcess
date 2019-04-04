@@ -279,10 +279,14 @@ public class AlertUtil {
                                           KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     // 先隐藏键盘
-                    ((InputMethodManager) et.getContext()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
-                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    try {
+                        ((InputMethodManager) et.getContext()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                        InputMethodManager.HIDE_NOT_ALWAYS);
+                    }catch (Exception e){
+
+                    }
                     String input = et.getText().toString();
                     if(input.length()>7){
                         et.setText(input.substring(0,7));
@@ -344,10 +348,14 @@ public class AlertUtil {
                                           KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     // 先隐藏键盘
-                    ((InputMethodManager) et.getContext()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
-                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    try {
+                        ((InputMethodManager) et.getContext()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                        InputMethodManager.HIDE_NOT_ALWAYS);
+                    }catch (Exception e){
+
+                    }
                     String input = et.getText().toString();
                     if (input.equals("")) {
                         Toast.makeText(cxt.getApplicationContext(), "不能为空！" + input, Toast.LENGTH_LONG).show();
@@ -408,10 +416,14 @@ public class AlertUtil {
                                           KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     // 先隐藏键盘
-                    ((InputMethodManager) et.getContext()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
-                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    try {
+                        ((InputMethodManager) et.getContext()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                        InputMethodManager.HIDE_NOT_ALWAYS);
+                    }catch (Exception e){
+
+                    }
                     String input = et.getText().toString();
                     if (input.equals("")) {
                         Toast.makeText(cxt.getApplicationContext(), "不能为空！" + input, Toast.LENGTH_LONG).show();
@@ -467,10 +479,14 @@ public class AlertUtil {
                                           KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     // 先隐藏键盘
-                    ((InputMethodManager) et.getContext()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
-                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    try {
+                        ((InputMethodManager) et.getContext()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                        InputMethodManager.HIDE_NOT_ALWAYS);
+                    }catch (Exception e){
+
+                    }
                     String input = et.getText().toString();
                     if (input.length()<4) {
                         Toast.makeText(cxt.getApplicationContext(), "至少输入4个字符" + input, Toast.LENGTH_LONG).show();
@@ -523,10 +539,14 @@ public class AlertUtil {
                                           KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     // 先隐藏键盘
-                    ((InputMethodManager) et.getContext()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
-                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    try {
+                        ((InputMethodManager) et.getContext()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                        InputMethodManager.HIDE_NOT_ALWAYS);
+                    }catch (Exception e){
+
+                    }
                     String input = et.getText().toString();
                     if (input.length()<minlength) {
                         Toast.makeText(cxt.getApplicationContext(), "至少输入"+minlength+"个字符" + input, Toast.LENGTH_LONG).show();
@@ -574,11 +594,14 @@ public class AlertUtil {
             public boolean onEditorAction(TextView v, int actionId,
                                           KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    // 先隐藏键盘
-                    ((InputMethodManager) et.getContext()
-                            .getSystemService(Context.INPUT_METHOD_SERVICE))
-                            .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
-                                    InputMethodManager.HIDE_NOT_ALWAYS);
+                    try {
+                        ((InputMethodManager) et.getContext()
+                                .getSystemService(Context.INPUT_METHOD_SERVICE))
+                                .hideSoftInputFromWindow(cxt.getCurrentFocus().getWindowToken(),
+                                        InputMethodManager.HIDE_NOT_ALWAYS);
+                    }catch (Exception e){
+
+                    }
                     String input = et.getText().toString();
                     ic.backData(input,0);
                     ad.dismiss();

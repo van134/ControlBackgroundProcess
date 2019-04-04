@@ -334,6 +334,7 @@ public class AppLoaderUtil {
             appInfo.broadCastDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwreceiver", 0);
             appInfo.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(appInfo.getPackageName() + "/ifwactivity", 0);
             appInfo.isADJump = sharedPrefs.adPrefs.getInt(appInfo.getPackageName() + "/ad", 0) != 0;
+            appInfo.isPreventNotify = sharedPrefs.adPrefs.getBoolean(appInfo.getPackageName() + "/preventnotify", false);
 
             appInfo.isblackAllXp = sharedPrefs.xpBlackListPrefs.getBoolean(appInfo.getPackageName() + "/allxpblack", false);
             appInfo.isblackControlXp = sharedPrefs.xpBlackListPrefs.getBoolean(appInfo.getPackageName() + "/contorlxpblack", false);
@@ -421,6 +422,7 @@ public class AppLoaderUtil {
                             ai.broadCastDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwreceiver", 0);
                             ai.activityDisableCount = sharedPrefs.ifwCountPrefs.getInt(ai.getPackageName() + "/ifwactivity", 0);
                             ai.isADJump = sharedPrefs.adPrefs.getInt(ai.getPackageName() + "/ad", 0) != 0;
+                            ai.isPreventNotify = sharedPrefs.adPrefs.getBoolean(ai.getPackageName() + "/preventnotify", false);
 
                             ai.isblackAllXp = sharedPrefs.xpBlackListPrefs.getBoolean(ai.getPackageName() + "/allxpblack", false);
                             ai.isblackControlXp = sharedPrefs.xpBlackListPrefs.getBoolean(ai.getPackageName() + "/contorlxpblack", false);

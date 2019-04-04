@@ -843,21 +843,21 @@
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
-                            android:text="模式一" />
+                            android:text="广告跳过A" />
 
                         <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
-                            android:text="模式二" />
+                            android:text="广告跳过B" />
 
                         <TextView style="@style/mtextSize"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:gravity="center"
-                            android:text="模式三" />
+                            android:text="屏蔽通知" />
 
                         <TextView style="@style/mtextSize"
                             android:layout_width="0dp"

@@ -13,12 +13,12 @@ public class SELinuxUtil {
     }
 
     public static void closeSEL(){
-        ShellUtilNoBackData.execCommand("setenforce 0");
-//        ShellUtils.execCommand("setenforce 0",true,false);
+//        ShellUtilNoBackData.execCommand("setenforce 0");
+        ShellUtils.execCommand("setenforce 0",true,false);
     }
 
     public static void openSEL(){
-//        ShellUtils.execCommand("setenforce 1",true,false);
-        ShellUtilNoBackData.execCommand("setenforce 1");
+        ShellUtils.execCommand("setenforce 1",true,false);
+//        ShellUtilNoBackData.execCommand("setenforce 1");
     }
 }

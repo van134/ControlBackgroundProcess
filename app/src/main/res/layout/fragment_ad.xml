@@ -60,7 +60,7 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:weightSum="16"
+                android:weightSum="20"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp" >
 
@@ -68,37 +68,37 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:id="@+id/textView5"
-                    android:layout_weight="7"
+                    android:layout_weight="8"
                     android:textSize="13dp"
-                    android:text="请优先使用模式三"
+                    android:text="请选择"
                     android:textAlignment="gravity"
                     android:gravity="left|center" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="模式一"
+                    android:text="跳过广告\n模式A"
                     android:textSize="13dp"
                     android:id="@+id/main_service_tv"
-                    android:layout_weight="3"
+                    android:layout_weight="4"
                     android:gravity="center" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="模式二"
+                    android:text="跳过广告\n模式B"
                     android:textSize="13dp"
                     android:id="@+id/main_wakelock_tv"
-                    android:layout_weight="3"
+                    android:layout_weight="4"
                     android:gravity="center" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:text="模式三"
+                    android:text="屏蔽通知"
                     android:textSize="13dp"
                     android:id="@+id/main_alarm_tv"
-                    android:layout_weight="3"
+                    android:layout_weight="4"
                     android:gravity="center" />
 
                 <TextView

@@ -1,6 +1,7 @@
 package com.click369.controlbp.service;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.app.Notification;
@@ -28,10 +29,12 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.click369.controlbp.common.Common;
@@ -99,13 +102,14 @@ public class XposedAMS {
             return null;
         }
     }
-    static Bitmap bitmapTemp;
+
     static Handler handler;
     static File file_autostart = new File("/data/sys_autostart");
     static File file_recent = new File("/data/sys_recnet");
     static File file_setting = new File("/data/sys_setting");
     static File file_control = new File("/data/sys_control");
     static File file_skip = new File("/data/sys_skip");
+    static File file_notnotify = new File("/data/sys_preventnotify");
     static boolean isFlyme = false;
     static boolean ISAMSHOOK = false;
     static boolean isOneOpen = true;
@@ -120,8 +124,10 @@ public class XposedAMS {
     static boolean isNeedFloadOnSys = false;
     static boolean isAutoStartNotNotify = false;
     static boolean isStopRemveRecent = false;
-//    static boolean isKillTenc = false;
-    static boolean oldSet = true;
+
+
+//    static boolean isTENCStart = false;
+//    static boolean oldSet = true;
     static int MUID = 0;//,SYSUI_UID = 0;
     final static HashMap<String,Object> appStartPrefHMs = new HashMap<String,Object>();
     final static HashMap<String,Object> recentPrefHMs = new HashMap<String,Object>();
@@ -129,6 +135,10 @@ public class XposedAMS {
     final static HashSet<Integer> netWifiList = new HashSet<Integer>();
 
 //    final static HashSet<String> autoStartAppNames = new HashSet<String>();
+    final static HashMap<String,String> preventNotifyMaps = new HashMap<String,String>();
+    final static HashSet<String> preventNotifyNames = new HashSet<String>();
+    final static HashSet<String> preventNotifyPkgs = new HashSet<String>();
+
     final static HashMap<String,String> autoStartAppNameMaps = new HashMap<String,String>();
     final static HashSet<String> muBeiHSs = new HashSet<String>();
     final static HashSet<String> notifySkipKeyWords = new HashSet<String>();
@@ -140,6 +150,8 @@ public class XposedAMS {
     final static HashSet<String> notStopPkgs = new HashSet<String>();
     final static HashMap<String,Long> runingTimes = new HashMap<String,Long>();
 
+    final static HashSet<String> mmnotifys = new HashSet<String>();
+    private static boolean isNotNeedAccess = true;
 
     final static HashMap<String,HashMap<Long,String>> privacyInfos = new HashMap<String,HashMap<Long,String>>();
     private static String preventInfo = "";
@@ -156,6 +168,7 @@ public class XposedAMS {
     private static Object amsObject;
     private static Context amsContext;
     private static int sysadj = -900;
+    private static int starterrcount = 0;
 
     private static void initData(Intent intent){
         try {
@@ -163,18 +176,23 @@ public class XposedAMS {
             Map recentMap = null;
             Map controlMap = null;
             Map settingMap = null;
+            Map autoStartAppNameMap = null;
+            Map preventNotifyMapsTemp = null;
             Set<String> skipDiaSet = null;
             if(intent!=null){
                 autoMap = (Map)intent.getSerializableExtra("autoStartPrefs");
                 recentMap = (Map)intent.getSerializableExtra("recentPrefs");
                 controlMap = (Map)intent.getSerializableExtra("controlPrefs");
                 settingMap = (Map)intent.getSerializableExtra("settingPrefs");
+                autoStartAppNameMap = (Map)intent.getSerializableExtra("autoStartAppNameMaps");
+                preventNotifyMapsTemp = (Map)intent.getSerializableExtra("preventNotifyMaps");
                 skipDiaSet = (Set<String>)((Map)intent.getSerializableExtra("skipDialogPrefs")).get(Common.PREFS_SKIPNOTIFY_KEYWORDS);
             }else{
                 autoMap = (Map)FileUtil.readObj(file_autostart.getAbsolutePath());
                 recentMap = (Map)FileUtil.readObj(file_recent.getAbsolutePath());
                 controlMap = (Map)FileUtil.readObj(file_control.getAbsolutePath());
                 settingMap = (Map)FileUtil.readObj(file_setting.getAbsolutePath());
+                preventNotifyMapsTemp = (Map)FileUtil.readObj(file_notnotify.getAbsolutePath());
                 skipDiaSet = (Set<String>)FileUtil.readObj(file_skip.getAbsolutePath());
             }
             if((settingMap!=null&&settingMap.size()>0)||(autoMap!=null&&autoMap.size()>0)){
@@ -184,6 +202,7 @@ public class XposedAMS {
                     FileUtil.writeObj(settingMap,file_setting.getAbsolutePath());
                     FileUtil.writeObj(controlMap,file_control.getAbsolutePath());
                     FileUtil.writeObj(skipDiaSet,file_skip.getAbsolutePath());
+                    FileUtil.writeObj(autoStartAppNameMap,file_notnotify.getAbsolutePath());
                 }
                 if(autoMap!=null) {
                     appStartPrefHMs.clear();
@@ -201,6 +220,18 @@ public class XposedAMS {
                     notifySkipKeyWords.clear();
                     notifySkipKeyWords.addAll(skipDiaSet);
                 }
+                if(autoStartAppNameMap!=null){
+                    autoStartAppNameMaps.clear();
+                    autoStartAppNameMaps.putAll(autoStartAppNameMap);
+                }
+                if(preventNotifyMapsTemp!=null){
+                    preventNotifyMaps.clear();
+                    preventNotifyMaps.putAll(preventNotifyMapsTemp);
+                    preventNotifyNames.clear();
+                    preventNotifyPkgs.clear();
+                    preventNotifyNames.addAll(preventNotifyMaps.keySet());
+                    preventNotifyPkgs.addAll(preventNotifyMaps.values());
+                }
                 XposedBridge.log("CONTROL_"+appStartPrefHMs.size()+"_"+recentPrefHMs.size()+"_"+controlHMs.size()+"_"+notifySkipKeyWords.size()+"_"+settingMap.size());
                 isOneOpen = settingMap.containsKey(Common.ALLSWITCH_SERVICE_BROAD)?(boolean)settingMap.get(Common.ALLSWITCH_SERVICE_BROAD):true;//settingPrefs.getBoolean(Common.ALLSWITCH_ONE,true);
                 isTwoOpen = settingMap.containsKey(Common.ALLSWITCH_BACKSTOP_MUBEI)?(boolean)settingMap.get(Common.ALLSWITCH_BACKSTOP_MUBEI):true;//settingPrefs.getBoolean(Common.ALLSWITCH_TWO,true);
@@ -212,22 +243,7 @@ public class XposedAMS {
                 isMubeiStopOther = settingMap.containsKey(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC)?(boolean)settingMap.get(Common.PREFS_SETTING_ISMUBEISTOPOTHERPROC):false;;
                 isAutoStartNotNotify = settingMap.containsKey(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY)?(boolean)settingMap.get(Common.PREFS_SETTING_ISAUTOSTARTNOTNOTIFY):false;;
                 isStopRemveRecent = settingMap.containsKey(Common.PREFS_SETTING_EXITREMOVERECENT)?(boolean)settingMap.get(Common.PREFS_SETTING_EXITREMOVERECENT):true;;
-                if(intent!=null&&isAutoStartNotNotify&&amsContext!=null){
-                    Set<String> sts = appStartPrefHMs.keySet();
-                    autoStartAppNameMaps.clear();
-                    for(String ss:sts){
-                        if(ss.endsWith("/autostart")){
-                            String pkg = ss.replace("/autostart","");
-                            String appName = PackageUtil.getAppNameByPkg(amsContext,pkg);
-                            if(appName==null){
-                                continue;
-                            }
-//                            autoStartAppNames.add(appName);
-                            autoStartAppNameMaps.put(appName,pkg);
-//                            XposedBridge.log(" appName "+appName);
-                        }
-                    }
-                }
+                isNotNeedAccess = settingMap.containsKey(Common.PREFS_SETTING_ISNOTNEEDACCESS)?(boolean)settingMap.get(Common.PREFS_SETTING_ISNOTNEEDACCESS):true;;
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -266,35 +282,38 @@ public class XposedAMS {
                                             }
                                         }
                                     };
-                                    IntentFilter intentFilter = new IntentFilter();
-                                    intentFilter.addAction("com.click369.control.getinitinfo");
-                                    intentFilter.addAction("com.click369.control.startservice");
-                                    app.registerReceiver(new BroadcastReceiver() {
-                                        @Override
-                                        public void onReceive(Context context, Intent intent) {
-                                            try {
-                                                String action = intent.getAction();
-                                                if("com.click369.control.getinitinfo".equals(action)){
-                                                    autoStartPrefs.reload();
-                                                    recentPrefs.reload();
-                                                    controlPrefs.reload();
-                                                    settingPrefs.reload();
-                                                    skipDialogPrefs.reload();
-                                                    uiBarPrefs.reload();
-                                                    XposedUtil.reloadInfos(context,autoStartPrefs,recentPrefs,controlPrefs,settingPrefs,skipDialogPrefs,uiBarPrefs);
-                                                }else if("com.click369.control.startservice".equals(action)) {
-                                                    long time = 0;
-                                                    if(intent.hasExtra("delay")){
-                                                        time = intent.getIntExtra("delay",0);
+                                    if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1){
+                                        IntentFilter intentFilter = new IntentFilter();
+                                        intentFilter.addAction("com.click369.control.getinitinfo");
+                                        intentFilter.addAction("com.click369.control.startservice");
+                                        app.registerReceiver(new BroadcastReceiver() {
+                                            @Override
+                                            public void onReceive(Context context, Intent intent) {
+                                                try {
+                                                    String action = intent.getAction();
+                                                    if("com.click369.control.getinitinfo".equals(action)){
+                                                        autoStartPrefs.reload();
+                                                        recentPrefs.reload();
+                                                        controlPrefs.reload();
+                                                        settingPrefs.reload();
+                                                        skipDialogPrefs.reload();
+                                                        uiBarPrefs.reload();
+                                                        XposedUtil.reloadInfos(context,autoStartPrefs,recentPrefs,controlPrefs,settingPrefs,skipDialogPrefs,uiBarPrefs);
+                                                    }else if("com.click369.control.startservice".equals(action)) {
+                                                        long time = 0;
+                                                        if(intent.hasExtra("delay")){
+                                                            time = intent.getIntExtra("delay",0);
+                                                        }
+                                                        handler.removeCallbacks(runnable);
+                                                        handler.postDelayed(runnable,time);
                                                     }
-                                                    handler.removeCallbacks(runnable);
-                                                    handler.postDelayed(runnable,time);
+                                                }catch (Throwable e){
+                                                    e.printStackTrace();
                                                 }
-                                            }catch (Throwable e){
-                                                e.printStackTrace();
                                             }
-                                        }
-                                    },intentFilter);
+                                        },intentFilter);
+                                    }
+
                                 }
                             } catch (Throwable e) {
                                 e.printStackTrace();
@@ -311,13 +330,8 @@ public class XposedAMS {
             return;
         }
 
-//        autoStartPrefs.reload();
-//        controlPrefs.reload();
-//        appStartPrefHMs.putAll(autoStartPrefs.getAll());
-//        controlHMs.putAll(controlPrefs.getAll());
         startRuningPkgs.add("android");
         startRuningPkgs.add("com.android.systemui");
-//        settingPrefs.reload();
         final Class amsCls = XposedUtil.findClass("com.android.server.am.ActivityManagerService", lpparam.classLoader);
         final Class actServiceCls = XposedUtil.findClass("com.android.server.am.ActiveServices", lpparam.classLoader);
         final Class actRecordCls = XposedUtil.findClass("com.android.server.am.ActivityRecord",lpparam.classLoader);
@@ -336,7 +350,6 @@ public class XposedAMS {
         if(android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1){
             ussClsTemp = XposedUtil.findClass("com.android.server.usage.AppStandbyController", lpparam.classLoader);
         }
-
         final Field sysCxtField = XposedHelpers.findFirstFieldByExactType(amsCls,Context.class);
         final Field mServicesField = XposedHelpers.findFirstFieldByExactType(amsCls,actServiceCls);
         final HashMap<String,Method> amsMethods =  XposedUtil.getAMSParmas(amsCls);
@@ -359,13 +372,21 @@ public class XposedAMS {
                             final Runnable startService = new Runnable() {
                                 @Override
                                 public void run() {
-                                try {
-                                    Intent intent = new Intent("com.click369.control.startservice");
-                                    intent.putExtra("delay",300);
-                                    amsContext.sendBroadcast(intent);
-                                }catch (Throwable e){
-                                    e.printStackTrace();
-                                }
+                                    try {
+                                        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.O_MR1){
+                                            Intent intent = new Intent("com.click369.control.startservice");
+                                            intent.putExtra("delay",300);
+                                            amsContext.sendBroadcast(intent);
+                                        }else if(starterrcount<3){
+                                            Intent explicitIntent = new Intent("com.click369.service");
+                                            ComponentName component = new ComponentName(Common.PACKAGENAME, Common.PACKAGENAME + ".service.WatchDogService");
+                                            explicitIntent.setComponent(component);
+                                            amsContext.startService(explicitIntent);
+                                        }
+                                    }catch (Throwable e){
+                                        starterrcount++;
+                                        e.printStackTrace();
+                                    }
                                 }
                             };
                             final Runnable startmmchece = new Runnable() {
@@ -394,15 +415,10 @@ public class XposedAMS {
                             final Runnable sendR = new Runnable() {
                                 @Override
                                 public void run() {
-//                                    Intent intent1 = new Intent(Common.TEST_A+Common.TEST_B+Common.TEST_C+Common.TEST_D+Common.TEST_E);
-//                                    amsContext.sendBroadcast(intent1);
-//                                    if(System.currentTimeMillis()-lastSCOnTime<2000||(Math.random()<0.6)) {
-                                        Intent intent2 = new Intent("click369.main.finish.check");
+                                    Intent intent2 = new Intent("click369.main.finish.check");
                                     intent2.putExtra("isscon",true);
-                                        amsContext.sendBroadcast(intent2);
-                                        h.postDelayed(startmmchece, 2500);
-//                                    }
-
+                                    amsContext.sendBroadcast(intent2);
+                                    h.postDelayed(startmmchece, 2500);
                                     handler.postDelayed(this,1000*61*((int)(Math.random()*3)+2));
                                 }
                             };
@@ -437,14 +453,12 @@ public class XposedAMS {
                                                 if(amsCls.getName().endsWith(".ActivityManagerService")){
                                                     recField = amsCls.getDeclaredField("mRecentTasks");
                                                 }else{
-//                                                    XposedBridge.log("amsCls.getSuperclass()1  "+amsCls.getSuperclass());
                                                     Class clss = amsCls;
                                                     for(int i = 0;i<10;i++){
                                                         if(clss.getName().endsWith(".ActivityManagerService")){
                                                             break;
                                                         }else if(clss!=null){
                                                             clss = clss.getSuperclass();
-//                                                            XposedBridge.log("amsCls.getSuperclass()2  "+i+"  "+clss);
                                                         }
                                                     }
                                                     if(clss==null){
@@ -488,7 +502,6 @@ public class XposedAMS {
                                         }else if ("com.click369.control.ams.delrecent".equals(action)) {
                                             String pkg = intent.getStringExtra("pkg");
                                             boolean isSelfCheck = intent.hasExtra("selfcheck");
-//                                            HashSet<String> runnings = new HashSet<String>();
                                             HashSet<String> checks = new HashSet<String>();
                                             if(isSelfCheck){
                                                 if(intent.hasExtra("pkgs")){
@@ -529,7 +542,6 @@ public class XposedAMS {
                                                             break;
                                                         }else if(clss!=null){
                                                             clss = clss.getSuperclass();
-//                                                            XposedUtil.showFields(clss);
                                                         }
                                                     }
                                                     if(clss==null){
@@ -563,11 +575,6 @@ public class XposedAMS {
                                                                 if(checks.contains(taskPkg)){
                                                                     sets.add(o);
                                                                 }
-//                                                                boolean isNotClean = recentPrefHMs.containsKey(taskPkg + "/notclean")?(Boolean)recentPrefHMs.get(taskPkg + "/notclean"):false;
-//                                                                boolean isNotShow = recentPrefHMs.containsKey(taskPkg + "/notshow")?(Boolean)recentPrefHMs.get(taskPkg + "/notshow"):false;
-//                                                                if(!runnings.contains(taskPkg)&&!isNotClean||isNotShow){
-//                                                                    sets.add(o);
-//                                                                }
                                                             }else if (pkg!=null&&pkg.equals(taskPkg)) {
                                                                 sets.add(o);
                                                             }
@@ -589,20 +596,15 @@ public class XposedAMS {
                                                         pkg.equals("com.android.settings")){
                                                     return;
                                                 }
-//                                                XposedUtil.setAdjByLru(amsCls,amsObject,pkg,906);
-//                                                muBeiHSs.add(pkg);
                                                 if (mServicesField!=null){
                                                     mServicesField.setAccessible(true);
                                                     Object mServicesObject = mServicesField.get(amsObject);
                                                     if (pkg!=null&&pkg.length()>0){
                                                        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
                                                             Method killMethod =null;
                                                             if(mServicesObject.getClass().getName().endsWith(".ActiveServices")){
                                                                 killMethod = mServicesObject.getClass().getDeclaredMethod("bringDownDisabledPackageServicesLocked", String.class, Set.class, int.class, boolean.class, boolean.class, boolean.class);
                                                             }else{
-//                                                                XposedBridge.log("amsCls.getSuperclass()  "+amsCls.getSuperclass());
-//                                                                XposedUtil.showMethods( mServicesObject.getClass().getSuperclass());
                                                                 killMethod = mServicesObject.getClass().getSuperclass().getDeclaredMethod("bringDownDisabledPackageServicesLocked", String.class, Set.class, int.class, boolean.class, boolean.class, boolean.class);
                                                             }
                                                             killMethod.setAccessible(true);
@@ -718,12 +720,8 @@ public class XposedAMS {
                                                 e.printStackTrace();
                                             }
                                         }else if("com.click369.control.ams.changepersistent".equals(action)){
-//                                            if(!isAppstart){
-//                                                return;
-//                                            }
                                             boolean persistent = intent.getBooleanExtra("persistent", false);
                                             String pkg = intent.getStringExtra("pkg");
-
                                             boolean iskill = intent.getBooleanExtra("iskill",false);
                                             if(persistent){
                                                 if(intent.hasExtra("pkgs")){
@@ -732,7 +730,6 @@ public class XposedAMS {
                                                 }else{
                                                     notStopPkgs.add(pkg);
                                                 }
-
                                             }else{
                                                 if(intent.hasExtra("pkgs")){
                                                     HashSet<String> pkgs = (HashSet<String>)intent.getSerializableExtra("pkgs");
@@ -767,6 +764,14 @@ public class XposedAMS {
                                             }
                                             lastSCOnTime = System.currentTimeMillis();
                                             handler.post(sendR);
+                                        }else if("com.click369.control.ams.checkwds".equals(action)){
+                                            if(startRuningPkgs.contains(Common.PACKAGENAME)&&Math.random()>0.8) {
+                                                Intent intent1 = new Intent("com.click369.control.heart");
+                                                amsContext.sendBroadcast(intent1);
+                                                h.postDelayed(startService, 1500);
+                                            }else if(!startRuningPkgs.contains(Common.PACKAGENAME)){
+                                                h.post(startService);
+                                            }
                                         }else if(Intent.ACTION_SCREEN_OFF.equals(action)){
                                             handler.removeCallbacks(sendR);
                                             h.removeCallbacks(startService);
@@ -851,6 +856,9 @@ public class XposedAMS {
                                                 privacyInfos.get(pkg).clear();
                                             }
                                         }
+//                                        else if("com.click369.control.ams.testart".equals(action)){
+//                                            isTENCStart = intent.getBooleanExtra("isstart",true);
+//                                        }
                                     }catch (Throwable e){
                                         e.printStackTrace();
                                         XposedBridge.log("^^^^^^^^^^^^^^AMS广播出错 " + e + "^^^^^^^^^^^^^^^^^");
@@ -865,6 +873,7 @@ public class XposedAMS {
                                 filter.addAction("com.click369.control.ams.forcestopservice");
                                 filter.addAction("com.click369.control.ams.getprocinfo");
                                 filter.addAction("com.click369.control.ams.heart");
+                                filter.addAction("com.click369.control.ams.checkwds");
                                 filter.addAction("com.click369.control.ams.killself");
                                 filter.addAction("com.click369.control.ams.removemubei");
                                 filter.addAction("com.click369.control.ams.changepersistent");
@@ -878,13 +887,15 @@ public class XposedAMS {
                                 filter.addAction("com.click369.control.ams.sendprivacyinfo");
                                 filter.addAction("com.click369.control.ams.getprivacyinfo");
                                 filter.addAction("com.click369.control.ams.clearprivacyinfo");
+//                                filter.addAction("com.click369.control.ams.testart");
                                 filter.addAction("click369.main.finish.checkok");
                                 filter.addAction(Intent.ACTION_SCREEN_ON);
                                 filter.addAction(Intent.ACTION_SCREEN_OFF);
+                                XposedBridge.log("CONTROL_BOOTCOMPLETE_BEFORE");
                                 amsContext.registerReceiver(br, filter);
                                 ISAMSHOOK = true;
                                 XposedHelpers.setAdditionalStaticField(amsCls, "click369res", amsContext.hashCode());
-                                XposedBridge.log("CONTROL_BOOTCOMPLETE");
+                                XposedBridge.log("CONTROL_BOOTCOMPLETE_AFTER");
                                 initData(null);
                                 isFlyme = isFlyme();
                             }
@@ -982,13 +993,15 @@ public class XposedAMS {
                             String pkg = null;
                             String cls = null;
                             if (intentObject != null) {
-                                pkg = ((Intent) intentObject).getComponent().getPackageName();
+                                Intent intent = new Intent(((Intent) intentObject));
+                                pkg = intent.getComponent().getPackageName();
+                                cls = intent.getComponent().getClassName();
                                 if(pkg == null){
                                     Field affinityField = taskRecordCls.getDeclaredField("affinity");
                                     affinityField.setAccessible(true);
                                     pkg = (String)affinityField.get(param.thisObject);
                                 }
-                                if(notStopPkgs.contains(pkg)||("com.tencent.mm".equals(pkg))){
+                                if(notStopPkgs.contains(pkg)||("com.tencent.mm".equals(pkg)&&!cls.endsWith(".AppBrandUI"))){
                                     param.setResult(null);
                                     return;
                                 }
@@ -1000,58 +1013,6 @@ public class XposedAMS {
                 });
 
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-//                    final Class clssact = XposedUtil.findClass("android.app.ActivityManager",lpparam.classLoader);
-////                    final Class clsstasksnap = XposedUtil.findClass("com.android.server.wm.TaskSnapshotController",lpparam.classLoader);
-//                    XposedUtil.hookMethod(taskRecordCls, XposedUtil.getMaxLenParmsByName(taskRecordCls, "setIntent"), "setIntent", new XC_MethodHook() {
-//                        @Override
-//                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                            Intent intent = (Intent) param.args[0];
-//                            XposedBridge.log("TEST_setIntent"+intent+"  "+intent.getBooleanExtra("ismyself",false));
-//                            if(intent.getBooleanExtra("ismyself",false)){
-//                                Field field = taskRecordCls.getDeclaredField("mActivities");
-//                                field.setAccessible(true);
-//                                ArrayList list = (ArrayList) field.get(param.thisObject);
-//
-//                                XposedBridge.log("MMTEST_setIntent 1 "+list.size());
-//                            }
-//                        }
-//                    });
-//                    XposedUtil.hookMethod(taskRecordCls, XposedUtil.getParmsByName(taskRecordCls, "addActivityToTop"), "addActivityToTop", new XC_MethodHook() {
-//                        @Override
-//                        protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
-//                            final Object object =  param.args[0];
-//                            Field intentF = object.getClass().getDeclaredField("intent");
-//                            Field realActivityF = object.getClass().getDeclaredField("realActivity");
-//                            realActivityF.setAccessible(true);
-//                            intentF.setAccessible(true);
-//                            ComponentName componentName = (ComponentName) realActivityF.get(object);
-//                            if(componentName!=null&&componentName.getPackageName().equals("com.tencent.mm")&&componentName.getClassName().endsWith("WebViewUI")){
-//                                intentF.setAccessible(true);
-//                                Intent intent = (Intent) intentF.get(object);
-//                                if(intent!=null&&intent.hasExtra("ismyself")){
-//
-//                                   handler.postDelayed(new Runnable() {
-//                                       @Override
-//                                       public void run() {
-//                                           try {
-//                                               Field field = taskRecordCls.getDeclaredField("mActivities");
-//                                               field.setAccessible(true);
-//                                               ArrayList list = (ArrayList) field.get(param.thisObject);
-//                                               XposedBridge.log("MMTEST_addActivityToTop 1 "+list.size());
-//                                               list.add(0,object);
-//                                           }
-//                                           catch (Exception e){
-//
-//                                           }
-//
-//                                       }
-//                                   },2000);
-//                                    param.setResult(null);
-//                                    return;
-//                                }
-//                            }
-//                        }
-//                    });
                     XposedUtil.hookMethod(actRecordCls, XposedUtil.getParmsByName(actRecordCls, "createWindowContainer"), "createWindowContainer", new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
@@ -1062,11 +1023,13 @@ public class XposedAMS {
                                 intentF.setAccessible(true);
                                 ComponentName componentName = (ComponentName) realActivityF.get(param.thisObject);
                                 if(componentName!=null&&componentName.getPackageName().equals("com.tencent.mm")&&
-                                        componentName.getClassName().endsWith(Common.MTEST_NAME_K+Common.MTEST_NAME_L)){
-                                    intentF.setAccessible(true);
-                                    Intent intent = (Intent) intentF.get(param.thisObject);
-                                    if(intent!=null&&intent.hasExtra("ismyself")){
-//                                        final  Method method = actRecordCls.getDeclaredMethod("removeWindowContainer");
+                                        componentName.getClassName().endsWith(Common.MTEST_NAME_K+Common.MTEST_NAME_L)){//isTENCStart&&
+//                                    isTENCStart = false;
+//                                    Intent intent = (Intent) intentF.get(param.thisObject);
+                                    Intent intent = new Intent((Intent) intentF.get(param.thisObject));
+//                                    XposedBridge.log("MMTEST_tencent "+componentName.getClassName()+"  "+intent.getBooleanExtra("ismyselftest",false));
+                                    if(intent!=null&&intent.getBooleanExtra("ismyselftest",false)){
+//                                        final  Method method = actRecordCls.getDeclaredMethod("updateOverrideConfiguration");
 //                                        method.setAccessible(true);
                                         final  Method method1 = actRecordCls.getDeclaredMethod("resumeKeyDispatchingLocked");
                                         method1.setAccessible(true);
@@ -1085,14 +1048,13 @@ public class XposedAMS {
                                                         method3.setAccessible(true);
                                                         method3.invoke(o,method2.invoke(param.thisObject));
                                                     }
-
 //                                                    XposedBridge.log("MMTEST_createWindowContainer_removeWindowContainer");
 //                                                    method.invoke(param.thisObject);
                                                 } catch (Exception e) {
                                                     e.printStackTrace();
                                                 }
                                             }
-                                        },6000);
+                                        },10000);
                                     }
                                 }
                             }catch (Throwable e){
@@ -1100,165 +1062,42 @@ public class XposedAMS {
                             }
                         }
                     });
-                    XposedUtil.hookMethod(actRecordCls, XposedUtil.getParmsByName(actRecordCls, "removeWindowContainer"), "removeWindowContainer", new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
-                            try {
-                                Field intentF = actRecordCls.getDeclaredField("intent");
-                                Field realActivityF = actRecordCls.getDeclaredField("realActivity");
-                                realActivityF.setAccessible(true);
-                                intentF.setAccessible(true);
-                                ComponentName componentName = (ComponentName) realActivityF.get(param.thisObject);
-                                if(componentName!=null&&componentName.getPackageName().equals("com.tencent.mm")&&
-                                        componentName.getClassName().endsWith(Common.MTEST_NAME_K+Common.MTEST_NAME_L)){
-                                    intentF.setAccessible(true);
-                                    Intent intent = (Intent) intentF.get(param.thisObject);
-                                    if(intent!=null&&intent.hasExtra("ismyself")){
-                                        final  Field field = actRecordCls.getDeclaredField("mWindowContainerController");
-                                        field.setAccessible(true);
-                                        Object o = field.get(param.thisObject);
-                                        if(o==null){
-//                                            XposedBridge.log("MMTEST_removeWindowContainer null");
-                                            param.setResult(null);
-                                            return;
-                                        }
-                                    }
-                                }
-                            }catch (Throwable e){
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-//                    XposedUtil.hookMethod(taskRecordCls, XposedUtil.getParmsByName(taskRecordCls, "getTaskThumbnailLocked"), "getTaskThumbnailLocked", new XC_MethodHook() {
+//                    XposedUtil.hookMethod(actRecordCls, XposedUtil.getParmsByName(actRecordCls, "removeWindowContainer"), "removeWindowContainer", new XC_MethodHook() {
 //                        @Override
-//                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-//                            Field f = taskRecordCls.getDeclaredField("mStack");
-//                            f.setAccessible(true);
-//                            Object mStack = f.get(param.thisObject);
-//                            if(mStack!=null){
-//                                Field f1 = mStack.getClass().getDeclaredField("mResumedActivity");
-//                                f1.setAccessible(true);
-//                                Object mResumedActivity = f1.get(mStack);
-//                                XposedBridge.log("TEST_getTaskThumbnailLocked  "+mResumedActivity);
-//                            }
-//                        }
-//                    });
-
-//                    XposedUtil.hookMethod(actRecordCls, XposedUtil.getParmsByName(actRecordCls, "screenshotActivityLocked"), "screenshotActivityLocked", new XC_MethodHook() {
-//                        @Override
-//                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//                            Field f0 = clssact.getDeclaredField("ENABLE_TASK_SNAPSHOTS");
-//                            Field f = actRecordCls.getDeclaredField("realActivity");
-//                            f0.setAccessible(true);
-//                            f.setAccessible(true);
-//                            ComponentName componentName = (ComponentName) f.get(param.thisObject);
-//                            if(componentName!=null){
-//                                if("com.tencent.mm".equals(componentName.getPackageName())&&componentName.getClassName().endsWith("LauncherUI")){
-//                                    if(recentPrefHMs.containsKey("com.tencent.mm/blur")&&(boolean)recentPrefHMs.get("com.tencent.mm/blur")){
-//                                    }else if(recentPrefHMs.containsKey("com.tencent.mm/notclean")&&(boolean)recentPrefHMs.get("com.tencent.mm/notclean")){
-//                                        oldSet = (boolean)f0.get(null);
-//                                        f0.set(null,false);
-//                                    }
-//                                }
-//                            }
-//                        }
-//                        @Override
-//                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//                        protected void beforeHookedMethod(final MethodHookParam param) throws Throwable {
 //                            try {
-//                                Field f0 = clssact.getDeclaredField("ENABLE_TASK_SNAPSHOTS");
-//                                Field f = actRecordCls.getDeclaredField("realActivity");
-//                                f0.setAccessible(true);
-//                                f.setAccessible(true);
-//                                ComponentName componentName = (ComponentName) f.get(param.thisObject);
-//                                if(componentName!=null){
-//                                    if("com.tencent.mm".equals(componentName.getPackageName())
-//                                        &&componentName.getClassName().endsWith("LauncherUI")){
-//                                        if(recentPrefHMs.containsKey("com.tencent.mm/blur")&&(boolean)recentPrefHMs.get("com.tencent.mm/blur")){
-//                                        }else if(recentPrefHMs.containsKey("com.tencent.mm/notclean")&&(boolean)recentPrefHMs.get("com.tencent.mm/notclean")){
-//                                            f0.set(null,oldSet);
-//                                            if(param.getResult()!=null){
-//                                                if(bitmapTemp!=null){
-//                                                    bitmapTemp.recycle();
-//                                                    bitmapTemp = null;
-//                                                }
-//                                                bitmapTemp = (Bitmap)param.getResult();
-////                                                new Thread(){
-////                                                    @Override
-////                                                    public void run() {
-////                                                        try {
-//                                                            File file = new File("/data/wxa.temp");
-//                                                            file.setReadable(true,false);
-//                                                            file.createNewFile();
-//                                                            bitmapTemp.compress(Bitmap.CompressFormat.PNG,80,new FileOutputStream(file));
-////                                                        }catch (Exception e){
-////                                                        }
-////                                                    }
-////                                                }.start();
-//                                                param.setResult(null);
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }catch (Exception e){
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    });
-                }
-
-//                XposedUtil.hookMethod(actRecordCls, XposedUtil.getParmsByName(actRecordCls, "activityStoppedLocked"), "activityStoppedLocked", new XC_MethodHook() {
-//                    @Override
-//                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-//                        try {
-//                            Field field1 = actRecordCls.getDeclaredField("realActivity");
-//                            Field field2 = actRecordCls.getDeclaredField("intent");
-//                            field1.setAccessible(true);
-//                            field2.setAccessible(true);
-//                            Object realActivity = field1.get(param.thisObject);
-//                            if(realActivity!=null){
-//                                ComponentName cn = (ComponentName)realActivity;
-//                                if(cn.getPackageName().equals("com.tencent.mm")&&cn.getClassName().endsWith("WebViewUI")){
-//                                    Object in = field2.get(param.thisObject);
-//                                    if(in!=null){
-//                                        Intent intent = (Intent)in;
-//                                        if(intent.hasExtra("ismyself")){
+//                                Field intentF = actRecordCls.getDeclaredField("intent");
+//                                Field realActivityF = actRecordCls.getDeclaredField("realActivity");
+//                                realActivityF.setAccessible(true);
+//                                intentF.setAccessible(true);
+//                                ComponentName componentName = (ComponentName) realActivityF.get(param.thisObject);
+//                                if(isTENCStart&&componentName!=null&&componentName.getPackageName().equals("com.tencent.mm")&&
+//                                        componentName.getClassName().endsWith(Common.MTEST_NAME_K+Common.MTEST_NAME_L)){
+//                                    Intent intent = (Intent) intentF.get(param.thisObject);
+//                                    if(intent!=null&&intent.getBooleanExtra("ismyselftest",false)){
+//                                        final  Field field = actRecordCls.getDeclaredField("mWindowContainerController");
+//                                        field.setAccessible(true);
+//                                        Object o = field.get(param.thisObject);
+//                                        if(o==null){
+////                                            XposedBridge.log("MMTEST_removeWindowContainer null");
 //                                            param.setResult(null);
 //                                            return;
 //                                        }
 //                                    }
 //                                }
+//                            }catch (Throwable e){
+//                                e.printStackTrace();
 //                            }
-//                        }catch (Exception e){
 //                        }
-//                    }
-//                });
+//                    });
+
+                }
+
             }catch (Throwable e){
                 e.printStackTrace();
             }
         }
 
-
-
-////        if(actServiceCls!=null){
-////            try {
-////                XposedUtil.hookMethod(actServiceCls, XposedUtil.getParmsByName(actServiceCls, "bringDownDisabledPackageServicesLocked"), "bringDownDisabledPackageServicesLocked", new XC_MethodHook() {
-////                    @Override
-////                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-////                        try {
-////                            Object pkg = param.args[0];
-////                            if (pkg != null&&Common.PACKAGENAME.equals(pkg)) {
-////                                param.setResult(true);
-////                                return;
-////                            }
-////                        }catch (Exception e){
-////                            e.printStackTrace();
-////                        }
-////                    }
-////                });
-////            }catch (Throwable e){
-////                e.printStackTrace();
-////            }
-////        }
         //保活自己
         if (processRecordCls!=null){
             XC_MethodHook hook = new XC_MethodHook() {
@@ -1285,10 +1124,6 @@ public class XposedAMS {
                     try {
                         Field infoField = processRecordCls.getDeclaredField("info");
                         infoField.setAccessible(true);
-//                        Field hasShownUiField = processRecordCls.getDeclaredField("hasShownUi");
-//                        hasShownUiField.setAccessible(true);
-//                        final boolean hasShownUi = (boolean)hasShownUiField.get(param.thisObject);
-
                         ApplicationInfo info = (ApplicationInfo) infoField.get(param.thisObject);
                         final String pkg = info.packageName;
                         if(pkg.equals(info.processName)&&startRuningPkgs.contains(info.packageName)){
@@ -1313,6 +1148,9 @@ public class XposedAMS {
                                         }
                                         startRuningPkgs.remove(pkg);
                                         runingTimes.remove(pkg);
+//                                        if(pkg.equals("com.tencent.mm")){
+//                                            isTENCStart = false;
+//                                        }
                                         startPkg = "";
                                         startProc = "";
                                         if(isStopRemveRecent){
@@ -1374,11 +1212,7 @@ public class XposedAMS {
             XposedUtil.hookMethod(amCls, XposedUtil.getParmsByName(amCls, "checkComponentPermission"), "checkComponentPermission",hook);
             XposedUtil.hookMethod(amCls, XposedUtil.getParmsByName(amCls, "checkUidPermission"), "checkUidPermission",hook);
         }
-
-
-
 //        isAppstart = settingPrefs.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true);
-
         //自启控制中自启动
         if(amsMethods.containsKey("startProcessLocked")){
             final int lenTemp = XposedUtil.hook_methodLen(amsCls,"startProcessLocked");
@@ -1549,50 +1383,6 @@ public class XposedAMS {
             XposedBridge.log("^^^^^^^^^^^^^^startProcessLocked  函数未找到^^^^^^^^^^^^^^^^^");
         }
 
-//        if(amsMethods.containsKey("bindService")){
-//            final Class clss[] = amsMethods.get("bindService").getParameterTypes();
-//            XC_MethodHook hook = new XC_MethodHook() {
-//                @Override
-//                protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-//                try{
-//                    if(isAppstart&&clss.length>2&&methodHookParam.args[2] instanceof Intent) {
-//                        Intent intent = (Intent) methodHookParam.args[2];
-//                        if(intent!=null&&intent.getComponent()!=null){
-//                            String pkg = intent.getComponent().getPackageName();
-//                            boolean isAutoHM = appStartPrefHMs.containsKey(pkg+"/autostart")?(Boolean)(appStartPrefHMs.get(pkg+"/autostart")):false;
-//                            if(isAutoHM&&!startRuningPkgs.contains(pkg)){
-//                                String saveInfo = pkg+"|"+intent.getComponent().getClassName()+"|bindservice";
-//                                preventPkgs.put(System.currentTimeMillis(),saveInfo);
-//                                if(saveInfo.equals(preventInfo)) {
-//                                    preventPkgTime++;
-//                                    if (preventPkgTime > 6) {
-//                                        appStartPrefHMs.remove(pkg + "/autostart");
-//                                        preventPkgTime = 0;
-//                                        Intent intent1 = new Intent("com.click369.control.amsalert");
-//                                        intent1.putExtra("pkg", pkg);
-//                                        intent1.putExtra("info", "被频繁启动并且频繁阻止，应用控制器本次取消对其阻止，请检查设置");
-//                                        Context sysCxt = (Context) sysCxtField.get(methodHookParam.thisObject);
-//                                        sysCxt.sendBroadcast(intent);
-//                                    }
-//                                }else{
-//                                    preventPkgTime = 0;
-//                                }
-//                                preventInfo = saveInfo;
-//                                methodHookParam.setResult(0);
-//                                return;
-//                            }
-//                        }
-//                    }
-//                } catch (Throwable e) {
-//                    XposedBridge.log("^^^^^^^^^^^^^^AMS阻止服务出错 "+e+ "^^^^^^^^^^^^^^^^^");
-//                }
-//                }
-//            };
-//            XposedUtil.hookMethod(amsCls,clss,"bindService",hook);
-//        }else{
-//            XposedBridge.log("^^^^^^^^^^^^^^bindService  函数未找到^^^^^^^^^^^^^^^^^");
-//        }
-
         if(ifwCls!=null&&!isFlyme()){
             XC_MethodHook hook = new XC_MethodHook() {
                 @Override
@@ -1668,7 +1458,7 @@ public class XposedAMS {
                 protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                     try{
                         if(isTwoOpen) {
-                            Intent intent = (Intent) methodHookParam.args[1];
+                            Intent intent = new Intent((Intent) methodHookParam.args[1]);
                             String callingPkg = null;
                             if (methodHookParam.args[clss.length - 2] instanceof String) {
                                 callingPkg = (String) methodHookParam.args[clss.length - 2];
@@ -1749,7 +1539,7 @@ public class XposedAMS {
                 protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
                 try{
                     if((isOneOpen||isTwoOpen)&&methodHookParam.args[0]!=null&&methodHookParam.args[0] instanceof Intent){
-                        String action =  ((Intent)methodHookParam.args[0]).getAction();
+                        String action =  new Intent((Intent)methodHookParam.args[0]).getAction();
                         if(action!=null&&action.contains("click369")){
                             methodHookParam.setResult(null);
                             return;
@@ -1914,10 +1704,8 @@ public class XposedAMS {
                             ArrayList list = (ArrayList) activitiesField.get(param.thisObject);
                             Field field = processListCls.getDeclaredField("FOREGROUND_APP_ADJ");
                             field.setAccessible(true);
-                            int myadj = (int)field.get(null);//
-//                            XposedBridge.log("tenc .. pre");
+                            int myadj = (int)field.get(null);
                             if(list!=null&&list.size()>=2){
-//                                XposedBridge.log("t nc .. pre1");
                                 try {
                                     Field persistentField = processRecordCls.getDeclaredField("persistent");
                                     persistentField.setAccessible(true);
@@ -1934,7 +1722,6 @@ public class XposedAMS {
                                     e.printStackTrace();
                                 }
                                 try {
-
                                     Field curAdjField = processRecordCls.getDeclaredField("curAdj");
                                     curAdjField.setAccessible(true);
                                     curAdjField.set(param.thisObject,myadj);
@@ -1945,7 +1732,6 @@ public class XposedAMS {
                                     Field maxAdjField = processRecordCls.getDeclaredField("maxAdj");
                                     maxAdjField.setAccessible(true);
                                     maxAdjField.set(param.thisObject,myadj);
-//                                    XposedBridge.log("t nc .. pre2");
                                     param.setResult(myadj);
                                     return;
                                 }catch (Exception e){
@@ -2014,8 +1800,9 @@ public class XposedAMS {
                                 String pkg = null;
                                 String cls = null;
                                 if (intentObject != null) {
-                                    pkg = ((Intent) intentObject).getComponent().getPackageName();
-                                    cls = ((Intent) intentObject).getComponent().getClassName();
+                                    Intent intent = new Intent((Intent) intentObject);
+                                    pkg = intent.getComponent().getPackageName();
+                                    cls = intent.getComponent().getClassName();
                                     if(pkg == null){
                                         Field affinityField = taskRecordCls.getDeclaredField("affinity");
                                         affinityField.setAccessible(true);
@@ -2030,7 +1817,7 @@ public class XposedAMS {
                                         methodHookParam.setResult(false);
                                         return;
                                     }
-                                } else if (pkg != null && isForceClean) {
+                                } else if (pkg != null ) {//&& isForceClean
                                     if ("com.tencent.mm".equals(pkg) && "com.tencent.mm.plugin.appbrand.ui.AppBrandUI".equals(cls)) {
                                     } else {
                                         Intent intent = new Intent("com.click369.control.removerecent");
@@ -2076,8 +1863,9 @@ public class XposedAMS {
                                     String pkg = null;
                                     String cls = null;
                                     if (intentObject != null) {
-                                        pkg = ((Intent) intentObject).getComponent().getPackageName();
-                                        cls = ((Intent) intentObject).getComponent().getClassName();
+                                        Intent intent = new Intent((Intent) intentObject);
+                                        pkg = intent.getComponent().getPackageName();
+                                        cls = intent.getComponent().getClassName();
                                         if(pkg == null){
                                             Field affinityField = taskRecordCls.getDeclaredField("affinity");
                                             affinityField.setAccessible(true);
@@ -2126,7 +1914,7 @@ public class XposedAMS {
                             final Object intentObject = intentField.get(taskRecordObject);
                             String pkg = null;
                             if (intentObject != null) {
-                                pkg = ((Intent) intentObject).getComponent().getPackageName();
+                                pkg = new Intent((Intent) intentObject).getComponent().getPackageName();
                                 if(pkg == null){
                                     Field affinityField = taskRecordCls.getDeclaredField("affinity");
                                     affinityField.setAccessible(true);
@@ -2423,30 +2211,13 @@ public class XposedAMS {
                                 }
                                 CharSequence title = (CharSequence) not.extras.get(Notification.EXTRA_TITLE);
                                 CharSequence text = (CharSequence) not.extras.get(Notification.EXTRA_TEXT);
-//                                ApplicationInfo info = null;
-//                                try {
-//                                    info = (ApplicationInfo) not.extras.get("android.appInfo");
-//                                }catch (Throwable e){}
-//                                XposedBridge.log("notifyPosted test "+not+"  "+title+"  "+text+"  "+autoStartAppNameMaps.containsKey(title.toString().trim()));
-                                if(isAppstart&&isAutoStartNotNotify){
-                                    boolean isAutoHM = appStartPrefHMs.containsKey(apppkg+"/autostart")?(Boolean)(appStartPrefHMs.get(apppkg+"/autostart")):false;
-//                                    boolean isAutoHM1 = info!=null?(appStartPrefHMs.containsKey(info.packageName+"/autostart")?(Boolean)(appStartPrefHMs.get(info.packageName+"/autostart")):false):false;
-//                                    if((!startRuningPkgs.contains(apppkg)||!startRuningPkgs.contains(autoStartAppNameMaps.get(title.toString())))&&(isAutoHM||isAutoHM1||autoStartAppNameMaps.containsKey(title.toString().trim()))){
-//                                        methodHookParam.setResult(null);
-//                                        return;
-//                                    }
-                                    String titleStr = title.toString().trim();
-                                    if(autoStartAppNameMaps.containsKey(titleStr)&&!startRuningPkgs.contains(autoStartAppNameMaps.get(titleStr))){
-                                        methodHookParam.setResult(null);
-                                        return;
-                                    }else if(!startRuningPkgs.contains(apppkg)&&isAutoHM){
-                                        methodHookParam.setResult(null);
-                                        return;
-                                    }
-                                }
+
 
                                 if (isSkipAdOpen&&!Common.PACKAGENAME.equals(apppkg)) {
-                                    if (notifySkipKeyWords.size()>0){
+                                    if(preventNotifyPkgs.contains(apppkg)||preventNotifyNames.contains(title)){
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    }else if (notifySkipKeyWords.size()>0){
 //                                        XposedBridge.log("notifyPosted title "+title+" text "+text);
                                         if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
                                             methodHookParam.setResult(null);
@@ -2485,6 +2256,17 @@ public class XposedAMS {
                                         }
                                     }
                                 }
+                                if(isAppstart&&isAutoStartNotNotify){
+                                    boolean isAutoHM = appStartPrefHMs.containsKey(apppkg+"/autostart")?(Boolean)(appStartPrefHMs.get(apppkg+"/autostart")):false;
+                                    String titleStr = title.toString().trim();
+                                    if(autoStartAppNameMaps.containsKey(titleStr)&&!startRuningPkgs.contains(autoStartAppNameMaps.get(titleStr))){
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    }else if(!startRuningPkgs.contains(apppkg)&&isAutoHM){
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    }
+                                }
                             }
                         } catch (Throwable e) {
                             XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
@@ -2492,6 +2274,152 @@ public class XposedAMS {
                     }
                 };
                 XposedUtil.hookMethod(nmsCls, XposedUtil.getParmsByName(nmsCls,"enqueueNotificationInternal"), "enqueueNotificationInternal",hook1);
+            }
+
+            final Class windowManagerCls = XposedUtil.findClass("com.android.server.policy.PhoneWindowManager",lpparam.classLoader);
+            if(windowManagerCls!=null){
+                Class clss[] = XposedUtil.getParmsByName(windowManagerCls,"interceptKeyBeforeDispatching");
+                if (clss!=null){
+                    XC_MethodHook hook = new XC_MethodHook() {
+                        @Override
+                        protected void beforeHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            try {
+                                KeyEvent event = null;
+                                if (methodHookParam.args[1] instanceof KeyEvent){
+                                    event = (KeyEvent)methodHookParam.args[1];
+                                }else if (methodHookParam.args[2] instanceof KeyEvent){
+                                    event = (KeyEvent)methodHookParam.args[2];
+                                }else if (methodHookParam.args[0] instanceof KeyEvent){
+                                    event = (KeyEvent)methodHookParam.args[0];
+                                }
+//                                    AlertDialog
+                                if (event!=null) {
+                                    int keyCode = event.getKeyCode();
+                                    if (keyCode == KeyEvent.KEYCODE_HOME&&event.getAction() == KeyEvent.ACTION_UP&&!event.isLongPress()) {
+                                        Field contextField = windowManagerCls.getDeclaredField("mContext");
+                                        contextField.setAccessible(true);
+                                        Context context = (Context) contextField.get(methodHookParam.thisObject);
+                                        Intent intent1 = new Intent("com.click369.control.keylistener");
+                                        intent1.putExtra("reason", "homekey");
+                                        context.sendBroadcast(intent1);
+                                    }
+                                }else{
+                                    XposedBridge.log("^^^^^^^^^^^^^^goHome event null ^^^^^^^^^^^^^^^^^");
+                                }
+                            }catch (RuntimeException e){
+                                XposedBridge.log("^^^^^^^^^^^^^^goHome err"+e+"^^^^^^^^^^^^^^^^^");
+                            }
+                        }
+                    };
+                    XposedUtil.hookMethod(windowManagerCls,clss,"interceptKeyBeforeDispatching",hook);
+                }else{
+                    XposedBridge.log("^^^^^^^^^^^^^^interceptKeyBeforeDispatching null 未找到^^^^^^^^^^^^^^^^^");
+                }
+            }
+
+            final Class notifyCls = XposedUtil.findClass("com.android.server.notification.NotificationManagerService$NotificationListeners",lpparam.classLoader);
+            final Class managerCls = XposedUtil.findClass("com.android.server.notification.ManagedServices",lpparam.classLoader);
+            if (isNotNeedAccess&&notifyCls!=null&&managerCls!=null){
+                Method ms[] = notifyCls.getDeclaredMethods();
+                Method temp1 = null,temp2 = null;
+                for (Method mm:ms){
+                    if (temp1==null&&mm.getName().equals("notifyRemoved")){
+                        temp1 = mm;
+                    }else if (temp2==null&&mm.getName().equals("notifyPosted")){
+                        temp2 = mm;
+                    }
+                }
+                final Method notifyRemoved = temp1;
+                final Method notifyPosted = temp2;
+                if(notifyRemoved!=null){
+                    Class clss[] = notifyRemoved.getParameterTypes();
+                    XC_MethodHook hook = new XC_MethodHook() {
+                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            try {
+                                StatusBarNotification sbn = (StatusBarNotification) methodHookParam.args[1];
+                                boolean isRemove = false;
+                                int id = sbn.getId();
+                                String pkg = sbn.getPackageName();
+                                String key = pkg+"/"+id;
+                                if (mmnotifys.contains(key)){
+                                    mmnotifys.remove(key);
+                                    isRemove = true;
+                                }
+                                if(isRemove){
+                                    for (String s:mmnotifys){
+                                        if (s.startsWith(pkg+"/")){
+                                            isRemove = false;
+                                        }
+                                    }
+                                }
+                                if (isRemove) {
+                                    Intent broad = new Intent("com.click369.control.notify");
+                                    broad.putExtra("type", "remove");
+                                    broad.putExtra("pkg", pkg);
+                                    Field cxtField = managerCls.getDeclaredField("mContext");
+                                    cxtField.setAccessible(true);
+                                    Object cxtObject = cxtField.get(methodHookParam.thisObject);
+                                    try {
+                                        ((Context) cxtObject).sendBroadcast(broad);
+                                    } catch (Throwable e) {
+                                    }
+                                }
+                            } catch (Exception e) {
+                                XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyRemoved error "+e+"^^^^^^^^^^^^^^^^^");
+                            }
+                        }
+                    };
+                    if(clss!=null){
+                        XposedUtil.hookMethod(notifyCls,clss,"notifyRemoved",hook);
+                    }else{
+                        XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyRemoved null 未找到^^^^^^^^^^^^^^^^^");
+                    }
+                }else{
+                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyRemoved clss null 未找到^^^^^^^^^^^^^^^^^");
+                }
+                if(notifyPosted!=null){
+                    Class clss[] = notifyPosted.getParameterTypes();
+                    XC_MethodHook hook = new XC_MethodHook() {
+                        @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            try {
+                                StatusBarNotification sbn = (StatusBarNotification)methodHookParam.args[1];
+                                int id = sbn.getId();
+                                String pkg = sbn.getPackageName();
+                                String key = pkg+"/"+id;
+
+                                if (!mmnotifys.contains(key)){
+                                    mmnotifys.add(key);
+                                    Intent broad = new Intent("com.click369.control.notify");
+                                    broad.putExtra("type","add");
+                                    broad.putExtra("pkg", pkg);
+                                    broad.putExtra("flags", sbn.getNotification().flags);
+                                    broad.putExtra("clearable", sbn.isClearable());
+                                    Field cxtField = managerCls.getDeclaredField("mContext");
+                                    cxtField.setAccessible(true);
+                                    Object cxtObject = cxtField.get(methodHookParam.thisObject);
+                                    try {
+                                        ((Context) cxtObject).sendBroadcast(broad);
+                                    }catch (Throwable e){
+                                    }
+                                }
+                            } catch (Exception e) {
+                                XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted error "+e+"^^^^^^^^^^^^^^^^^");
+                            }
+                        }
+                    };
+                    if(clss!=null){
+                        XposedUtil.hookMethod(notifyCls,clss,"notifyPosted",hook);
+                    }else{
+                        XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted null 未找到^^^^^^^^^^^^^^^^^");
+                    }
+
+                }else{
+                    XposedBridge.log("^^^^^^^^^^^^^^XposedStartListenerNotify notifyPosted clss null 未找到^^^^^^^^^^^^^^^^^");
+                }
             }
         }catch (Throwable e){
             e.printStackTrace();
@@ -2598,7 +2526,7 @@ public class XposedAMS {
                 final int FIREWALL_RULE_DEFAULT = 0;
                 final int FIREWALL_RULE_ALLOW = 1;
                 final int FIREWALL_RULE_DENY = 2;
-                XposedUtil.hookConstructorMethod(netServiceCls, new Class[]{Context.class, String.class}, new XC_MethodHook() {
+                XC_MethodHook hook = new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         try {
@@ -2630,13 +2558,14 @@ public class XposedAMS {
                                                 netMobileList.add(uid);
                                                 isAdd = netType==1;
                                             }
-                                            if(isAdd){
+                                            if(isAdd&&uid>0){
                                                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                     setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_DENY);
                                                 }else{
                                                     setFireWallMethod.invoke(netObj,uid,false);
                                                 }
                                             }
+//                                            XposedBridge.log("CONTROL_NET_ADD:"+uid);
                                         }else if("com.click369.control.ams.net.remove".equals(action)){
                                             int uid = intent.getIntExtra("uid",-1);
                                             String type = intent.getStringExtra("type");
@@ -2649,25 +2578,29 @@ public class XposedAMS {
                                                 netMobileList.remove(uid);
                                                 isRemove = netType==1;
                                             }
-                                            if(isRemove){
+                                            if(isRemove&&uid>0){
                                                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                     setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_ALLOW);
                                                 }else{
                                                     setFireWallMethod.invoke(netObj,uid,true);
                                                 }
                                             }
+//                                            XposedBridge.log("CONTROL_NET_REMOVE:"+uid);
                                         }else if("com.click369.control.ams.net.set".equals(action)){
                                             boolean isEnable = intent.getBooleanExtra("isenable",false);
                                             setFirewallEnabledMethod.invoke(netObj,isEnable);
-//                                        XposedBridge.log("CONTROL_NET_SET:"+isEnable);
+//                                            XposedBridge.log("CONTROL_NET_SET:"+isEnable);
                                         }else if("com.click369.control.ams.net.get".equals(action)){
                                             boolean isEnable = (Boolean) isFirewallEnabledMethod.invoke(netObj);
-                                            XposedBridge.log("CONTROL_NET_ISENABLE:"+isEnable);
+//                                            XposedBridge.log("CONTROL_NET_ISENABLE:"+isEnable);
                                         }else if("com.click369.control.ams.net.init".equals(action)){
                                             HashSet<Integer> sets = new HashSet<Integer>();
                                             sets.addAll(netWifiList);
                                             sets.addAll(netMobileList);
                                             for(int uid:sets){
+                                                if(uid<=0){
+                                                    continue;
+                                                }
                                                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                     setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_ALLOW);
                                                 }else{
@@ -2681,11 +2614,13 @@ public class XposedAMS {
                                                 netMobileList.clear();
                                                 netWifiList.addAll(netWifiListTemp);
                                                 netMobileList.addAll(netMobileListTemp);
-                                                XposedBridge.log("CONTROL_NETCONTROL_"+netWifiList.size()+" "+netMobileList.size());
                                             }
                                             int type = getNetworkType(context);
                                             if(type==1){
                                                 for(int uid:netMobileList){
+                                                    if(uid<=0){
+                                                        continue;
+                                                    }
                                                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                         setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_DENY);
                                                     }else{
@@ -2694,6 +2629,9 @@ public class XposedAMS {
                                                 }
                                             }else if(type ==2){
                                                 for(int uid:netWifiList){
+                                                    if(uid<=0){
+                                                        continue;
+                                                    }
                                                     if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                         setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_DENY);
                                                     }else{
@@ -2701,6 +2639,7 @@ public class XposedAMS {
                                                     }
                                                 }
                                             }
+                                            XposedBridge.log("CONTROL_NETCONTROL_INIT_"+netWifiList.size()+" "+netMobileList.size());
                                         }// 监听网络连接，包括wifi和移动数据的打开和关闭,以及连接上可用的连接都会接到监听
                                         else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                                             //获取联网状态的NetworkInfo对象
@@ -2710,6 +2649,9 @@ public class XposedAMS {
                                                 if (NetworkInfo.State.CONNECTED == info.getState() && info.isAvailable()) {//链接
                                                     if (info.getType() == ConnectivityManager.TYPE_WIFI ){
                                                         for(int uid:netWifiList){
+                                                            if(uid<=0){
+                                                                continue;
+                                                            }
                                                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                                 setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_DENY);
                                                             }else{
@@ -2718,6 +2660,9 @@ public class XposedAMS {
                                                         }
                                                     }else if(info.getType() == ConnectivityManager.TYPE_MOBILE) {
                                                         for(int uid:netMobileList){
+                                                            if(uid<=0){
+                                                                continue;
+                                                            }
                                                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                                 setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_DENY);
                                                             }else{
@@ -2728,6 +2673,9 @@ public class XposedAMS {
                                                 } else {//断开
                                                     if (info.getType() == ConnectivityManager.TYPE_WIFI ){
                                                         for(int uid:netWifiList){
+                                                            if(uid<=0){
+                                                                continue;
+                                                            }
                                                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                                 setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_ALLOW);
                                                             }else{
@@ -2736,6 +2684,9 @@ public class XposedAMS {
                                                         }
                                                     }else if(info.getType() == ConnectivityManager.TYPE_MOBILE) {
                                                         for(int uid:netMobileList){
+                                                            if(uid<=0){
+                                                                continue;
+                                                            }
                                                             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                                                                 setFireWallMethod.invoke(netObj,FIREWALL_CHAIN_NONE,uid,FIREWALL_RULE_ALLOW);
                                                             }else{
@@ -2745,6 +2696,7 @@ public class XposedAMS {
                                                     }
                                                 }
                                             }
+//                                            XposedBridge.log("CONTROL_NET_NETCHANGE:"+info.getType()+"  netMobileList "+netMobileList.size()+"  netWifiList "+netWifiList.size());
                                         }
                                     }catch (Exception e){
                                         e.printStackTrace();
@@ -2757,16 +2709,29 @@ public class XposedAMS {
                             intentFilter.addAction("com.click369.control.ams.net.init");
                             intentFilter.addAction("com.click369.control.ams.net.set");
                             intentFilter.addAction("com.click369.control.ams.net.get");
-//                        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
-//                        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
                             intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                             context.registerReceiver(broadcastReceiver,intentFilter);
-//                        XposedBridge.log("CONTROL_NET_REG:"+isFirewallEnabledMethod.invoke(netObj));
                         }catch (Exception e){
                             e.printStackTrace();
                         }
                     }
-                });
+                };
+                if(Build.VERSION.SDK_INT <= 27){
+                    XposedUtil.hookConstructorMethod(netServiceCls, new Class[]{Context.class, String.class},hook);
+                }else{
+                    Constructor[] css = netServiceCls.getDeclaredConstructors();
+                    Constructor c = null;
+                    if(css.length>0){
+                        for(Constructor cs:css){
+                            if (cs.getParameterTypes().length>0){
+                                c = cs;
+                            }
+                        }
+                        if(c!=null){
+                            XposedUtil.hookConstructorMethod(netServiceCls, c.getParameterTypes(),hook);
+                        }
+                    }
+                }
             } catch (Throwable e) {
                 e.printStackTrace();
             }

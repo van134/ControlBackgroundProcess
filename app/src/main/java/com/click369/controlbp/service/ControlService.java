@@ -1,6 +1,7 @@
 package com.click369.controlbp.service;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.view.Gravity;
@@ -135,15 +137,42 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 //		}
 //	}
 
-	public static void log(String text){
-	//        if (isLog){
-		XposedBridge.log("MMTEST_"+text);
-	//        }
-	}
     @Override
 	public void handleLoadPackage(final LoadPackageParam lpparam) throws Throwable {
 		try {
 			if (lpparam == null || lpparam.packageName == null || lpparam.packageName.startsWith("com.fkzhang")) {
+				return;
+			}
+			if (settingPrefs != null) {
+				settingPrefs.reload();
+			} else {
+				XposedBridge.log("重要！！！CONTROL_共享参数settingPrefs为空");
+			}
+			boolean isAutoStartOpen = settingPrefs.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true);
+			//如果不用辅助服务 则用hook形式处理
+			boolean isNotNeedAccess = settingPrefs.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true);
+			XposedAppStartNotifyListener.loadPackage(lpparam, autoStartPrefs,isAutoStartOpen,isNotNeedAccess);
+
+
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1&&settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName)){//settingPrefs.getString("nowhomeapk","").equals(lpparam.packageName) lpparam.packageName.equals(settingPrefs.getString("homeapk",""))
+				final Class appCls = XposedHelpers.findClass("android.app.Application",lpparam.classLoader);
+				XposedHelpers.findAndHookMethod(appCls, "onCreate",  new XC_MethodHook() {
+					@Override
+					protected void afterHookedMethod(final MethodHookParam methodHookParam) throws Throwable {
+						try {
+							final Application app = (Application) (methodHookParam.thisObject);
+							if (app!=null){
+								XposedBridge.log("CONTROL_START_HOME_APP ");
+//								Intent intenta = new Intent("com.click369.control.startservice");
+								Intent intenta = new Intent("com.click369.control.ams.checkwds");
+								app.sendBroadcast(intenta);
+							}
+						}catch (Throwable e){
+							XposedBridge.log("^^^^^^^^^^^^^HOOK homeapk 出错"+e+"^^^^^^^^^^^^^^^");
+							e.printStackTrace();
+						}
+					}
+				});
 				return;
 			}
 //			if(true){
@@ -156,11 +185,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 			}
 			XposedBroadCast.loadPackage(lpparam,recentPrefs);
 
-			if (settingPrefs != null) {
-				settingPrefs.reload();
-			} else {
-				XposedBridge.log("重要！！！CONTROL_共享参数settingPrefs为空");
-			}
+
 			if (xpBlackListPrefs != null) {
 				xpBlackListPrefs.reload();
 			} else {
@@ -192,13 +217,7 @@ public class ControlService implements IXposedHookZygoteInit, IXposedHookLoadPac
 				XposedMedia.loadPackage(lpparam);
 			}
 
-			boolean isAutoStartOpen = settingPrefs.getBoolean(Common.ALLSWITCH_AUTOSTART_LOCK,true);
-			//如果不用辅助服务 则用hook形式处理
-			boolean isNotNeedAccess = settingPrefs.getBoolean(Common.PREFS_SETTING_ISNOTNEEDACCESS,true);
-//			boolean isBackStopOpen = settingPrefs.getBoolean(Common.ALLSWITCH_BACKSTOP_MUBEI,true);
-//			if (isAutoStartOpen||isBackStopOpen){
-				XposedAppStartNotifyListener.loadPackage(lpparam, autoStartPrefs,isAutoStartOpen,isNotNeedAccess);
-//			}
+
 
 			boolean isOneOpen = settingPrefs.getBoolean(Common.ALLSWITCH_SERVICE_BROAD,true);
 			if (isOneOpen&&controlPrefs!=null){
