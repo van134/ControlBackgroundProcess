@@ -229,7 +229,7 @@
                             android:layout_height="wrap_content"
                             android:id="@+id/ui_recentround_size_sb"
                             android:indeterminate="false"
-                            android:max="60"
+                            android:max="100"
                             android:progress="0" />
                     </LinearLayout>
                 </FrameLayout>
@@ -910,7 +910,7 @@
                             android:layout_height="wrap_content"
                             android:id="@+id/ui_round_size_sb"
                             android:indeterminate="false"
-                            android:max="60"
+                            android:max="100"
                             android:progress="35" />
                     </LinearLayout>
                 </FrameLayout>

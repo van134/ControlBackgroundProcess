@@ -493,11 +493,16 @@ public class MainActivity extends BaseActivity
                 int saveCode = sharedPrefs.settings.getInt(Common.BUILDCODE,0);
                 if(saveCode!=BuildConfig.VERSION_CODE){
                     isShowAlert = true;
+
                     sharedPrefs.settings.edit().putInt(Common.BUILDCODE,BuildConfig.VERSION_CODE).commit();
                     h.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            AlertUtil.showAlertMsg(MainActivity.this,getString(R.string.mainalert));
+                            try {
+                                AlertUtil.showAlertMsg(MainActivity.this,getString(R.string.mainalert));
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
                         }
                     },500);
                 }

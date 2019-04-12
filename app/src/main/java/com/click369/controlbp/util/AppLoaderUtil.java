@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Vector;
 
 /**
  * Created by asus on 2017/10/15.
@@ -62,7 +63,7 @@ public class AppLoaderUtil {
     public static final HashMap<String,AppInfo> allHMAppInfos = new HashMap<String,AppInfo>();
     public static final HashMap<String,Bitmap> allHMAppIcons = new HashMap<String,Bitmap>();
     public static final ArrayList<AppInfo> allAppInfos = new ArrayList<AppInfo>();
-    public static final HashSet<String> runLists = new HashSet<String>();
+    public static final Vector<String> runLists = new Vector<String>();
     public static AppLoaderUtil getInstance(Context context){
         if(instance==null){
             instance = new AppLoaderUtil(context);

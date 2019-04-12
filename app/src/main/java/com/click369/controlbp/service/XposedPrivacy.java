@@ -275,7 +275,7 @@ public class XposedPrivacy {
             final Set<String> switchs = privacyPrefs.getStringSet(lpparam.packageName+"/prilist",new HashSet<String>());
             final boolean isChangeLoc = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_CHANGELOC]);
             final boolean isPreventRunList = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_RUNLIST])||(isChangeLoc&&!isDIDISIJI);
-            final boolean isPreventAppList = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_APPLIST])||(isChangeLoc&&!isDIDISIJI);
+            final boolean isPreventAppList = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_APPLIST]);//||(isChangeLoc&&!isDIDISIJI);
             final boolean isPreventGps = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_GPSINFO])||isChangeLoc;
             final boolean isPreventBaseStation = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_BASESTATION])||isChangeLoc;
             final boolean isPreventWifi = switchs.contains(Common.PRIVACY_KEYS[Common.PRI_TYPE_WIFIINFO])||isChangeLoc;
@@ -442,33 +442,75 @@ public class XposedPrivacy {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     try {
-                        if(isPreventAppList){
+                        if(isPreventAppList||isChangeLoc){
                             List list = (List) param.getResult();
                             List newList = new ArrayList();
+//                            Object temp = null;
+//                            String args = "";
+//                            if(param.args!=null&&param.args.length>0){
+//                                args+= param.args[0]+"  ";
+//                                if(param.args.length==2){
+//                                    args+= param.args[1]+"  ";
+//                                }else if(param.args.length==3){
+//                                    args+= param.args[1]+"  "+param.args[2];
+//                                }else if(param.args.length==4){
+//                                    args+= param.args[1]+"  "+param.args[2]+"  "+param.args[3];
+//                                }
+//                            }
+//                            XposedBridge.log("DD_TEST_"+param.method.getName()+"  args "+args);
+                            int type = 0;
                             for(Object o:list){
                                 if(o instanceof ApplicationInfo){
+                                    type = 1;
                                     ApplicationInfo applicationInfo = (ApplicationInfo)o;
-                                    if(applicationInfo.packageName.equals(lpparam.packageName)||applicationInfo.packageName.startsWith("com.android")){
-                                        newList.add(o);
+                                    if(applicationInfo!=null&&applicationInfo.packageName!=null){
+                                        if(isPreventAppList){
+                                            if(applicationInfo.packageName.equals(lpparam.packageName)||applicationInfo.packageName.startsWith("com.android")){
+                                                newList.add(applicationInfo);
+                                            }
+                                        }else{
+                                            if(!applicationInfo.packageName.equals(Common.PACKAGENAME)&&!applicationInfo.packageName.toLowerCase().contains("xposed")){
+                                                newList.add(applicationInfo);
+                                            }
+                                        }
                                     }
                                 }else if(o instanceof PackageInfo){
+                                    type = 2;
                                     PackageInfo packageInfo = (PackageInfo)o;
-                                    if(packageInfo.packageName.equals(lpparam.packageName)||packageInfo.packageName.startsWith("com.android")){
-                                        newList.add(o);
+                                    if(packageInfo!=null&&packageInfo.packageName!=null){
+                                        if(isPreventAppList){
+                                            if(packageInfo.packageName.equals(lpparam.packageName)||packageInfo.packageName.startsWith("com.android")){
+                                                newList.add(packageInfo);
+                                            }
+                                        }else{
+                                            if(!packageInfo.packageName.equals(Common.PACKAGENAME)&&!packageInfo.packageName.toLowerCase().contains("xposed")){
+                                                newList.add(packageInfo);
+                                            }
+                                        }
                                     }
                                 }else if(o instanceof ResolveInfo){
-                                    ResolveInfo resolveInfo = (ResolveInfo)o;
-                                    if(resolveInfo.resolvePackageName.equals(lpparam.packageName)||resolveInfo.resolvePackageName.startsWith("com.android")){
-                                        newList.add(o);
-                                    }
-                                }else if(o instanceof ResolveInfo){
-                                    ResolveInfo resolveInfo = (ResolveInfo)o;
-                                    if(resolveInfo.resolvePackageName.equals(lpparam.packageName)||resolveInfo.resolvePackageName.startsWith("com.android")){
-                                        newList.add(o);
+                                    type = 3;
+                                    ResolveInfo  resolveInfo = (ResolveInfo)o;
+                                    if(resolveInfo!=null&&resolveInfo.resolvePackageName!=null){
+                                        if(isPreventAppList){
+                                            if(resolveInfo.resolvePackageName.equals(lpparam.packageName)||resolveInfo.resolvePackageName.startsWith("com.android")){
+                                                newList.add(resolveInfo);
+                                            }
+                                        }else{
+                                            if(!resolveInfo.resolvePackageName.equals(Common.PACKAGENAME)&&!resolveInfo.resolvePackageName.toLowerCase().contains("xposed")){
+                                                newList.add(resolveInfo);
+                                            }
+                                        }
                                     }
                                 }
                             }
-                            param.setResult(newList);
+                            if(type == 1){
+                                param.setResult((List<ApplicationInfo>)newList);
+                            }else if(type == 2){
+                                param.setResult((List<PackageInfo>)newList);
+                            }else if(type == 3){
+                                param.setResult((List<ResolveInfo>)newList);
+                            }
                         }
                         sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_APPLIST]+"|"+isPreventAppList,true);
                     }catch (Exception e){
@@ -484,6 +526,11 @@ public class XposedPrivacy {
                             if(param.args[0]!=null&&(param.args[0].equals(lpparam.packageName)||
                                     param.args[0].toString().startsWith("com.android"))){
                             }else{
+                                param.args[0] = "haha.12345680e9";
+                            }
+                        }else if(isChangeLoc){
+                            String info = param.args[0].toString();
+                            if(param.args[0]!=null&&(info.toLowerCase().contains("xposed")||info.equals(Common.PACKAGENAME))){
                                 param.args[0] = "haha.12345680e9";
                             }
                         }
@@ -513,8 +560,31 @@ public class XposedPrivacy {
             XposedUtil.hookMethod(apmCls, XposedUtil.getParmsByName(apmCls, "getInstallerPackageName"), "getInstallerPackageName",hookapmbacknull);
             XposedUtil.hookMethod(apmCls, XposedUtil.getParmsByName(apmCls, "getPackagesHoldingPermissions"), "getPackagesHoldingPermissions",hookapm);
             XposedUtil.hookMethod(apmCls, XposedUtil.getParmsByName(apmCls, "getPreferredPackages"), "getPreferredPackages",hookapm);
-            XposedUtil.hookMethod(apmCls, XposedUtil.getParmsByName(apmCls, "queryIntentActivities"), "queryIntentActivities",hookapm);
+//            XposedUtil.hookMethod(apmCls, XposedUtil.getParmsByName(apmCls, "queryIntentActivities"), "queryIntentActivities",hookapm);
             XposedUtil.hookMethod(apmCls, XposedUtil.getParmsByName(apmCls, "queryIntentContentProviders"), "queryIntentContentProviders",hookapm);
+            XposedUtil.hookMethod(File.class, new Class[]{},"list", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    if(isChangeLoc||isPreventAppList){
+                        String ss[] = (String[])param.getResult();
+                        if(ss!=null&&ss.length>0){
+                            ArrayList<String> newList = new ArrayList<String>();
+                            for(int i = 0;i<ss.length;i++){
+                                String s = ss[i].toLowerCase();
+                                if(!s.contains("xposed")&&!s.contains("click369")&&!s.contains("superuser")&&!s.contains("magisk")){
+                                    newList.add(ss[i]);
+                                }
+                            }
+                            String res[] = new String[newList.size()];
+                            for(int i = 0;i<newList.size();i++){
+                                res[i] = newList.get(i);
+                            }
+                            param.setResult(res);
+                            return;
+                        }
+                    }
+                }
+            });
 
 
             final Class locCls = XposedUtil.findClass("android.location.Location", lpparam.classLoader);
@@ -527,12 +597,15 @@ public class XposedPrivacy {
                     try {
                         if(isPreventGps){
                             Location location = (Location)param.getResult();
-                            location.setTime(System.currentTimeMillis()-1000);
-                            location.setLongitude(lon);
-                            location.setLatitude(lat);
-                            location.setAccuracy(3.0f);
-                            location.setAltitude(Math.random()*lon);
-                            param.setResult(location);
+                            if(location!=null){
+                                location.setTime(System.currentTimeMillis()-1000);
+                                location.setLongitude(lon);
+                                location.setLatitude(lat);
+                                location.setAccuracy(3.0f);
+                                location.setAltitude(Math.random()*lon);
+                                param.setResult(location);
+                            }
+
                         }
                         sendBroad(lpparam.packageName,Common.PRIVACY_KEYS[Common.PRI_TYPE_GPSINFO]+"|"+isPreventGps,true);
                     }catch (Exception e){

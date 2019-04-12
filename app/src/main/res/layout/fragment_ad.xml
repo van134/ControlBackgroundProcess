@@ -59,7 +59,7 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="wrap_content"
                 android:weightSum="20"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp" >
@@ -76,7 +76,7 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="跳过广告\n模式A"
                     android:textSize="13dp"
                     android:id="@+id/main_service_tv"
@@ -85,7 +85,7 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="跳过广告\n模式B"
                     android:textSize="13dp"
                     android:id="@+id/main_wakelock_tv"
@@ -94,10 +94,11 @@
 
                 <TextView
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="屏蔽通知"
                     android:textSize="13dp"
                     android:id="@+id/main_alarm_tv"
+                    android:layout_gravity="center"
                     android:layout_weight="4"
                     android:gravity="center" />
 

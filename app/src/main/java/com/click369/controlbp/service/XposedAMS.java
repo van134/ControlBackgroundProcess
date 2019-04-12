@@ -1591,7 +1591,32 @@ public class XposedAMS {
             };
             XposedUtil.hookMethod(amsCls, amsMethods.get("createRecentTaskInfoFromTaskRecord").getParameterTypes(),"createRecentTaskInfoFromTaskRecord",hook);
         }else{
-            XposedBridge.log("^^^^^^^^^^^^^^createRecentTaskInfoFromTaskRecord  函数未找到 ^^^^^^^^^^^^^^^^^");
+            try {
+                Constructor cs[] = taskRecordCls.getDeclaredConstructors();
+                for(Constructor c:cs){
+                    XposedUtil.hookConstructorMethod(taskRecordCls, c.getParameterTypes(), new XC_MethodHook() {
+                        @Override
+                        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                            if(isRecentOpen) {
+                                Method getBaseMethod = taskRecordCls.getDeclaredMethod("getBaseIntent");
+                                if (getBaseMethod == null) {
+                                    getBaseMethod = taskRecordCls.getMethod("getBaseIntent");
+                                }
+                                getBaseMethod.setAccessible(true);
+                                Intent intent = (Intent) (getBaseMethod.invoke(param.thisObject));
+                                String pkg = intent != null && intent.getComponent() != null ? intent.getComponent().getPackageName() : "";
+                                if (recentPrefHMs.containsKey(pkg + "/notshow")) {
+                                    Field isAvailableField = taskRecordCls.getDeclaredField("isAvailable");
+                                    isAvailableField.setAccessible(true);
+                                    isAvailableField.set(param.thisObject, !(Boolean) recentPrefHMs.get(pkg + "/notshow"));
+                                }
+                            }
+                        }
+                    });
+                }
+            }catch (Throwable w){
+            }
+//            XposedBridge.log("^^^^^^^^^^^^^^createRecentTaskInfoFromTaskRecord  函数未找到 ^^^^^^^^^^^^^^^^^");
         }
 
         //最近任务保留常驻内存
@@ -1792,9 +1817,9 @@ public class XposedAMS {
                             anyTaskForIdLockedMethod.setAccessible(true);
                             Object taskRecordObject = anyTaskForIdLockedMethod.invoke(mStackSupervisorObject, methodHookParam.args[0]);
                             if (taskRecordObject != null) {
-                                Field mAffiliatedTaskIdField = taskRecordCls.getDeclaredField("mAffiliatedTaskId");
+//                                Field mAffiliatedTaskIdField = taskRecordCls.getDeclaredField("mAffiliatedTaskId");
                                 Field intentField = taskRecordCls.getDeclaredField("intent");
-                                mAffiliatedTaskIdField.setAccessible(true);
+//                                mAffiliatedTaskIdField.setAccessible(true);
                                 intentField.setAccessible(true);
                                 Object intentObject = intentField.get(taskRecordObject);
                                 String pkg = null;
@@ -2214,18 +2239,19 @@ public class XposedAMS {
 
 
                                 if (isSkipAdOpen&&!Common.PACKAGENAME.equals(apppkg)) {
+                                    if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    } else if (text != null && text.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {
+                                        methodHookParam.setResult(null);
+                                        return;
+                                    }
+
                                     if(preventNotifyPkgs.contains(apppkg)||preventNotifyNames.contains(title)){
                                         methodHookParam.setResult(null);
                                         return;
                                     }else if (notifySkipKeyWords.size()>0){
 //                                        XposedBridge.log("notifyPosted title "+title+" text "+text);
-                                        if (title != null && title.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {//title.toString().contains("可能有害")
-                                            methodHookParam.setResult(null);
-                                            return;
-                                        } else if (text != null && text.toString().contains("应用控制器") && !Common.PACKAGENAME.equals(apppkg)) {
-                                            methodHookParam.setResult(null);
-                                            return;
-                                        }
                                         Method cxtField = sysCls.getDeclaredMethod("getContext");
                                         cxtField.setAccessible(true);
                                         Context cxtObject = (Context)cxtField.invoke(methodHookParam.thisObject);

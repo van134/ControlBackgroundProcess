@@ -59,7 +59,7 @@ public class SetPWDActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
          settingPrefs =sharedPrefs.settings;// SharedPrefsUtil.getPreferences(this, Common.PREFS_APPSETTINGS);
-            requestWindowFeature(Window.FEATURE_NO_TITLE);
+//            requestWindowFeature(Window.FEATURE_NO_TITLE);
             setContentView(R.layout.activity_unlock);
         bgColor = SharedPrefsUtil.getInstance(getApplicationContext()).uiBarPrefs.getString(Common.PREFS_SETTING_UI_THEME_UNLOCK_BG_COLOR,MainActivity.THEME_COLOR);
 

@@ -632,6 +632,7 @@ public class AppConfigActivity extends BaseActivity {
                         notifyImg.setImageResource(ai.isNotifyNotExit?R.mipmap.icon_add:R.mipmap.icon_notdisable);
                         break;
                 }
+                AppLoaderUtil.allHMAppInfos.put(ai.packageName,ai);
                 backImg.setImageResource(ai.isBackMuBei?R.mipmap.icon_dead:ai.isBackForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
                 homeImg.setImageResource(ai.isHomeMuBei?R.mipmap.icon_dead:ai.isHomeIdle?R.mipmap.icon_idle:R.mipmap.icon_notdisable);
                 offScImg.setImageResource(ai.isOffscMuBei?R.mipmap.icon_dead:ai.isOffscForceStop?R.mipmap.icon_disable:R.mipmap.icon_notdisable);
@@ -1001,6 +1002,7 @@ public class AppConfigActivity extends BaseActivity {
                         break;
 
                 }
+                AppLoaderUtil.allHMAppInfos.put(ai.packageName,ai);
             }
         };
         MyClickListener listener = new MyClickListener();

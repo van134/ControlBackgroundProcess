@@ -224,12 +224,21 @@ public class IFWCompActivity extends BaseActivity {
 //                                    se.remove(dataName);
 //                                    se.commit();
                                     IFWFragment.ai.serviceDisableCount--;
+                                    if(IFWFragment.ai.serviceDisableCount < 0){
+                                        IFWFragment.ai.serviceDisableCount = 0;
+                                    }
                                     ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwservice",IFWFragment.ai.serviceDisableCount).commit();
                                 } else if (type == 1) {
                                     IFWFragment.ai.broadCastDisableCount--;
+                                    if(IFWFragment.ai.broadCastDisableCount < 0){
+                                        IFWFragment.ai.broadCastDisableCount = 0;
+                                    }
                                     ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwreceiver",IFWFragment.ai.broadCastDisableCount).commit();
                                 } else if (type == 2) {
                                     IFWFragment.ai.activityDisableCount--;
+                                    if(IFWFragment.ai.activityDisableCount < 0){
+                                        IFWFragment.ai.activityDisableCount = 0;
+                                    }
                                     ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwactivity",IFWFragment.ai.activityDisableCount).commit();
                                 }
                             } else {
@@ -244,10 +253,6 @@ public class IFWCompActivity extends BaseActivity {
                                         runServices.remove(runName);
                                     }
                                     IFWFragment.ai.serviceDisableCount++;
-//                                    SharedPreferences sp = getSharedPreferences(pkgName + IFWCompActivity.EXT_SERVICE, Context.MODE_WORLD_READABLE);
-//                                    SharedPreferences.Editor se = sp.edit();
-//                                    se.putBoolean(dataName, true);
-//                                    se.commit();
                                     ifwCountPrefs.edit().putInt(IFWFragment.ai.getPackageName()+"/ifwservice",IFWFragment.ai.serviceDisableCount).commit();
                                 } else if (type == 1) {
                                     IFWFragment.ai.broadCastDisableCount++;
